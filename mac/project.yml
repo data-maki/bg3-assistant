@@ -1,0 +1,19 @@
+name: CivCoach
+options:
+  deploymentTarget:
+    macOS: "14.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+targets:
+  CivCoach:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - CivCoach
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.CivCoach
+        INFOPLIST_FILE: CivCoach/Resources/Info.plist
+        CODE_SIGN_STYLE: Automatic
