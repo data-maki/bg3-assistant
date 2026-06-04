@@ -24,11 +24,12 @@ struct CivCoachApp: App {
         }
         .windowResizability(.contentSize)
 
-        MenuBarExtra("CivCoach", systemImage: "gamecontroller") {
+        MenuBarExtra {
             Button("Open CivCoach") {
                 NSApp.activate(ignoringOtherApps: true)
                 NSApp.windows.first { $0.title == "CivCoach" }?.makeKeyAndOrderFront(nil)
             }
+            Divider()
             Button("Launch Civ VII") {
                 appState.launchCiv()
             }
@@ -40,15 +41,33 @@ struct CivCoachApp: App {
             Button("Show Overlay Now") {
                 appState.showOverlayNow()
             }
+            Button("Hide Assistant Overlay") {
+                appState.hideAssistantOverlay()
+            }
+            Button("Show Turn Log") {
+                appState.showTurnLogOverlayNow()
+            }
+            Button("Hide Turn Log") {
+                appState.hideTurnLogOverlay()
+            }
+            Button("Hide All Overlays") {
+                appState.hideAllOverlays()
+            }
+            Divider()
             Button("Start Backend") {
                 Task { await appState.startBackend() }
             }
             Button(appState.isRecording ? "Stop Recording" : "Start Recording") {
                 Task { await appState.toggleRecording() }
             }
-            Button("Quit") {
+            Divider()
+            Button("Quit CivCoach") {
                 NSApp.terminate(nil)
             }
+            .keyboardShortcut("q")
+        } label: {
+            Label("CivCoach", systemImage: "gamecontroller.fill")
         }
+        .menuBarExtraStyle(.menu)
     }
 }

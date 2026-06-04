@@ -43,10 +43,20 @@ struct ControlWindowView: View {
                 statusRow("Detection detail", appState.civDetectionDetail, appState.civDetected)
                 statusRow("Backend health", appState.backendHealthy ? "OK" : appState.backendStatus, appState.backendHealthy)
                 statusRow("Screen Recording", appState.screenRecordingStatus, appState.screenRecordingAllowed)
+                statusRow("macOS saved grant", appState.screenRecordingPreflightStatus, appState.screenRecordingPreflightAllowed)
+                statusRow("Capture test", appState.screenCaptureVerificationStatus, appState.screenCaptureVerifiedThisLaunch)
                 statusRow("Microphone", "Not required", true)
                 statusRow("Keyboard input", "Not required", true)
                 statusRow("Speaker output", "No permission required", true)
                 statusRow("Turn recording", appState.recordingStatus, appState.isRecording)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                debugLine("Permission identity", appState.appPermissionIdentity)
+                debugLine("Permission checked", appState.screenRecordingLastChecked)
+                if let captureError = appState.screenCaptureLastError {
+                    debugLine("Last capture error", captureError)
+                }
             }
 
             Toggle("Show Overlay", isOn: $appState.showOverlay)
@@ -91,8 +101,8 @@ struct ControlWindowView: View {
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                     HStack(spacing: 8) {
-                        Button("Request Permission") {
-                            appState.requestScreenRecordingPermission()
+                        Button("Test Capture") {
+                            Task { await appState.testCapture() }
                         }
                         Button("Open Settings") {
                             appState.openScreenRecordingSettings()

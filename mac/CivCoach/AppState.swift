@@ -16,10 +16,15 @@ final class AppState: ObservableObject {
     }
     @Published var isLoading = false
     @Published var overlayExpanded = false
+    @Published var screenRecordingPreflightAllowed = PermissionManager.hasScreenRecordingPermission
+    @Published var screenRecordingPreflightStatus = PermissionManager.hasScreenRecordingPermission ? "Granted by macOS" : "Not granted by macOS"
     @Published var screenRecordingAllowed = PermissionManager.hasScreenRecordingPermission
-    @Published var screenRecordingStatus = PermissionManager.hasScreenRecordingPermission ? "Allowed" : "Not verified"
+    @Published var screenRecordingStatus = PermissionManager.hasScreenRecordingPermission ? "Granted, test needed" : "Not verified"
     @Published var shouldShowScreenRecordingHelp = false
     @Published var screenCaptureLastError: String?
+    @Published var screenCaptureVerifiedThisLaunch = false
+    @Published var screenCaptureVerificationStatus = "Not tested this launch"
+    @Published var screenRecordingLastChecked = "Launch"
     @Published var appPermissionIdentity = PermissionManager.appIdentityDescription
     @Published var statusMessage = "Ready"
     @Published var errorMessage: String?
@@ -73,10 +78,11 @@ final class AppState: ObservableObject {
         let allowed = PermissionManager.requestScreenRecordingPermission()
         appPermissionIdentity = PermissionManager.appIdentityDescription
         if allowed {
-            markScreenCaptureAllowed(status: "Allowed")
+            markScreenCaptureAllowed(status: "Allowed, test needed", verifiedByCapture: false)
         } else {
             screenRecordingAllowed = false
             screenRecordingStatus = "Not verified"
+            screenCaptureVerificationStatus = "Not tested this launch"
         }
         Task { await refreshScreenCaptureStatus() }
     }
@@ -111,6 +117,27 @@ final class AppState: ObservableObject {
         forceOverlay = true
         showOverlay = true
         overlayController.show(appState: self)
+    }
+
+    func hideAssistantOverlay() {
+        forceOverlay = false
+        showOverlay = false
+        overlayController.hide()
+    }
+
+    func showTurnLogOverlayNow() {
+        showTurnLogOverlay = true
+        turnLogOverlayController.show(appState: self)
+    }
+
+    func hideTurnLogOverlay() {
+        showTurnLogOverlay = false
+        turnLogOverlayController.hide()
+    }
+
+    func hideAllOverlays() {
+        hideAssistantOverlay()
+        hideTurnLogOverlay()
     }
 
     func toggleRecording() async {
@@ -285,6 +312,10 @@ final class AppState: ObservableObject {
         } catch {
             recordingStatus = "Observation failed"
             errorMessage = error.localizedDescription
+            if shouldShowScreenRecordingHelp {
+                stopRecording()
+                recordingStatus = "Waiting for Screen Recording"
+            }
         }
         syncTurnLogOverlay()
     }
@@ -308,7 +339,7 @@ final class AppState: ObservableObject {
             backendStatus = "Offline"
             await startBackend()
         }
-        if autoRecordTurns && !userStoppedRecording && civDetected && backendHealthy && !isRecording && !shouldShowScreenRecordingHelp {
+        if autoRecordTurns && !userStoppedRecording && civDetected && backendHealthy && screenCaptureVerifiedThisLaunch && !isRecording && !shouldShowScreenRecordingHelp {
             await startRecording()
         }
         syncOverlay()
@@ -333,9 +364,16 @@ final class AppState: ObservableObject {
 
     private func refreshScreenCaptureStatus() async {
         let preflightAllowed = PermissionManager.hasScreenRecordingPermission
+        screenRecordingPreflightAllowed = preflightAllowed
+        screenRecordingPreflightStatus = preflightAllowed ? "Granted by macOS" : "Not granted by macOS"
+        screenRecordingLastChecked = Date.now.formatted(date: .omitted, time: .standard)
         appPermissionIdentity = PermissionManager.appIdentityDescription
         if preflightAllowed && !shouldShowScreenRecordingHelp {
-            markScreenCaptureAllowed(status: "Allowed")
+            if screenCaptureVerifiedThisLaunch {
+                screenRecordingAllowed = true
+            } else {
+                markScreenCaptureAllowed(status: "Allowed, test needed", verifiedByCapture: false)
+            }
         } else if !screenRecordingAllowed && !shouldShowScreenRecordingHelp {
             screenRecordingStatus = "Not verified"
         }
@@ -344,7 +382,7 @@ final class AppState: ObservableObject {
     private func captureScreen(markStatus status: String) async throws -> ScreenshotResult {
         do {
             let screenshot = try await captureService.capture()
-            markScreenCaptureAllowed(status: status)
+            markScreenCaptureAllowed(status: status, verifiedByCapture: true)
             return screenshot
         } catch {
             handleScreenCaptureFailure(error)
@@ -352,11 +390,17 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func markScreenCaptureAllowed(status: String) {
+    private func markScreenCaptureAllowed(status: String, verifiedByCapture: Bool) {
         screenRecordingAllowed = true
         screenRecordingStatus = status
         shouldShowScreenRecordingHelp = false
         screenCaptureLastError = nil
+        if verifiedByCapture {
+            screenCaptureVerifiedThisLaunch = true
+            screenCaptureVerificationStatus = "Verified this launch"
+        } else if !screenCaptureVerifiedThisLaunch {
+            screenCaptureVerificationStatus = "Not tested this launch"
+        }
         appPermissionIdentity = PermissionManager.appIdentityDescription
     }
 
@@ -366,6 +410,7 @@ final class AppState: ObservableObject {
         screenRecordingStatus = permissionFailure ? "Capture blocked" : "Capture failed"
         shouldShowScreenRecordingHelp = permissionFailure
         screenCaptureLastError = error.localizedDescription
+        screenCaptureVerificationStatus = permissionFailure ? "Blocked by macOS/TCC" : "Capture failed"
         errorMessage = error.localizedDescription
     }
 
