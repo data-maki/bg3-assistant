@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BG3 Honor Map — Act 1</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>" />
+    <link rel="stylesheet" href="/map-assets/vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="/map-assets/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">BG3 HONOR MODE</p>
+        <h1>Act 1 route map</h1>
+        <p class="subtitle">Key fights, safe leveling stops, and build equipment on the real Wilderness map.</p>
+      </div>
+      <div class="topbar-actions">
+        <span id="liveStatus" class="live-status live-status--none"><i></i>No live position</span>
+        <span id="summaryCount" class="summary-count">Loading markers…</span>
+        <button id="exportMarkersBtn" class="button button-primary" type="button">Export BG3 markers</button>
+        <a id="mapgenieLink" class="button button-secondary" target="_blank" rel="noreferrer">Open MapGenie Wilderness ↗</a>
+      </div>
+    </header>
+
+    <section class="filters" aria-label="Map filters">
+      <label>
+        <span>Region</span>
+        <select id="regionFilter"></select>
+      </label>
+      <label>
+        <span>Character level: <strong id="levelValue">4</strong></span>
+        <input id="levelFilter" type="range" min="1" max="7" value="4" />
+      </label>
+      <label>
+        <span>Build equipment</span>
+        <select id="buildFilter"></select>
+      </label>
+      <label class="search-field">
+        <span>Search</span>
+        <input id="searchFilter" type="search" placeholder="Fight, item, or area…" />
+      </label>
+      <div class="type-filters">
+        <label><input id="majorFilter" type="checkbox" checked /> Major goals</label>
+        <label><input id="minorFilter" type="checkbox" checked /> Minor XP fights</label>
+        <label><input id="itemFilter" type="checkbox" checked /> Build items</label>
+        <label><input id="hideDoneFilter" type="checkbox" /> Hide completed</label>
+        <label><input id="labelsFilter" type="checkbox" /> Always show labels</label>
+      </div>
+    </section>
+
+    <main class="workspace">
+      <aside class="route-panel">
+        <nav class="panel-tabs" role="tablist" aria-label="Assistant panels">
+          <button id="tabRoute" class="panel-tab active" role="tab" aria-selected="true">Route</button>
+          <button id="tabParty" class="panel-tab" role="tab" aria-selected="false">Party</button>
+          <button id="tabEquipment" class="panel-tab" role="tab" aria-selected="false">Equipment</button>
+          <button id="tabWarnings" class="panel-tab" role="tab" aria-selected="false">Warnings <span id="warningsBadge" class="tab-badge tab-badge--alert" hidden></span></button>
+        </nav>
+
+        <div id="panelRoute" class="panel-page">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">VISIBLE ROUTE</p>
+              <h2 id="routeTitle">All Act 1 locations</h2>
+            </div>
+            <button id="resetButton" class="text-button" type="button">Reset filters</button>
+          </div>
+          <div id="routeList" class="route-list" aria-live="polite"></div>
+        </div>
+
+        <div id="panelParty" class="panel-page" hidden>
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">CURRENT LEVEL ACTIONS</p>
+              <h2>Party</h2>
+            </div>
+          </div>
+          <div id="partyPanel" class="route-list"></div>
+        </div>
+
+        <div id="panelEquipment" class="panel-page" hidden>
+          <div class="panel-heading">
+            <div>
+              <p id="equipmentActLabel" class="eyebrow">ACT 1 LOADOUTS</p>
+              <h2>Equipment <span id="equipmentBadge" class="tab-badge" hidden></span></h2>
+            </div>
+            <button id="missingOnlyBtn" class="text-button" type="button">Show missing on map</button>
+          </div>
+          <div id="equipmentPanel" class="route-list"></div>
+        </div>
+
+        <div id="panelWarnings" class="panel-page" hidden>
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">HONOR RUN SAFETY</p>
+              <h2>Warnings</h2>
+            </div>
+          </div>
+          <div id="warningsPanel" class="route-list"></div>
+        </div>
+      </aside>
+
+      <section class="map-panel">
+        <div class="map-toolbar">
+          <div class="legend">
+            <span><i class="dot major"></i>Major goal</span>
+            <span><i class="dot minor"></i>Minor XP</span>
+            <span><i class="dot item"></i>Build item</span>
+            <span><i class="ring"></i>Area-level pin</span>
+          </div>
+          <div class="zoom-controls">
+            <button id="locateBtn" aria-label="Center on player" title="Center on the live player position">◎ Locate</button>
+            <button id="followBtn" aria-label="Follow player" title="Keep the map centered on the live position">Follow</button>
+            <button id="zoomOut" aria-label="Zoom out">−</button>
+            <button id="fitMap" aria-label="Fit visible markers">Fit</button>
+            <button id="zoomIn" aria-label="Zoom in">+</button>
+          </div>
+        </div>
+        <div id="mapViewport" class="map-viewport">
+          <div id="leafletMap"></div>
+          <div id="emptyMap" class="empty-map" hidden>No markers match these filters.</div>
+          <div class="coordinate-note">Real map tiles © MapGenie. Pins aligned to the official Wilderness map. Right-click sets your position manually.</div>
+        </div>
+        <article id="detailCard" class="detail-card" hidden></article>
+      </section>
+    </main>
+
+    <dialog id="markerExportDialog" class="marker-export-dialog">
+      <form method="dialog" class="marker-export-card">
+        <header>
+          <div>
+            <p class="eyebrow">ONE-SHOT MAP SETUP</p>
+            <h2>BG3 marker export</h2>
+          </div>
+          <button class="dialog-close" value="cancel" aria-label="Close marker export">×</button>
+        </header>
+        <p id="markerExportSummary" class="marker-export-summary"></p>
+        <div id="markerExportWarnings" class="marker-export-warnings"></div>
+        <div id="markerExportList" class="marker-export-list"></div>
+        <footer>
+          <span id="markerExportFingerprint" class="marker-export-fingerprint"></span>
+          <div class="marker-export-actions">
+            <button id="confirmMarkersBtn" class="button" type="button">Placed in BG3</button>
+            <button id="downloadMarkersBtn" class="button button-primary" type="button">Download JSON</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="/map-assets/vendor/leaflet/leaflet.js" defer></script>
+    <script src="/map-assets/app.js" defer></script>
+  </body>
+</html>

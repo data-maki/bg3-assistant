@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>BG3 Honor Mode Assistant</string>
+	<key>CFBundleExecutable</key>
+	<string>BG3HonorAssistant</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.local.BG3HonorAssistant</string>
+	<key>CFBundleName</key>
+	<string>BG3 Honor Mode Assistant</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.games</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The assistant uses the microphone to dictate chat questions about your run.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Dictated questions are transcribed on-device where possible and sent only to the local guide backend.</string>
+</dict>
+</plist>

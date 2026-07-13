@@ -1,0 +1,91 @@
+Build ID	Character level	Take	Subclass / choice	Feat / spells / skills	What changes now	Source confidence
+SB-A1	1	Bard 1	-	Cantrips: Friends, Minor Illusion; spells: Sleep, Tasha's Hideous Laughter, Healing Word	Use Sleep to prevent early enemy turns; attack from high ground with a bow or hand crossbow	Assistant synthesis; linked page is sparse
+SB-A1	2	Bard 2	-	Song of Rest; add Longstrider	Pre-buff Longstrider after every long rest and use Song of Rest as an extra short rest	Assistant synthesis
+SB-A1	3	Bard 3	College of Swords	Two-Weapon Fighting; Slashing Flourish (Ranged); add Hold Person	The build comes online: ranged Slashing Flourish can hit one target twice; dual-wield hand crossbows	Assistant synthesis
+SB-A1	4	Bard 4	-	Sharpshooter; add Enhance Ability	Toggle Sharpshooter off when hit chance is poor; Enhance Ability helps dialogue and pickpocket checks	Assistant synthesis
+SB-A1	5	Bard 5	-	Font of Inspiration; add Glyph of Warding or Fear	Bardic Inspiration refreshes on short rest, so flourishes become your normal combat engine	Assistant synthesis
+SB-A1	6	Bard 6	College of Swords	Extra Attack; Countercharm	Four attacks are possible with two ranged flourishes; transition to the SB-1011 plan at level 8	Assistant synthesis
+SB-102	1	Bard 1	-	STR 17, CHA 16, CON 14; Sleep, Tasha's Hideous Laughter, Healing Word	Control early encounters and save spell slots when weapon attacks are enough	Guide-derived
+SB-102	2	Bard 2	-	Song of Rest; Longstrider	Pre-buff movement and gain another short-rest cycle for the party	Guide-derived
+SB-102	3	Bard 3	College of Swords	Defensive Flourish; Hold Person	Use Defensive Flourish when a dangerous melee enemy can reach you	Guide-derived
+SB-102	4	Bard 4	-	ASI +2 STR by default; GWM only with reliable accuracy	Accuracy is more valuable than theoretical GWM damage in early Honor Mode	Guide-derived
+SB-102	5	Bard 5	-	Font of Inspiration; Glyph of Warding	Flourishes refresh on short rest; Glyph provides flexible area damage or sleep	Guide-derived
+SB-102	6	Bard 6	College of Swords	Extra Attack	This is the safe Act 1 martial breakpoint	Guide-derived
+SB-102	7	Paladin 1	Oath of Vengeance	Respec with Paladin first for heavy armour; reduce DEX after Gloves of Dexterity	Heavy armour and Vengeance utility improve frontline safety	Guide-derived
+SB-102	8	Paladin 2	-	Defense fighting style; Divine Smite	The build comes online: smite held or paralysed targets for automatic critical hits	Guide-derived
+SB-102	9	Bard 7	-	Fourth-level spells	Add Greater Invisibility or another utility/control option appropriate to the party	Guide-derived
+SB-102	10	Bard 8	-	Savage Attacker	Rerolls melee weapon and Smite damage dice, materially increasing burst	Guide-derived
+SB-102	11	Bard 9	-	Hold Monster	Paralyse eligible bosses, then spend high-level slots on critical Smites	Guide-derived
+SB-102	12	Bard 10	Magical Secrets	Counterspell; Spirit Guardians for good path or Hunger of Hadar / Armour of Agathys alternative	Final control and spell package; prioritize Command through Mystic Scoundrel	Guide-derived
+SB-1011	1	Bard 1	-	DEX 16, CHA 16, CON 14; Friends, Minor Illusion, Sleep, Tasha's	Sleep and Tasha's reduce enemy turns while weapon accuracy is still modest	Guide-derived
+SB-1011	2	Bard 2	-	Song of Rest; Longstrider	Pre-buff movement and gain another short-rest resource cycle	Guide-derived
+SB-1011	3	Bard 3	College of Swords	Two-Weapon Fighting; ranged flourishes; Hold Person	Use ranged Slashing Flourish to burst a priority target	Guide-derived
+SB-1011	4	Bard 4	-	Sharpshooter	Toggle off against high Armour Class until Bless, advantage, or acuity gear fixes accuracy	Guide-derived
+SB-1011	5	Bard 5	-	Font of Inspiration; Glyph of Warding	Flourishes now refresh on short rest; Glyph is reliable area control	Guide-derived
+SB-1011	6	Bard 6	College of Swords	Extra Attack	Core Act 1 damage package is complete	Guide-derived
+SB-1011	7	Bard 7	-	Fourth-level spell slot progression	Continue as Bard for one level; prepare for the level 8 respec	Guide-derived
+SB-1011	8	Respec: Fighter 1 / Wizard 1 / Bard 6	Fighter first; Archery fighting style	CHA 17, INT 16, CON 14; use Gloves of Dexterity; scribe Shield and utility spells	Class order grants proficiencies and Archery while Wizard adds scroll flexibility	Guide-derived
+SB-1011	9	Bard 7	-	Fourth-level Bard spells	Use Fear or Confusion when enemies cannot be efficiently killed this round	Guide-derived
+SB-1011	10	Bard 8	-	Dual Wielder; use +2 CHA instead if carrying a shield	Dual wielding enables two powerful stat sticks in the final loadout	Guide-derived
+SB-1011	11	Bard 9	-	Hold Monster	Build acuity first, then lock down the most dangerous eligible enemy	Guide-derived
+SB-1011	12	Bard 10	Magical Secrets	Command and Counterspell	Attack to build Arcane Acuity, then cast Command as a bonus action through Mystic Scoundrel	Guide-derived
+MO-OH	1	Monk 1	-	DEX 16, CON 15, WIS 16	Use unarmed bonus attacks and high movement; do not overextend ahead of support	Guide-derived
+MO-OH	2	Monk 2	-	Patient Defence, Step of the Wind	Patient Defence can prevent a wipe when enemies focus the monk	Guide-derived
+MO-OH	3	Monk 3	Way of the Open Hand	Flurry: Topple, Stagger, Push	Topple creates advantage; Stagger removes reactions before repositioning	Guide-derived
+MO-OH	4	Monk 4	Open Hand	Tavern Brawler, +1 CON	Drink an Elixir of Hill Giant Strength after long rest; accuracy and damage jump sharply	Guide-derived
+MO-OH	5	Monk 5	Open Hand	Extra Attack, Stunning Strike	Spend ki to deny a boss turn rather than only chasing damage	Guide-derived
+MO-OH	6	Cleric 1	Light Domain	Bless, Sanctuary, Shield of Faith; Warding Flare	Gain armour/shield support and emergency Sanctuary	Guide-derived
+MO-OH	7	Monk 6	Open Hand	Manifestations; Ki-Empowered Strikes	Choose the manifestation damage type enemies are least resistant to	Guide-derived
+MO-OH	8	Respec: Fighter 1 / Monk 6 / Cleric 1	Fighter first; Defense	-	Heavy armour and shield proficiency make the frontliner much safer	Guide-derived
+MO-OH	9	Rogue 1	-	Expertise	Add utility skills; combat loop is otherwise unchanged	Guide-derived
+MO-OH	10	Respec: Fighter 1 / Monk 6 / Thief 3	Thief	Fast Hands	Fast Hands grants a second bonus action, enabling another Flurry or movement option	Guide-derived
+MO-OH	11	Cleric 1	Light Domain	Restore Bless, Sanctuary, Warding Flare	Support and reaction defence return without sacrificing Fast Hands	Guide-derived
+MO-OH	12	Rogue 4	Thief	Resilient: Wisdom; use Alert if initiative is the larger risk	Final feat protects against incapacitating mental saves	Guide-derived
+PA-FL	1	Druid 1	-	STR 10, DEX 16, CON 14, WIS 10, CHA 16; Shillelagh, Resistance	Cast Shillelagh on a torch in the main hand; carry a second torch off-hand for early fire damage	Guide planner data
+PA-FL	2	Druid 2	Circle of Spores	Symbiotic Entity; Halo of Spores	Use Symbiotic Entity before combat for temporary hit points and added weapon damage	Guide planner data
+PA-FL	3	Druid 3	Circle of Spores	Prepare Flame Blade, Hold Person, Heat Metal	Summon Flame Blade in the off-hand and keep the Shillelagh torch in the main hand	Guide planner data
+PA-FL	4	Paladin 1	Oath of Devotion	Paladin utility and Lay on Hands	Act 1 remains Devotion; the guide's intended Oathbreaker transition happens through an Act 2 oath break	Guide planner data plus author note
+PA-FL	5	Paladin 2	Devotion	Duelling; Divine Smite	Spend Smites on critical hits or priority targets; retain spell slots for Flame Blade and control	Guide planner data
+PA-FL	6	Paladin 3	Devotion	Channel Oath features	Use Sacred Weapon when accuracy matters more than immediate damage	Guide planner data
+PA-FL	7	Paladin 4	Devotion	Ability Improvement: +2 CHA	Charisma reaches 18, improving Paladin spells and the later Oathbreaker package	Guide planner data
+PA-FL	8	Paladin 5	Oathbreaker after Act 2 oath break	Extra Attack; Magic Weapon, Branding Smite, Aid	The melee engine is complete; break the oath during Punish the Wicked when following the source route	Guide planner data plus author note
+PA-FL	9	Sorcerer 1	Draconic Bloodline	Booming Blade, Fire Bolt, Blade Ward, Shocking Grasp; Shield, Magic Missile	Shield improves emergency defence and Booming Blade gives another fire-adjacent melee option	Guide planner data
+PA-FL	10	Sorcerer 2	Draconic Bloodline	Thunderwave; Metamagic: Twinned Spell and Extended Spell	Extend control durations or twin a high-value support spell when the party can protect concentration	Guide planner data
+PA-FL	11	Sorcerer 3	Draconic Bloodline	Hold Person; Quickened Spell	Build Arcane Acuity first, then Quickened or extended control to deny enemy turns	Guide planner data
+PA-FL	12	Sorcerer 4	Draconic Bloodline	Ability Improvement: +2 CHA; Mirror Image; Acid Splash	Charisma reaches 20; use Mirror Image before dangerous melee engagements	Guide planner data
+SO-111	1	Sorcerer 1	Red Draconic Bloodline	CHA 17, DEX 16, CON 14; Shield, Sleep	Use Sleep to remove early actions and Shield only when it changes a hit to a miss	Guide-derived
+SO-111	2	Sorcerer 2	Red Draconic	Twinned Spell, Extended Spell; add Magic Missile	Twin high-value buffs; Extended later doubles Command duration	Guide-derived
+SO-111	3	Sorcerer 3	Red Draconic	Quickened Spell; Scorching Ray; replace Sleep with Enhance Ability	Scorching Ray becomes the core single-target attack	Guide-derived
+SO-111	4	Sorcerer 4	Red Draconic	Dual Wielder; Hold Person	Carry two staves; Hold Person enables critical melee follow-up from allies	Guide-derived
+SO-111	5	Sorcerer 5	Red Draconic	Haste	Twin Haste only when concentration is safe; lethargy can lose the run	Guide-derived
+SO-111	6	Sorcerer 6	Red Draconic	Elemental Affinity; Fireball; replace Magic Missile with Counterspell	Charisma now adds to fire damage; Fireball clears grouped enemies	Guide-derived
+SO-111	7	Warlock 1	The Fiend	Command	The build comes online: Fire Acuity plus Extended Command can deny multiple enemy turns	Guide-derived
+SO-111	8	Sorcerer 7	Red Draconic	Daylight	Use Daylight for encounters where magical darkness or sunlight sensitivity matters	Guide-derived
+SO-111	9	Sorcerer 8	Red Draconic	Elemental Adept: Fire by default; alternatives +2 CHA, Alert, War Caster; Dimension Door	Ignore fire resistance and retain a strong emergency reposition	Guide-derived
+SO-111	10	Sorcerer 9	Red Draconic	Hold Monster	Stack acuity first, then paralyse an eligible boss	Guide-derived
+SO-111	11	Sorcerer 10	Red Draconic	Careful Spell; Telekinesis	Careful Spell makes large control effects safer around allies	Guide-derived
+SO-111	12	Sorcerer 11	Red Draconic	Chain Lightning	Use lightning only when it beats the fire package or targets are wet; core loop remains Scorching Ray plus control	Guide-derived
+WI-BS	1	Wizard 1	-	Booming Blade, Ray of Frost, Toll the Dead; Mage Armour, Longstrider, Shield, Magic Missile, Chromatic Orb, Enhance Leap	Play as a protected full caster; keep Mage Armour and Longstrider active after each long rest	Guide-derived
+WI-BS	2	Wizard 2	Bladesinging	Witch Bolt, Feather Fall; Bladesong	Bladesong raises Armour Class, movement, concentration, and Dexterity saves before dangerous turns	Guide-derived
+WI-BS	3	Wizard 3	Bladesinging	Shadow Blade, Cloud of Daggers	Choose melee pressure with concentration on Shadow Blade or safer area damage with Cloud of Daggers	Guide-derived
+WI-BS	4	Wizard 4	Bladesinging	Minor Illusion; Hold Person, Misty Step; +2 DEX or +2 INT	Raise Dexterity for melee and defence, or Intelligence for stronger spellcasting; the guide supports either path	Guide-derived
+WI-BS	5	Wizard 5	Bladesinging	Counterspell, Lightning Bolt	Counter deadly enemy spells; combine Wet with Lightning Bolt when allies can set it up safely	Guide-derived
+WI-BS	6	Wizard 6	Bladesinging	Extra Attack; Hypnotic Pattern, Glyph of Warding	The melee plan comes online with two attacks, while Hypnotic Pattern remains the safer group-control option	Guide-derived
+WI-BS	7	Wizard 7	Bladesinging	Ice Storm, Confusion	Use wide-area control when entering melee would expose concentration or positioning	Guide-derived
+WI-BS	8	Wizard 8	Bladesinging	Dimension Door; Savage Attacker	Savage Attacker improves Shadow Blade damage; Dimension Door is the emergency extraction tool	Guide-derived
+WI-BS	9	Wizard 9	Bladesinging	Hold Monster, Cone of Cold	Disable an eligible boss before closing to melee, or punish clustered enemies with cold damage	Guide-derived
+WI-BS	10	Wizard 10	Bladesinging	Friends or Bone Chill; Conjure Elemental	Add a durable summon so enemy actions are divided before the Bladesinger commits	Guide-derived
+WI-BS	11	Wizard 11	Bladesinging	Chain Lightning, Globe of Invulnerability	Use Globe to stabilize lethal encounters; Chain Lightning excels after Wet setup	Guide-derived
+WI-BS	12	Wizard 12	Bladesinging	Sentinel: Vengeance or +2 DEX / INT	Finish the chosen ability path or take Sentinel for stronger melee reaction pressure	Guide-derived
+CL-102	1	Cleric 1	Light Domain	WIS 17; Guiding Bolt, Bless, Healing Word, Command; cantrips Produce Flame, Sacred Flame, Resistance	Light Domain from level 1; Warding Flare blunts one dangerous attack per short rest	Guide-derived, respec-free order
+CL-102	2	Cleric 2	Light Domain	Radiance of the Dawn (Channel Divinity)	Radiance clears grouped weak enemies without spending spell slots	Guide-derived, respec-free order
+CL-102	3	Cleric 3	Light Domain	Aid, Spiritual Weapon, Protection from Evil and Good	Upcast Aid after each long rest; Spiritual Weapon adds bonus-action damage	Guide-derived, respec-free order
+CL-102	4	Cleric 4	Light Domain	Feat: War Caster (source swaps to Spell Sniper: Eldritch Blast later); Toll the Dead, Warding Bond	Concentration becomes reliable ahead of the Spirit Guardians loop	Guide-derived, respec-free order
+CL-102	5	Cleric 5	Light Domain	Spirit Guardians, Glyph of Warding	The core radiant loop comes online at level 5 — four levels earlier than the source's respec route	Guide-derived, respec-free order
+CL-102	6	Druid 1	-	Cantrips: Poison Spray, Thorn Whip	First Stars dip level; keep concentrating on Spirit Guardians in fights	Guide-derived, respec-free order
+CL-102	7	Druid 2	Circle of Stars	Starry Form: Dragon and Archer	Dragon steadies concentration saves; Archer adds efficient bonus-action radiant damage	Guide-derived, respec-free order
+CL-102	8	Cleric 6	Light Domain	Improved Warding Flare; Calm Emotions, Protection from Poison	Reaction protection extends to allies; Protection from Poison preps the Act 2 boss	Guide-derived, respec-free order
+CL-102	9	Cleric 7	Light Domain	Banishment, Death Ward, Freedom of Movement	Death Ward the tank before dangerous fights	Guide-derived, respec-free order
+CL-102	10	Cleric 8	Light Domain	ASI: +1 WIS (18) and +1 CON	Final Wisdom and concentration breakpoint	Guide-derived, respec-free order
+CL-102	11	Cleric 9	Light Domain	Destructive Wave, Flame Strike	Use Destructive Wave only when party positioning is safe	Guide-derived, respec-free order
+CL-102	12	Cleric 10	Light Domain	Cantrip: Blade Ward; Sanctuary; Divine Intervention	Divine Intervention caps the build; final split Light Cleric 10 / Stars Druid 2	Guide-derived, respec-free order

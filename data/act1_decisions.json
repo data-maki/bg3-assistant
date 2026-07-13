@@ -1,0 +1,47 @@
+{
+  "fight-grove-entrance": [
+    {"text": "Convince Rolan to stay before leaving the grove.", "kind": "guide_fact"},
+    {"text": "After triggering Investigate the Beach, do not long rest until Mirkon is safe.", "kind": "guide_fact"},
+    {"text": "Expose Kagha before stealing the idol; stealing it during the ritual can get the tieflings killed.", "kind": "guide_fact"},
+    {"text": "As Dark Urge, knock out Alfira before the relevant long rest.", "kind": "guide_fact"}
+  ],
+  "fight-blighted-village": [
+    {"text": "Use Disguise Self: Drow for the safer village dialogue route.", "kind": "guide_fact"},
+    {"text": "At the windmill choose the BRAKE lever, not Release Brake, to save Barcus.", "kind": "guide_fact"},
+    {"text": "Recruit Lump's ogres for an emergency summon instead of spending that resource immediately.", "kind": "guide_fact"}
+  ],
+  "fight-owlbear": [
+    {"text": "The encounter can be avoided. If the cub remains hostile after the adults die, flee rather than kill it.", "kind": "guide_fact"}
+  ],
+  "fight-auntie-ethel": [
+    {"text": "If you want Auntie Ethel's Hair, leave Ethel alive below roughly 20 HP and let her next turn begin so the bargain triggers.", "kind": "guide_fact"},
+    {"text": "Use non-lethal damage if you intend to preserve Ethel's controlled victims.", "kind": "guide_fact"}
+  ],
+  "fight-gnolls": [
+    {"text": "Speak to Rugan and Olly before combat and use the tadpole option on Flind when available.", "kind": "guide_fact"},
+    {"text": "Keep the shipment unopened if you want the Zhentarim special stock and Titanstring Bow route.", "kind": "guide_fact"}
+  ],
+  "fight-goblin-leaders": [
+    {"text": "Finish grove and camp conversations before making the camp hostile; talk to Abdirak, Volo, Liam, the spiders, and Gut for the brand first if desired.", "kind": "guide_fact"},
+    {"text": "Take Gut into isolation and Silence her; resolve Minthara deliberately; leave Dror Ragzlin for last.", "kind": "guide_fact"},
+    {"text": "Do not enter the Mountain Pass after the leaders; finish the remaining surface route first.", "kind": "guide_fact"}
+  ],
+  "fight-underdark-minotaurs": [
+    {"text": "Save Thulla and give Derryth the Noblestalk if you want to preserve the Act 3 shop supply.", "kind": "guide_fact"}
+  ],
+  "fight-arcane-tower": [
+    {"text": "Read the tower poetry before speaking to Bernard and choose the poetry-derived peaceful responses to avoid the fight and preserve reward options.", "kind": "guide_fact"}
+  ],
+  "fight-nere": [
+    {"text": "Visit Philomeen and recruit Brithvar, or clear the duergar, before freeing Nere.", "kind": "guide_fact"},
+    {"text": "Once you enter Grymforge and trigger the cave-in state, treat Nere's rescue as time-sensitive.", "kind": "guide_fact"}
+  ],
+  "fight-gith-patrol": [
+    {"text": "Prefer the dialogue route. Bring Lae'zel, or use Disguise Self: Gith for the safer deception route.", "kind": "guide_fact"},
+    {"text": "Pass or defeat the patrol, but deliberately defer entering the Mountain Pass until the Act 1 readiness gate is clear.", "kind": "guide_fact"}
+  ],
+  "fight-wargaz": [
+    {"text": "Before the zaith'isk dialogue, prepare for Intelligence DC 12, Wisdom DC 15, and Constitution DC 18 checks.", "kind": "guide_fact"},
+    {"text": "Long rest before the Inquisitor's Chamber and spread the party before dialogue ends.", "kind": "guide_fact"}
+  ]
+}
