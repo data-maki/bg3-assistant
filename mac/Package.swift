@@ -3,17 +3,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "CivCoach",
+    name: "BG3HonorAssistant",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "CivCoach", targets: ["CivCoach"])
+        .executable(name: "BG3HonorAssistant", targets: ["BG3HonorAssistant"])
     ],
     targets: [
         .executableTarget(
-            name: "CivCoach",
-            path: "CivCoach",
+            name: "BG3HonorAssistant",
+            path: "BG3Assistant",
             exclude: ["Resources"]
         )
     ]

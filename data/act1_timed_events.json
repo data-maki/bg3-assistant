@@ -1,0 +1,142 @@
+[
+  {
+    "id": "timed-mountain-pass-gate",
+    "name": "Mountain Pass point of no return",
+    "kind": "point_of_no_return",
+    "trigger": "Entering Rosymorn Monastery Trail (or the Shadow-Cursed Lands)",
+    "deadline": "Finish grove-related quests first",
+    "consequence": "Rescue the Gnome, Rescue the Grand Duke, Rescue the Trapped Man, Save the Goblin Sazza, Save the Refugees, and Rescue the Druid Halsin all fail silently.",
+    "severity": "critical",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-minthara-raid",
+    "name": "Raid the Grove one-rest clock",
+    "kind": "long_rest",
+    "trigger": "Telling Minthara the grove's location (or Sazza + Minthara talk)",
+    "deadline": "1 long rest",
+    "consequence": "The raid triggers immediately after the next long rest; goblin leaders can despawn from their rooms.",
+    "severity": "critical",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-waukeens-rest",
+    "name": "Waukeen's Rest fire survivors",
+    "kind": "long_rest",
+    "trigger": "Approaching Waukeen's Rest",
+    "deadline": "No long rest or fast travel before the rescues",
+    "consequence": "Grand Duke Ravengard's men (Counsellor Florrick side) and trapped Benryn die in the fire.",
+    "severity": "high",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-missing-shipment",
+    "name": "Missing shipment (Zhentarim) gnoll clock",
+    "kind": "long_rest",
+    "trigger": "Approaching the cave on the Risen Road",
+    "deadline": "1 long rest",
+    "consequence": "Rugan and Olly are killed by the gnolls; Zhentarim reward line closes.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-mirkon-beach",
+    "name": "Mirkon at the harpy beach",
+    "kind": "long_rest",
+    "trigger": "Approaching the beach near the grove",
+    "deadline": "1 long rest",
+    "consequence": "Mirkon dies to the harpies.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-thulla",
+    "name": "Thulla's poison (Ebonlake Grotto)",
+    "kind": "long_rest",
+    "trigger": "Meeting poisoned Thulla in the Myconid Colony",
+    "deadline": "3 long rests",
+    "consequence": "Thulla becomes a myconid husk permanently.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-nere",
+    "name": "Free True Soul Nere",
+    "kind": "long_rest",
+    "trigger": "Interacting with the cave-in rubble in Grymforge",
+    "deadline": "1 long rest / fast travel",
+    "consequence": "Nere and the trapped deep gnomes die behind the rubble.",
+    "severity": "high",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-ethel-shop",
+    "name": "Auntie Ethel leaves the grove",
+    "kind": "immediate",
+    "trigger": "Entering the Sunlit Wetlands (or robbing her stand)",
+    "deadline": "Buy her potions before heading to the wetlands",
+    "consequence": "Her grove shop (cheap healing potions) is gone for the run.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-owlbear-hunters",
+    "name": "Andrick & Brynna hunt the owlbear",
+    "kind": "long_rest",
+    "trigger": "Telling the hunters to finish the owlbear",
+    "deadline": "1 long rest",
+    "consequence": "The owlbear (and cub recruitment chance) can be lost.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-withers",
+    "name": "Withers in the Dank Crypt",
+    "kind": "point_of_no_return",
+    "trigger": "Entering the goblin camp courtyard before opening his sarcophagus",
+    "deadline": "Visit the Dank Crypt early",
+    "consequence": "Withers can disappear from the tomb — losing respecs and hireling revives for the run.",
+    "severity": "high",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-edowin-siblings",
+    "name": "True Soul Edowin's siblings",
+    "kind": "immediate",
+    "trigger": "Finding dying Edowin (Owlbear Nest path)",
+    "deadline": "Resolve before camping or fast travel",
+    "consequence": "Andrick and Brynna leave permanently.",
+    "severity": "low",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-alfira-durge",
+    "name": "Dark Urge: bard visitor at camp",
+    "kind": "long_rest",
+    "trigger": "Crossing toward Blighted Village (Dark Urge origin only)",
+    "deadline": "Before Mountain Pass",
+    "consequence": "A forced camp scene kills Alfira (or Quill). Knowing it's coming avoids honor-run panic decisions.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-laezel-cage",
+    "name": "Lae'zel's cage",
+    "kind": "immediate",
+    "trigger": "Tieflings holding Lae'zel near the crash site",
+    "deadline": "Early — the cage resolves on its own after enough time",
+    "consequence": "She must be re-recruited later at the Mountain Pass.",
+    "severity": "low",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "timed-arabella",
+    "name": "Save Arabella (snake in the grove)",
+    "kind": "point_of_no_return",
+    "trigger": "Kagha's snake confrontation",
+    "deadline": "Before Defeat the Goblins / Raid the Grove completes",
+    "consequence": "Arabella dies; her Act 2 storyline is lost.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  }
+]
