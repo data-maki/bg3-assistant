@@ -14,7 +14,8 @@ let package = Package(
         .executableTarget(
             name: "BG3HonorAssistant",
             path: "BG3Assistant",
-            exclude: ["Resources"]
+            exclude: ["Resources"],
+            linkerSettings: [.linkedLibrary("sqlite3")]
         )
     ]
 )

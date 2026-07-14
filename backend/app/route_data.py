@@ -1,5 +1,6 @@
 import csv
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -14,10 +15,13 @@ DECISIONS_PATH = REPO_ROOT / "data" / "act1_decisions.json"
 BUILDS_PATH = REPO_ROOT / "data" / "build_overview.tsv"
 BUILD_LEVELS_PATH = REPO_ROOT / "data" / "build_levels.tsv"
 BUILD_GEAR_PATH = REPO_ROOT / "data" / "build_gear.tsv"
+ITEM_EFFECTS_PATH = REPO_ROOT / "data" / "item_effects.json"
+ITEM_ICONS_PATH = REPO_ROOT / "data" / "item_icons.json"
 SOURCE_URL = (
     "https://docs.google.com/spreadsheets/d/"
     "1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
 )
+GUIDE_VERSION = "2026-07-12"
 
 
 @lru_cache(maxsize=1)
@@ -56,29 +60,64 @@ def load_route() -> list[RouteCheckpoint]:
     return sorted(checkpoints, key=lambda item: item.route_order)
 
 
+def item_key(item_name: str) -> str:
+    """Stable per-item key (stack counts stripped) used for equip tracking
+    and for joining gear rows with the wiki-sourced effects file."""
+    stripped = re.sub(r"\s*x\d+$", "", item_name)
+    return re.sub(r"[^a-z0-9]+", "-", stripped.lower()).strip("-")
+
+
 @lru_cache(maxsize=1)
 def load_gear() -> list[BuildGear]:
     """All reviewed gear rows — the single parse of build_gear.tsv.
 
     Consumed per-build here (filtered into BuildSummary.gear) and item-wise by
     map_data to place Act 1 item markers, so both payloads stay on one vocabulary.
+    Each row is joined with data/item_effects.json (built by
+    backend/scripts/fetch_item_effects.py from bg3.wiki) for what the item does
+    and exactly where it comes from.
     """
     with BUILD_GEAR_PATH.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))
-    return [
-        BuildGear(
-            item=row["Item"],
-            slot=row["Slot"],
-            priority=row["Priority"],
-            act=int(row["Act"]),
-            region=row["Region / map"],
-            acquisition=row["Location and acquisition"],
-            why=row["Why / when"],
-            source=row["Source"],
-            build_ids=[value for value in row["Build IDs"].split(";") if value],
+    try:
+        effects = json.loads(ITEM_EFFECTS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        effects = {}
+    try:
+        icons = json.loads(ITEM_ICONS_PATH.read_text(encoding="utf-8"))
+        icons_by_key = {item_key(name): f"/map-assets/{path}" for name, path in icons.items()}
+    except Exception:
+        icons_by_key = {}
+    gear = []
+    for row in rows:
+        key = item_key(row["Item"])
+        extra = effects.get(key, {})
+        minimum_level = int(row.get("Minimum level") or 1)
+        maximum_level = int(row["Maximum level"]) if row.get("Maximum level") else None
+        map_objective = (row.get("Map objective") or "yes").strip().lower() not in {"no", "false", "0"}
+        gear.append(
+            BuildGear(
+                item=row["Item"],
+                slot=row["Slot"],
+                priority=row["Priority"],
+                act=int(row["Act"]),
+                region=row["Region / map"],
+                acquisition=row["Location and acquisition"],
+                why=row["Why / when"],
+                source=row["Source"],
+                build_ids=[value for value in row["Build IDs"].split(";") if value],
+                minimum_level=minimum_level,
+                maximum_level=maximum_level,
+                requirement=row.get("Requirement") or "",
+                map_objective=map_objective,
+                alternative=row.get("Alternative") or "",
+                effect=extra.get("effect", ""),
+                acquire=extra.get("acquire", ""),
+                wiki=extra.get("wiki", ""),
+                icon=icons_by_key.get(key, ""),
+            )
         )
-        for row in rows
-    ]
+    return gear
 
 
 @lru_cache(maxsize=1)

@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 @MainActor
@@ -6,6 +7,34 @@ final class BackendProcessManager {
 
     var isRunning: Bool {
         process?.isRunning == true
+    }
+
+    /// A force-quit or replaced app bundle can leave the frozen backend alive
+    /// after its GUI owner disappears. A valid health response proves this is
+    /// our service; the packaged flag keeps developer uvicorn out of scope.
+    func retireUnownedPackagedBackend(_ health: BackendHealth) async {
+        guard process?.isRunning != true else { return }
+        let currentPID = ProcessInfo.processInfo.processIdentifier
+        guard health.ok,
+              health.service == "bg3-honor-assistant",
+              health.parentPid != currentPID,
+              health.packaged != false,
+              let candidate = health.pid ?? listenerProcessIDs().first,
+              candidate > 1,
+              candidate != currentPID else { return }
+        try? appendLog("Retiring unowned packaged backend pid=\(candidate) parent=\(health.parentPid.map(String.init) ?? "legacy")")
+        _ = Darwin.kill(candidate, SIGTERM)
+        for _ in 0..<20 {
+            if Darwin.kill(candidate, 0) != 0 { return }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        if Darwin.kill(candidate, 0) == 0 { _ = Darwin.kill(candidate, SIGKILL) }
+    }
+
+    nonisolated static func processIDs(from output: String, excluding currentPID: Int32) -> [Int32] {
+        output.split(whereSeparator: \.isWhitespace)
+            .compactMap { Int32($0) }
+            .filter { $0 > 1 && $0 != currentPID }
     }
 
     func stop() {
@@ -50,6 +79,14 @@ final class BackendProcessManager {
         let logDirectory = try logDirectory()
         let stdout = try writableLogHandle(at: logDirectory.appending(path: "backend.stdout.log"))
         let stderr = try writableLogHandle(at: logDirectory.appending(path: "backend.stderr.log"))
+        var environment = ProcessInfo.processInfo.environment
+        environment["BG3_STATE_DB_PATH"] = RunStore().databaseURL.path
+        if let stateRoot = environment["BG3_ASSISTANT_STATE_DIR"], !stateRoot.isEmpty {
+            environment["RUNS_DIR"] = URL(fileURLWithPath: stateRoot)
+                .appending(path: "backend-runs", directoryHint: .isDirectory)
+                .path
+        }
+        newProcess.environment = environment
         newProcess.standardOutput = stdout
         newProcess.standardError = stderr
         try newProcess.run()
@@ -61,6 +98,24 @@ final class BackendProcessManager {
         guard let resources = Bundle.main.resourceURL else { return nil }
         let candidate = resources.appending(path: "backend/bg3-honor-backend")
         return FileManager.default.isExecutableFile(atPath: candidate.path) ? candidate : nil
+    }
+
+    private func listenerProcessIDs() -> [Int32] {
+        let probe = Process()
+        let stdout = Pipe()
+        probe.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        probe.arguments = ["-nP", "-tiTCP:8787", "-sTCP:LISTEN"]
+        probe.standardOutput = stdout
+        probe.standardError = FileHandle.nullDevice
+        do {
+            try probe.run()
+            probe.waitUntilExit()
+            let output = String(decoding: stdout.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+            return Self.processIDs(from: output, excluding: ProcessInfo.processInfo.processIdentifier)
+        } catch {
+            try? appendLog("Could not inspect port 8787 listener: \(error.localizedDescription)")
+            return []
+        }
     }
 
     private func findBackendDirectory() -> URL? {

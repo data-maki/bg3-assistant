@@ -3,29 +3,62 @@ import CoreGraphics
 import Foundation
 import ScreenCaptureKit
 
+enum ScreenCaptureAuthorizationAction: Equatable {
+    case alreadyVerified
+    case offerRequest
+    case verifyPixels
+    case wait
+}
+
 enum PermissionManager {
-    /// Fast, synchronous hint. Reliable when it returns `true`, but macOS caches
-    /// a `false` result for the whole process lifetime — so after the user grants
-    /// access mid-session it keeps reporting `false`. Never treat a `false` here
-    /// as authoritative; confirm with `probeCaptureAccess()`.
+    /// Fast, synchronous TCC hint. Keep it visible for diagnostics, but do not
+    /// claim capture is usable until a real pixel capture succeeds.
     static var hasScreenRecordingPermission: Bool {
         CGPreflightScreenCaptureAccess()
     }
 
-    /// The authoritative, non-caching check: can we actually enumerate the
-    /// screen right now? Reflects a grant made after launch, which the preflight
-    /// cannot. On a genuine first run this triggers the one-time system prompt.
-    static func probeCaptureAccess() async -> Bool {
+    static func authorizationAction(
+        preflightGranted: Bool,
+        verifiedThisLaunch: Bool,
+        requestAttempted: Bool,
+        promptIfMissing: Bool
+    ) -> ScreenCaptureAuthorizationAction {
+        if verifiedThisLaunch { return .alreadyVerified }
+        if preflightGranted { return .verifyPixels }
+        // A request that returned false is waiting on the user in System
+        // Settings. Do not turn the two-second status loop into repeated real
+        // capture attempts while that system-owned flow is unresolved.
+        if requestAttempted { return .wait }
+        return promptIfMissing ? .offerRequest : .wait
+    }
+
+    /// ScreenCaptureKit can enumerate displays and windows without usable pixel
+    /// access on current macOS releases. A tiny display screenshot is the only
+    /// probe used as proof that capture is actually authorized.
+    static func verifyScreenRecordingAccess() async -> Bool {
         do {
             let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
-            return !content.displays.isEmpty
+            guard let display = content.displays.first else { return false }
+            let filter = SCContentFilter(display: display, excludingWindows: [])
+            let configuration = SCStreamConfiguration()
+            configuration.width = 16
+            configuration.height = 16
+            configuration.queueDepth = 1
+            configuration.showsCursor = false
+            configuration.capturesAudio = false
+            if #available(macOS 15.0, *) {
+                configuration.captureMicrophone = false
+            }
+            _ = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: configuration)
+            return true
         } catch {
             return false
         }
     }
 
-    /// Pops the system permission modal. Only ever call this from an explicit
-    /// user action — calling it on a timer re-prompts endlessly.
+    /// Registers this signed app with Screen Recording TCC and, when needed,
+    /// presents the system prompt. Invoke it directly from the user's consent
+    /// action so the request is explicit and never originates from a timer.
     @discardableResult
     static func requestScreenRecordingPermission() -> Bool {
         CGRequestScreenCaptureAccess()
@@ -57,5 +90,17 @@ enum PermissionManager {
         let bundleID = Bundle.main.bundleIdentifier ?? "unknown bundle id"
         let path = Bundle.main.bundleURL.path
         return "\(bundleID) at \(path)"
+    }
+
+    static var isInstalledInApplications: Bool {
+        let path = Bundle.main.bundleURL.standardizedFileURL.path
+        let userApplications = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Applications", isDirectory: true)
+            .standardizedFileURL.path
+        return path.hasPrefix("/Applications/") || path.hasPrefix(userApplications + "/")
+    }
+
+    static var installationDescription: String {
+        isInstalledInApplications ? "Stable Applications install" : "Development path — install in Applications before granting"
     }
 }

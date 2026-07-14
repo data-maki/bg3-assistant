@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 ROOT_DIR="$(cd .. && pwd)"
-BUNDLE_ID="${BUNDLE_ID:-com.local.BG3HonorAssistant}"
+BUNDLE_ID="${BUNDLE_ID:-com.datamaki.BG3HonorAssistant}"
 BUILD_BACKEND="${BUILD_BACKEND:-1}"
 SWIFT_SCRATCH_PATH="${SWIFT_SCRATCH_PATH:-.build}"
 

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
@@ -67,6 +69,15 @@ class BuildGear(CamelModel):
     why: str
     source: str
     build_ids: list[str] = Field(default_factory=list)
+    minimum_level: int = 1
+    maximum_level: int | None = None
+    requirement: str = ""
+    map_objective: bool = True
+    alternative: str = ""
+    effect: str = ""  # what the item does (bg3.wiki lead)
+    acquire: str = ""  # wiki "where to find" specifics
+    wiki: str = ""  # canonical bg3.wiki page URL
+    icon: str = ""  # servable URL under /map-assets/icons/
 
 
 class BuildSummary(CamelModel):
@@ -91,6 +102,9 @@ class PartyMember(BaseModel):
     build_id: str | None = None
     prepared_tags: list[str] = Field(default_factory=list)
     class_name: str | None = None
+    status: Literal["active", "camp", "unrecruited", "unavailable", "dead", "departed"] | None = None
+    role_override: str | None = None
+    is_custom: bool | None = None
 
 
 class ReadinessRequest(BaseModel):
@@ -109,12 +123,40 @@ class ReadinessResponse(BaseModel):
     next_actions: list[str] = Field(default_factory=list)
 
 
+class ChatContextSnapshot(BaseModel):
+    """Player-owned run state for chat; guide prose is deliberately absent."""
+
+    version: int = 1
+    scope: Literal["current", "route", "party", "loadout"] = "current"
+    guide_version: str = ""
+    selected_act: int = Field(default=1, ge=1, le=3)
+    map_region: str = "unknown"
+    route_phase: str = "unknown"
+    detection_timestamp: float | None = None
+    detection_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    recommended_step_id: str | None = None
+    focused_step_id: str | None = None
+    walkthrough_statuses: dict[str, str] = Field(default_factory=dict)
+    walkthrough_outcomes: dict[str, str] = Field(default_factory=dict)
+    roster: list[PartyMember] = Field(default_factory=list)
+    story_outcomes: list[str] = Field(default_factory=list)
+    equipped_by_member: dict[str, list[str]] = Field(default_factory=dict)
+    equipment_ownership_known: bool = False
+    visual_memory_summary: str | None = None
+    visual_memory_timestamp: float | None = None
+    visual_memory_completion_step_ids: list[str] = Field(default_factory=list)
+
+
 class ChatRequest(BaseModel):
     message: str
     checkpoint_id: str
     party: list[PartyMember] = Field(default_factory=list)
     completed_checkpoint_ids: list[str] = Field(default_factory=list)
+    walkthrough_step_id: str | None = None
     screenshot_context: str | None = None
+    image_base64: str | None = None  # optional BG3 screenshot for the vision model
+    screenshot_timestamp: float | None = None
+    context: ChatContextSnapshot | None = None
 
 
 class ChatResponse(BaseModel):
@@ -141,10 +183,17 @@ class ScreenCandidate(BaseModel):
     reason: str
 
 
+class VisualCompletionCandidate(BaseModel):
+    step_id: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    reason: str
+
+
 class VisionResult(BaseModel):
     screen_summary: str
     detected: ScreenDetected = Field(default_factory=ScreenDetected)
     candidates: list[ScreenCandidate] = Field(default_factory=list)
+    completion_candidates: list[VisualCompletionCandidate] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
 
 
@@ -154,6 +203,7 @@ class AnalysisResponse(BaseModel):
     screen_summary: str = ""
     detected: ScreenDetected = Field(default_factory=ScreenDetected)
     candidates: list[ScreenCandidate] = Field(default_factory=list)
+    completion_candidates: list[VisualCompletionCandidate] = Field(default_factory=list)
     confidence: float = 0.0
     latency_ms: int = 0
     error: str | None = None
@@ -162,6 +212,44 @@ class AnalysisResponse(BaseModel):
 class HealthResponse(BaseModel):
     ok: bool
     service: str
+    pid: int
+    parent_pid: int
+    packaged: bool
+    walkthrough_count: int
+
+
+class TelemetryEvent(BaseModel):
+    sequence: int = Field(ge=1)
+    kind: str = Field(min_length=1, max_length=64)
+    emitted_at: float | None = None
+    actor: str | None = Field(default=None, max_length=256)
+    target: str | None = Field(default=None, max_length=256)
+    combat_id: str | None = Field(default=None, max_length=256)
+    payload: dict[str, str] = Field(default_factory=dict)
+
+
+class TelemetrySnapshot(BaseModel):
+    schema_version: int
+    producer_id: str
+    producer_version: str
+    session_id: str
+    written_at: float | None = None
+    sequence: int = Field(ge=0)
+    events: list[TelemetryEvent] = Field(default_factory=list, max_length=128)
+
+
+class TelemetryStatus(BaseModel):
+    ok: bool = True
+    available: bool = False
+    active: bool = False
+    stale: bool = False
+    mode: str = "vanilla"
+    message: str = "Vanilla mode • no telemetry mod required"
+    producer_version: str | None = None
+    session_id: str | None = None
+    last_sequence: int = 0
+    age_seconds: float | None = None
+    events: list[TelemetryEvent] = Field(default_factory=list)
 
 
 class PlayerPosition(BaseModel):
@@ -189,16 +277,27 @@ class MapPartyMember(CamelModel):
     name: str
     level: int = Field(ge=1, le=12)
     build_id: str | None = None
+    prepared_tags: list[str] = Field(default_factory=list)
+    class_name: str | None = None
+    status: Literal["active", "camp", "unrecruited", "unavailable", "dead", "departed"] = "active"
+    role_override: str | None = None
+    is_custom: bool = False
 
 
 class RunState(CamelModel):
     """Shared web-map run progress and party-owned equipment state."""
 
-    equipped: list[str] = Field(default_factory=list)  # legacy/global item keys
     equipped_by_member: dict[str, list[str]] = Field(default_factory=dict)
     builds: list[str] = Field(default_factory=list)  # active build ids
     done: list[str] = Field(default_factory=list)  # completed fight marker ids
+    walkthrough_statuses: dict[str, str] = Field(default_factory=dict)
+    # step id → the decision option that actually happened in this run
+    walkthrough_outcomes: dict[str, str] = Field(default_factory=dict)
+    focused_walkthrough_step_id: str | None = None
     party: list[MapPartyMember] = Field(default_factory=list)
+    roster: list[MapPartyMember] = Field(default_factory=list)
+    story_outcomes: list[str] = Field(default_factory=list)
+    include_camp_plans: bool = False
 
 
 class RunStateResponse(RunState):
@@ -237,6 +336,9 @@ class Marker(CamelModel):
     slot: str | None = None
     priority: str | None = None
     why: str | None = None
+    effect: str | None = None  # what the item does (bg3.wiki lead)
+    acquire_detail: str | None = None  # wiki "where to find" specifics
+    wiki: str | None = None  # canonical bg3.wiki page URL
 
 
 class TimedEvent(CamelModel):
@@ -248,6 +350,73 @@ class TimedEvent(CamelModel):
     consequence: str
     severity: str  # critical | high | moderate | low
     source: str
+
+
+class DecisionOption(CamelModel):
+    label: str
+    benefits: list[str] = Field(default_factory=list)
+    costs: list[str] = Field(default_factory=list)
+
+
+class WalkthroughDecision(CamelModel):
+    prompt: str
+    recommended: DecisionOption
+    alternatives: list[DecisionOption] = Field(default_factory=list)
+    reversible: bool = False
+    authority: str = "guide_fact"
+
+
+class IncidentProtocol(CamelModel):
+    trigger: str
+    safe_actions: list[str] = Field(default_factory=list)
+    never: str
+    escape: str
+    honor_delta: str = ""
+    post_fight: list[str] = Field(default_factory=list)
+    authority: str = "assistant_suggestion"
+    source_url: str = ""
+
+
+class RiskReward(CamelModel):
+    reward: str
+    risk: str
+    skip_cost: str
+    return_by: str
+
+
+class WalkthroughDependency(CamelModel):
+    step_id: str
+    kind: Literal["completion_required", "resolution_required", "outcome_required", "warning_only"] = "resolution_required"
+    reason: str
+    required_outcome: str | None = None
+
+
+class WalkthroughStep(CamelModel):
+    id: str
+    order: int
+    phase: str
+    phase_order: int
+    title: str
+    kind: str  # exploration | dialogue | pickup | mini_fight | major_fight | gate
+    importance: str  # required | recommended | optional
+    region: str
+    area: str
+    minimum_level: int = Field(ge=1, le=12)
+    summary: str
+    avoid: str = ""
+    why: str = ""
+    rewards: list[str] = Field(default_factory=list)
+    completion_checks: list[str] = Field(default_factory=list)
+    prerequisites: list[str] = Field(default_factory=list)
+    dependencies: list[WalkthroughDependency] = Field(default_factory=list)
+    checkpoint_id: str | None = None
+    marker_id: str | None = None
+    decision: WalkthroughDecision | None = None
+    incident: IncidentProtocol | None = None
+    risk_reward: RiskReward | None = None
+    authority: str = "assistant_suggestion"
+    source_label: str
+    source_url: str
 
 
 class MapTilesStart(CamelModel):
@@ -270,6 +439,7 @@ class ActOneMap(CamelModel):
     regions: list[str]
     builds: list[BuildSummary]
     timed_events: list[TimedEvent]
+    walkthrough: list[WalkthroughStep]
     mapgenie_url: str
     mapgenie: MapTiles
     coordinate_note: str

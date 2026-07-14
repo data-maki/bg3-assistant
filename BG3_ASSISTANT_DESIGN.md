@@ -12,6 +12,19 @@ The assistant should not behave like a general BG3 chatbot that happens to float
 
 The route is the source of truth. Vision suggests where the player is and what is visible; the player confirms progress. Chat explains the current checkpoint using the guide and saved run state.
 
+Competitive-overlay research reinforces that the pet should become phase-aware rather than grow into a dashboard. See [`COMPETITIVE_OVERLAY_RESEARCH.md`](COMPETITIVE_OVERLAY_RESEARCH.md) for the Hearthstone, Valorant, Dota, and League comparison and the recommended `explore → preflight → dialogue/combat → recover` interaction model.
+
+The implemented route model separates three concepts that must never be conflated:
+
+```text
+Reviewed recommendation ──┐
+Player-selected focus ─────┼──> current phase card
+Manual Done/Skip ledger ───┘          |
+                                      +──> Archive -> Revisit
+```
+
+The recommendation is always recoverable, but never forces the player's open-world choice. Only unresolved work is active; resolved work is archived rather than faded in place.
+
 ## Architecture options
 
 ### Option A — Checklist-only overlay (simplest)
@@ -27,8 +40,9 @@ This is fast and dependable. It cannot recognize where the player is, tailor adv
 ```text
 Curated guide data -----------+
 Player run/party state -------+--> Route engine --> Pet + planner
-2-second screen/map detector --+         |
-Optional deeper vision --------+         |
+Optional 30-second capture ----+         |
+  |-- visual evidence memory --+         |
+  +-- local map alignment -----+         |
                                          +--> Grounded chat
 ```
 
@@ -53,7 +67,7 @@ Pet motion is user-invoked and follows the Codex v2 atlas contract. Hovering dir
 
 The expanded planner is one system glass surface, not a stack of custom cards. Native material remains the behavioral foundation, but its visual vocabulary should belong beside BG3: translucent umber rather than cool gray, a restrained bronze/gold double hairline, parchment text, compact serif display headings, and red used only for lethal state. Do not copy or redistribute BG3 artwork. Standard inputs remain native; navigation chrome may use a lightweight game-aligned treatment where a stock segmented control visibly clashes. Header and navigation chrome stay intrinsic-height, and the planner uses tab-specific content envelopes rather than a single oversized fixed frame.
 
-The collapsed state is a horizontal tooltip, not a portrait dashboard. It defaults to the middle-right edge, grows inward when expanded, and leaves the top-right minimap and bottom hotbar bands clear. It retains the full interaction contract—next checkpoint, level/danger, one `AVOID`, and Details/Ask/Done—in roughly one tooltip-sized glance.
+The collapsed state is a horizontal tooltip, not a portrait dashboard. It defaults to the middle-right edge, grows inward when expanded, and leaves the top-right minimap and bottom hotbar bands clear. It retains the full interaction contract—next walkthrough step, level/danger, one `AVOID`, and Plan/Dialogue/Ask/Done—in roughly one tooltip-sized glance.
 
 ### 2. Peek card — one decision, not a dashboard
 
@@ -68,7 +82,8 @@ The collapsed state is a horizontal tooltip, not a portrait dashboard. It defaul
                                       │       │ NEXT: Harpy beach      │ │
                                       │       │ Reach level 4 first     │ │
                                       │       │ ! Save Mirkon           │ │
-                                      │       │ [Open plan] [Ask]       │ │
+                                      │       │ [Plan] [Dialogue]      │ │
+                                      │       │ [Ask]  [Done]          │ │
                                       │       └────────────────────────┘ │
                                       └──────────────────────────────────┘
 ```
@@ -78,7 +93,7 @@ The peek card shows only:
 - current or next checkpoint;
 - minimum/recommended level status;
 - the single most important warning;
-- `Open plan`, `Ask`, and `Check screen` actions.
+- `Plan`, `Dialogue`, `Ask`, and `Done` actions. Dialogue opens the current or upcoming conversation protocol without removing it from the unified route.
 
 ### 3. Planner — the main assistant surface
 
@@ -133,6 +148,8 @@ Show a five-part preflight:
 3. **Legendary action** — short plain-language explanation and trigger.
 4. **Preparation** — spells, consumables, positioning, and escape plan.
 5. **Completion condition** — important bargains, non-lethal outcomes, or rewards.
+
+High-value permanent powers and equipment chains are first-class steps rather than prose buried inside an area: permanent Shovel, the Necromancy of Thay reader decision, Mourning Frost components, the one-choice Sussur forge, and the Blood of Lathander crest path. The compact card exposes only a `POWER` line; ownership, tradeoffs, and exact completion proof remain behind the step detail.
 
 The player can press `Ready` to pin a combat-sized version of the card.
 
@@ -261,18 +278,37 @@ The first functional map surface is a localhost web app served by the existing b
 
 The map keeps two party jobs separate. **Party** shows one current-level action per named character using that member's own level and reviewed build. **Equipment** shows only the selected act's gear, grouped and checked independently per character, with item-to-map handoff. Native party state is authoritative; the web run state persists the same member IDs so shared build items do not collapse into an anonymous global checklist.
 
+A selectable reviewed build must have a complete current-act fallback loadout independent of its final best-in-slot list. For Act 1 this means reviewed recommendations and acquisition locations for head, chest, hands, feet, amulet, rings, ranged, and any build-defining main/off-hand setup. Later-act core pieces remain upgrades in their own act; they cannot leave the current-act Equipment view empty.
+
 The local map must work without MapGenie being embedded. Each marker stores BG3 world coordinates, region, minimum recommended level, encounter/item type, build IDs, and source. Wilderness markers are plotted on a coordinate grid now; later map-image calibration can replace the neutral background without changing the data model.
 
-The app samples the BG3 window approximately every two seconds. The frequent path must be a lightweight local classifier that answers only whether the BG3 map is open and, when practical, which stable map transform is visible. It must not send every frame to an LLM.
+Automatic capture is optional, persisted, and disabled by default. When the player enables **Visual Memory**, the app samples one BG3 frame approximately every 30 seconds and sends only that frame to the configured screenshot-analysis provider. When the player enables **Map overlay**, the same sample is reused by the lightweight local map matcher. Enabling both features must still produce one capture, not parallel loops.
 
 When the map is detected, the app overlays the current route destination and relevant nearby guide locations using stored world coordinates. Coordinate records must identify the map/region they belong to because Act 1 includes separate surfaces such as the Wilderness, Underdark, Grymforge, and Mountain Pass. The overlay must calibrate world coordinates to screen pixels from stable map bounds or anchors; hard-coded screen pixels are not acceptable because resolution, UI scale, zoom, and panning vary.
 
 **Implemented calibration (2026-07-12).** The in-game map and MapGenie's Wilderness tiles use matching artwork, so the backend registers each map screenshot against a locally cached z12 tile mosaic with ORB feature matching and a RANSAC similarity fit (`backend/app/map_align.py`, `POST /api/map-align`). Synthetic screenshot tests verify recovered transforms and target projection at 0.55×–3.5× zoom, and a live non-map BG3 capture verifies false-positive rejection. A positive live BG3 map-frame check still requires the player to open a loaded-save map. The matcher runs locally with no LLM call, and its inlier count is the authoritative map-open detector; the OCR classifier remains as a fallback when the backend is down. A successful alignment also publishes an approximate live player position (the aligned view centre) to `GET/POST /api/position`, which the companion web map polls to render a beacon with follow mode. Guide markers carry MapGenie lat/lng resolved from MapGenie's location data, so the companion map, overlay, and alignment mosaic share one coordinate system. Tiles are hot-linked or cached at runtime (`backend/runs/map_cache/`, gitignored) — MapGenie assets are not redistributed.
 
 ```text
-BG3 window screenshot (2 sec)
+BG3 window screenshot (optional, 30 sec)
           |
-          v
+          +------------------------------+
+          |                              |
+          v                              v
+Visual Memory analysis          POST /api/map-align
+evidence + completion hints      local ORB match vs mosaic
+          |                              |
+          v                       inliers >= 20?
+Player reviews -> Done                    |
+changes progress                         yes
+                                         v
+                             transform -> markers + position
+```
+
+The evidence ledger is bounded, timestamped, and deduplicated. It may remember the likely activity, visible context, and directly evidenced completion candidates. A completion hint opens the matching step for review; it never changes the walkthrough ledger itself. Location alone, an empty battlefield, or simply appearing later in the route is not completion evidence.
+
+The local map path remains:
+
+```text
 POST /api/map-align (local ORB match vs MapGenie mosaic)
           |
    inliers >= 20? ---- no ----> hide overlay (map closed)
@@ -285,7 +321,7 @@ similarity transform -> targets in screen px + player position
 Transparent click-through markers   /api/position -> web map beacon
 ```
 
-Deeper screenshot analysis remains user-triggered via `Check screen` or chat. It should try to identify:
+Screenshot analysis runs either through the explicit `Check screen` action or the opt-in 30-second Visual Memory schedule. It should try to identify:
 
 - likely area or encounter;
 - combat vs exploration vs dialogue vs level-up screen;
@@ -294,9 +330,11 @@ Deeper screenshot analysis remains user-triggered via `Check screen` or chat. It
 - active dialogue choice or warning;
 - confidence and evidence.
 
-It should return checkpoint candidates, not a definitive location. If confidence is low, ask the player to choose from two or three nearby route points. A screenshot must never automatically complete an objective.
+It should return checkpoint candidates, not a definitive location. If confidence is low, ask the player to choose from two or three nearby route points. It may log a completion candidate only when direct visible evidence matches the reviewed completion check. A screenshot must never automatically complete an objective.
 
-Continuous screenshot sampling is in scope for map detection. Continuous cloud/LLM vision is not: only the local map detector runs on the two-second loop, and sampled frames should remain in memory unless debug capture is explicitly enabled.
+No capture schedule runs by default. The only automatic schedule is the explicit 30-second Visual Memory/Map overlay preference. Screenshots remain in memory unless debug capture is explicitly enabled; the persisted visual memory stores compact text evidence, not image bytes.
+
+Screen-capture permission uses a three-signal model: raw `CGPreflightScreenCaptureAccess`, an explicit TCC request from the consent sheet, and a successful real pixel capture. `SCShareableContent` metadata enumeration is never authorization. The signed app includes `NSScreenCaptureUsageDescription` and a permanent bundle ID. Startup does not request permission while capture features are off; enabling a feature or choosing a manual capture action presents the explanation, whose Continue button invokes the system request synchronously. Existing grants never see that prompt. Background refreshes only recheck, generic stream failures are reconciled with a tiny local screenshot, and `capturesAudio`/microphone capture remain disabled.
 
 ## Progress and safety model
 
@@ -337,12 +375,12 @@ Replace:
 - Curated Act 1 route and fight cards from `Act 1 - fights` and `Act 1 - Notes`.
 - Manual run progress and party level/class setup.
 - Pre-fight pinned card.
-- Local persistence.
+- One local SQLite authority shared by the native overlay and localhost map, with full run snapshots, bounded revisions, settings, and one-time legacy JSON migration.
 
 ### Phase 2 — contextual assistance
 
 - Click-open guide-grounded chat.
-- User-triggered screenshot classification.
+- User-triggered screenshot classification plus default-off 30-second Visual Memory.
 - Suggested current checkpoint with explicit confirmation.
 - Party-aware readiness checks.
 
@@ -355,11 +393,27 @@ Replace:
 
 ## Explicit non-goals for Act 1 MVP
 
-- No memory reading, mod injection, combat automation, general gameplay input control, or save manipulation. Only an explicit external Computer Use session may click/type, and only inside the open BG3 custom-marker flow.
-- No continuously streaming screenshots to a remote vision service.
+- Vanilla mode performs no memory reading, mod injection, combat automation, general gameplay input control, or save manipulation. An optional separately installed read-only telemetry integration may publish structured local events, but the companion must remain complete without it, label the game as modded, and never mutate game state or silently complete route progress. Only an explicit external Computer Use session may click/type, and only inside the open BG3 custom-marker flow.
+- No default or high-frequency screenshot stream. Visual Memory is an explicit, default-off 30-second sample to the configured provider.
 - No claim that every quest, item, or inspiration is covered.
 - No automatic progress changes from uncertain screen recognition.
 - No free-form LLM route generation.
+
+## Optional telemetry boundary
+
+The companion has one product and one persisted run model, not a separate mod edition:
+
+```text
+Clean run:  BG3 -> local capture + player confirmation -> shared overlay
+Modded run: BG3 -> read-only event bridge -> local JSON -> shared overlay
+                         absent / stale / invalid -> Vanilla fallback
+```
+
+- Vanilla is the default, complete path.
+- Live Events is explicitly enabled and labeled as modded.
+- The backend treats the snapshot as bounded, untrusted advisory input.
+- Events may alter transient wording only; they never mutate party, equipment, route, or completion state.
+- The bridge subscribes to documented events and writes one local snapshot. It makes no Osiris mutation calls, performs no game input, and reads no saves.
 
 ## First implementation slice
 

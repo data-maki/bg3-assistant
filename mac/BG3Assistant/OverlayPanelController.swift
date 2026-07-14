@@ -1,6 +1,16 @@
 import AppKit
 import SwiftUI
 
+/// A borderless panel that can still take keyboard focus. `NSPanel` returns
+/// `canBecomeKey == false` for borderless styles by default, which silently
+/// blocks every text field in the overlay (you can't type in chat). Combined
+/// with `.nonactivatingPanel` + `becomesKeyOnlyIfNeeded`, this lets a clicked
+/// text field become first responder without stealing activation from BG3.
+private final class KeyableOverlayPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { false }
+}
+
 /// A transparent zone that moves the whole overlay window when dragged. Placed
 /// behind non-interactive content (pet, grip, status text) so the collapsed
 /// card is draggable everywhere that is not a button.
@@ -46,14 +56,19 @@ final class OverlayPanelController {
     func show(appState: AppState, gameFrame: CGRect?) {
         let reference = gameFrame ?? NSScreen.main?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
         lastReference = reference
-        let targetSize = OverlayMetrics.panelSize(expanded: appState.overlayExpanded, reference: reference, tab: appState.plannerTab)
+        let targetSize = OverlayMetrics.panelSize(
+            expanded: appState.overlayExpanded,
+            reference: reference,
+            tab: appState.plannerTab,
+            density: appState.effectiveOverlayDensity
+        )
         let persistedAnchor = savedAnchor()
 
         if panel == nil {
             let rootView = OverlayView()
                 .environmentObject(appState)
             let hostingController = NSHostingController(rootView: rootView)
-            let newPanel = NSPanel(
+            let newPanel = KeyableOverlayPanel(
                 contentRect: NSRect(origin: .zero, size: targetSize),
                 styleMask: [.borderless, .nonactivatingPanel],
                 backing: .buffered,
