@@ -1,70 +1,77 @@
 # Learnings
 
-## 2026-07-13
+Durable product and environment facts only. Incident archaeology purged 2026-07-13; if a rule is still true, it lives here once.
 
-- GitHub SSH and API authorization are independent. This machine's SSH key could read and push `data-maki/bg3-assistant` while the fine-grained CLI token and connected GitHub app both returned 404; refreshing the CLI's repository scope restored PR and merge operations without changing the working SSH remote.
-- BG3-native custom markers can become the durable navigation layer. The existing local screenshot alignment remains valuable, but primarily as a one-shot coordinate transform and placement verifier rather than as the only continuously projected surface.
-- Computer Use is an external operator, not a runtime dependency the signed companion can silently embed. Keep the native app input-free: export and activate a deterministic queue, let the explicit operator place only those pins, then require screenshot evidence plus manual fingerprint confirmation before clearing the temporary overlay.
-- A survival planner should be task-first, not filter-first. Party level, selected builds, completion, and current travel phase should generate a small recommended pursuit list automatically; category filters remain secondary tools for adding optional challenges. Separate map identity (`Wilderness`, `Underdark`, `Grymforge`, etc.) from semantic region so markers never appear on the wrong raster and Acts 2–3 can add maps without rewriting planner state.
-- Level-up execution and equipment acquisition are different player jobs. Keep current-level class choices and tactics in Party, put act-scoped gear/location tracking in Equipment, and preserve member identity in the web state so a four-build party never becomes an anonymous list of build cards.
+## Product invariants
 
-- `NSApp.currentEvent` inside a deferred `didMove` observer is not a reliable way to identify a user drag. Compare the resulting frame to the controller's known programmatic target instead: matching movement is layout work; any different origin is user-authored and should be persisted. This also covers AppKit's `isMovableByWindowBackground` path outside explicit SwiftUI drag handles.
+- Honor Mode assistance is a deterministic route/checkpoint engine. Vision and chat identify context and explain; they must not invent the route or silently advance irreversible steps.
+- Collapsed pet shows one verdict and one blocker; expanded planner is reference depth. Prefer phase-specific relevance over persistent information density.
+- Competitive-overlay lesson: highlight decisions and offer choices; do not remove or dictate the decision.
+- Honor Mode guidance must pass a strict value test: encounter-specific, non-obvious, consequential, and actionable. Routine healing, resting, initiative cleanup, ordinary hazard avoidance, and generic looting caution are assumed player competence and should not occupy the overlay.
+- Dialogue, evidence gates, fights, and pickups share one progression contract: prerequisites, minimum level, player-confirmed completion, explicit consequences, compact incident protocol. Dialogue is route state, not background notes.
+- Route order, level safety, and story eligibility are separate. Recommend only steps whose evidence and branch prerequisites are satisfied; a focused blocked step must name the blocker.
+- `PICKUP`/`EXPLORE` stay pickup/explore. Only dialogue/decision steps and fight-opening conversations render as `TALK`.
+- Party level drives an activity ladder: safe XP, next core challenge, level gate, and first-class dialogue outcomes—not one fight card.
+- Level-aware recommendations stay inside contiguous travel phases (Nautiloid/surface → Underdark → Grymforge → Crèche); do not bounce a higher-level party back out of region.
+- Separate map identity (`Wilderness`, `Underdark`, …) from semantic region so markers never land on the wrong raster.
+- Survival planner is task-first: party level, builds, completion, and travel phase generate a small pursuit list; category filters are secondary.
+- Level-up execution and equipment acquisition are different jobs: current-level choices in Party; act-scoped gear/location in Equipment; preserve member identity so a four-build party is never anonymous build IDs.
+- Honor-run party state is a full persistent roster plus an active-party projection capped at four. Readiness uses only active members; camp/dead/departed/unrecruited keep builds and loadouts.
+- A selected reviewed build is assumed setup at that level (choices, tactics, listed gear). Free-form capability tags are only for deviations.
+- Every selectable build needs a tested current-act interim loadout even when defining items arrive later. Endgame or post-respec pieces never stand in for Act 1 slots.
+- Keep app-ready builds, Act-1-only reviewed builds, and source-only research in separate statuses; only the first two belong in the player picker.
+- Build selectors contain only playable character plans. Item packages (e.g. Shadow Blade) and known non-Honor progressions (e.g. Lockadin) stay out.
+- Keep each referenced build as its own versioned plan; similar names must not be blended.
+- Expose all reviewed gear to party/equipment UI; keep `/api/act1/markers` explicitly Act 1-only.
+- MapGenie is a live reference and handoff, not an asset to clone. Own a local auditable marker dataset.
+- Local ORB/RANSAC artwork registration is authoritative for marker projection; region bounds are interior/offline fallback only.
+- Two-second screenshot loop uses a cheap local map-open detector; LLM vision stays on-demand.
+- Grounded chat needs a deterministic context snapshot: route eligibility, focus, active roster, inactive outcomes, current build steps, relevant equipment, authority labels—not just checkpoint ID plus four party rows.
+- Decision guidance states recommended choice, what it preserves, what it sacrifices, and reversibility.
+- The vanilla ScreenCaptureKit/manual route is the product baseline. Optional telemetry is still a mod: disclose install, achievements, save metadata, patch compatibility, and trust independently.
+- Structured telemetry can update transient context; encounter completion stays player-confirmed.
+- Official Mod.io publication is Toolkit-originated and PC-only. Script Extender JSON file transport is third-party unless redesigned. Valid `.pak` ≠ Script Extender compatibility with the current patch.
+- Computer Use / external operators must not be silently embedded. Native app stays input-free: export a deterministic queue, let an explicit operator place pins, then require screenshot evidence plus manual confirmation.
+- BG3-native custom markers are the durable navigation layer; local screenshot alignment is one-shot transform/placement verification.
 
-- `data/build_gear.tsv` already carries reviewed rows for Acts 1, 2, and 3, but `backend/app/route_data.py::load_gear()` currently filters the payload to Act 1. Build guidance and map marker scope therefore need separate filters: expose all reviewed gear to the party UI, while keeping `/api/act1/markers` explicitly Act 1-only.
+## Overlay / capture / packaging
 
-- A valid v2 pet atlas is not enough; playback is part of the product contract. Pause the timeline on the neutral frame outside hover, preserve authored row durations for the hover reaction, and map pointer angle clockwise into rows 9-10 rather than cycling every column indiscriminately. Keep sprite interaction outside drag-handle overlays so the nonactivating panel can receive hover events.
-- Overlay visibility is a process-ownership invariant, not only a view-state invariant. Verification and extracted release copies can share the same bundle ID while AppKit still launches separate processes; acquire a per-user OS lock before SwiftUI starts, activate the owner on contention, and retire legacy copies before creating any panel or backend.
-## 2026-07-12
+- Separate material behavior from visual identity: native Liquid Glass underneath restrained BG3 cues (umber, bronze/gold, parchment, serif, tooltip geometry)—no copied assets.
+- One adaptive outer glass surface; separators for rows; tinted fills only for safety-critical state. Collapsed form is a low horizontal middle-right tooltip (~304×128), not a tall pet card.
+- Party setup optimizes four parallel decisions (companion, level, build, NOW→NEXT), not four editable character documents.
+- Overlay position: read normalized anchor before layout changes; never persist programmatic resize/reference frames; compare resulting frame to programmatic target to detect user drags; migrate behavior-changing defaults once.
+- Pet atlas: pause on neutral outside hover; preserve authored hover durations; map pointer angle into look rows; keep sprite interaction outside drag-handle overlays.
+- Overlay visibility is process ownership: per-user OS lock before SwiftUI starts; activate owner on contention; retire legacy copies before panel/backend creation.
+- Control-window and menu-bar scenes can enter the same async startup concurrently. A synchronous `isStarting` latch is required in addition to the cross-process lock.
+- Detect BG3 via `com.larian.bg3` / explicit Baldur’s Gate names—never a generic `bg3` substring that matches the assistant.
+- Capture the largest matching visible Larian window (auxiliary thin strips exist); capture 1:1 at reported pixel size—do not force 2×.
+- Enumerate off-screen/other-Space windows. `CGPreflightScreenCaptureAccess` is only a raw TCC hint; missing/minimized BG3 is capture health, not “permission denied.” Include `NSScreenCaptureUsageDescription`, offer a first-launch consent sheet when the hint is missing, and invoke the TCC request synchronously from its Continue button. Background refreshes never prompt, and successful pixel capture is authoritative.
+- Borderless `NSPanel` needs `canBecomeKey` overridden or overlay text fields never receive keyboard focus.
+- Distributable shell embeds FastAPI + guide/static assets; repo/`uv` are dev fallbacks. Frozen state and secrets live in Application Support (`…/BG3HonorAssistant/backend/.env`), never in the signed bundle.
+- Backend lifecycle needs executable path and parent PID. Port 8787 and `/health` alone are insufficient: orphaned packaged backends can serve stale payloads. Startup retires matching packaged backends before health; release verification also checks a new schema field or embedded content hash. Quit via normal app lifecycle for smoke tests.
+- `Settings.runs_dir` is shared across ports; mutating browser QA needs an isolated runs directory.
+- Apple Development signing ≠ Developer ID / notarization for public distribution. This machine currently lacks a Developer ID Application identity.
+- Rebuild-in-place does not update a running process; verify UI after explicit restart with new GUI PID owning the backend.
+- The first working local build used `com.local.BG3HonorAssistant`; the release uses `com.datamaki.BG3HonorAssistant`. TCC grants do not migrate across that identity change, so one new approval is required. Run that approval from `/Applications`, then keep the bundle ID, signing certificate, and installed path stable.
 
-- A game overlay should separate material behavior from visual identity. Keep native Liquid Glass for responsiveness and accessibility, then add only the host game's repeated low-level cues—umber tint, bronze/gold hairlines, parchment hierarchy, serif display text, and tooltip geometry—without copying assets.
-- For BG3, a 304×128 horizontal tooltip at the middle-right reads as native and avoids both minimap and hotbar better than a narrow 276px-tall pet card. Assigned party builds need one-line `NOW → NEXT` summaries so all four selectors remain visible together.
-- Native Liquid Glass works best here as one adaptive outer surface with standard controls, not as a glass card for every section. Give Current, Party, Route, and Chat separate height envelopes, use separators for character rows, and reserve tinted fills for safety-critical state.
-- Party setup should optimize for four parallel decisions, not four editable character documents. Showing companion, level, build, and current/next steps for all slots at once is materially faster than exposing class strings, capability tags, full levels, and gear inline.
-- A default overlay coordinate is insufficient if panel creation can persist a transient hosting-controller frame first. Read the normalized anchor before any layout change, never save programmatic resize/reference-transition frames, reapply the original anchor against the final reference, clamp it, and migrate behavior-changing defaults once.
-- A low-obstruction overlay needs visual and accessibility acceptance together. Root-level accessibility labels can mask child actions, and an unconstrained `Color.clear` drag area can consume remaining height even when all useful content is compact.
-- The current keychain contains Apple Development and Apple Distribution identities, but no `Developer ID Application` identity. Apple Distribution is not a substitute for direct-download Developer ID signing and notarization.
-- Long-running product goals must be rewritten as the evidence changes. A continuation prompt should state what is already proved, what must not regress, and the smallest remaining acceptance gaps; otherwise an agent will interpret a stale build brief as permission to start over.
-- macOS Screen Recording authorization and capture health are distinct signals. `CGPreflightScreenCaptureAccess` should drive the permission row; a missing, minimized, or temporarily uncapturable BG3 window should only affect capture diagnostics and must not relabel permission as denied.
-- `SCShareableContent` must enumerate off-screen windows for BG3 because fullscreen games commonly occupy another macOS Space. A manual capture button is a troubleshooting action, not a prerequisite for the automatic loop.
-- The existing macOS overlay, ScreenCaptureKit capture path, local FastAPI process manager, and click-to-expand panel were reusable for a BG3 assistant; legacy detection, prompts, response models, launch URL, and turn-recording concepts were not.
-- An Honor Mode guide should be encoded as deterministic route/checkpoint data. Vision and chat can identify context and explain a checkpoint, but should not invent the route or silently advance irreversible steps.
-- Honor Mode assistance needs a low-obstruction pet state for ambient warnings plus a larger click-open planner/chat state; treating every screenshot as an open-ended vision request would be slower, noisier, and less reliable.
-- The shared spreadsheet URL's numeric `gid` exports the inspiration tab even though the browser opens with `Act 1 - fights` selected. Import guide data by stable sheet title (`Act 1 - fights`, `Act 1 - Notes`, `Tips and tricks`, `Great builds`) rather than trusting the supplied `gid`.
-- The BG3 map overlay requires region-aware world coordinates plus runtime map calibration; coordinates alone cannot be mapped to pixels reliably across panning, zoom, resolution, and UI scale.
-- The requested two-second screenshot loop should use a cheap local map-open detector. LLM vision remains on-demand so the loop is responsive, private, and affordable.
-- Build guidance must keep each referenced build as a separate, versioned plan. Similar names such as Swords Bard Archer, Smite Swords Bard, and Control Martial Bard are incompatible progressions and must not be blended into one recommendation.
-- Every build plan needs level-by-level choices plus an Act/region/location equipment path before implementation; end-state class splits alone are not actionable enough for Honor Mode readiness checks.
-- Keep sparse or incompatible source material explicit: the Act 1 EIP archer page is too sparse for attribution, Shadow Blade is an equipment package, and the published 7/5 Lockadin extra-attack payoff does not work in Honor Mode.
-- Spreadsheet storage density is not the usability goal: each playable build needs its own self-contained tab so a player can scan the overview, current level, next level, and equipment route without filtering a combined dataset.
-- Verify live Google Sheets edits twice: CSV export for row/column integrity and XLSX rendering for formatting and readability.
-- When batch-creating Google Sheets tabs through the UI, verify expected sheet names from the exported workbook; visible tab position is not a reliable new-sheet identifier after the tab bar scrolls.
-- Plain-text spreadsheet payloads must not begin with `=`, `+`, `-`, or `@` unless they are intended formulas; reword player-facing text to avoid formula coercion.
-- Use MapGenie as a live reference and explicit handoff, not as an asset source to clone. The assistant should own a local, auditable Act 1 marker dataset so fight readiness and build-item filters keep working independently.
-- Build selectors should contain only actual playable character plans. Item packages belong inside equipment routes, and known non-Honor builds should be removed rather than left as disabled choices.
-- Human-readable build sheets need a class-composition card showing the level order and respec points before the detailed progression table.
-- When replacing a shorter Google Sheets build tab, overwrite a padded range rather than only the new used rows; otherwise stale gear remains below the new table.
-- The bundled spreadsheet renderer currently cannot load its signed `skia.node` native module on this Mac because the host process and module have different Team IDs; live Google Sheets verification remains the reliable fallback until that runtime is repaired.
-- BG3 is installed at `~/Library/Application Support/Steam/steamapps/common/Baldurs Gate 3/Baldur's Gate 3.app` and exposes a process/window name matching `Baldur's Gate 3`, so the native detector and Steam app ID 1086940 can be verified on this machine.
-- The installed Command Line Tools SDK exposes neither XCTest nor Swift Testing modules. Native model checks compile the production `BG3Models.swift` and `MapOpenDetector.swift` directly with a small executable smoke-test source, while `swift build` verifies the complete app.
-- BG3's Wilderness map artwork can be registered against the MapGenie tile mosaic with ORB features plus a RANSAC similarity fit. The recovered transform directly accounts for pan, zoom, capture resolution, and window size and is more accurate than coordinate-bound normalization.
-- Act 1 recommendations should be level-aware inside contiguous travel phases, not globally sorted only by difficulty: finish the Nautiloid and surface, then the Underdark, Grymforge, and Crèche so a higher-level player is not sent back out of the Underdark for the gith patrol.
-- A selected reviewed build is useful readiness evidence by itself. Its level choices, tactics, play pattern, and listed equipment should count as assumed setup; free-form capability tags are only needed for deviations and extras.
-- Party level needs to produce an activity ladder, not only a fight: show safe XP/mini encounters, the next core challenge, and the level gate together. Key dialogue outcomes should be first-class checkpoint data with source-kind labels instead of being buried in preparation notes.
-- BG3 can expose a thin auxiliary `com.larian.bg3` window before its main Metal surface. ScreenCaptureKit clients must select the largest matching visible window, and BG3's reported 2560×1440 frame is already its real capture size on this machine; forcing 2× creates padded pixels and breaks overlay back-projection.
-- A distributable native shell must embed the FastAPI runtime and guide/static assets; repo discovery and `uv` are development fallbacks only. Frozen backend state belongs in Application Support, never inside the signed app bundle.
-- Backend lifecycle verification needs executable path and parent-process evidence. A stale pre-rebrand app can bind the same port and make a correctly terminated packaged backend look orphaned.
-- Apple Development signing proves bundle integrity on the development machine but does not satisfy Gatekeeper for public distribution. The public build must require a stable bundle ID, Developer ID Application identity, notarization, stapling, and an assessment of the final app.
+## Environment / verification
 
-## 2026-06-01
+- Shell has `python3` / `uv run python`, not `python`. Portable tests: from `backend/`, `uv run --with pytest python -m pytest`. Prefer `uv run python` over system Python for backend imports.
+- After repository rename, recreate `.venv`—shebangs may still point at the old checkout path.
+- Native checks: Command Line Tools SDK has neither XCTest nor Swift Testing; compile production sources with `ModelTests/main.swift` per README; `swift build` from `mac/`.
+- BG3 install: `~/Library/Application Support/Steam/steamapps/common/Baldurs Gate 3/Baldur's Gate 3.app`; Steam app ID 1086940.
+- Apache-2.0 `oliver` is the macOS `.pak` build fallback; packaging and live event delivery are separate gates.
+- Spreadsheet/workbook work: prefer verified local XLSX when the visible Sheet is an anonymous read-only session; `artifact-tool` wants a sheet name string in `setActiveWorksheet`; prefer explicit `SEARCH`/`ISNUMBER` over wildcard `COUNTIF` in that renderer; never paste cells starting with `=+/ -@` unless intentional formulas. Import guide data by stable sheet title, not numeric `gid`.
+- GitHub SSH push and `gh`/app API authorization are independent; refresh CLI repo scope when SSH works but API returns 404.
+- Long-running goals must be rewritten as evidence changes: proved baseline, must-not-regress, smallest remaining acceptance gaps—never treat a stale build brief as permission to start over.
+- Do not claim remote Sheet updates, live map acceptance, or publishability without observable evidence from the packaged/live surface under test.
+- Automatic capture is a user-owned capability, not a baseline requirement. Default it off, share one serialized 30-second frame across enabled consumers, and keep vision evidence separate from player-confirmed route state.
+- `BG3_ASSISTANT_STATE_DIR` must derive the embedded backend's `RUNS_DIR`; isolating only `RunStore` leaves localhost QA able to touch the player's backend ledger.
+- LaunchServices does not inherit environment variables from a one-off shell process. For Computer Use QA, set the isolated state root with `launchctl setenv` before launching, then unset it during cleanup.
+# ScreenCaptureKit enumeration is not a permission probe
 
-- This repo started as a greenfield tree with only `goal.md`, `.env`, and `.gitignore`.
-- The local shell does not expose `python`; use `python3` or `uv run python`.
-- The current OpenAI API rejected the goal's suggested default `gpt-5.5-mini` with `model_not_found`, so the assistant defaults to the documented vision-capable `gpt-4.1-mini` unless `OPENAI_MODEL` is set.
-- The retired strategy-game prototype supplied reusable macOS overlay and capture infrastructure, but none of its game-specific process paths or product identity remain relevant to this repository.
-- The app can start its own development backend from the repository by finding `../backend` and running `uv run uvicorn app.main:app --host 127.0.0.1 --port 8787`.
-- macOS Screen Recording permission is tied to app identity and signature. The development bundle must keep a stable identifier so TCC does not treat each rebuild as a different client.
-- This machine has an `Apple Development: Jan Carbonell Llobet (4ZKRD8Y7K4)` code-signing identity, so the local BG3 app bundle should use it instead of ad-hoc signing for a more stable TCC identity.
-- `CGPreflightScreenCaptureAccess()` is only a hint. The app should treat a successful ScreenCaptureKit screenshot as authoritative and only show permission remediation when capture itself fails with a TCC/permission-style error.
-- `CGDisplayCreateImage` is obsolete in the current macOS SDK for screen capture; the assistant uses ScreenCaptureKit `SCScreenshotManager.captureImage` so capture behavior follows Apple's current Screen Recording permission path.
-- Auto-starting a ScreenCaptureKit workflow can trigger macOS's own TCC modal before the user explicitly asks for capture. The assistant should only auto-record after capture has already succeeded in the current launch.
-- Permission debugging needs to show persisted macOS grant and actual current-launch capture verification separately. A previous authorization can appear in `CGPreflightScreenCaptureAccess()` while ScreenCaptureKit still fails because of app identity, signing, path, or TCC state.
+On macOS 26, `SCShareableContent.excludingDesktopWindows` can return displays even when the signed app is absent from Privacy & Security → Screen & System Audio Recording. Apple documents `NSScreenCaptureUsageDescription` for ScreenCaptureKit. The tested automatic request did not create a manageable row, while later ScreenCaptureKit attempts were denied without prompting; an explicit consent sheet makes the request observable and user-initiated. An actual screenshot verifies the grant, and a stable bundle ID/code-sign identity keeps that row mapped to the shipping app.
+## 2026-07-14 — Keep deferred experiments out of the core release loop
+
+- The telemetry mod is future work, so its simulator, feed contract, package validation, and publication blockers must not run or appear as gates during vanilla overlay iterations.
+- Retaining experimental source does not imply retaining its tests in the default product suite; reintroduce them only with a separate mod milestone.

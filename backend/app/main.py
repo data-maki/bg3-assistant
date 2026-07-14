@@ -1,4 +1,6 @@
 import json
+import os
+import sys
 import time
 import uuid
 
@@ -8,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import guide_chat, stores
+from . import guide_chat, llm_chat, stores
 from .config import get_settings
 from .map_align import get_aligner
 from .map_data import load_act_one_map, overlay_targets
@@ -32,10 +34,13 @@ from .models import (
     ReadinessResponse,
     RunState,
     RunStateResponse,
+    TelemetryStatus,
 )
 from .paths import resource_root
-from .route_data import assess_readiness, checkpoint_by_id, load_builds, load_route
+from .route_data import GUIDE_VERSION, assess_readiness, checkpoint_by_id, load_builds, load_route
+from .walkthrough_data import load_walkthrough, walkthrough_by_id
 from .storage import create_run_dir, save_analysis, save_upload
+from .telemetry import read_telemetry_status
 from .vision import analyze_screenshot
 
 
@@ -65,7 +70,19 @@ async def revalidate_frontend_assets(request: Request, call_next):
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
-    return HealthResponse(ok=True, service="bg3-honor-assistant")
+    return HealthResponse(
+        ok=True,
+        service="bg3-honor-assistant",
+        pid=os.getpid(),
+        parent_pid=os.getppid(),
+        packaged=bool(getattr(sys, "frozen", False)),
+        walkthrough_count=len(load_walkthrough()),
+    )
+
+
+@app.get("/api/telemetry", response_model=TelemetryStatus)
+def telemetry_status() -> TelemetryStatus:
+    return read_telemetry_status()
 
 
 @app.get("/", include_in_schema=False)
@@ -105,9 +122,10 @@ def act_one_route() -> JSONResponse:
     # dumps by field name rather than by the camelCase web alias.
     return JSONResponse(
         content={
-            "guideVersion": "2026-07-12",
+            "guideVersion": GUIDE_VERSION,
             "checkpoints": [item.model_dump(mode="json") for item in load_route()],
             "builds": [item.model_dump(mode="json") for item in load_builds()],
+            "walkthrough": [item.model_dump(mode="json") for item in load_walkthrough()],
         }
     )
 
@@ -126,7 +144,11 @@ def chat(request: ChatRequest) -> ChatResponse:
         checkpoint = checkpoint_by_id(request.checkpoint_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Unknown checkpoint: {exc.args[0]}") from exc
-    return guide_chat.answer(checkpoint, request)
+    try:
+        walkthrough_step = walkthrough_by_id(request.walkthrough_step_id) if request.walkthrough_step_id else None
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown walkthrough step: {exc.args[0]}") from exc
+    return llm_chat.answer(checkpoint, request, walkthrough_step, get_settings())
 
 
 @app.get("/api/run-state", response_model=RunStateResponse)
@@ -248,13 +270,22 @@ async def analyze(image: UploadFile = File(...), context: str | None = Form(defa
     image_bytes = await image.read()
 
     try:
-        result = analyze_screenshot(image_bytes, image.content_type, context, settings, load_route())
+        result = await run_in_threadpool(
+            analyze_screenshot,
+            image_bytes,
+            image.content_type,
+            context,
+            settings,
+            load_route(),
+            load_walkthrough(),
+        )
         response = AnalysisResponse(
             ok=True,
             analysis_id=analysis_id,
             screen_summary=result.screen_summary,
             detected=result.detected,
             candidates=result.candidates,
+            completion_candidates=result.completion_candidates,
             confidence=result.confidence,
             latency_ms=int((time.perf_counter() - started) * 1000),
         )

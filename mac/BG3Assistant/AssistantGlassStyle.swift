@@ -15,6 +15,10 @@ enum BG3Theme {
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
+
+    static func dangerColor(_ danger: String) -> Color {
+        danger == "extreme" ? .red : danger == "high" ? .orange : danger == "medium" ? .yellow : .cyan
+    }
 }
 
 private struct BG3FrameOverlay: View {

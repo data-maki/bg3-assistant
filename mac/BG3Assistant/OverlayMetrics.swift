@@ -17,13 +17,16 @@ enum OverlayMetrics {
         return min(max(reference.height / 1000, 0.85), 1.45)
     }
 
-    static func collapsedSize(for reference: CGRect) -> CGSize {
+    static func collapsedSize(for reference: CGRect, density: OverlayDensity = .focus) -> CGSize {
         let s = scale(for: reference)
+        if density == .minimal {
+            return CGSize(width: 112, height: 86)
+        }
         // A BG3-style horizontal tooltip: wide enough for the checkpoint and
         // one warning, short enough to stay between minimap and hotbar. The
         // height fits the 64pt pet portrait plus the icon shortcut row.
         let width = min(max(310 * s, 288), 336)
-        let height = min(max(150 * s, 142), 158)
+        let height = density == .reference ? min(max(170 * s, 162), 182) : min(max(150 * s, 142), 158)
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
@@ -31,14 +34,14 @@ enum OverlayMetrics {
         let width = min(max(reference.width * 0.22, 420), 520)
         let height = switch tab {
         case .current: min(max(reference.height * 0.46, 500), 600)
-        case .party: min(max(reference.height * 0.58, 590), 680)
+        case .party, .loadout: min(max(reference.height * 0.58, 590), 680)
         case .route, .chat: min(max(reference.height * 0.54, 550), 640)
         }
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
-    static func panelSize(expanded: Bool, reference: CGRect, tab: PlannerTab = .current) -> CGSize {
-        expanded ? expandedSize(for: reference, tab: tab) : collapsedSize(for: reference)
+    static func panelSize(expanded: Bool, reference: CGRect, tab: PlannerTab = .current, density: OverlayDensity = .focus) -> CGSize {
+        expanded ? expandedSize(for: reference, tab: tab) : collapsedSize(for: reference, density: density)
     }
 
     static func origin(fromNormalizedAnchor anchor: CGPoint, panelSize: CGSize, reference: CGRect) -> CGPoint {

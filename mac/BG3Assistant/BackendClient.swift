@@ -23,17 +23,27 @@ struct BackendClient {
     }()
 
     func health() async -> Bool {
+        await healthDetails()?.ok == true
+    }
+
+    func healthDetails() async -> BackendHealth? {
         do {
             let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: "health"))
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return false }
-            return (try decoder.decode(HealthResponse.self, from: data)).ok
-        } catch { return false }
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+            return try decoder.decode(BackendHealth.self, from: data)
+        } catch { return nil }
     }
 
     func route() async throws -> RoutePayload {
         let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: "api/act1/route"))
         try validate(response)
         return try decoder.decode(RoutePayload.self, from: data)
+    }
+
+    func telemetry() async throws -> TelemetryStatus {
+        let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: "api/telemetry"))
+        try validate(response)
+        return try decoder.decode(TelemetryStatus.self, from: data)
     }
 
     func readiness(_ requestBody: ReadinessRequest) async throws -> ReadinessResponse {
@@ -93,5 +103,3 @@ struct BackendClient {
 
     private func append(_ string: String, to data: inout Data) { data.append(Data(string.utf8)) }
 }
-
-private struct HealthResponse: Decodable { let ok: Bool }

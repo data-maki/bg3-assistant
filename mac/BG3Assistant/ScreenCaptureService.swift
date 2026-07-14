@@ -9,7 +9,7 @@ struct ScreenshotResult {
     let height: Int
 }
 
-struct ScreenCaptureService {
+actor ScreenCaptureService {
     func captureBG3Window() async throws -> ScreenshotResult {
         let image = try await captureCGImage()
         let bitmap = NSBitmapImageRep(cgImage: image)

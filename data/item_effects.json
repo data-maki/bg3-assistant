@@ -1,0 +1,308 @@
+{
+  "adamantine-scale-mail": {
+    "acquire": "Forged from a Scale Mail Mould and Mithral Ore",
+    "effect": "Adamantine Scale Mail is a very rare Medium Armour that reduces all incoming damage by 1 and sends attackers Reeling. In addition, attacks cannot land Critical Hits on the user.",
+    "name": "Adamantine Scale Mail",
+    "wiki": "https://bg3.wiki/wiki/Adamantine_Scale_Mail"
+  },
+  "adamantine-splint-armour": {
+    "acquire": "Forged from a Splint Mould and Mithral Ore",
+    "effect": "Adamantine Splint Armour is a very rare Heavy Armour that reduces all incoming damage by 2 and sends attackers Reeling. In addition, attacks can't land critical hits on the wearer.",
+    "name": "Adamantine Splint Armour",
+    "wiki": "https://bg3.wiki/wiki/Adamantine_Splint_Armour"
+  },
+  "amulet-of-misty-step": {
+    "acquire": "In a Gilded chest next to the bed behind Polma in Gut's private chambers",
+    "effect": "Amulet of Misty Step is an uncommon amulet that grants its wearer the Misty Step spell on a short rest cooldown.",
+    "name": "Amulet of Misty Step",
+    "wiki": "https://bg3.wiki/wiki/Amulet_of_Misty_Step"
+  },
+  "boots-of-stormy-clamour": {
+    "acquire": "Sold by Omeluum after completing the quest Help Omeluum Investigate the Parasite",
+    "effect": "Boots of Stormy Clamour are an uncommon pair of Boots that inflict the Reverberation condition on a creature when afflicting it with another condition.",
+    "name": "Boots of Stormy Clamour",
+    "wiki": "https://bg3.wiki/wiki/Boots_of_Stormy_Clamour"
+  },
+  "boots-of-striding": {
+    "acquire": "Worn by Minthara",
+    "effect": "The Boots of Striding are an uncommon pair of Boots that grants the wearer a burst of speed whenever they begin concentrating on a spell.",
+    "name": "Boots of Striding",
+    "wiki": "https://bg3.wiki/wiki/Boots_of_Striding"
+  },
+  "boots-of-uninhibited-kushigo": {
+    "acquire": "Carried by Prelate Lir'i'c, as entering Act Three",
+    "effect": "The Boots of Uninhibited Kushigo are a rare pair of Boots that add the wearer's Wisdom modifier to their Unarmed Strike damage.",
+    "name": "Boots of Uninhibited Kushigo",
+    "wiki": "https://bg3.wiki/wiki/Boots_of_Uninhibited_Kushigo"
+  },
+  "bow-of-awareness": {
+    "acquire": "Sold by Roah Moonglow, to the left beyond the sanctum entrance",
+    "effect": "Bow of Awareness is an uncommon +1 Shortbow that boosts the wielder's Initiative.",
+    "name": "Bow of Awareness",
+    "wiki": "https://bg3.wiki/wiki/Bow_of_Awareness"
+  },
+  "bracers-of-defence": {
+    "acquire": "In a gilded chest in the secret cellar area of the Apothecary, beneath the Blighted Village",
+    "effect": "Bracers of Defence are a rare pair of Gloves which increase the wearer's Armour Class by 2 when unarmoured and not holding a shield.",
+    "name": "Bracers of Defence",
+    "wiki": "https://bg3.wiki/wiki/Bracers_of_Defence"
+  },
+  "breastplate-1": {
+    "acquire": "On crate near Dammon in the The Hollow",
+    "effect": "Breastplate +1 is an uncommon Medium Armour that reduces Piercing damage.",
+    "name": "Breastplate +1",
+    "wiki": "https://bg3.wiki/wiki/Breastplate_%2B1"
+  },
+  "broodmother-s-revenge": {
+    "acquire": "Carried by Kagha in the Emerald Grove",
+    "effect": "The Broodmother's Revenge is an uncommon Amulet. It coats the wearer's weapon in poison for 2 turns whenever they are healed.",
+    "name": "Broodmother's Revenge",
+    "wiki": "https://bg3.wiki/wiki/Broodmother%27s_Revenge"
+  },
+  "caustic-band": {
+    "acquire": "Sold by Derryth Bonecloak in the Underdark",
+    "effect": "Caustic Band is an uncommon Ring that grants the wearer 2 Acid damage with weapon attacks.",
+    "name": "Caustic Band",
+    "wiki": "https://bg3.wiki/wiki/Caustic_Band"
+  },
+  "crusher-s-ring": {
+    "acquire": "Worn by Crusher",
+    "effect": "Crusher's Ring is an uncommon Ring which grants additional speed to the wearer.",
+    "name": "Crusher's Ring",
+    "wiki": "https://bg3.wiki/wiki/Crusher%27s_Ring"
+  },
+  "diadem-of-arcane-synergy": {
+    "acquire": "Carried by Ardent Jhe'rezath in the Inquisitor's Chamber",
+    "effect": "The Diadem of Arcane Synergy is a rare circlet that grants Arcane Synergy when the wearer inflicts a condition.",
+    "name": "Diadem of Arcane Synergy",
+    "wiki": "https://bg3.wiki/wiki/Diadem_of_Arcane_Synergy"
+  },
+  "disintegrating-night-walkers": {
+    "acquire": "Worn by Nere",
+    "effect": "The Disintegrating Night Walkers are story-related Boots which grant their wearer immunity to various surface effects, and also allows them to cast Misty Step once per Short Rest.",
+    "name": "Disintegrating Night Walkers",
+    "wiki": "https://bg3.wiki/wiki/Disintegrating_Night_Walkers"
+  },
+  "elixir-of-hill-giant-strength": {
+    "acquire": "• Sold by various merchants throughout the game, including: • Araj Oblodra at Moonrise Towers • Auntie Ethel in the Druid Grove or the Riverside Teahouse is unique in that she always sells a stack of 3 per Long Rest or level-up • Derryth Bonecloak in the Myconid Colony (uncommonly, she may sell up t.",
+    "effect": "Elixir of Hill Giant Strength is an uncommon elixir. It increases Strength when consumed.",
+    "name": "Elixir of Hill Giant Strength",
+    "wiki": "https://bg3.wiki/wiki/Elixir_of_Hill_Giant_Strength"
+  },
+  "everburn-blade": {
+    "acquire": "Carried by Commander Zhalk at the helm of the Nautiloid during the Prologue.",
+    "effect": "Everburn Blade is an uncommon greatsword that deals additional ⁠⁠Fire damage.",
+    "name": "Everburn Blade",
+    "wiki": "https://bg3.wiki/wiki/Everburn_Blade"
+  },
+  "flame-blade": {
+    "acquire": "",
+    "effect": "Flame Blade is a level 2 evocation spell. It allows spellcasters to summon a fiery scimitar in their free hand that sheds bright light. Casters can make a melee weapon attack with the blade to deal Fire damage to enemies.",
+    "name": "Flame Blade",
+    "wiki": "https://bg3.wiki/wiki/Flame_Blade"
+  },
+  "gloves-of-archery": {
+    "acquire": "Sold by Grat the Trader",
+    "effect": "Gloves of Archery are an uncommon pair of Gloves that grant the wearer Proficiency with Longbows and Shortbows, as well as +2 damage with ranged weapon attacks.",
+    "name": "Gloves of Archery",
+    "wiki": "https://bg3.wiki/wiki/Gloves_of_Archery"
+  },
+  "gloves-of-belligerent-skies": {
+    "acquire": "In an elegant chest in the Inquisitor's Chamber, along the southern wall of the room, on the western side",
+    "effect": "The Gloves of Belligerent Skies are an uncommon pair of Gloves that inflict Reverberation when the wearer deals ⁠Thunder, ⁠Lightning or ⁠Radiant damage.",
+    "name": "Gloves of Belligerent Skies",
+    "wiki": "https://bg3.wiki/wiki/Gloves_of_Belligerent_Skies"
+  },
+  "gloves-of-cinder-and-sizzle": {
+    "acquire": "Sold by Lady Esther, north-east of the Trielta Crags waypoint",
+    "effect": "The Gloves of Cinder and Sizzle are a rare pair of Gloves that add Fire damage to the wearer's unarmed attacks and the ability to cast Scorching Ray once per Long Rest.",
+    "name": "Gloves of Cinder and Sizzle",
+    "wiki": "https://bg3.wiki/wiki/Gloves_of_Cinder_and_Sizzle"
+  },
+  "gloves-of-dexterity": {
+    "acquire": "Sold by A'jak'nir Jeera",
+    "effect": "The Gloves of Dexterity are a very rare pair of gloves that give a character 18 Dexterity and increase their Attack Rolls by 1.",
+    "name": "Gloves of Dexterity",
+    "wiki": "https://bg3.wiki/wiki/Gloves_of_Dexterity"
+  },
+  "gloves-of-the-growling-underdog": {
+    "acquire": "In Dror Ragzlin's treasure crates behind the locked iron gate",
+    "effect": "The Gloves of the Growling Underdog are an uncommon pair of Gloves which grant the wearer Advantage on their melee attack rolls while surrounded by 2 or more enemies.",
+    "name": "Gloves of the Growling Underdog",
+    "wiki": "https://bg3.wiki/wiki/Gloves_of_the_Growling_Underdog"
+  },
+  "hand-crossbow-1": {
+    "acquire": "Sold by Derryth Bonecloak in the Underdark",
+    "effect": "Hand Crossbow +1 is an uncommon, lightly enchanted (+1) variant of the Hand Crossbows family of weapons. It is a martial ranged weapon wielded in one hand. It's a light weapon that anyone can dual-wield without special training.",
+    "name": "Hand Crossbow +1",
+    "wiki": "https://bg3.wiki/wiki/Hand_Crossbow_%2B1"
+  },
+  "haste-helm": {
+    "acquire": "Inside the Moss-Covered Chest",
+    "effect": "The Haste Helm is a rare helmet that grants the wearer a burst of speed at the start of combat.",
+    "name": "Haste Helm",
+    "wiki": "https://bg3.wiki/wiki/Haste_Helm"
+  },
+  "hellrider-s-pride": {
+    "acquire": "Carried by Zevlor and can be looted from him, stolen, or earned as a reward for Kill Kagha or Investigate Kagha",
+    "effect": "Hellrider's Pride are an uncommon pair of Gloves that grant creatures healed by the wearer resistance to the physical damage of weapon attacks.[See: Bugs]",
+    "name": "Hellrider's Pride",
+    "wiki": "https://bg3.wiki/wiki/Hellrider%27s_Pride"
+  },
+  "holy-lance-helm": {
+    "acquire": "In a painted chest, accessible from the top level",
+    "effect": "A Holy Lance Helm is an uncommon Helmet that potentially deals radiant damage to creatures that attack the wearer.",
+    "name": "Holy Lance Helm",
+    "wiki": "https://bg3.wiki/wiki/Holy_Lance_Helm"
+  },
+  "knife-of-the-undermountain-king": {
+    "acquire": "Sold by A'jak'nir Jeera",
+    "effect": "The Knife of the Undermountain King is a very rare +2 shortsword which increases the frequency of scoring Critical Hits and grants Advantage against obscured enemies.",
+    "name": "Knife of the Undermountain King",
+    "wiki": "https://bg3.wiki/wiki/Knife_of_the_Undermountain_King"
+  },
+  "luminous-armour": {
+    "acquire": "in a locked and trapped opulent chest",
+    "effect": "Luminous Armour is an uncommon Medium Armour that allows the wearer to cause radiant shockwaves whenever they deal Radiant damage.",
+    "name": "Luminous Armour",
+    "wiki": "https://bg3.wiki/wiki/Luminous_Armour"
+  },
+  "melf-s-first-staff": {
+    "acquire": "Sold by Blurg",
+    "effect": "The Melf's First Staff is an uncommon +1 Quarterstaff that improves Spell Save DC and Spell Attack Rolls, and allows the wearer to cast Melf's Acid Arrow.",
+    "name": "Melf's First Staff",
+    "wiki": "https://bg3.wiki/wiki/Melf%27s_First_Staff"
+  },
+  "pearl-of-power-amulet": {
+    "acquire": "Sold by Omeluum after completing the quest Help Omeluum Investigate the Parasite",
+    "effect": "The Pearl of Power Amulet is an uncommon Amulet that allows the wielder to restore a spell slot of 3rd level or lower once per Long Rest.",
+    "name": "Pearl of Power Amulet",
+    "wiki": "https://bg3.wiki/wiki/Pearl_of_Power_Amulet"
+  },
+  "phalar-aluve": {
+    "acquire": "Embedded inside a rock",
+    "effect": "Phalar Aluve is a rare +1 Longsword that can be made to Sing or Shriek, granting nearby allies or enemies a bonus to Attack Rolls or damage rolls, depending on the choice.",
+    "name": "Phalar Aluve",
+    "wiki": "https://bg3.wiki/wiki/Phalar_Aluve"
+  },
+  "psychic-spark": {
+    "acquire": "Sold by Blurg",
+    "effect": "Psychic Spark is an uncommon Amulet that allows the wearer to cast a stronger version of Magic Missile.",
+    "name": "Psychic Spark",
+    "wiki": "https://bg3.wiki/wiki/Psychic_Spark"
+  },
+  "ring-of-arcane-synergy": {
+    "acquire": "Worn by Gish Far'aag",
+    "effect": "Ring of Arcane Synergy is a rare Ring. It grants Arcane Synergy when the wearer deals damage with a cantrip.",
+    "name": "Ring of Arcane Synergy",
+    "wiki": "https://bg3.wiki/wiki/Ring_of_Arcane_Synergy"
+  },
+  "ring-of-protection": {
+    "acquire": "Rewarded by Mol for completing the quest Steal the Sacred Idol in the Emerald Grove",
+    "effect": "The Ring of Protection is a rare Ring that grants the wearer a bonus to Armour Class and Saving Throws.",
+    "name": "Ring of Protection",
+    "wiki": "https://bg3.wiki/wiki/Ring_of_Protection"
+  },
+  "safeguard-shield": {
+    "acquire": "Sold by Dammon in the Emerald Grove",
+    "effect": "The Safeguard Shield is an uncommon Shield that grants you Saving Throws +1",
+    "name": "Safeguard Shield",
+    "wiki": "https://bg3.wiki/wiki/Safeguard_Shield"
+  },
+  "sentient-amulet": {
+    "acquire": "",
+    "effect": "Sentient Amulet is an amulet that comes in two varieties:",
+    "name": "Sentient Amulet",
+    "wiki": "https://bg3.wiki/wiki/Sentient_Amulet"
+  },
+  "spidersilk-armour": {
+    "acquire": "Worn by Minthara",
+    "effect": "Spidersilk Armour is a rare Light Armour that aids the wearer with Stealth checks and Constitution Saving Throws.",
+    "name": "Spidersilk Armour",
+    "wiki": "https://bg3.wiki/wiki/Spidersilk_Armour"
+  },
+  "strange-conduit-ring": {
+    "acquire": "Inside an elegant chest in the Inquisitor's Chamber",
+    "effect": "The Strange Conduit Ring is a uncommon Ring that grants additional Psychic damage to the wearer's weapon while Concentrating.",
+    "name": "Strange Conduit Ring",
+    "wiki": "https://bg3.wiki/wiki/Strange_Conduit_Ring"
+  },
+  "svartlebee-s-woundseeker": {
+    "acquire": "Carried by Gauntlet Yeva",
+    "effect": "Svartlebee's Woundseeker is an uncommon +1 greatsword that grants its wielder bonus to Attack Rolls against already damaged creatures.",
+    "name": "Svartlebee's Woundseeker",
+    "wiki": "https://bg3.wiki/wiki/Svartlebee%27s_Woundseeker"
+  },
+  "swiresy-shoes": {
+    "acquire": "Sold by Grat the Trader",
+    "effect": "The Swiresy Shoes are a pair of rare Boots that improve Jumping distance and Acrobatics skill.",
+    "name": "Swiresy Shoes",
+    "wiki": "https://bg3.wiki/wiki/Swiresy_Shoes"
+  },
+  "sword-of-justice": {
+    "acquire": "Carried by Anders in Toll House, or rewarded by him for killing Karlach in Hunt the Devil",
+    "effect": "Sword of Justice is an uncommon +1 greatsword that grants its wielder the Tyr's Protection spell.",
+    "name": "Sword of Justice",
+    "wiki": "https://bg3.wiki/wiki/Sword_of_Justice"
+  },
+  "the-graceful-cloth": {
+    "acquire": "Sold by Lady Esther, north-east of the Trielta Crags waypoint",
+    "effect": "The Graceful Cloth is a rare piece of Clothing which gives its wearer +2 Dexterity and the Cat's Grace condition. It also boosts their Dexterity Saving Throws and jump distance.",
+    "name": "The Graceful Cloth",
+    "wiki": "https://bg3.wiki/wiki/The_Graceful_Cloth"
+  },
+  "the-protecty-sparkswall": {
+    "acquire": "In a gilded chest at the end of the trapped bridge",
+    "effect": "The Protecty Sparkswall is a rare Clothing that increases the wearer's defences while they have Lightning Charges and grants a +1 bonus to their Spell Save DC.",
+    "name": "The Protecty Sparkswall",
+    "wiki": "https://bg3.wiki/wiki/The_Protecty_Sparkswall"
+  },
+  "the-shadespell-circlet": {
+    "acquire": "Sold by Omeluum after completing the quest Help Omeluum Investigate the Parasite",
+    "effect": "The Shadespell Circlet is an uncommon Helmet that grants a bonus to Spell Save DC when the wearer is obscured in shadow.",
+    "name": "The Shadespell Circlet",
+    "wiki": "https://bg3.wiki/wiki/The_Shadespell_Circlet"
+  },
+  "the-sparkle-hands": {
+    "acquire": "in a wooden chest at the base of the giant tree stump in the Sunlit Wetlands",
+    "effect": "The Sparkle Hands are a pair of rare Gloves that grant Lightning Charges on unarmed attacks and provide Advantage against metal constructs and armoured foes while charged.",
+    "name": "The Sparkle Hands",
+    "wiki": "https://bg3.wiki/wiki/The_Sparkle_Hands"
+  },
+  "the-spellsparkler": {
+    "acquire": "Rewarded by Counsellor Florrick for rescuing her from the burning inn during the quest Rescue the Grand Duke.",
+    "effect": "The Spellsparkler is a rare Quarterstaff that allows the wielder to generate Lightning Charges upon dealing damage with spells.",
+    "name": "The Spellsparkler",
+    "wiki": "https://bg3.wiki/wiki/The_Spellsparkler"
+  },
+  "the-whispering-promise": {
+    "acquire": "Sold by Grat the Trader",
+    "effect": "The Whispering Promise is an uncommon Ring that grants a bonus to Attack Rolls and Saving Throws to creatures healed by the wearer.",
+    "name": "The Whispering Promise",
+    "wiki": "https://bg3.wiki/wiki/The_Whispering_Promise"
+  },
+  "titanstring-bow": {
+    "acquire": "Sold by Brem after completing the quest Find the Missing Shipment",
+    "effect": "Titanstring Bow is a rare +1 Longbow that allows its wielder to add their Strength Modifier to damage dealt with this weapon.",
+    "name": "Titanstring Bow",
+    "wiki": "https://bg3.wiki/wiki/Titanstring_Bow"
+  },
+  "torch": {
+    "acquire": "Throughout the game",
+    "effect": "A Torch can be used as a Light Source or as an improvised club. It can be wielded as a simple melee weapon in one hand. The torch is a light weapon that anyone can dual wield without special training.",
+    "name": "Torch",
+    "wiki": "https://bg3.wiki/wiki/Torch"
+  },
+  "unseen-menace": {
+    "acquire": "Sold by A'jak'nir Jeera",
+    "effect": "Unseen Menace is a rare + 1 Pike which increases critical hit chance and grants Advantage as long as the wielder keeps connecting hits.",
+    "name": "Unseen Menace",
+    "wiki": "https://bg3.wiki/wiki/Unseen_Menace"
+  },
+  "warped-headband-of-intellect": {
+    "acquire": "Carried by Lump the Enlightened",
+    "effect": "The Warped Headband of Intellect is an uncommon Circlet that raises the wearer's Intelligence to 17.",
+    "name": "Warped Headband of Intellect",
+    "wiki": "https://bg3.wiki/wiki/Warped_Headband_of_Intellect"
+  }
+}

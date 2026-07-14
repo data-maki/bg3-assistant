@@ -46,29 +46,34 @@ final class SpeechInputService: ObservableObject {
     }
 
     private func beginRecording() {
+        guard !isRecording else { return }
         guard let recognizer, recognizer.isAvailable else {
             errorMessage = "Speech recognizer is unavailable on this system."
             return
         }
-        let request = SFSpeechAudioBufferRecognitionRequest()
-        request.shouldReportPartialResults = true
-        if recognizer.supportsOnDeviceRecognition {
-            request.requiresOnDeviceRecognition = true
-        }
 
         let input = engine.inputNode
-        let format = input.outputFormat(forBus: 0)
-        guard format.sampleRate > 0 else {
-            errorMessage = "No microphone input is available."
+        // The hardware format must be valid before installing a tap. Right after
+        // the first permission grant it can briefly report 0 channels / 0 Hz;
+        // installing a tap with that format throws an ObjC exception that Swift
+        // cannot catch and takes the app down — so refuse it and surface a note.
+        let format = input.inputFormat(forBus: 0)
+        guard format.channelCount > 0, format.sampleRate > 0 else {
+            errorMessage = "Microphone isn't ready yet — try the mic again in a moment."
             return
         }
+
+        let request = SFSpeechAudioBufferRecognitionRequest()
+        request.shouldReportPartialResults = true
+        request.requiresOnDeviceRecognition = recognizer.supportsOnDeviceRecognition
+
         input.removeTap(onBus: 0)
         input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
             request.append(buffer)
         }
 
+        engine.prepare()
         do {
-            engine.prepare()
             try engine.start()
         } catch {
             input.removeTap(onBus: 0)
@@ -97,8 +102,8 @@ final class SpeechInputService: ObservableObject {
     }
 
     private func finishRecording() {
+        if engine.isRunning { engine.stop() }
         engine.inputNode.removeTap(onBus: 0)
-        engine.stop()
         task?.finish()
         task = nil
         request = nil

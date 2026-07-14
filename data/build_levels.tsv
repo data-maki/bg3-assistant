@@ -89,3 +89,15 @@ CL-102	9	Cleric 7	Light Domain	Banishment, Death Ward, Freedom of Movement	Death
 CL-102	10	Cleric 8	Light Domain	ASI: +1 WIS (18) and +1 CON	Final Wisdom and concentration breakpoint	Guide-derived, respec-free order
 CL-102	11	Cleric 9	Light Domain	Destructive Wave, Flame Strike	Use Destructive Wave only when party positioning is safe	Guide-derived, respec-free order
 CL-102	12	Cleric 10	Light Domain	Cantrip: Blade Ward; Sanctuary; Divine Intervention	Divine Intervention caps the build; final split Light Cleric 10 / Stars Druid 2	Guide-derived, respec-free order
+FI-WEK	1	Warlock 1	The Great Old One	Eldritch Blast, Booming Blade; Armour of Agathys, Dissonant Whispers	Use Eldritch Blast at range; Armour of Agathys before dangerous melee contact	Guide-extracted
+FI-WEK	2	Warlock 2	The Great Old One	Agonising Blast, Beguiling Influence; Hex	Hex only when its concentration is worth more than a defensive spell; Agonising Blast is the reliable default	Guide-extracted
+FI-WEK	3	Warlock 3	Pact of the Blade	Hellish Rebuke; bind the best current finesse weapon	Pact binding switches the weapon to Charisma; re-bind after every long rest	Guide-extracted
+FI-WEK	4	Warlock 4	Pact of the Blade	Savage Attacker; Mage Hand, Hold Person	Use Hold Person only after checking immunity and concentration risk; crits amplify the source's fear plan	Guide-extracted
+FI-WEK	5	Warlock 5	Pact of the Blade	Deepened Pact; temporary Extra Attack; Counterspell	This is the source-recommended early bridge breakpoint; keep Warlock 5 until ready for the level-6 respec	Assistant-reviewed bridge from guide note
+FI-WEK	6	Respec: Fighter 6	Eldritch Knight	Duelling, Action Surge, Magic Missile, Shield, Tasha's Hideous Laughter; Alert; Extra Attack; Sentinel	Rebuild Fighter-first now: DEX-based Phalar Aluve remains accurate until Pact of the Blade returns	Guide-extracted final order
+FI-WEK	7	Fighter 7	Eldritch Knight	War Magic; Darkness, Thunderwave	Cantrip then bonus-action weapon attack; Darkness is optional unless the party can see and fight inside it	Guide-extracted final order
+FI-WEK	8	Fighter 8	Eldritch Knight	+2 CHA; Magic Weapon; Tasha's Hideous Laughter, Misty Step	The Charisma increase is for the Warlock levels that begin next; use Misty Step as extraction, not routine movement	Guide-extracted final order
+FI-WEK	9	Warlock 1	The Great Old One	Eldritch Blast, Booming Blade; Armour of Agathys, Dissonant Whispers; Mortal Reminder	Critical hits can frighten nearby enemies; weapon attacks still use Dexterity until Pact returns	Guide-extracted final order
+FI-WEK	10	Warlock 2	The Great Old One	Agonising Blast, Beguiling Influence; Hex	Eldritch Blast becomes the dependable ranged action and feeds War Magic	Guide-extracted final order
+FI-WEK	11	Warlock 3	Pact of the Blade	Hellish Rebuke; pact-bind Phalar Aluve	The intended Charisma weapon engine is online; bind after every long rest and use Shriek before multi-hit turns	Guide-extracted final order
+FI-WEK	12	Warlock 4	Pact of the Blade	Savage Attacker; Mage Hand, Hold Person	Final 8/4 split: cantrip plus War Magic, Sentinel reactions, pact weapon, fear, and Reverberation control	Guide-extracted final order

@@ -18,13 +18,13 @@ import re
 
 from .models import ActOneMap, BuildGear, Marker, MapTiles, RouteCheckpoint, TimedEvent
 from .paths import resource_root
-from .route_data import checkpoint_by_id, load_gear, load_builds, load_route, next_checkpoint
+from .route_data import checkpoint_by_id, item_key, load_gear, load_builds, load_route, next_checkpoint
+from .walkthrough_data import load_walkthrough
 
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = resource_root()
 TIMED_EVENTS_PATH = REPO_ROOT / "data" / "act1_timed_events.json"
-ITEM_ICONS_PATH = REPO_ROOT / "data" / "item_icons.json"
 
 MAP_TILES = MapTiles(
     tile_url="https://tiles.mapgenie.io/games/baldurs-gate-3/wilderness/default-v4/{z}/{x}/{y}.jpg",
@@ -46,9 +46,10 @@ REGION_BY_PHRASE = [
     ("Adamantine Forge", "Grymforge"),
     ("Grymforge", "Grymforge"),
     ("Shattered Sanctum", "Shattered Sanctum"),
+    ("Blighted Village", "Wilderness"),
     ("Druid Grove", "Wilderness"),
     ("Goblin Camp", "Wilderness"),
-    ("Zhentarim Hideout", "Wilderness"),
+    ("Zhentarim Hideout", "Zhentarim Hideout"),
     ("Waukeen's Rest", "Wilderness"),
     ("The Risen Road", "Wilderness"),
     ("Sunlit Wetlands", "Wilderness"),
@@ -61,6 +62,16 @@ REGION_BY_PHRASE = [
 AREA_SPLITS = {
     "Druid Grove / Shattered Sanctum": [("Druid Grove", "Wilderness"), ("Shattered Sanctum", "Shattered Sanctum")],
     "Druid Grove / Goblin Camp": [("Druid Grove", "Wilderness"), ("Goblin Camp", "Wilderness")],
+}
+
+# Items whose MapGenie pin sits on an interior cell (its own landmass on the
+# mosaic) even though the curated location names the parent area. The region
+# must match the landmass the pin is on — otherwise selecting "Wilderness"
+# fits the view across the whole canvas and drags the Underdark into frame.
+ITEM_REGION_OVERRIDES = {
+    "Ring of Protection": "Emerald Grove",
+    "Broodmother's Revenge": "Emerald Grove",
+    "Hellrider's Pride": "Emerald Grove",
 }
 
 # Coarse area anchors (lat, lng) on the Wilderness tileset. Used for markers
@@ -120,18 +131,28 @@ MG_FIGHT_COORDS: dict[str, tuple[float, float, str]] = {
 }
 
 # Exact MapGenie coordinates for individually-mapped items, keyed by item name
-# as it appears in the gear TSV. Others fall back to their area anchor.
+# as it appears in the gear TSV — or "item|area" when a dual-location item has
+# an exact pin for only one of its markers (the other falls back to its area
+# anchor instead of borrowing the wrong landmass's coordinate).
 MG_ITEM_COORDS: dict[str, tuple[float, float]] = {
+    "Haste Helm": (0.67051, -0.58509),
+    "Crusher's Ring": (0.66777, -0.64225),
+    "Breastplate +1": (0.73725, -0.52151),
+    "Safeguard Shield": (0.73787, -0.52188),
     "Gloves of Archery": (0.68160, -0.63960),
+    "Gloves of the Growling Underdog": (0.76947, -0.76564),
+    "Boots of Striding": (0.75925, -0.74873),
+    "Amulet of Misty Step": (0.74325, -0.72735),
     "Titanstring Bow": (0.82260, -0.63260),
     "Phalar Aluve": (0.71870, -0.84270),
     "Svartlebee's Woundseeker": (0.75740, -0.62530),
     "Sword of Justice": (0.73960, -0.55120),
     "Luminous Armour": (0.69550, -0.81670),
-    "The Whispering Promise": (0.68080, -0.63950),
+    "The Whispering Promise|Goblin Camp": (0.68080, -0.63950),
     "Hellrider's Pride": (0.78350, -0.45720),
     "The Sparkle Hands": (0.58790, -0.55730),
     "Disintegrating Night Walkers": (0.69810, -1.01100),
+    "Adamantine Scale Mail": (0.66072, -0.97707),
     "Adamantine Splint Armour": (0.66070, -0.97780),
     "Bracers of Defence": (0.62820, -0.68940),
     "Ring of Protection": (0.78720, -0.40000),
@@ -139,6 +160,9 @@ MG_ITEM_COORDS: dict[str, tuple[float, float]] = {
     "Bow of Awareness": (0.72890, -0.77680),
     "The Spellsparkler": (0.75590, -0.62410),
     "Melf's First Staff": (0.76040, -0.84440),
+    "Pearl of Power Amulet": (0.76352, -0.84472),
+    "The Shadespell Circlet": (0.76352, -0.84472),
+    "Caustic Band": (0.75966, -0.87043),
     "The Protecty Sparkswall": (0.71980, -1.01580),
 }
 
@@ -147,9 +171,6 @@ def _slug(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
 
 
-def item_key(item_name: str) -> str:
-    """Stable per-item key (stack counts stripped) used for equip tracking."""
-    return _slug(re.sub(r"\s*x\d+$", "", item_name))
 
 
 def _mg_anchor(*locations: str) -> tuple[float, float] | None:
@@ -212,20 +233,15 @@ def _fight_markers() -> list[Marker]:
 
 
 def _item_markers() -> list[Marker]:
-    try:
-        icons = json.loads(ITEM_ICONS_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        icons = {}
-    icons_by_key = {item_key(name): f"/map-assets/{path}" for name, path in icons.items()}
-
     markers: dict[tuple[str, str], Marker] = {}
-    for gear in (item for item in load_gear() if item.act == 1):
+    for gear in (item for item in load_gear() if item.act == 1 and item.map_objective):
         for area, region in _item_areas(gear.region):
             key = (gear.item, area)
             if existing := markers.get(key):
                 existing.build_ids = sorted(set(existing.build_ids) | set(gear.build_ids))
                 continue
-            exact = MG_ITEM_COORDS.get(gear.item)
+            region = ITEM_REGION_OVERRIDES.get(gear.item, region)
+            exact = MG_ITEM_COORDS.get(f"{gear.item}|{area}") or MG_ITEM_COORDS.get(gear.item)
             lat, lng, precision = (*exact, "exact") if exact else _place(gear.item, area, gear.region, region)
             markers[key] = Marker(
                 id=f"item-{_slug(gear.item)}-{_slug(area)}",
@@ -241,10 +257,13 @@ def _item_markers() -> list[Marker]:
                 importance="item",
                 build_ids=sorted(gear.build_ids),
                 item_key=item_key(gear.item),
-                icon=icons_by_key.get(item_key(gear.item)),
+                icon=gear.icon or None,
                 slot=gear.slot,
                 priority=gear.priority,
                 why=gear.why,
+                effect=gear.effect or None,
+                acquire_detail=gear.acquire or None,
+                wiki=gear.wiki or None,
             )
     return list(markers.values())
 
@@ -265,6 +284,7 @@ def load_act_one_map() -> ActOneMap:
         regions=sorted({marker.region for marker in markers}),
         builds=load_builds(),
         timed_events=_timed_events(),
+        walkthrough=load_walkthrough(),
         mapgenie_url="https://mapgenie.io/baldurs-gate-3/maps/wilderness",
         mapgenie=MAP_TILES,
         coordinate_note=(

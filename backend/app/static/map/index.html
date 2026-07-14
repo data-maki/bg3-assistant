@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BG3 Honor Map — Act 1</title>
+    <title>BG3 Honor Walkthrough — Act 1</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>" />
     <link rel="stylesheet" href="/map-assets/vendor/leaflet/leaflet.css" />
     <link rel="stylesheet" href="/map-assets/styles.css" />
@@ -12,8 +12,8 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">BG3 HONOR MODE</p>
-        <h1>Act 1 route map</h1>
-        <p class="subtitle">Key fights, safe leveling stops, and build equipment on the real Wilderness map.</p>
+        <h1>Act 1 Honor walkthrough</h1>
+        <p class="subtitle">Your level-aware run ledger, decision tradeoffs, fights, and build equipment.</p>
       </div>
       <div class="topbar-actions">
         <span id="liveStatus" class="live-status live-status--none"><i></i>No live position</span>
@@ -44,7 +44,7 @@
         <label><input id="majorFilter" type="checkbox" checked /> Major goals</label>
         <label><input id="minorFilter" type="checkbox" checked /> Minor XP fights</label>
         <label><input id="itemFilter" type="checkbox" checked /> Build items</label>
-        <label><input id="hideDoneFilter" type="checkbox" /> Hide completed</label>
+        <label><input id="hideDoneFilter" type="checkbox" checked /> Archive completed</label>
         <label><input id="labelsFilter" type="checkbox" /> Always show labels</label>
       </div>
     </section>
@@ -52,13 +52,25 @@
     <main class="workspace">
       <aside class="route-panel">
         <nav class="panel-tabs" role="tablist" aria-label="Assistant panels">
-          <button id="tabRoute" class="panel-tab active" role="tab" aria-selected="true">Route</button>
+          <button id="tabWalkthrough" class="panel-tab active" role="tab" aria-selected="true">Walkthrough</button>
+          <button id="tabRoute" class="panel-tab" role="tab" aria-selected="false">Map</button>
           <button id="tabParty" class="panel-tab" role="tab" aria-selected="false">Party</button>
-          <button id="tabEquipment" class="panel-tab" role="tab" aria-selected="false">Equipment</button>
-          <button id="tabWarnings" class="panel-tab" role="tab" aria-selected="false">Warnings <span id="warningsBadge" class="tab-badge tab-badge--alert" hidden></span></button>
+          <button id="tabEquipment" class="panel-tab" role="tab" aria-selected="false">Gear</button>
+          <button id="tabWarnings" class="panel-tab" role="tab" aria-selected="false">Risks <span id="warningsBadge" class="tab-badge tab-badge--alert" hidden></span></button>
         </nav>
 
-        <div id="panelRoute" class="panel-page">
+        <div id="panelWalkthrough" class="panel-page">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">PLAYER-CONFIRMED RUN LEDGER</p>
+              <h2>Act 1 walkthrough</h2>
+            </div>
+            <span id="walkthroughProgress" class="tab-badge">0/0</span>
+          </div>
+          <div id="walkthroughList" class="route-list walkthrough-list" aria-live="polite"></div>
+        </div>
+
+        <div id="panelRoute" class="panel-page" hidden>
           <div class="panel-heading">
             <div>
               <p class="eyebrow">VISIBLE ROUTE</p>
@@ -149,6 +161,8 @@
     </dialog>
 
     <script src="/map-assets/vendor/leaflet/leaflet.js" defer></script>
-    <script src="/map-assets/app.js" defer></script>
+    <!-- Modules defer by default and run after classic deferred scripts in
+         document order, so Leaflet's global L is ready before app.js. -->
+    <script type="module" src="/map-assets/app.js"></script>
   </body>
 </html>

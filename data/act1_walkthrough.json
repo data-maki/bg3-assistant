@@ -1,0 +1,1768 @@
+[
+  {
+    "id": "walk-nautiloid-zhalk",
+    "order": 1,
+    "phase": "Nautiloid escape",
+    "phaseOrder": 0,
+    "title": "Reach the transponder; treat Zhalk as optional",
+    "kind": "major_fight",
+    "importance": "required",
+    "region": "Nautiloid",
+    "area": "Helm",
+    "minimumLevel": 1,
+    "summary": "Prepare Command on Shadowheart, attempt the blade only while the escape remains controlled, then connect the transponder.",
+    "avoid": "Do not trade the run for the optional Zhalk kill when cambions arrive.",
+    "why": "The blade and extra XP are useful; reaching the transponder is the only required outcome.",
+    "completionChecks": ["Reached the transponder", "Picked up the Everburn Blade if attempted"],
+    "prerequisites": [],
+    "checkpointId": "fight-nautiloid-zhalk",
+    "markerId": "fight-nautiloid-zhalk",
+    "decision": {
+      "prompt": "How hard should you commit to Commander Zhalk?",
+      "recommended": {
+        "label": "Attempt Command: Drop, then leave",
+        "benefits": ["Can secure the Everburn Blade", "Keeps the escape route open"],
+        "costs": ["Uses Shadowheart's spell slots", "The roll can fail"]
+      },
+      "alternatives": [
+        {
+          "label": "Ignore Zhalk and connect immediately",
+          "benefits": ["Lowest wipe risk"],
+          "costs": ["No blade and less optional XP"]
+        },
+        {
+          "label": "Stay for the kill",
+          "benefits": ["More XP if successful"],
+          "costs": ["Cambion reinforcements can end the run"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "incident": {
+      "trigger": "Cambion reinforcements arrive or the helm countdown stops being controlled.",
+      "safeActions": ["Attempt Command: Drop once", "Move the party toward the transponder before committing more actions"],
+      "never": "Stay for an optional Zhalk kill after the escape route is no longer guaranteed.",
+      "escape": "Ignore the remaining enemies and connect the transponder.",
+      "honorDelta": "The Everburn Blade and Zhalk XP are optional; only reaching the transponder preserves the run.",
+      "postFight": ["Confirm the blade is actually picked up before connecting if you attempted it"],
+      "authority": "guide_fact",
+      "sourceUrl": "https://docs.google.com/spreadsheets/d/1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
+    },
+    "riskReward": {
+      "reward": "Everburn Blade and optional XP.",
+      "risk": "The helm timer and cambion reinforcements can end the run.",
+      "skipCost": "Lose only optional loot and XP.",
+      "returnBy": "Cannot be revisited after connecting the transponder."
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-recruit-beach-party",
+    "order": 2,
+    "phase": "Crash site and crypt",
+    "phaseOrder": 1,
+    "title": "Recruit the beach party before risky fights",
+    "kind": "exploration",
+    "importance": "required",
+    "region": "Wilderness",
+    "area": "Ravaged Beach",
+    "minimumLevel": 2,
+    "summary": "Recruit Shadowheart, Gale, Astarion, and Lae'zel; level the active party before pushing inland.",
+    "avoid": "Do not walk into the intellect devourer ambush with an incomplete party.",
+    "why": "A full party turns the beach and crypt into safe early XP.",
+    "completionChecks": ["Four active party slots filled", "Party level-ups applied"],
+    "prerequisites": ["walk-nautiloid-zhalk"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-beach-devourers",
+    "order": 3,
+    "phase": "Crash site and crypt",
+    "phaseOrder": 1,
+    "title": "Clear the beach intellect devourers",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Ravaged Beach",
+    "minimumLevel": 2,
+    "summary": "Return with a full party and start from range or high ground.",
+    "avoid": "Do not let the party enter grouped through the direct approach.",
+    "why": "Low-risk XP once companions are recruited.",
+    "completionChecks": ["Beach intellect devourers defeated"],
+    "prerequisites": ["walk-recruit-beach-party"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-crypt-outer",
+    "order": 4,
+    "phase": "Crash site and crypt",
+    "phaseOrder": 1,
+    "title": "Resolve the outer ruins",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Overgrown Ruins",
+    "minimumLevel": 2,
+    "summary": "Talk the looters away, or use the hanging foundation block to control the opening fight.",
+    "avoid": "Do not drop into the inner group without controlling the clustered enemies.",
+    "why": "Dialogue or terrain makes this a safe route into the crypt.",
+    "completionChecks": ["Outer ruins resolved", "Crypt entrance opened"],
+    "prerequisites": ["walk-recruit-beach-party"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-withers-crypt",
+    "order": 5,
+    "phase": "Crash site and crypt",
+    "phaseOrder": 1,
+    "title": "Wake Withers before the goblin camp",
+    "kind": "mini_fight",
+    "importance": "required",
+    "region": "Wilderness",
+    "area": "Dank Crypt",
+    "minimumLevel": 2,
+    "summary": "Loot the skeletons before pressing the button, then clear the crypt and open Withers' sarcophagus.",
+    "avoid": "Do not postpone the crypt until after entering the goblin camp courtyard.",
+    "why": "Withers enables respecs, revives, and hirelings; the event is time-sensitive.",
+    "completionChecks": ["Withers' sarcophagus opened", "Withers available in camp"],
+    "prerequisites": ["walk-crypt-outer"],
+    "incident": {
+      "trigger": "The trapped sarcophagus room ignites while the party is grouped or auto-pathing through it.",
+      "safeActions": ["Ungroup before entering the trapped room", "Use turn-based mode and resolve vents or the trap control before looting"],
+      "never": "Let the entire party auto-path through active oil and fire.",
+      "escape": "Move the surviving character through the doorway and away from the burning floor before helping anyone.",
+      "honorDelta": "The trap is mechanically ordinary; the single-save consequence makes a grouped mistake run-ending.",
+      "postFight": [],
+      "authority": "assistant_suggestion",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/1pp9rx5/dumbest_honor_mode_death/"
+    },
+    "source": "wiki"
+  },
+  {
+    "id": "walk-grove-entrance",
+    "order": 6,
+    "phase": "Grove setup",
+    "phaseOrder": 2,
+    "title": "Secure the Emerald Grove entrance",
+    "kind": "mini_fight",
+    "importance": "required",
+    "region": "Wilderness",
+    "area": "Emerald Grove environs",
+    "minimumLevel": 2,
+    "summary": "Take high ground and remove the boss and Booyahg first.",
+    "avoid": "Do not loot friendly corpses while grove defenders can see you.",
+    "why": "Opens the main quest hub and early vendors.",
+    "completionChecks": ["Grove entrance secured", "Defenders remain friendly"],
+    "prerequisites": ["walk-nautiloid-zhalk"],
+    "checkpointId": "fight-grove-entrance",
+    "markerId": "fight-grove-entrance",
+    "source": "sheet"
+  },
+  {
+    "id": "walk-save-arabella",
+    "order": 7,
+    "phase": "Grove setup",
+    "phaseOrder": 2,
+    "title": "Save Arabella now",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Emerald Grove",
+    "minimumLevel": 2,
+    "summary": "Resolve Kagha's snake confrontation before advancing the grove conflict.",
+    "avoid": "Do not finish Defeat the Goblins or Raid the Grove first.",
+    "why": "Saving her preserves her later storyline and reward path.",
+    "completionChecks": ["Arabella left Kagha's chamber alive"],
+    "prerequisites": ["walk-grove-entrance"],
+    "decision": {
+      "prompt": "Intervene in Kagha's punishment?",
+      "recommended": {
+        "label": "Save Arabella",
+        "benefits": ["Preserves her Act 2 storyline", "Keeps her parents' reward available"],
+        "costs": ["Requires a dialogue check or the correct druid response"]
+      },
+      "alternatives": [
+        {
+          "label": "Do not intervene",
+          "benefits": ["Avoids the check"],
+          "costs": ["Arabella and her later content can be lost"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "wiki"
+  },
+  {
+    "id": "walk-rolan-stays",
+    "order": 8,
+    "phase": "Grove setup",
+    "phaseOrder": 2,
+    "title": "Convince Rolan to stay",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Emerald Grove",
+    "minimumLevel": 2,
+    "summary": "Resolve the argument near the grove vendor and persuade Rolan's group to remain.",
+    "avoid": "Do not leave the grove with this conversation unresolved.",
+    "why": "Rolan's presence changes who survives later.",
+    "completionChecks": ["Rolan, Cal, and Lia agreed to stay"],
+    "prerequisites": ["walk-grove-entrance"],
+    "decision": {
+      "prompt": "Should Rolan's group stay or leave?",
+      "recommended": {
+        "label": "Convince them to stay",
+        "benefits": ["Preserves later rescue support and story content"],
+        "costs": ["Requires a dialogue check"]
+      },
+      "alternatives": [
+        {
+          "label": "Let them leave",
+          "benefits": ["No check required"],
+          "costs": ["Removes their later protective role"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-grove-tour",
+    "order": 9,
+    "phase": "Grove setup",
+    "phaseOrder": 2,
+    "title": "Finish the grove's safe XP and vendor loop",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Emerald Grove",
+    "minimumLevel": 2,
+    "summary": "Talk to Zevlor, Nettie, Rath, Volo, Dammon, and Arron; collect the parasite and the quests you intend to keep.",
+    "avoid": "Do not steal the idol while the ritual is active.",
+    "why": "This is combat-free XP, vendor setup, and quest protection before travel.",
+    "completionChecks": ["Core grove conversations complete", "Desired vendor purchases checked"],
+    "prerequisites": ["walk-grove-entrance"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-scratch-karlach",
+    "order": 10,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Recruit Scratch and meet Karlach",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Forest and Risen Road",
+    "minimumLevel": 3,
+    "summary": "Use the low-risk river route to Scratch and Karlach; collect the Smuggler's Ring nearby.",
+    "avoid": "Do not start the paladins fight during the scouting pass.",
+    "why": "Adds camp utility, a companion option, and early lockpicking gear without a hard fight.",
+    "completionChecks": ["Scratch invited to camp", "Karlach met", "Smuggler's Ring checked"],
+    "prerequisites": ["walk-grove-tour"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-drow-scouting",
+    "order": 11,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Scout the village and goblin camp as a drow",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Blighted Village and Goblin Camp",
+    "minimumLevel": 3,
+    "summary": "Use Disguise Self: Drow to unlock waypoints, vendors, and conversations without pulling the camps.",
+    "avoid": "Do not turn either area hostile during the scouting loop.",
+    "why": "Front-loads safe XP, access, and shopping before level-gated combat.",
+    "completionChecks": ["Blighted Village waypoint secured", "Goblin Camp waypoint secured", "Grat and Volo checked"],
+    "prerequisites": ["walk-grove-tour"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-lump-ogres",
+    "order": 12,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Recruit Lump's ogres",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Blighted Village",
+    "minimumLevel": 3,
+    "summary": "Use the lower Deception route and Inspiration if necessary to obtain Lump's War Horn.",
+    "avoid": "Do not spend a level-3 party on the ogre fight for marginal XP.",
+    "why": "The horn is an emergency resource for a dangerous surface encounter.",
+    "rewards": ["Lump's War Horn", "Warped Headband of Intellect after the horn has paid for itself"],
+    "completionChecks": ["Lump's War Horn obtained or ogres deliberately declined"],
+    "prerequisites": ["walk-drow-scouting"],
+    "markerId": "fight-blighted-village",
+    "decision": {
+      "prompt": "Recruit or fight Lump's group?",
+      "recommended": {
+        "label": "Recruit them with Deception",
+        "benefits": ["Provides an emergency summon", "Avoids a risky early fight"],
+        "costs": ["May consume Inspiration", "The horn is limited-use"]
+      },
+      "alternatives": [
+        {
+          "label": "Fight the ogres now",
+          "benefits": ["Immediate XP and headband loot"],
+          "costs": ["Higher early-run risk", "Loses the emergency summon"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "reddit"
+  },
+  {
+    "id": "walk-save-barcus",
+    "order": 13,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Save Barcus at the windmill",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Blighted Village windmill",
+    "minimumLevel": 3,
+    "summary": "Talk the goblins down, enter the windmill, and pull the BRAKE lever.",
+    "avoid": "Do not pull Release Brake; it kills Barcus.",
+    "why": "Preserves Barcus and his later Ironhand content.",
+    "completionChecks": ["Barcus released alive"],
+    "prerequisites": ["walk-drow-scouting"],
+    "markerId": "fight-blighted-village",
+    "decision": {
+      "prompt": "Which windmill control?",
+      "recommended": {
+        "label": "BRAKE",
+        "benefits": ["Saves Barcus", "Preserves later quests"],
+        "costs": []
+      },
+      "alternatives": [
+        {
+          "label": "Release Brake",
+          "benefits": ["None for an Honor safety route"],
+          "costs": ["Kills Barcus immediately"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-apothecary-cellar",
+    "order": 14,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Open the Apothecary's Cellar and loot the lab",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Apothecary's Cellar",
+    "area": "Blighted Village",
+    "minimumLevel": 4,
+    "summary": "Clear isolated village groups, enter through the ornate mirror, disarm the lab, and collect the unique scroll, Bracers of Defence, Basilisk Oil, and tome.",
+    "avoid": "Do not pull the whole village or open every cellar coffin at once.",
+    "why": "The lab contains three separate permanent-power decisions that should not be lost inside one generic loot checkbox.",
+    "rewards": ["Bracers of Defence", "Basilisk Oil", "Scroll of Summon Quasit", "Necromancy of Thay"],
+    "completionChecks": ["Village micro-fights resolved", "Ornate mirror passed", "Unique quasit scroll secured", "Bracers and Basilisk Oil checked", "Tome secured"],
+    "prerequisites": ["walk-drow-scouting", "walk-save-barcus"],
+    "checkpointId": "fight-blighted-village",
+    "markerId": "fight-blighted-village",
+    "source": "steam"
+  },
+  {
+    "id": "walk-shovel-quasit",
+    "order": 15,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Make Shovel a permanent familiar",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Apothecary's Cellar",
+    "area": "Necromancer's laboratory",
+    "minimumLevel": 4,
+    "summary": "Choose the long-term owner before using the unique scroll. Use the reviewed dialogue route on an eligible Warlock, Wizard, or Sorcerer, or scribe it on the Wizard who will keep that class level.",
+    "avoid": "Do not consume the unique scroll casually or assume two characters can learn it; Patch 8 allows one permanent owner.",
+    "why": "Shovel is a reusable invisible scout and encounter trigger, including for the Spectator setup.",
+    "rewards": ["Find Familiar: Cheeky Quasit once per Short Rest"],
+    "completionChecks": ["Permanent owner chosen", "Find Familiar: Cheeky Quasit appears in that character's spellbook", "Shovel can be resummoned after dismissal or death"],
+    "prerequisites": ["walk-apothecary-cellar"],
+    "markerId": "fight-blighted-village",
+    "decision": {
+      "prompt": "Who should permanently own Shovel?",
+      "recommended": {
+        "label": "The long-term caster who will scout",
+        "benefits": ["Reusable invisibility scout", "Safe remote encounter trigger", "Persists through short-rest resummons"],
+        "costs": ["Only one permanent owner on current patches"]
+      },
+      "alternatives": [
+        {
+          "label": "Scribe it on a Wizard",
+          "benefits": ["Direct spellbook access"],
+          "costs": ["Access is lost while the character has no Wizard level"]
+        },
+        {
+          "label": "Use once and move on",
+          "benefits": ["Fastest resolution"],
+          "costs": ["Permanently loses a reusable Act 1 scouting tool"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "authority": "guide_fact",
+    "source": "wiki_shovel"
+  },
+  {
+    "id": "walk-goblin-camp-buffs",
+    "order": 16,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Collect goblin-camp access and permanent buffs",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Shattered Sanctum",
+    "area": "Goblin Camp",
+    "minimumLevel": 3,
+    "summary": "Handle the brand, Abdirak, Volo, Liam, traders, and desired camp conversations before hostility.",
+    "avoid": "Do not use Friends during Abdirak's ritual; broken concentration can end the performance.",
+    "why": "These interactions disappear or become dangerous after Dror Ragzlin dies.",
+    "completionChecks": ["Desired brand/buff obtained", "Volo and Liam resolved", "Vendors checked"],
+    "prerequisites": ["walk-drow-scouting"],
+    "decision": {
+      "prompt": "Accept the Absolute's Brand?",
+      "recommended": {
+        "label": "Take it for the safety route",
+        "benefits": ["Unlocks branded dialogue and item effects", "Can bypass later checks"],
+        "costs": ["A visible role-play choice some characters may reject"]
+      },
+      "alternatives": [
+        {
+          "label": "Refuse the brand",
+          "benefits": ["Preserves a non-Absolute role-play choice"],
+          "costs": ["Loses branded shortcuts and item bonuses"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "reddit"
+  },
+  {
+    "id": "walk-gut-private",
+    "order": 17,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Resolve Priestess Gut in isolation",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Shattered Sanctum",
+    "area": "Priestess Gut's chamber",
+    "minimumLevel": 3,
+    "summary": "Meet Gut privately and use Silence/burst, or deliberately allow her capture route if compatible with your character.",
+    "avoid": "Do not let her call the whole sanctum.",
+    "why": "Removing Gut early is much safer than fighting all three leaders together.",
+    "completionChecks": ["Gut resolved", "Her chamber and parasite looted"],
+    "prerequisites": ["walk-goblin-camp-buffs"],
+    "source": "sheet"
+  },
+  {
+    "id": "walk-waukeens-rest",
+    "order": 18,
+    "phase": "Safe surface scouting",
+    "phaseOrder": 3,
+    "title": "Rescue Waukeen's Rest immediately",
+    "kind": "exploration",
+    "importance": "required",
+    "region": "Wilderness",
+    "area": "Waukeen's Rest",
+    "minimumLevel": 3,
+    "summary": "Once the fire is triggered, rescue Florrick and Benryn before resting or fast travel; take the preferred reward.",
+    "avoid": "Do not leave the area after approaching the burning inn.",
+    "why": "The survivors die if the triggered fire state advances.",
+    "rewards": ["The Spellsparkler, Joltshooter, or Sparky Points", "Hamarhraft"],
+    "completionChecks": ["Counsellor Florrick rescued", "Benryn resolved", "Reward chosen"],
+    "prerequisites": ["walk-drow-scouting"],
+    "source": "wiki"
+  },
+  {
+    "id": "walk-bugbear-assassin",
+    "order": 19,
+    "phase": "Level 3 cleanup",
+    "phaseOrder": 4,
+    "title": "Stop the grove bugbear assassin",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Emerald Grove overlook",
+    "minimumLevel": 3,
+    "summary": "Climb above the grove entrance and interrupt the assassination before another long rest.",
+    "avoid": "Do not leave Nadira's encounter triggered and unresolved.",
+    "why": "A small isolated fight preserves an NPC and grants safe XP.",
+    "completionChecks": ["Nadira survived", "Bugbear defeated"],
+    "prerequisites": ["walk-grove-entrance"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-harpies",
+    "order": 20,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Save Mirkon from the harpies",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Emerald Grove, Secluded Cove",
+    "minimumLevel": 4,
+    "summary": "Pre-cast Calm Emotions or use Silence, protect Mirkon, and focus the singing harpy.",
+    "avoid": "Do not long rest after Investigate the Beach begins.",
+    "why": "Protects Mirkon and prevents Luring Song from breaking the formation.",
+    "rewards": ["Ring of Colour Spray", "Mirkon's later tiefling-child access"],
+    "completionChecks": ["Mirkon survived", "Investigate the Beach resolved"],
+    "prerequisites": ["walk-grove-entrance"],
+    "checkpointId": "fight-harpies",
+    "markerId": "fight-harpies",
+    "incident": {
+      "trigger": "Multiple characters fail against Luring Song before the singer is controlled.",
+      "safeActions": ["Reach level 4", "Pre-cast Calm Emotions or place Silence", "Protect Mirkon and focus the active singer"],
+      "never": "Start this fight at level 2 or after beginning Investigate the Beach without the control spell ready.",
+      "escape": "Break line of sight and move unaffected characters back toward the grove path; do not chase across the cove.",
+      "honorDelta": "Failed control can deny the party's actions before it can stabilize.",
+      "postFight": ["Confirm Mirkon is alive and the beach quest resolved before resting"],
+      "authority": "guide_fact",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/1l3zkjx/worst_honour_mode_run_ever/"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-redcaps",
+    "order": 21,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Clear the Sunlit Wetlands redcaps",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Sunlit Wetlands",
+    "minimumLevel": 4,
+    "summary": "Start from range, hold the choke, and remove redcap mages before melee closes.",
+    "avoid": "Do not cross trapped terrain as a grouped party.",
+    "why": "Opens the swamp route and safe access to the Kagha evidence path.",
+    "completionChecks": ["Redcaps defeated", "Swamp route open"],
+    "prerequisites": ["walk-drow-scouting"],
+    "checkpointId": "fight-redcaps",
+    "markerId": "fight-redcaps",
+    "source": "sheet"
+  },
+  {
+    "id": "walk-wood-woads",
+    "order": 22,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Get Kagha's evidence from the sanctuary",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Sunlit Wetlands tree",
+    "minimumLevel": 4,
+    "summary": "Fight across the water, stop wood-woad regeneration with fire, and avoid mephit death chains.",
+    "avoid": "Do not bunch the party around dying mud mephits.",
+    "why": "The letter enables a safer grove outcome before the idol or leader resolution.",
+    "rewards": ["The Sparkle Hands", "Kagha evidence"],
+    "completionChecks": ["Guardians defeated", "Kagha evidence collected"],
+    "prerequisites": ["walk-redcaps"],
+    "checkpointId": "fight-wood-woads",
+    "markerId": "fight-wood-woads",
+    "source": "sheet"
+  },
+  {
+    "id": "walk-expose-kagha",
+    "order": 23,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Expose Kagha before touching the idol",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Emerald Grove",
+    "minimumLevel": 4,
+    "summary": "Return with the evidence and resolve Kagha's confrontation before any idol theft.",
+    "avoid": "Stealing the idol during the ritual can start a tiefling massacre.",
+    "why": "Stops the ritual and preserves safer quest branches.",
+    "completionChecks": ["Kagha exposed", "Ritual stopped"],
+    "prerequisites": ["walk-wood-woads"],
+    "dependencies": [
+      {
+        "stepId": "walk-wood-woads",
+        "kind": "completion_required",
+        "reason": "Collect the Shadow Druid letter after resolving the mud mephit and wood woad sanctuary challenge."
+      }
+    ],
+    "decision": {
+      "prompt": "Expose Kagha or steal the idol immediately?",
+      "recommended": {
+        "label": "Expose Kagha first",
+        "benefits": ["Stops the ritual safely", "Preserves the tieflings", "Keeps later idol choices open"],
+        "costs": ["Requires the swamp detour"]
+      },
+      "alternatives": [
+        {
+          "label": "Steal during the ritual",
+          "benefits": ["Faster access to the idol"],
+          "costs": ["Can trigger irreversible violence in the grove"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-owlbear",
+    "order": 24,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Choose the owlbear outcome deliberately",
+    "kind": "major_fight",
+    "importance": "optional",
+    "region": "Owlbear Nest",
+    "area": "Owlbear Nest",
+    "minimumLevel": 4,
+    "summary": "Avoid the fight, or enter spread with Silence and focus one adult while protecting the cub.",
+    "avoid": "If the cub remains hostile after the adults die, flee instead of killing it.",
+    "why": "The cub is a camp outcome; the fight itself is not required.",
+    "rewards": ["Owlbear Egg", "Head of a Broken Spear for Vision of the Absolute"],
+    "completionChecks": ["Encounter avoided or resolved", "Cub survived if desired"],
+    "prerequisites": ["walk-drow-scouting"],
+    "checkpointId": "fight-owlbear",
+    "markerId": "fight-owlbear",
+    "decision": {
+      "prompt": "Fight or leave the owlbears?",
+      "recommended": {
+        "label": "Avoid combat unless you want the XP/cub route",
+        "benefits": ["Lowest run risk", "Keeps the cub outcome available"],
+        "costs": ["Defers or loses the encounter XP"]
+      },
+      "alternatives": [
+        {
+          "label": "Fight with Silence and spread formation",
+          "benefits": ["Encounter XP", "Can progress the cub recruitment path"],
+          "costs": ["Honor Mode adds the second owlbear", "Area damage can kill the cub"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "incident": {
+      "trigger": "Combat begins and the mother calls the second adult owlbear.",
+      "safeActions": ["Spread before combat", "Use Silence to prevent the call when fighting", "Focus one adult without catching the cub in area damage"],
+      "never": "Assume the Tactician encounter contains only one adult or kill the cub after the adults fall.",
+      "escape": "Use the cave mouth as the retreat line and flee if the cub remains hostile.",
+      "honorDelta": "Honor Mode adds the owlbear mate when the mother's call succeeds.",
+      "postFight": ["Confirm the cub's outcome before leaving the cave"],
+      "authority": "guide_fact",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/18bxm1q/honour_mode_run_ended_in_the_stupidest_way/"
+    },
+    "riskReward": {
+      "reward": "Encounter XP and the owlbear-cub recruitment path.",
+      "risk": "Two adults, poor cave spacing, and accidental cub damage.",
+      "skipCost": "Less XP; the cub can still remain available through the goblin outcome.",
+      "returnBy": "Resolve before closing the goblin-camp phase if you want deliberate control of the outcome."
+    },
+    "source": "tavern"
+  },
+  {
+    "id": "walk-spider-matriarch",
+    "order": 25,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Clear the Phase Spider Matriarch",
+    "kind": "major_fight",
+    "importance": "recommended",
+    "region": "Whispering Depths",
+    "area": "Whispering Depths",
+    "minimumLevel": 4,
+    "summary": "Destroy eggs unseen, burn the web beneath her for fall damage, and bring fire or acid for Enwebbed.",
+    "avoid": "Do not rely on pushing her into the chasm; keep an exit from the web bridges.",
+    "why": "Large surface XP and a controlled boss when its setup is done first.",
+    "rewards": ["Dark Amethyst", "Poisoner's Robe"],
+    "completionChecks": ["Egg clutches handled", "Matriarch defeated", "Dark Amethyst collected", "Poisoner's Robe checked"],
+    "prerequisites": ["walk-apothecary-cellar"],
+    "checkpointId": "fight-spider-matriarch",
+    "markerId": "fight-spider-matriarch",
+    "incident": {
+      "trigger": "A character becomes Enwebbed, spiderlings surround the party, or a web bridge collapses under the wrong target.",
+      "safeActions": ["Destroy egg clutches before combat", "Carry fire or acid to remove Enwebbed", "Keep the retreat side of each web bridge clear"],
+      "never": "Jump into the Underdark without Feather Fall or rely on a chasm push as the only boss plan.",
+      "escape": "Retreat through the upper cave route; use Feather Fall before any intentional Underdark descent.",
+      "honorDelta": "Attacking her offspring can inflict a delayed Enwebbed cocoon that bursts for massive damage.",
+      "postFight": ["Cast Feather Fall before using the central pit"],
+      "authority": "guide_fact",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/1r8fjhy/honour_mode_ended/"
+    },
+    "riskReward": {
+      "reward": "Large surface XP, poison loot, and an Underdark entrance.",
+      "risk": "Cocoon burst, spiderling action economy, and lethal falls.",
+      "skipCost": "Lose optional XP and loot; other Underdark entrances remain.",
+      "returnBy": "Available until leaving Act 1."
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-necromancy-thay",
+    "order": 26,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Assign and preserve the Necromancy of Thay",
+    "kind": "decision",
+    "importance": "recommended",
+    "region": "Apothecary's Cellar",
+    "area": "Necromancer's laboratory",
+    "minimumLevel": 4,
+    "summary": "Insert the Dark Amethyst, give the tome to its permanent reader, stack Wisdom-save support, and attempt the three pages only when the reader is prepared.",
+    "avoid": "Do not sell, destroy, or hand the opened tome to a temporary reader; it binds to that character and is needed for its Act 3 payoff.",
+    "why": "The tome can grant permanent Wisdom utility now and unlock Danse Macabre later.",
+    "rewards": ["Speak with Dead", "Forbidden Knowledge: +1 Wisdom saves and checks", "Act 3 Danse Macabre path"],
+    "completionChecks": ["Dark Amethyst inserted", "Permanent reader chosen", "Page outcomes recorded", "Tome kept for Act 3"],
+    "prerequisites": ["walk-apothecary-cellar", "walk-spider-matriarch"],
+    "markerId": "fight-blighted-village",
+    "decision": {
+      "prompt": "What should happen to the tome?",
+      "recommended": {
+        "label": "Read it on the chosen long-term character and preserve it",
+        "benefits": ["Speak with Dead access", "+1 Wisdom saves and checks from Forbidden Knowledge", "Preserves the Act 3 Danse Macabre route"],
+        "costs": ["Three escalating Wisdom saves", "Failed saves can curse the reader"]
+      },
+      "alternatives": [
+        {
+          "label": "Give it to Astarion",
+          "benefits": ["Astarion approval and story context"],
+          "costs": ["The tome becomes locked to him as its reader"]
+        },
+        {
+          "label": "Destroy it with Radiant damage",
+          "benefits": ["Removes the tome for role-play reasons"],
+          "costs": ["Spawns three hostile Shadows", "Loses all current and Act 3 book rewards"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "authority": "guide_fact",
+    "source": "wiki_thay"
+  },
+  {
+    "id": "walk-false-paladins",
+    "order": 27,
+    "phase": "Level 4 surface",
+    "phaseOrder": 5,
+    "title": "Ambush the false paladins",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Risen Road tollhouse",
+    "minimumLevel": 4,
+    "summary": "Separate the trader on the balcony, then burst Anders before his smites remove a character.",
+    "avoid": "Do not begin grouped in Anders' melee range.",
+    "why": "Resolves Karlach's immediate threat and yields the Sword of Justice.",
+    "rewards": ["Sword of Justice"],
+    "completionChecks": ["Anders and allies defeated", "Karlach quest updated"],
+    "prerequisites": ["walk-scratch-karlach"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-gnoll-packs",
+    "order": 28,
+    "phase": "Level 5 surface",
+    "phaseOrder": 6,
+    "title": "Split the hyenas and gnolls into separate pulls",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Risen Road",
+    "minimumLevel": 5,
+    "summary": "Kill transforming hyenas first, approach Flind from high ground, and use the tadpole option when available.",
+    "avoid": "Do not let the two groups chain into one action-economy loss.",
+    "why": "Hyena Ears become Potions of Speed; Flind guards the shipment route.",
+    "rewards": ["Shattered Flail", "Hyena Ears for Potions of Speed"],
+    "completionChecks": ["Hyena pack cleared", "Flind resolved", "Hyena Ears looted"],
+    "prerequisites": ["walk-false-paladins"],
+    "checkpointId": "fight-gnolls",
+    "markerId": "fight-gnolls",
+    "source": "sheet"
+  },
+  {
+    "id": "walk-shipment-choice",
+    "order": 29,
+    "phase": "Level 5 surface",
+    "phaseOrder": 6,
+    "title": "Choose the Zhentarim shipment outcome",
+    "kind": "decision",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Risen Road cave",
+    "minimumLevel": 5,
+    "summary": "Keep the chest sealed if you want the safest Zhentarim vendor route and Titanstring access.",
+    "avoid": "Do not carry an opened/stolen chest into the hideout without expecting hostility or a trap.",
+    "why": "This choice changes the hideout reception and special stock.",
+    "rewards": ["Harold", "Titanstring Bow vendor access"],
+    "completionChecks": ["Shipment outcome chosen deliberately"],
+    "prerequisites": ["walk-gnoll-packs"],
+    "markerId": "fight-gnolls",
+    "decision": {
+      "prompt": "Open the shipment or deliver it sealed?",
+      "recommended": {
+        "label": "Keep it sealed and complete the delivery",
+        "benefits": ["Preserves the special Zhentarim stock", "Supports the Titanstring Bow route", "Avoids the chest betrayal state"],
+        "costs": ["You do not take the flask contents now"]
+      },
+      "alternatives": [
+        {
+          "label": "Open or steal the chest",
+          "benefits": ["Immediate access to its contents"],
+          "costs": ["Closes the clean delivery reward", "Can make the hideout encounter lethal"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-zhentarim-hideout",
+    "order": 30,
+    "phase": "Level 5 surface",
+    "phaseOrder": 6,
+    "title": "Enter the Zhentarim Hideout with one scout",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Zhentarim Hideout",
+    "minimumLevel": 5,
+    "summary": "Send one character past the explosive entrance first, resolve the shipment, and shop before provoking anyone.",
+    "avoid": "Do not cluster the party beside smokepowder barrels or fight from the upper landing.",
+    "why": "The hideout can wipe a grouped party through scripted barrel ignition.",
+    "rewards": ["Titanstring Bow", "Giantbreaker", "Gloves of Thievery"],
+    "completionChecks": ["Hideout entered safely", "Desired special stock purchased"],
+    "prerequisites": ["walk-shipment-choice"],
+    "source": "reddit"
+  },
+  {
+    "id": "walk-goblin-leaders",
+    "order": 31,
+    "phase": "Level 5 surface",
+    "phaseOrder": 6,
+    "title": "Resolve Minthara, then kill Dror last",
+    "kind": "major_fight",
+    "importance": "required",
+    "region": "Shattered Sanctum",
+    "area": "Goblin Camp",
+    "minimumLevel": 5,
+    "summary": "Finish all conversations, secure the upper escape, remove drums, resolve Minthara deliberately, and isolate Dror's room.",
+    "avoid": "Dror's death turns the camp hostile; do not leave through the lower front door.",
+    "why": "This is the surface quest gate and advances the tiefling state.",
+    "completionChecks": ["Gut resolved", "Minthara outcome chosen", "Dror defeated", "Halsin and prisoners resolved"],
+    "prerequisites": ["walk-harpies", "walk-expose-kagha", "walk-goblin-camp-buffs"],
+    "checkpointId": "fight-goblin-leaders",
+    "markerId": "fight-goblin-leaders",
+    "decision": {
+      "prompt": "What must be settled before Dror dies?",
+      "recommended": {
+        "label": "Finish camp/grove content and choose Minthara's outcome first",
+        "benefits": ["Preserves desired prisoners, buffs, vendors, and companion branches", "Keeps an escape route available"],
+        "costs": ["Requires a deliberate pre-fight checklist"]
+      },
+      "alternatives": [
+        {
+          "label": "Kill Dror immediately",
+          "benefits": ["Fast leader completion"],
+          "costs": ["Entire camp becomes hostile", "Unresolved conversations and choices can be lost"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-auntie-ethel",
+    "order": 32,
+    "phase": "Level 5 surface",
+    "phaseOrder": 6,
+    "title": "Defeat Ethel and choose the hair tradeoff",
+    "kind": "major_fight",
+    "importance": "recommended",
+    "region": "Overgrown Tunnel",
+    "area": "Ancient Abode",
+    "minimumLevel": 5,
+    "summary": "Bring water and multi-hit attacks; stop damage below roughly 20 HP if you want the hair bargain.",
+    "avoid": "Do not cast Friends during the bargain or accidentally kill her before her turn.",
+    "why": "The hair is a permanent +1 ability reward, but requires leaving Ethel alive for the bargain.",
+    "rewards": ["Auntie Ethel's Hair: permanent +1 ability", "Staff of Crones"],
+    "completionChecks": ["Mayrina outcome chosen", "Ethel defeated or bargained", "Hair collected if desired"],
+    "prerequisites": ["walk-redcaps"],
+    "checkpointId": "fight-auntie-ethel",
+    "markerId": "fight-auntie-ethel",
+    "decision": {
+      "prompt": "Take Ethel's hair or finish the kill?",
+      "recommended": {
+        "label": "Trigger the bargain if your build needs the +1",
+        "benefits": ["Permanent ability increase", "Can still save Mayrina with the correct dialogue"],
+        "costs": ["Ethel survives", "Requires damage control and a dialogue check"]
+      },
+      "alternatives": [
+        {
+          "label": "Kill Ethel",
+          "benefits": ["Clean role-play resolution", "No bargain check"],
+          "costs": ["Permanently loses the ability increase"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "incident": {
+      "trigger": "Spellcasting creates extra Ethel duplicates or uncontrolled damage prevents the hair bargain.",
+      "safeActions": ["Bring water for Mayrina", "Use multi-hit attacks to clear clones", "Stop damage near 20 HP if taking the hair"],
+      "never": "Cast Friends during the bargain or spend high-level spells without accounting for the extra clones.",
+      "escape": "Use the tunnel back toward the teahouse before the party is surrounded; invisibility is the last-resort exit.",
+      "honorDelta": "Casting spells triggers Wild Magic and higher-level spells create more Ethel duplicates.",
+      "postFight": ["Confirm Mayrina's state and collect the hair before leaving"],
+      "authority": "guide_fact",
+      "sourceUrl": "https://docs.google.com/spreadsheets/d/1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
+    },
+    "riskReward": {
+      "reward": "Permanent +1 ability hair and encounter loot.",
+      "risk": "Clone multiplication, cage failure, and losing control of the bargain threshold.",
+      "skipCost": "Permanently lose the hair if Ethel dies; deferring retains the encounter.",
+      "returnBy": "Complete before leaving Act 1 if the permanent bonus matters."
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-gith-patrol",
+    "order": 33,
+    "phase": "Level 5 surface",
+    "phaseOrder": 6,
+    "title": "Pass the gith patrol; defer the Mountain Pass",
+    "kind": "major_fight",
+    "importance": "required",
+    "region": "Wilderness",
+    "area": "Mountain Pass approach",
+    "minimumLevel": 5,
+    "summary": "Prefer dialogue with Lae'zel or Disguise Self: Gith; if it fails, fight from the bridge high ground.",
+    "avoid": "Do not enter the Mountain Pass until grove, rescue, and surface goals are settled.",
+    "why": "The patrol is the surface route gate; the pass itself advances unresolved quests.",
+    "completionChecks": ["Patrol passed or defeated", "Mountain Pass entry deliberately deferred"],
+    "prerequisites": ["walk-goblin-leaders"],
+    "checkpointId": "fight-gith-patrol",
+    "markerId": "fight-gith-patrol",
+    "decision": {
+      "prompt": "Talk or ambush the patrol?",
+      "recommended": {
+        "label": "Use the dialogue route",
+        "benefits": ["Avoids an extreme-damage fight", "Keeps resources for the Underdark"],
+        "costs": ["A failed check can begin combat from dialogue"]
+      },
+      "alternatives": [
+        {
+          "label": "Pre-position and fight",
+          "benefits": ["XP and loot"],
+          "costs": ["Gith multiattacks can delete a character", "Requires high-ground setup"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-enter-underdark",
+    "order": 34,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Enter through Selûne and secure the Myconid waypoint",
+    "kind": "exploration",
+    "importance": "required",
+    "region": "Underdark",
+    "area": "Selûnite Outpost to Myconid Colony",
+    "minimumLevel": 5,
+    "summary": "Use the outpost gate, avoid an uncontrolled minotaur pull, and unlock the colony before starting Glut's route.",
+    "avoid": "Do not chase the bulette into a second encounter.",
+    "why": "The colony is the safe hub for the entire regional loop.",
+    "completionChecks": ["Selûnite waypoint secured", "Myconid waypoint secured"],
+    "prerequisites": ["walk-gith-patrol"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-colony-tour",
+    "order": 35,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Finish the Myconid Colony setup",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Underdark",
+    "area": "Myconid Colony",
+    "minimumLevel": 5,
+    "summary": "Heal Thulla promptly, take Omeluum and Spaw's quests, shop Derryth/Blurg, then recruit Glut when ready to stay in-region.",
+    "avoid": "Do not leave poisoned Thulla through three long rests.",
+    "why": "Secures Boots of Speed, vendors, quests, and Glut's reanimation utility.",
+    "completionChecks": ["Thulla resolved", "Spaw and Omeluum quests taken", "Desired vendor gear checked"],
+    "prerequisites": ["walk-enter-underdark"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-minotaurs",
+    "order": 36,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Clear the minotaurs with elevation or Glut",
+    "kind": "mini_fight",
+    "importance": "recommended",
+    "region": "Underdark",
+    "area": "Selûnite Outpost approach",
+    "minimumLevel": 5,
+    "summary": "Use the gate/elevation and, if available, Glut's reanimated minotaur to split the fight.",
+    "avoid": "Do not line up where a charge can knock the party into a chasm.",
+    "why": "Opens Phalar Aluve and creates a strong Glut summon for the next fights.",
+    "completionChecks": ["Minotaurs defeated", "Safe route to Phalar Aluve open"],
+    "prerequisites": ["walk-colony-tour"],
+    "checkpointId": "fight-underdark-minotaurs",
+    "markerId": "fight-underdark-minotaurs",
+    "source": "sheet"
+  },
+  {
+    "id": "walk-phalar-aluve",
+    "order": 37,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Collect Phalar Aluve",
+    "kind": "pickup",
+    "importance": "recommended",
+    "region": "Underdark",
+    "area": "Stone near the minotaurs",
+    "minimumLevel": 5,
+    "summary": "Pull the sword from the stone and assign its Sing/Shriek role before the next boss.",
+    "avoid": "Do not leave the area after clearing the approach without checking it.",
+    "why": "Its short-rest aura remains valuable well beyond Act 1.",
+    "completionChecks": ["Phalar Aluve collected and assigned"],
+    "prerequisites": ["walk-minotaurs"],
+    "source": "reddit"
+  },
+  {
+    "id": "walk-spectator",
+    "order": 38,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Prevent the Spectator surprise",
+    "kind": "major_fight",
+    "importance": "recommended",
+    "region": "Underdark",
+    "area": "Petrified drow cliff",
+    "minimumLevel": 5,
+    "summary": "Trigger from range with Shovel or Basilisk Oil, burst the Spectator, and damage charmed drow to free them.",
+    "avoid": "Do not walk the full party into the exposed trigger area.",
+    "why": "Setup removes the Spectator's strongest opening advantage.",
+    "rewards": ["Icy Helve from Dhourn", "The Spectator Eyes"],
+    "completionChecks": ["Spectator defeated", "Drow outcome resolved", "Icy Helve secured"],
+    "prerequisites": ["walk-minotaurs"],
+    "checkpointId": "fight-spectator",
+    "markerId": "fight-spectator",
+    "source": "sheet"
+  },
+  {
+    "id": "walk-bibberbang",
+    "order": 39,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Rescue Baelen and choose the Noblestalk owner",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Underdark",
+    "area": "Bibberbang Grotto",
+    "minimumLevel": 5,
+    "summary": "Use Mage Hand or Glut to deliver the pack, move the torch, then clear mushrooms without fire and retrieve the Noblestalk.",
+    "avoid": "Do not ignite the field before the Noblestalk is secured.",
+    "why": "The mushroom affects Derryth's later shop and personal-story alternatives.",
+    "completionChecks": ["Baelen resolved", "Noblestalk collected", "Recipient chosen"],
+    "prerequisites": ["walk-colony-tour"],
+    "decision": {
+      "prompt": "Who receives the Noblestalk?",
+      "recommended": {
+        "label": "Give it to Derryth for the commerce route",
+        "benefits": ["Preserves her later Noblestalk shop supply", "Completes the Myconid delivery cleanly"],
+        "costs": ["Forfeits alternate personal-story uses"]
+      },
+      "alternatives": [
+        {
+          "label": "Use it on another eligible character",
+          "benefits": ["Unlocks character-specific memory or story content"],
+          "costs": ["Loses Derryth's later shop benefit"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-hook-horrors",
+    "order": 40,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Clear Hook Horrors and take Sussur Bark",
+    "kind": "mini_fight",
+    "importance": "required",
+    "region": "Underdark",
+    "area": "Sussur Tree",
+    "minimumLevel": 5,
+    "summary": "Pull one horror at a time, chase Filro before Hypnotic Pattern, then collect bark and flowers.",
+    "avoid": "Do not wake the full nest while the bulette is active nearby.",
+    "why": "Completes the regional route and unlocks a Sussur weapon.",
+    "rewards": ["Icy Crystal from Filro", "Sussur Tree Bark"],
+    "completionChecks": ["Filro defeated", "Icy Crystal secured without a chasm kill", "Sussur Bark collected", "Route to beach open"],
+    "prerequisites": ["walk-minotaurs"],
+    "checkpointId": "fight-sussur-hook-horrors",
+    "markerId": "fight-sussur-hook-horrors",
+    "source": "sheet"
+  },
+  {
+    "id": "walk-arcane-tower",
+    "order": 41,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Power the Arcane Tower and pacify Bernard",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Underdark",
+    "area": "Arcane Tower",
+    "minimumLevel": 5,
+    "summary": "Use invisibility/Feather Fall to disable turrets, read the poetry, and use the learned responses on the roof.",
+    "avoid": "Do not fight Bernard without first checking the peaceful dialogue rewards.",
+    "why": "The pacifist path grants XP and preserves reward options at lower risk.",
+    "rewards": ["Club of Hill Giant Strength", "Guiding Light", "Mystra's Grace"],
+    "completionChecks": ["Tower powered", "Bernard pacified or deliberately fought", "Basement checked"],
+    "prerequisites": ["walk-colony-tour"],
+    "checkpointId": "fight-arcane-tower",
+    "markerId": "fight-arcane-tower",
+    "decision": {
+      "prompt": "Pacify or fight Bernard?",
+      "recommended": {
+        "label": "Use the poetry dialogue",
+        "benefits": ["Avoids a dangerous fight", "Preserves reward interactions", "Still grants exploration XP"],
+        "costs": ["Requires reading the correct books first"]
+      },
+      "alternatives": [
+        {
+          "label": "Fight Bernard",
+          "benefits": ["Combat XP and direct loot"],
+          "costs": ["Legendary leap punishes grouping", "Consumes resources for limited gain"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-duergar-glut",
+    "order": 42,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Clear the beach duergar, then resolve Glut",
+    "kind": "mini_fight",
+    "importance": "required",
+    "region": "Underdark",
+    "area": "Decrepit Village beach",
+    "minimumLevel": 5,
+    "summary": "Open on Gekh from stealth, bait Counterspell, move away from corpses, dismiss the spore servant, then choose Glut's outcome.",
+    "avoid": "Do not let Glut reanimate the duergar against you before his confrontation.",
+    "why": "Secures the boat route and cleanly ends the regional companion state.",
+    "rewards": ["Icy Metal from Xargrim's opened vault", "Shadow of Menzoberranzan from Spaw"],
+    "completionChecks": ["Gekh's group defeated", "Glut outcome chosen", "Spaw reward collected", "Xargrim's vault opened and Icy Metal secured", "Boat route open"],
+    "prerequisites": ["walk-hook-horrors"],
+    "decision": {
+      "prompt": "Support Spaw or Glut?",
+      "recommended": {
+        "label": "Use Glut's help, then refuse his coup",
+        "benefits": ["Gets the value of Animating Spores", "Preserves Spaw's colony rewards"],
+        "costs": ["Requires one additional fight with Glut"]
+      },
+      "alternatives": [
+        {
+          "label": "Side with Glut",
+          "benefits": ["Alternate colony outcome and rewards"],
+          "costs": ["Kills Spaw and changes the colony state"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "steam"
+  },
+  {
+    "id": "walk-mourning-frost",
+    "order": 43,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Assemble Mourning Frost before leaving the Underdark",
+    "kind": "pickup",
+    "importance": "recommended",
+    "region": "Underdark",
+    "area": "Petrified battlefield, Dread Hollow, and Myconid vault",
+    "minimumLevel": 5,
+    "summary": "Combine Dhourn's Icy Helve, Filro's Icy Crystal, and Xargrim's Icy Metal after Spaw opens the colony vault.",
+    "avoid": "Do not chasm-kill Filro or leave Dhourn and Xargrim unlooted; losing any one component blocks the staff.",
+    "why": "This closes three already-recommended Underdark encounters into one build-defining cold staff.",
+    "rewards": ["Mourning Frost"],
+    "completionChecks": ["Icy Helve collected", "Icy Crystal collected", "Icy Metal collected", "Mourning Frost assembled and assigned"],
+    "prerequisites": ["walk-spectator", "walk-hook-horrors", "walk-duergar-glut"],
+    "markerId": "fight-spectator",
+    "authority": "guide_fact",
+    "source": "wiki_mourning"
+  },
+  {
+    "id": "walk-sussur-weapon",
+    "order": 44,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Forge the party's Sussur weapon",
+    "kind": "pickup",
+    "importance": "recommended",
+    "region": "Wilderness",
+    "area": "Blighted Village blacksmith forge",
+    "minimumLevel": 5,
+    "summary": "On the single surface return, combine Sussur Bark with the forge, then add the plain dagger, greatsword, or sickle the current party will actually carry.",
+    "avoid": "Do not use a magical base weapon or leave Act 1 with the bark uncrafted; the recipe accepts a plain weapon only.",
+    "why": "Silence on hit is a compact anti-caster tool and the craft closes the Underdark loop without repeated backtracking.",
+    "rewards": ["Sussur Dagger", "Sussur Greatsword", "Sussur Sickle"],
+    "completionChecks": ["Highcliff's Blueprints read", "Sussur Bark inserted into the lit forge", "One Sussur weapon forged and assigned"],
+    "prerequisites": ["walk-hook-horrors"],
+    "dependencies": [
+      {
+        "stepId": "walk-hook-horrors",
+        "kind": "completion_required",
+        "reason": "Collect Sussur Bark from the tree before returning to the Blighted Village forge."
+      }
+    ],
+    "markerId": "fight-blighted-village",
+    "decision": {
+      "prompt": "Which Sussur weapon fits the current party?",
+      "recommended": {
+        "label": "Forge the weapon a current party member will keep equipped",
+        "benefits": ["Reliable Silence-on-hit utility", "Avoids crafting an unused weapon"],
+        "costs": ["Only one of the three weapons can be forged"]
+      },
+      "alternatives": [
+        {
+          "label": "Default to the dagger for flexible utility",
+          "benefits": ["Finesse and light properties fit more loadouts"],
+          "costs": ["Lower base damage than the greatsword"]
+        },
+        {
+          "label": "Skip the craft",
+          "benefits": ["Avoids the single waypoint return"],
+          "costs": ["Permanently loses the Act 1 Silence weapon"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "authority": "guide_fact",
+    "source": "wiki_sussur"
+  },
+  {
+    "id": "walk-grymforge-arrival",
+    "order": 45,
+    "phase": "Grymforge",
+    "phaseOrder": 8,
+    "title": "Enter Grymforge without starting the Nere clock",
+    "kind": "exploration",
+    "importance": "required",
+    "region": "Grymforge",
+    "area": "Main dock and ruins",
+    "minimumLevel": 5,
+    "summary": "Use drow/branded dialogue on the boat, collect dead-gnome and ruin loot, and avoid the main cave-in until ready.",
+    "avoid": "Do not interact with the cave-in and then long rest or fast travel.",
+    "why": "The cave-in starts Nere's one-rest deadline.",
+    "completionChecks": ["Grymforge waypoint secured", "Callarduran ring checked", "Cave-in not triggered prematurely"],
+    "prerequisites": ["walk-duergar-glut"],
+    "incident": {
+      "trigger": "A moving platform fails to carry every grouped party member.",
+      "safeActions": ["Ungroup before every Grymforge platform", "Send one character first", "Secure the destination waypoint before regrouping"],
+      "never": "Put all four characters on a moving platform at once.",
+      "escape": "If a rider desynchronizes, stop moving the remaining party and use the secured waypoint or a single mobility character to recover.",
+      "honorDelta": "This is an engine-risk protocol rather than an Honor rule change; a full-party fall still ends the run.",
+      "postFight": [],
+      "authority": "assistant_suggestion",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/1gdm7z4/our_honor_mode_run_was_wiped_by_elevator_physics/"
+    },
+    "source": "steam"
+  },
+  {
+    "id": "walk-philomeen",
+    "order": 46,
+    "phase": "Grymforge",
+    "phaseOrder": 8,
+    "title": "Visit Philomeen before freeing Nere",
+    "kind": "dialogue",
+    "importance": "required",
+    "region": "Grymforge",
+    "area": "Philomeen's refuge",
+    "minimumLevel": 5,
+    "summary": "Approach with a split party or invisibility and resolve the runepowder conversation before the cave-in fight.",
+    "avoid": "Keep one character safely away; the barrel explosion can end the run.",
+    "why": "Secures runepowder and prevents an unresolved explosive NPC state.",
+    "completionChecks": ["Philomeen resolved", "Runepowder outcome recorded"],
+    "prerequisites": ["walk-grymforge-arrival"],
+    "incident": {
+      "trigger": "Philomeen reaches the runepowder detonation after a failed or hostile dialogue outcome.",
+      "safeActions": ["Leave most of the party outside", "Remove torches and flaming weapons", "Carry Inspiration and approach with the chosen speaker only"],
+      "never": "Put all four characters inside the blast room or improvise a theft after dialogue turns hostile.",
+      "escape": "The outside characters are the recovery plan; the speaker should disengage instead of contesting the barrel.",
+      "honorDelta": "A failed dialogue can detonate enough runepowder to wipe every character in the room.",
+      "postFight": ["Confirm the runepowder outcome before leaving Philomeen"],
+      "authority": "assistant_suggestion",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/18hb8jv/my_first_embarrassing_death_in_honor_mode/"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-brithvar-eye",
+    "order": 47,
+    "phase": "Grymforge",
+    "phaseOrder": 8,
+    "title": "Recruit Brithvar and remove the Scrying Eye",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Grymforge",
+    "area": "Main hall",
+    "minimumLevel": 5,
+    "summary": "Make the deal, destroy the eye out of sight, and confirm Brithvar's faction before opening the cave-in.",
+    "avoid": "Do not fight Nere and every duergar as one hostile group.",
+    "why": "Allied duergar reverse the fight's action economy.",
+    "completionChecks": ["Scrying Eye destroyed", "Brithvar alliance confirmed"],
+    "prerequisites": ["walk-grymforge-arrival"],
+    "decision": {
+      "prompt": "Use Brithvar or clear the duergar first?",
+      "recommended": {
+        "label": "Recruit Brithvar",
+        "benefits": ["Adds allies against Nere", "Reduces pre-fight attrition"],
+        "costs": ["Leaves slavers alive until the alliance resolves"]
+      },
+      "alternatives": [
+        {
+          "label": "Clear all duergar before Nere",
+          "benefits": ["Nere can be isolated completely"],
+          "costs": ["More fights and resource use before the timed rescue"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "steam"
+  },
+  {
+    "id": "walk-nere",
+    "order": 48,
+    "phase": "Grymforge",
+    "phaseOrder": 8,
+    "title": "Free and defeat Nere before resting",
+    "kind": "major_fight",
+    "importance": "required",
+    "region": "Grymforge",
+    "area": "Cave-in",
+    "minimumLevel": 5,
+    "summary": "Detonate from range, start dialogue before enemies heal, keep off the lava edges, and let allies absorb the action economy.",
+    "avoid": "After Nere is hit, do not feed physical attacks into his duplicate immunity and thunder retaliation.",
+    "why": "The gnomes and Nere die if the triggered deadline expires.",
+    "completionChecks": ["Nere resolved", "Gnomes saved if intended", "Head, tadpole, and boots checked"],
+    "prerequisites": ["walk-philomeen", "walk-brithvar-eye"],
+    "checkpointId": "fight-nere",
+    "markerId": "fight-nere",
+    "incident": {
+      "trigger": "The cave-in explosion leaves a damaging surface that a freed gnome walks through, turning neutral allies hostile.",
+      "safeActions": ["Detonate from range", "Enter turn-based mode after the blast", "Extinguish residual fire before freed NPCs begin pathing"],
+      "never": "Start Nere's dialogue while fire remains between the cave-in and the escaping gnomes.",
+      "escape": "Use invisibility or Misty Step toward the Grymforge waypoint; one survivor should leave instead of contesting a surprise full-room aggro.",
+      "honorDelta": "Nere's first physical hit creates duplicates; while one remains he ignores slashing, piercing, and bludgeoning damage.",
+      "postFight": ["Confirm the surviving gnomes' outcome before leaving Grymforge"],
+      "authority": "assistant_suggestion",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/1on1z4y/nere_fight_ruined_my_honor_mode_run_how/"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-mithral-moulds",
+    "order": 49,
+    "phase": "Grymforge",
+    "phaseOrder": 8,
+    "title": "Collect two Mithral Ore and choose two moulds",
+    "kind": "pickup",
+    "importance": "recommended",
+    "region": "Grymforge",
+    "area": "Adamantine Forge route",
+    "minimumLevel": 5,
+    "summary": "Clear the mephits, collect both ore nodes, and decide the two forge outputs before starting Grym.",
+    "avoid": "Only two items can be forged; do not consume ore on an unplanned duplicate.",
+    "why": "The ore limit makes this an irreversible party-loadout choice.",
+    "completionChecks": ["Both ore nodes checked", "Two mould choices assigned to party members"],
+    "prerequisites": ["walk-grymforge-arrival"],
+    "decision": {
+      "prompt": "Which two adamantine items?",
+      "recommended": {
+        "label": "Assign the two outputs to current party roles before forging",
+        "benefits": ["Avoids duplicate or unused gear", "Matches the selected builds"],
+        "costs": ["Requires committing before later acts"]
+      },
+      "alternatives": [
+        {
+          "label": "Forge opportunistically",
+          "benefits": ["No planning delay"],
+          "costs": ["The two-ore limit makes a poor choice permanent"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-grym",
+    "order": 50,
+    "phase": "Grymforge",
+    "phaseOrder": 8,
+    "title": "Fight Grym only at level 6",
+    "kind": "major_fight",
+    "importance": "recommended",
+    "region": "Grymforge",
+    "area": "Adamantine Forge",
+    "minimumLevel": 6,
+    "summary": "Keep lava active, use bludgeoning damage, pre-position the lever role, and control Grym's target before using the hammer.",
+    "avoid": "Do not start without a plan to reapply Superheated or escape the lower platform.",
+    "why": "Level 6 and role assignment turn an extreme fight into a controlled forge puzzle.",
+    "rewards": ["Two chosen Adamantine items", "Grymskull Helm"],
+    "completionChecks": ["Grym defeated", "Two intended items forged"],
+    "prerequisites": ["walk-nere", "walk-mithral-moulds"],
+    "checkpointId": "fight-grym",
+    "markerId": "fight-grym",
+    "incident": {
+      "trigger": "Grym loses Superheated, changes target unexpectedly, or traps the party on the lower platform.",
+      "safeActions": ["Assign lava, lever, and damage roles before descending", "Keep one mobility escape resource", "Reapply Superheated before committing damage"],
+      "never": "Start the forge without a lower-platform escape plan or cluster everyone beside the hammer.",
+      "escape": "Use the preassigned mobility character to reach the platform controls; flee the lower platform rather than improvising through lava.",
+      "honorDelta": "Once per round, Grym retaliates against an attacker with thunder damage.",
+      "postFight": [],
+      "authority": "guide_fact",
+      "sourceUrl": "https://docs.google.com/spreadsheets/d/1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
+    },
+    "riskReward": {
+      "reward": "Two Adamantine items, Grym's helm, and substantial XP.",
+      "risk": "Extreme damage, lava, targeting volatility, and thunder retaliation.",
+      "skipCost": "Lose the forge rewards; the encounter is optional for Act 2 progression.",
+      "returnBy": "Finish before leaving Act 1 if the Adamantine items are part of the party plan."
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-mountain-pass-gate",
+    "order": 51,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Run the surface point-of-no-return check",
+    "kind": "gate",
+    "importance": "required",
+    "region": "Mountain Pass",
+    "area": "Rosymorn Monastery Trail entrance",
+    "minimumLevel": 6,
+    "summary": "Confirm grove, Waukeen's Rest, Barcus, Halsin, Sazza, and refugee outcomes before crossing.",
+    "avoid": "Do not accept the transition warning with unresolved surface rescues.",
+    "why": "Entering the pass silently fails multiple Act 1 quests.",
+    "completionChecks": ["Surface rescue checklist reviewed", "Desired grove outcome complete", "Party at least level 6"],
+    "prerequisites": ["walk-goblin-leaders", "walk-gith-patrol", "walk-grym"],
+    "source": "wiki"
+  },
+  {
+    "id": "walk-death-shepherds",
+    "order": 52,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Kill the Death Shepherds first",
+    "kind": "mini_fight",
+    "importance": "required",
+    "region": "Mountain Pass",
+    "area": "Rosymorn trail",
+    "minimumLevel": 6,
+    "summary": "Focus both shepherds before cleaning up ghouls so they cannot chain-resurrect the encounter.",
+    "avoid": "Do not spend turns on ghouls while a shepherd can revive them.",
+    "why": "Target order removes the encounter's only compounding failure loop.",
+    "completionChecks": ["Death Shepherds defeated", "Trail to monastery open"],
+    "prerequisites": ["walk-mountain-pass-gate"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-rosymorn-weapons",
+    "order": 53,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Collect the ceremonial weapons",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Mountain Pass",
+    "area": "Rosymorn Monastery",
+    "minimumLevel": 6,
+    "summary": "Clear the kobolds, resolve the eagles, and retrieve the mace, hammer, and battleaxe for the Dawnmaster puzzle.",
+    "avoid": "Do not let the eagles call reinforcements if dialogue fails.",
+    "why": "Enables Morninglord's Radiance and the Blood of Lathander route.",
+    "rewards": ["Dawnmaster's Crest", "Morninglord's Radiance"],
+    "completionChecks": ["Ceremonial weapons checked", "Dawnmaster puzzle resolved", "Dawnmaster's Crest secured"],
+    "prerequisites": ["walk-death-shepherds"],
+    "source": "steam"
+  },
+  {
+    "id": "walk-blood-of-lathander",
+    "order": 54,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Take the Blood of Lathander with the crest",
+    "kind": "pickup",
+    "importance": "recommended",
+    "region": "Crèche Y'llek",
+    "area": "Secret chamber beneath the crèche",
+    "minimumLevel": 6,
+    "summary": "Disable the force traps, reach the hidden chamber, insert the Dawnmaster's Crest, and then take the mace safely.",
+    "avoid": "Do not remove the mace without inserting the crest unless deliberately accepting the monastery-destruction escape sequence.",
+    "why": "The mace's blind aura, Sunbeam, and death-prevention passive remain exceptional through Act 2.",
+    "rewards": ["The Blood of Lathander"],
+    "completionChecks": ["Dawnmaster's Crest inserted", "The Blood of Lathander collected", "Mace assigned to its Act 2 carrier"],
+    "prerequisites": ["walk-rosymorn-weapons"],
+    "markerId": "fight-wargaz",
+    "decision": {
+      "prompt": "Use the crest or trigger the monastery weapon?",
+      "recommended": {
+        "label": "Insert the crest and take the mace safely",
+        "benefits": ["Keeps the monastery intact", "Avoids a timed party escape", "Secures the legendary mace"],
+        "costs": ["Requires completing the ceremonial-weapon puzzle"]
+      },
+      "alternatives": [
+        {
+          "label": "Take it without the crest",
+          "benefits": ["Skips the crest requirement"],
+          "costs": ["Starts the monastery-destruction countdown", "Can wipe the party during the escape"]
+        },
+        {
+          "label": "Leave the mace",
+          "benefits": ["Avoids the chamber entirely"],
+          "costs": ["Loses one of the strongest Act 2 weapons"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "authority": "guide_fact",
+    "source": "wiki_lathander"
+  },
+  {
+    "id": "walk-creche-tour",
+    "order": 55,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Shop and prepare before the infirmary",
+    "kind": "exploration",
+    "importance": "recommended",
+    "region": "Crèche Y'llek",
+    "area": "Crèche entrance and infirmary",
+    "minimumLevel": 6,
+    "summary": "Enter disguised as gith if useful, buy build gear, and prepare Inspiration plus Intelligence/Wisdom/Constitution save bonuses.",
+    "avoid": "Do not enter the zaith'isk checks without save bonuses and a plan for Lae'zel approval.",
+    "why": "Shopping and save preparation must happen before the crèche becomes hostile.",
+    "completionChecks": ["Trader checked", "Save bonuses and Inspiration prepared", "Tadpoles considered"],
+    "prerequisites": ["walk-rosymorn-weapons"],
+    "source": "sheet"
+  },
+  {
+    "id": "walk-zaithisk",
+    "order": 56,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Choose the zaith'isk occupant deliberately",
+    "kind": "dialogue",
+    "importance": "recommended",
+    "region": "Crèche Y'llek",
+    "area": "Crèche infirmary",
+    "minimumLevel": 6,
+    "summary": "Use the character prepared for every save, spend Inspiration instead of accepting a permanent penalty, and manage Lae'zel's approval deliberately.",
+    "avoid": "Do not enter with an unprepared character merely because the dialogue is available.",
+    "why": "The machine can impose permanent penalties or grant a major illithid-action benefit.",
+    "completionChecks": ["Zaith'isk occupant chosen", "Permanent outcome recorded", "Awakened benefit checked"],
+    "prerequisites": ["walk-creche-tour"],
+    "decision": {
+      "prompt": "Who enters the zaith'isk?",
+      "recommended": {
+        "label": "Use the character prepared to pass every save",
+        "benefits": ["Can secure the awakened illithid benefit", "Avoids permanent ability penalties"],
+        "costs": ["Consumes Inspiration and save resources"]
+      },
+      "alternatives": [
+        {
+          "label": "Let Lae'zel enter unprepared",
+          "benefits": ["Fits her preferred story path"],
+          "costs": ["Failed saves can impose permanent penalties"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "incident": {
+      "trigger": "A failed zaith'isk save reaches a permanent-penalty outcome.",
+      "safeActions": ["Pre-buff Intelligence, Wisdom, and Constitution saves", "Hold Inspiration for this conversation", "Use the character selected for the long-term illithid plan"],
+      "never": "Accept the machine with no Inspiration or save preparation.",
+      "escape": "Stop advancing the dialogue while rerolls remain; if the desired outcome is not essential, leave the machine unused.",
+      "honorDelta": "The dialogue is not a conventional fight, but its permanent penalties cannot be reloaded away in Honor Mode.",
+      "postFight": [],
+      "authority": "guide_fact",
+      "sourceUrl": "https://docs.google.com/spreadsheets/d/1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
+    },
+    "source": "sheet"
+  },
+  {
+    "id": "walk-vlaakith-audience",
+    "order": 57,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Survive Vlaakith's audience",
+    "kind": "dialogue",
+    "importance": "required",
+    "region": "Crèche Y'llek",
+    "area": "Inquisitor's Chamber",
+    "minimumLevel": 6,
+    "summary": "Show enough deference to keep the audience alive; accept the prism objective without challenging Vlaakith's power.",
+    "avoid": "Never tell Vlaakith to kill the prism occupant herself or openly dare her to prove her divinity.",
+    "why": "One hostile line can end the entire party without combat.",
+    "completionChecks": ["Vlaakith audience survived", "Astral Prism instruction understood"],
+    "prerequisites": ["walk-zaithisk"],
+    "decision": {
+      "prompt": "How should you answer Vlaakith?",
+      "recommended": {
+        "label": "Respond deferentially and accept the prism instruction",
+        "benefits": ["Avoids the instant party wipe", "Keeps the crèche route progressing"],
+        "costs": ["Temporarily complies with Vlaakith's demand"]
+      },
+      "alternatives": [
+        {
+          "label": "Challenge her power or tell her to do it herself",
+          "benefits": ["Defiant role-play response"],
+          "costs": ["Can trigger an immediate, unavoidable party wipe"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "incident": {
+      "trigger": "The player openly challenges Vlaakith or tells her to solve the prism problem herself.",
+      "safeActions": ["Choose deferential responses", "Accept the prism objective", "Save defiance for choices that do not provoke Wish"],
+      "never": "Select the line that tells Vlaakith to kill the occupant herself.",
+      "escape": "There is no combat escape after the fatal line; prevention is the only recovery plan.",
+      "honorDelta": "This dialogue can end the run instantly without initiative or a saving throw.",
+      "postFight": [],
+      "authority": "guide_fact",
+      "sourceUrl": "https://www.reddit.com/r/BaldursGate3/comments/1pi3isl/can_you_guys_share_some_honor_run_killing/"
+    },
+    "source": "reddit_dialogue"
+  },
+  {
+    "id": "walk-wargaz",
+    "order": 58,
+    "phase": "Mountain Pass and crèche",
+    "phaseOrder": 9,
+    "title": "Choose whether to fight or bypass W'wargaz",
+    "kind": "major_fight",
+    "importance": "optional",
+    "region": "Crèche Y'llek",
+    "area": "Inquisitor's Chamber",
+    "minimumLevel": 6,
+    "summary": "Long rest first and spread before dialogue; if fighting, remove W'wargaz within two rounds and control the psychic weapons.",
+    "avoid": "Do not enter grouped or let manifested weapons accumulate.",
+    "why": "This is the hardest Act 1 combat and can be bypassed with prepared invisibility.",
+    "completionChecks": ["Astral Prism conversation resolved", "W'wargaz defeated or escape route completed"],
+    "prerequisites": ["walk-vlaakith-audience"],
+    "checkpointId": "fight-wargaz",
+    "markerId": "fight-wargaz",
+    "decision": {
+      "prompt": "Fight the Inquisitor or leave invisibly?",
+      "recommended": {
+        "label": "Bypass with multiple invisibility sources if survival is the only goal",
+        "benefits": ["Avoids Act 1's highest-risk fight", "Preserves the run"],
+        "costs": ["Forfeits combat XP and direct loot"]
+      },
+      "alternatives": [
+        {
+          "label": "Fight at level 6+",
+          "benefits": ["XP, loot, and full encounter completion"],
+          "costs": ["He must be controlled or killed quickly", "Legendary weapons compound every attack"]
+        }
+      ],
+      "reversible": false,
+      "authority": "guide_fact"
+    },
+    "incident": {
+      "trigger": "The party enters grouped and W'wargaz compounds attacks into manifested psychic weapons.",
+      "safeActions": ["Long rest before the chamber", "Spread before dialogue ends", "Control or remove W'wargaz within two rounds"],
+      "never": "Feed attacks into the encounter without controlling the manifested weapons.",
+      "escape": "Use prepared invisibility sources to bypass or disengage; do not assume one potion covers the entire party.",
+      "honorDelta": "When W'wargaz or an ally is attacked, he can manifest a psychic weapon up to twice per round.",
+      "postFight": [],
+      "authority": "guide_fact",
+      "sourceUrl": "https://docs.google.com/spreadsheets/d/1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
+    },
+    "riskReward": {
+      "reward": "Combat XP, loot, and full encounter completion.",
+      "risk": "Act 1's highest-risk action-economy snowball.",
+      "skipCost": "Forfeit direct combat rewards while preserving the run.",
+      "returnBy": "Decide before making the crèche permanently hostile."
+    },
+    "source": "steam"
+  },
+  {
+    "id": "walk-act-two-gate",
+    "order": 59,
+    "phase": "Act 2 readiness",
+    "phaseOrder": 10,
+    "title": "Close the Act 1 ledger before advancing",
+    "kind": "gate",
+    "importance": "required",
+    "region": "Mountain Pass",
+    "area": "Act 2 transition",
+    "minimumLevel": 6,
+    "summary": "Review every skipped/revisit item, assign final Act 1 equipment, stock escape resources, and explicitly accept remaining optional losses.",
+    "avoid": "Do not advance with an unresolved critical timer or an accidental skip.",
+    "why": "The final review separates deliberate tradeoffs from forgotten content.",
+    "completionChecks": ["No critical timed event unresolved", "All skips deliberate", "Party builds and Act 1 gear reviewed", "Level 6 minimum met"],
+    "prerequisites": ["walk-mountain-pass-gate"],
+    "decision": {
+      "prompt": "Grind remaining optional Act 1 content or advance?",
+      "recommended": {
+        "label": "Advance once required goals and party readiness are green",
+        "benefits": ["Avoids unnecessary exposure to optional fights", "Keeps the run moving"],
+        "costs": ["Leaves some optional XP and loot behind"]
+      },
+      "alternatives": [
+        {
+          "label": "Clear every optional encounter",
+          "benefits": ["More XP and loot"],
+          "costs": ["Every extra fight adds wipe risk"]
+        }
+      ],
+      "reversible": false,
+      "authority": "assistant_suggestion"
+    },
+    "source": "steam"
+  }
+]
