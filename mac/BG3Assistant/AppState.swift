@@ -491,6 +491,15 @@ final class AppState: ObservableObject {
 
     func showPlannerNow() {
         plannerTab = .current
+        forceOverlay = true
+        overlayExpanded = true
+        showOverlay = true
+        syncOverlay()
+    }
+
+    func openSettings() {
+        plannerTab = .settings
+        forceOverlay = true
         overlayExpanded = true
         showOverlay = true
         syncOverlay()

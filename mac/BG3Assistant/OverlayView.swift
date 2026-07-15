@@ -76,10 +76,11 @@ struct OverlayView: View {
                 DraggableArea {
                     HStack(spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(appState.plannerTab == .chat ? "Ask about this run" : appState.currentActivityTitle)
+                            Text(plannerTitle)
                                 .font(.system(size: 14, weight: .bold, design: .serif))
                                 .foregroundStyle(BG3Theme.parchment).lineLimit(1)
-                            if appState.currentWalkthroughStep != nil || appState.currentCheckpoint != nil {
+                            if appState.plannerTab != .settings,
+                               appState.currentWalkthroughStep != nil || appState.currentCheckpoint != nil {
                                 Text("\(appState.currentActivityArea) • L\(appState.currentActivityMinimumLevel)+ • \(appState.currentActivityLabel.lowercased())")
                                     .font(.caption2).foregroundStyle(BG3Theme.mutedParchment).lineLimit(1)
                             }
@@ -99,6 +100,11 @@ struct OverlayView: View {
                 }
                 .assistantActionButton(accent: appState.plannerTab == .chat ? BG3Theme.bronzeBright : BG3Theme.control)
                 .help("Ask about this run")
+                Button(action: appState.openSettings) {
+                    Image(systemName: "gearshape").frame(width: 18, height: 18)
+                }
+                .assistantActionButton(accent: appState.plannerTab == .settings ? BG3Theme.bronzeBright : BG3Theme.control)
+                .help("Settings")
                 Button(action: appState.togglePlanner) {
                     Image(systemName: "xmark").frame(width: 18, height: 18)
                 }
@@ -118,6 +124,7 @@ struct OverlayView: View {
                 case .route: RouteTabView()
                 case .party: PartyTabView()
                 case .chat: ChatTabView()
+                case .settings: SettingsView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -129,6 +136,14 @@ struct OverlayView: View {
         .tint(BG3Theme.control)
         .assistantGlassSurface(cornerRadius: 16)
         .shadow(color: .black.opacity(0.46), radius: 20, y: 8)
+    }
+
+    private var plannerTitle: String {
+        switch appState.plannerTab {
+        case .chat: "Ask about this run"
+        case .settings: "Settings"
+        default: appState.currentActivityTitle
+        }
     }
 
     @ViewBuilder private var currentTab: some View {

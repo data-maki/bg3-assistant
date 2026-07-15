@@ -24,8 +24,8 @@ See the next safe action, check the risk before a fight, manage each companion's
 
 Requirements: macOS 14 or later on Apple silicon.
 
-1. Download the [latest macOS release](https://github.com/data-maki/bg3-assistant/releases/latest), move **BG3 Honor Mode Assistant** to `/Applications`, and open it.
-2. Keep or decline **Launch at Login** in Settings.
+1. Install [TestFlight from the Mac App Store](https://apps.apple.com/app/testflight/id899247664), accept the project's tester invite, and install **BG3 Honor Mode Assistant** from TestFlight.
+2. Open **Settings** from the shield menu and keep or decline **Launch at Login**.
 3. Start Baldur's Gate 3. Use the shield in the macOS menu bar to show the overlay manually when needed.
 4. Move through **Now**, **Run**, and **Party**. Nothing is marked complete until you confirm it.
 5. Use the map icon for the Act 1 map or the chat icon to ask about the current run.
@@ -34,14 +34,14 @@ The bundled local service starts with the app. A release build needs no terminal
 
 ## Keep separate Honor runs
 
-Name and save multiple attempts, including solo and co-op campaigns. Each run keeps its own route progress, decisions, party, builds, and equipment. Switch the active run from the menu-bar **Run** menu, or create and rename runs in **Settings**.
+Name and save multiple attempts, including solo and co-op campaigns. Each run keeps its own route progress, decisions, party, builds, and equipment. Switch the active run from the shield menu's **Run** submenu, or create and rename runs in the overlay's **Settings** view.
 
 ## AI chat and screenshots
 
 Chat has two modes:
 
 - **Guide-only:** works without an API key and returns deterministic answers from the reviewed route and current player-confirmed state.
-- **OpenRouter AI:** add your own [OpenRouter](https://openrouter.ai/) key in **Settings → AI Chat** for short model-generated answers grounded in the same guide, current route, party, equipment, and recent conversation.
+- **OpenRouter AI:** add your own [OpenRouter](https://openrouter.ai/) key in the overlay's **Settings → AI Chat** section for short model-generated answers grounded in the same guide, current route, party, equipment, and recent conversation.
 
 When OpenRouter AI is configured, opening chat prepares one current BG3-window screenshot for the next message. The attachment is visible in chat, opens as a preview, and can be removed before sending. It is sent to OpenRouter only with that message. The overlay is excluded because the app captures the BG3 window directly.
 
@@ -68,7 +68,7 @@ Technical contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and
 Good next milestones:
 
 - Reviewed Act 2 and Act 3 routes, decisions, builds, and map data
-- Signed, notarized updates with a simple in-app update path
+- TestFlight feedback, release automation, and a public beta invite
 - Accessibility, keyboard-navigation, and first-run onboarding passes
 - Localization-ready guide and interface strings
 - Stronger deterministic chat evaluation and screenshot-attachment coverage

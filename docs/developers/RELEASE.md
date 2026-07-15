@@ -1,25 +1,36 @@
 # Release Checklist
 
-## Build requirements
+TestFlight is the primary beta distribution path. The app remains a Swift package with a bundled Python service; release packaging does not require a checked-in Xcode project.
 
-- [ ] Set version and build numbers in `mac/BG3Assistant/Resources/Info.plist`.
-- [ ] Install a Developer ID Application certificate.
-- [ ] Store notarization credentials in a `notarytool` keychain profile.
-- [ ] Run the enforced release build:
+## TestFlight requirements
 
-  ```sh
-  cd mac
-  NOTARY_PROFILE=bg3-honor-notary \
-  REQUIRE_RELEASE_SIGNING=1 \
-  ./scripts/build-release.sh
-  ```
+- Full Xcode 16 or later selected with `xcode-select`
+- Apple Distribution certificate
+- Mac Installer Distribution certificate
+- Mac App Store provisioning profile for `com.datamaki.BG3HonorAssistant`
+- App record and tester group in App Store Connect
+- Transporter installed from the Mac App Store
 
-- [ ] Record and verify the generated ZIP SHA-256.
-- [ ] Test the uploaded ZIP on a clean macOS 14+ Apple-silicon account.
+The app uses standard HTTPS/TLS and does not implement proprietary encryption. `ITSAppUsesNonExemptEncryption` is set to `false`; the release owner must confirm the export-compliance answers in App Store Connect for every release.
+
+## Build and upload
+
+```sh
+cd mac
+APP_STORE_PROFILE="$HOME/Downloads/BG3_Honor_Assistant.provisionprofile" \
+APP_STORE_INSTALLER_IDENTITY="Mac Installer Distribution: Example (TEAMID)" \
+BUILD_NUMBER=2 \
+./scripts/build-testflight.sh
+```
+
+`BUILD_NUMBER` must increase for every App Store Connect upload. The script defaults to a UTC timestamp when it is omitted. It derives the main app's App Sandbox entitlements from the provisioning profile, adds microphone and localhost networking access, and signs the bundled backend as an inheriting child process.
+
+Open the generated `.pkg` in Transporter, deliver it to App Store Connect, wait for processing, and add the build to the internal TestFlight group. Complete beta app review before inviting external testers when App Store Connect requires it.
 
 ## Product smoke test
 
-- [ ] First launch creates only a menu-bar item and native overlay, not a control window.
+- [ ] First launch creates only a menu-bar item and native overlay, not a control window or Dock app.
+- [ ] The menu-bar Settings command opens settings inside the native overlay.
 - [ ] BG3 detection, Launch BG3, Show Overlay, Open Planner, Open Map, Settings, and Quit work.
 - [ ] Now, Run, and Party remain usable without an OpenRouter key or Screen Recording permission.
 - [ ] Party presents one character at a time and persists level, build, status, and equipment changes.
@@ -39,15 +50,17 @@
 ```sh
 cd backend
 uv lock --check
+uv run --with pytest pytest
 
 cd ../mac
 swift build
 BUILD_BACKEND=0 ./scripts/build-app.sh
 codesign --verify --deep --strict "BG3 Honor Mode Assistant.app"
+bash -n scripts/build-testflight.sh
 ```
 
 Run `git diff --check` from the repository root. Keep screenshots and QA evidence in ignored `outputs/`, `qa/`, or `artifacts/` directories.
 
-## Publishing blockers
+## Direct-download fallback
 
-Public macOS downloads require a Developer ID Application signature and Apple notarization. A locally signed development build is not a substitute.
+`scripts/build-release.sh` still creates a Developer ID-signed, notarized ZIP for local or direct-download testing. It is not the primary beta channel while TestFlight distribution is active.

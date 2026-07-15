@@ -38,16 +38,6 @@ struct BG3HonorAssistantApp: App {
     @StateObject private var appState = AppState()
 
     var body: some Scene {
-        Settings {
-            SettingsView()
-                .environmentObject(appState)
-                .frame(width: 430)
-                .task { await appState.start() }
-                .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
-                    appState.stop()
-                }
-        }
-
         MenuBarExtra {
             MenuBarContent()
                 .environmentObject(appState)
@@ -56,6 +46,9 @@ struct BG3HonorAssistantApp: App {
                 // The menu-bar label always exists on a login launch, so it
                 // owns the detector loop's kick-off.
                 .task { await appState.start() }
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+                    appState.stop()
+                }
         }
     }
 }
@@ -81,7 +74,9 @@ private struct MenuBarContent: View {
         Divider()
         Button("Hide Pet", action: appState.hideAssistantOverlay)
         Divider()
-        SettingsLink { Label("Settings", systemImage: "gearshape") }
+        Button(action: appState.openSettings) {
+            Label("Settings", systemImage: "gearshape")
+        }
         Button("Quit") { NSApp.terminate(nil) }.keyboardShortcut("q")
     }
 }

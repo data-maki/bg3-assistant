@@ -76,6 +76,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
         .tint(BG3Theme.control)
         .padding(.vertical, 8)
         .confirmationDialog(

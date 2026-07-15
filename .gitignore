@@ -66,6 +66,7 @@ __pycache__/
 *.pyc
 mac/BG3 Honor Mode Assistant.app/
 mac/BG3-Honor-Mode-Assistant-*-macOS-*.zip
+mac/BG3-Honor-Mode-Assistant-*-TestFlight.pkg
 backend/build/
 backend/dist/
 backend/*.spec

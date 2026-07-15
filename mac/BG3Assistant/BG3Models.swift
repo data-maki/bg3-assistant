@@ -523,6 +523,7 @@ enum PlannerTab: String, CaseIterable, Identifiable {
     case route = "Run"
     case party = "Party"
     case chat = "Chat"
+    case settings = "Settings"
     var id: String { rawValue }
 
     static let primary: [PlannerTab] = [.current, .route, .party]
