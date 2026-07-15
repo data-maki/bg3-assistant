@@ -2,16 +2,10 @@ import Foundation
 import SQLite3
 
 struct AssistantSettings: Codable, Equatable {
-    var telemetryEnabled = false
-    var visualMemoryEnabled = false
-    var mapOverlayCaptureEnabled = false
     var overlayDensity = OverlayDensity.focus.rawValue
 
     static func migrating(_ defaults: UserDefaults = .standard) -> AssistantSettings {
         AssistantSettings(
-            telemetryEnabled: defaults.bool(forKey: "telemetryEnabled"),
-            visualMemoryEnabled: defaults.bool(forKey: "BG3VisualMemoryEnabled"),
-            mapOverlayCaptureEnabled: defaults.bool(forKey: "BG3MapOverlayCaptureEnabled"),
             overlayDensity: defaults.string(forKey: "BG3OverlayDensity") ?? OverlayDensity.focus.rawValue
         )
     }
@@ -27,6 +21,13 @@ enum RunStoreError: LocalizedError {
         case .invalidSnapshot: "The saved run snapshot could not be decoded."
         }
     }
+}
+
+struct SavedRunSummary: Identifiable, Equatable {
+    let id: String
+    let name: String
+    let completedSteps: Int
+    let partyLevel: Int
 }
 
 /// One cross-process SQLite authority for the native overlay and localhost map.
@@ -99,6 +100,37 @@ struct RunStore {
                     text: [run.id, run.id], doubles: [], in: database
                 )
                 try execute("COMMIT", in: database)
+            } catch {
+                try? execute("ROLLBACK", in: database)
+                throw error
+            }
+        }
+    }
+
+    func listRuns() -> [HonorRun] {
+        (try? withDatabase { database in
+            try queryText("SELECT snapshot_json FROM runs ORDER BY updated_at DESC", in: database)
+                .compactMap { try? decoder.decode(HonorRun.self, from: Data($0.utf8)) }
+        }) ?? []
+    }
+
+    func activate(runID: String) throws -> HonorRun {
+        try withDatabase { database in
+            guard let snapshot = try queryText(
+                "SELECT snapshot_json FROM runs WHERE run_id = ? LIMIT 1",
+                bind: [runID],
+                in: database
+            ).first else { throw RunStoreError.invalidSnapshot }
+            let run = try decoder.decode(HonorRun.self, from: Data(snapshot.utf8))
+            try execute("BEGIN IMMEDIATE", in: database)
+            do {
+                try execute("UPDATE runs SET is_active = 0 WHERE is_active = 1", in: database)
+                try bindAndRun(
+                    "UPDATE runs SET is_active = 1 WHERE run_id = ?",
+                    text: [runID], doubles: [], in: database
+                )
+                try execute("COMMIT", in: database)
+                return run
             } catch {
                 try? execute("ROLLBACK", in: database)
                 throw error

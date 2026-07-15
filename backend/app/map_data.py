@@ -16,9 +16,9 @@ import json
 import logging
 import re
 
-from .models import ActOneMap, BuildGear, Marker, MapTiles, RouteCheckpoint, TimedEvent
+from .models import ActOneMap, BuildGear, Marker, MapTiles, TimedEvent
 from .paths import resource_root
-from .route_data import checkpoint_by_id, item_key, load_gear, load_builds, load_route, next_checkpoint
+from .route_data import item_key, load_gear, load_builds, load_route
 from .walkthrough_data import load_walkthrough
 
 logger = logging.getLogger(__name__)
@@ -293,28 +293,3 @@ def load_act_one_map() -> ActOneMap:
             "Mountain Pass) without claiming false precision."
         ),
     )
-
-
-def overlay_targets(checkpoint_id: str | None, completed: set[str]) -> list[tuple[RouteCheckpoint, float, float]]:
-    """The next few uncompleted checkpoints with their MapGenie coordinates,
-    for projection onto the in-game map overlay."""
-    current = None
-    if checkpoint_id:
-        try:
-            current = checkpoint_by_id(checkpoint_id)
-        except KeyError:
-            current = None
-    if current is None:
-        current = next_checkpoint(completed)
-    min_order = current.route_order if current else 0
-    upcoming = [
-        checkpoint
-        for checkpoint in load_route()
-        if checkpoint.id not in completed and checkpoint.route_order >= min_order
-    ][:6]
-    targets = []
-    for checkpoint in upcoming:
-        exact = MG_FIGHT_COORDS.get(checkpoint.id)
-        lat, lng, _ = exact if exact else _place(checkpoint.name, checkpoint.region, checkpoint.area)
-        targets.append((checkpoint, lat, lng))
-    return targets

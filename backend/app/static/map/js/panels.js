@@ -1,5 +1,5 @@
-// Side panels: route list, party/loadout, equipment sheets, warnings, the
-// marker detail card, and the marker-export dialog. Pure render/template
+// Side panels: route list, party/loadout, equipment sheets, warnings, and the
+// marker detail card. Pure render/template
 // functions over shared state — no render() calls, no listener binding
 // (panel innerHTML is rebuilt constantly; app.js delegates events instead).
 
@@ -394,70 +394,4 @@ export function renderDetail() {
     ${distance ? `<p class="detail-distance">${escapeHtml(distance)}</p>` : ""}
     ${buildNames ? `<p><strong>Builds:</strong> ${escapeHtml(buildNames)}</p>` : ""}
     <a href="${escapeHtml(marker.wiki || marker.source)}" target="_blank" rel="noreferrer">${marker.wiki ? "Open bg3.wiki ↗" : "Open source ↗"}</a>`;
-}
-
-// ---------------------------------------------------------------------------
-// Deterministic one-shot BG3 marker export
-// ---------------------------------------------------------------------------
-
-export async function previewMarkerExport() {
-  const selectedBuild = els.build.value !== "all" ? [els.build.value] : [];
-  const buildIds = state.activeBuilds.length ? state.activeBuilds : selectedBuild;
-  const response = await fetch("/api/marker-sync/preview", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      act: state.data.act,
-      partyLevel: Number(els.level.value),
-      buildIds,
-      completedCheckpointIds: [...state.done],
-      equippedItemKeys: [...equippedSet()],
-    }),
-  });
-  if (!response.ok) throw new Error(`Marker preview failed: HTTP ${response.status}`);
-  state.markerExport = await response.json();
-  renderMarkerExport();
-  els.markerExportDialog.showModal();
-}
-
-function renderMarkerExport() {
-  const payload = state.markerExport;
-  if (!payload) return;
-  const fights = payload.markers.filter((marker) => marker.type === "fight").length;
-  const items = payload.markers.length - fights;
-  els.markerExportSummary.textContent = `${payload.phase} · party L${payload.partyLevel} · ${fights} fights · ${items} equipment locations. Only this reviewed queue will be offered to the BG3 marker sync.`;
-  els.markerExportWarnings.innerHTML = payload.warnings.map((warning) => `<p>⚠ ${escapeHtml(warning)}</p>`).join("");
-  els.markerExportList.innerHTML = payload.markers.length ? payload.markers.map((marker) => `
-    <article class="marker-export-row">
-      <span class="marker-export-kind">${escapeHtml(marker.type)}</span>
-      <div><strong>${escapeHtml(marker.label)}</strong><small>${escapeHtml(marker.region)} · ${escapeHtml(marker.area)} · ${escapeHtml(marker.precision)} pin</small></div>
-      <span class="marker-export-level" title="${marker.levelSource === "guide_fact" ? "Guide minimum" : "Selected-level suggestion"}">L${marker.recommendedLevel}</span>
-    </article>`).join("") : `<p class="empty-note">Nothing to export for this level and regional phase.</p>`;
-  els.markerExportFingerprint.textContent = `sync ${payload.fingerprint}`;
-  els.downloadMarkersBtn.disabled = payload.markers.length === 0;
-  els.confirmMarkersBtn.disabled = payload.markers.length === 0 || payload.alreadySynced;
-  els.confirmMarkersBtn.textContent = payload.alreadySynced ? "Already placed ✓" : "Placed in BG3";
-}
-
-export function downloadMarkerExport() {
-  if (!state.markerExport?.markers.length) return;
-  const artifact = { formatVersion: 1, generatedAt: new Date().toISOString(), ...state.markerExport };
-  const url = URL.createObjectURL(new Blob([JSON.stringify(artifact, null, 2)], { type: "application/json" }));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `bg3-markers-act${artifact.act}-l${artifact.partyLevel}-${artifact.fingerprint}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-export async function confirmMarkerExport() {
-  if (!state.markerExport?.fingerprint) return;
-  const response = await fetch("/api/marker-sync/confirm", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fingerprint: state.markerExport.fingerprint }),
-  });
-  if (!response.ok) throw new Error("Marker queue changed; export it again before confirming.");
-  state.markerExport.alreadySynced = true;
-  renderMarkerExport();
 }

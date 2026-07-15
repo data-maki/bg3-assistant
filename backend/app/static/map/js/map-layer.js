@@ -51,7 +51,7 @@ export function initMap({ onBackgroundClick }) {
 }
 
 // ---------------------------------------------------------------------------
-// Live player position (fed by the Mac app's screenshot → map-align loop)
+// Optional player position, set manually from the map.
 // ---------------------------------------------------------------------------
 
 function positionAgeSeconds() {
@@ -64,7 +64,7 @@ function renderLiveStatus() {
   let cls = "none";
   let text = "No live position";
   if (state.player) {
-    const label = state.player.source === "map-align" ? "Game map" : state.player.source;
+    const label = state.player.source || "Manual position";
     if (age < 30) { cls = "live"; text = `${label} · ${Math.max(0, Math.round(age))}s ago`; }
     else if (age < 600) { cls = "stale"; text = `${label} · ${Math.round(age / 60)}m ago`; }
     else { cls = "stale"; text = `${label} · stale`; }

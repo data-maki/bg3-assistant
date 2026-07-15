@@ -15,7 +15,10 @@ let package = Package(
             name: "BG3HonorAssistant",
             path: "BG3Assistant",
             exclude: ["Resources"],
-            linkerSettings: [.linkedLibrary("sqlite3")]
+            linkerSettings: [
+                .linkedLibrary("sqlite3"),
+                .linkedFramework("Security"),
+            ]
         )
     ]
 )

@@ -12,7 +12,7 @@ import uuid
 from pathlib import Path
 
 from .config import get_settings
-from .models import MarkerSyncPreview, PlayerPosition, RunState
+from .models import PlayerPosition, RunState
 
 
 class JsonStore:
@@ -47,8 +47,6 @@ class JsonStore:
 
 _position = JsonStore("position.json")
 _legacy_run_state = JsonStore("run_state.json")
-_active_marker_sync = JsonStore("active_marker_sync.json")
-_confirmed_marker_sync = JsonStore("confirmed_marker_sync.json")
 
 
 class RunDatabase:
@@ -331,29 +329,3 @@ def _normalize_roster(members: list) -> list:
         if active_count > 4:
             member.status = "camp"
     return roster
-
-
-def activate_marker_sync(preview: MarkerSyncPreview) -> MarkerSyncPreview:
-    _active_marker_sync.put(preview.model_dump())
-    return preview
-
-
-def current_marker_sync() -> MarkerSyncPreview | None:
-    state = _active_marker_sync.get()
-    if state is None:
-        return None
-    try:
-        return MarkerSyncPreview(**state)
-    except Exception:
-        return None
-
-
-def marker_sync_confirmed(fingerprint: str) -> bool:
-    state = _confirmed_marker_sync.get() or {}
-    return fingerprint in set(state.get("fingerprints") or [])
-
-
-def confirm_marker_sync(fingerprint: str) -> None:
-    state = _confirmed_marker_sync.get() or {}
-    fingerprints = list(dict.fromkeys([*(state.get("fingerprints") or []), fingerprint]))[-24:]
-    _confirmed_marker_sync.put({"fingerprints": fingerprints})

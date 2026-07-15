@@ -7,7 +7,7 @@ route facts, and every line is traceable to the guide data.
 
 from .chat_context import resolve_chat_context
 from .models import ChatRequest, ChatResponse, DecisionOption, ReadinessRequest, RouteCheckpoint, WalkthroughStep
-from .route_data import assess_readiness, item_key
+from .route_data import assess_readiness
 
 
 def _alternative(option: DecisionOption) -> str:
@@ -139,10 +139,7 @@ def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughS
             step_facts.append(f"Location: {step.area}, {step.region}.")
             suggestions.append(step.summary)
         for member in context.active:
-            gear = context.relevant_gear.get(member.id, [])
-            owned = set(context.equipped_by_member.get(member.id, []))
-            missing = [item for item in gear if item_key(item.item) not in owned and item.item not in owned]
-            if missing:
+            if missing := context.missing_gear(member.id):
                 pick = next((item for item in missing if item.map_objective), missing[0])
                 suggestions.append(f"{member.name}: pursue {pick.item} — {pick.acquisition}")
         unknowns.extend(context.equipment_conflicts)
@@ -163,12 +160,6 @@ def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughS
             suggestions.append("Inactive roster: " + ", ".join(f"{member.name} ({member.status or 'camp'})" for member in context.inactive))
         if context.story_outcomes:
             suggestions.append("Player-confirmed outcomes: " + "; ".join(context.story_outcomes))
-
-    if request.screenshot_context:
-        evidence = request.screenshot_context.strip()[:500]
-        if evidence:
-            captured = f" at {request.screenshot_timestamp:.0f}" if request.screenshot_timestamp else ""
-            suggestions.append(f"Latest optional screenshot evidence{captured} (not a guide fact): " + evidence)
 
     answer_parts = ["Action: " + action, "DON'T DIE: " + risk]
     if facts:

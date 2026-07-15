@@ -1,14 +1,5 @@
 import Foundation
 
-struct BackendContext: Encodable {
-    let gameDetected: Bool
-    let gameName: String
-    let checkpointId: String?
-    let party: [PartyMember]
-    let screenshotWidth: Int
-    let screenshotHeight: Int
-}
-
 struct BackendClient {
     private let baseURL = URL(string: "http://127.0.0.1:8787")!
     private let decoder: JSONDecoder = {
@@ -40,39 +31,12 @@ struct BackendClient {
         return try decoder.decode(RoutePayload.self, from: data)
     }
 
-    func telemetry() async throws -> TelemetryStatus {
-        let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: "api/telemetry"))
-        try validate(response)
-        return try decoder.decode(TelemetryStatus.self, from: data)
-    }
-
     func readiness(_ requestBody: ReadinessRequest) async throws -> ReadinessResponse {
         try await postJSON(path: "api/act1/readiness", body: requestBody, response: ReadinessResponse.self)
     }
 
     func chat(_ requestBody: ChatRequest) async throws -> ChatResponse {
         try await postJSON(path: "api/chat", body: requestBody, response: ChatResponse.self)
-    }
-
-    func analyze(imageData: Data, context: BackendContext) async throws -> AnalysisResponse {
-        try await postMultipart(path: "analyze", imageData: imageData, context: context, response: AnalysisResponse.self)
-    }
-
-    func alignMap(imageData: Data, context: MapAlignContext) async throws -> MapAlignResponse {
-        try await postMultipart(path: "api/map-align", imageData: imageData, context: context, response: MapAlignResponse.self)
-    }
-
-    private func postMultipart<Context: Encodable, Response: Decodable>(
-        path: String, imageData: Data, context: Context, response: Response.Type
-    ) async throws -> Response {
-        let boundary = "Boundary-\(UUID().uuidString)"
-        var request = URLRequest(url: baseURL.appending(path: path))
-        request.httpMethod = "POST"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try multipartBody(imageData: imageData, context: context, boundary: boundary)
-        let (data, urlResponse) = try await URLSession.shared.data(for: request)
-        try validate(urlResponse)
-        return try decoder.decode(Response.self, from: data)
     }
 
     private func postJSON<Body: Encodable, Response: Decodable>(path: String, body: Body, response: Response.Type) async throws -> Response {
@@ -91,15 +55,4 @@ struct BackendClient {
         }
     }
 
-    private func multipartBody<Context: Encodable>(imageData: Data, context: Context, boundary: String) throws -> Data {
-        var body = Data()
-        let contextString = String(decoding: try encoder.encode(context), as: UTF8.self)
-        append("--\(boundary)\r\nContent-Disposition: form-data; name=\"context\"\r\n\r\n\(contextString)\r\n", to: &body)
-        append("--\(boundary)\r\nContent-Disposition: form-data; name=\"image\"; filename=\"screenshot.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n", to: &body)
-        body.append(imageData)
-        append("\r\n--\(boundary)--\r\n", to: &body)
-        return body
-    }
-
-    private func append(_ string: String, to data: inout Data) { data.append(Data(string.utf8)) }
 }

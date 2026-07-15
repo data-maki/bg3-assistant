@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .models import BuildGear, ChatRequest, PartyMember, RouteCheckpoint, WalkthroughStep
+from .models import BuildGear, BuildSummary, ChatRequest, PartyMember, RouteCheckpoint, WalkthroughStep
 from .route_data import GUIDE_VERSION, item_key, load_builds
 from .walkthrough_data import load_walkthrough, recommend_walkthrough_step, walkthrough_blockers
 
@@ -31,12 +31,19 @@ class ResolvedChatContext:
     equipment_conflicts: list[str] = field(default_factory=list)
     story_outcomes: list[str] = field(default_factory=list)
     walkthrough_outcomes: dict[str, str] = field(default_factory=dict)
-    detection_timestamp: float | None = None
-    detection_confidence: float | None = None
-    visual_memory_summary: str | None = None
-    visual_memory_timestamp: float | None = None
-    visual_memory_completion_step_ids: list[str] = field(default_factory=list)
     guide_version_mismatch: str | None = None
+
+    def missing_gear(self, member_id: str) -> list[BuildGear]:
+        """Reviewed gear this member should pursue and does not own yet.
+
+        The single definition of "missing": deterministic answers and LLM
+        grounding must never disagree about what a member still needs.
+        """
+        owned = set(self.equipped_by_member.get(member_id, []))
+        return [
+            gear for gear in self.relevant_gear.get(member_id, [])
+            if item_key(gear.item) not in owned and gear.item not in owned
+        ]
 
     def grounding_lines(self, checkpoint: RouteCheckpoint) -> list[str]:
         """Concise, authority-labelled state for deterministic or LLM chat."""
@@ -65,8 +72,7 @@ class ResolvedChatContext:
                 owned = self.equipped_by_member.get(member.id, [])
                 if owned:
                     lines.append(f"[Player-confirmed equipment] {member.name}: {', '.join(owned)}")
-                missing = [gear.item for gear in self.relevant_gear.get(member.id, []) if item_key(gear.item) not in owned]
-                if missing:
+                if missing := [gear.item for gear in self.missing_gear(member.id)]:
                     lines.append(f"[Reviewed loadout] {member.name} missing/current pursuits: {', '.join(missing[:3])}")
         else:
             lines.append("[Unknown] Equipment ownership has not been confirmed.")
@@ -76,14 +82,6 @@ class ResolvedChatContext:
         if relevant_inactive:
             lines.append("[Player state] Inactive roster: " + ", ".join(f"{member.name} ({member.status})" for member in relevant_inactive))
         lines.extend(f"[Unknown] {conflict}" for conflict in self.equipment_conflicts)
-        if self.detection_timestamp is not None:
-            confidence = f" at {self.detection_confidence:.0%}" if self.detection_confidence is not None else ""
-            lines.append(f"[Local detection] Last sample {self.detection_timestamp:.0f}{confidence}; not route authority.")
-        if self.visual_memory_summary:
-            timestamp = f" at {self.visual_memory_timestamp:.0f}" if self.visual_memory_timestamp else ""
-            lines.append(f"[Vision memory] {self.visual_memory_summary[:400]}{timestamp}; assistant inference, progress unchanged.")
-        if self.visual_memory_completion_step_ids:
-            lines.append("[Vision completion candidates] " + ", ".join(self.visual_memory_completion_step_ids) + "; player confirmation required.")
         if self.guide_version_mismatch:
             lines.append(f"[Unknown] {self.guide_version_mismatch}")
         return lines
@@ -93,7 +91,7 @@ def _valid_step(step_id: str | None, by_id: dict[str, WalkthroughStep]) -> Walkt
     return by_id.get(step_id) if step_id else None
 
 
-def _available_gear(build_id: str, level: int, act: int, builds: dict) -> list[BuildGear]:
+def _available_gear(build_id: str, level: int, act: int, builds: dict[str, BuildSummary]) -> list[BuildGear]:
     build = builds.get(build_id)
     if not build:
         return []
@@ -203,10 +201,5 @@ def resolve_chat_context(
         equipment_conflicts=conflicts,
         story_outcomes=snapshot.story_outcomes if snapshot else [],
         walkthrough_outcomes=outcomes,
-        detection_timestamp=snapshot.detection_timestamp if snapshot else None,
-        detection_confidence=snapshot.detection_confidence if snapshot else None,
-        visual_memory_summary=snapshot.visual_memory_summary if snapshot else None,
-        visual_memory_timestamp=snapshot.visual_memory_timestamp if snapshot else None,
-        visual_memory_completion_step_ids=snapshot.visual_memory_completion_step_ids if snapshot else [],
         guide_version_mismatch=mismatch,
     )

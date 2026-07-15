@@ -12,7 +12,7 @@ import { initMap, renderMarkers, pollPosition, setFollow } from "./js/map-layer.
 import { renderWalkthrough, setWalkthroughStatus, focusWalkthroughStep } from "./js/walkthrough.js";
 import {
   renderRoute, renderParty, renderEquipment, renderWarnings, updateWarningsBadge,
-  renderDetail, previewMarkerExport, downloadMarkerExport, confirmMarkerExport,
+  renderDetail,
 } from "./js/panels.js";
 
 // ---------------------------------------------------------------------------
@@ -233,14 +233,6 @@ function bindEvents() {
 
   Object.entries(els.tabs).forEach(([name, button]) => button.addEventListener("click", () => setTab(name)));
   els.missingOnlyBtn.addEventListener("click", () => setMissingOnly(!state.missingOnly));
-  els.exportMarkersBtn.addEventListener("click", () => {
-    previewMarkerExport().catch((error) => { els.summary.textContent = error.message; });
-  });
-  els.downloadMarkersBtn.addEventListener("click", downloadMarkerExport);
-  els.confirmMarkersBtn.addEventListener("click", () => {
-    confirmMarkerExport().catch((error) => { els.markerExportWarnings.innerHTML = `<p>⚠ ${escapeHtml(error.message)}</p>`; });
-  });
-
   // Panels re-render their innerHTML constantly, so events are delegated to
   // the stable containers instead of re-bound per render.
   els.walkthroughList.addEventListener("click", (event) => {

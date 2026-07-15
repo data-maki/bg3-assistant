@@ -1,9 +1,7 @@
 import SwiftUI
 
-/// BG3-style character sheet for the planner: rotate through the party, see
-/// the recommended item for every equipment slot in the selected act, where to
-/// pick each piece up, and whether another party member's build wants the same
-/// item (single-copy conflicts are exactly why team composition matters).
+/// Focused party sheet: rotate through the roster, edit the current character,
+/// then review and confirm that character's equipment.
 struct LoadoutTabView: View {
     @EnvironmentObject private var appState: AppState
     @State private var memberIndex = 0
@@ -12,6 +10,14 @@ struct LoadoutTabView: View {
         VStack(spacing: 8) {
             header
             characterRotator
+            if let member {
+                RosterMemberEditor(
+                    member: member,
+                    builds: appState.builds,
+                    onChange: appState.updatePartyMember,
+                    onStatusChange: { _ = appState.setRosterStatus($0, for: member) }
+                )
+            }
             if let member, let build {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
@@ -25,14 +31,14 @@ struct LoadoutTabView: View {
                 emptyState
             }
         }
-        .onChange(of: appState.loadoutMembers.count) { _, count in
+        .onChange(of: appState.roster.count) { _, count in
             memberIndex = min(memberIndex, max(0, count - 1))
         }
     }
 
     // MARK: - Party selection
 
-    private var party: [PartyMember] { appState.loadoutMembers }
+    private var party: [PartyMember] { appState.roster }
 
     private var member: PartyMember? {
         party.indices.contains(memberIndex) ? party[memberIndex] : party.first
@@ -45,12 +51,9 @@ struct LoadoutTabView: View {
 
     private var header: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("CHARACTER LOADOUT").font(.system(.caption, design: .serif).bold()).foregroundStyle(BG3Theme.gold)
-                Text("Wear these, in this order").font(.system(.headline, design: .serif))
-                Text(appState.run.equipmentOwnershipKnown == true ? "Checkmarks are player-confirmed" : "Tap a circle when an item is equipped")
-                    .font(.caption2).foregroundStyle(.secondary)
-            }
+            Text("LOADOUT")
+                .font(.system(.caption, design: .serif).bold())
+                .foregroundStyle(BG3Theme.gold)
             Spacer()
             Picker("Act", selection: Binding(
                 get: { appState.selectedAct },
@@ -99,7 +102,7 @@ struct LoadoutTabView: View {
         Button(action: action) {
             Image(systemName: icon).font(.system(size: 13, weight: .bold)).frame(width: 24, height: 30)
         }
-        .assistantGlassButton().tint(BG3Theme.bronzeBright)
+        .assistantActionButton()
         .disabled(party.count < 2)
         .accessibilityLabel(label)
     }
@@ -110,8 +113,8 @@ struct LoadoutTabView: View {
                 .font(.system(size: 26)).foregroundStyle(.secondary)
             Text("\(member?.name ?? "This character") has no build yet.")
                 .font(.caption).foregroundStyle(.secondary)
-            Button("Pick a build in Party") { appState.plannerTab = .party }
-                .assistantGlassButton().tint(BG3Theme.bronzeBright)
+            Text("Choose a reviewed build above to see equipment.")
+                .font(.caption2).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -281,7 +284,7 @@ struct LoadoutTabView: View {
                     Label("Show all pickups on the map", systemImage: "map.fill").font(.caption.bold())
                         .frame(maxWidth: .infinity)
                 }
-                .assistantGlassButton().tint(BG3Theme.bronzeBright)
+                .assistantActionButton()
             } else {
                 Label("The map covers Act 1 only — each item's note says where to look in Act \(appState.selectedAct).", systemImage: "map")
                     .font(.caption2).foregroundStyle(.secondary)

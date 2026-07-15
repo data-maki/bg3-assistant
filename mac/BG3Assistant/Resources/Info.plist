@@ -16,12 +16,18 @@
 	<string>0.1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.games</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>The assistant reads the Baldur's Gate 3 window only for capture features you enable. Map alignment stays local; opt-in Visual Memory can send one frame every 30 seconds to your configured vision provider. Screenshots stay in memory.</string>
+	<string>AI chat can attach one screenshot of the Baldur's Gate 3 window to a message you send through OpenRouter. There is no periodic capture or recording.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The assistant uses the microphone to dictate chat questions about your run.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

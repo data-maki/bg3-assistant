@@ -62,7 +62,7 @@ struct PeekCardView: View {
                 DraggableArea {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 5) {
-                            Text(appState.telemetryActive ? "LIVE • \(appState.assistantPhase.rawValue)" : appState.assistantPhase.rawValue)
+                            Text(appState.assistantPhase.rawValue)
                                 .font(.system(size: 8.5, weight: .heavy, design: .serif))
                                 .foregroundStyle(BG3Theme.gold)
                             Spacer(minLength: 4)
@@ -107,7 +107,7 @@ struct PeekCardView: View {
         .padding(9).frame(width: size.width, height: size.height, alignment: .top)
         .foregroundStyle(BG3Theme.parchment)
         .colorScheme(.dark)
-        .tint(BG3Theme.gold)
+        .tint(BG3Theme.control)
         .assistantGlassSurface(cornerRadius: 14)
         .shadow(color: .black.opacity(0.42), radius: 14, y: 6)
         .contextMenu {
@@ -145,9 +145,8 @@ struct PeekCardView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 4)
         }
-        .assistantGlassButton()
+        .assistantActionButton(accent: tint ?? BG3Theme.control)
         .controlSize(.mini)
-        .tint(tint ?? BG3Theme.bronzeBright)
         .disabled(disabled)
         .accessibilityLabel(title)
     }

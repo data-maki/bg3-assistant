@@ -3,6 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 rm -rf build dist/bg3-honor-backend
+uv sync --locked
 uv run --with pyinstaller pyinstaller \
   --noconfirm \
   --clean \
