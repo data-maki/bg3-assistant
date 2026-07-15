@@ -36,11 +36,11 @@ extension AppState {
         chatDraft = ""
 
         let history = chatLines.suffix(8)
-            .filter { !$0.text.hasPrefix("Chat is offline right now") }
-            .map { ChatTurn(role: $0.role == "You" ? "user" : "assistant", content: $0.text) }
+            .filter { !$0.isError }
+            .map { ChatTurn(role: $0.role.rawValue, content: $0.text) }
         let screenshot = chatScreenshot
         chatScreenshot = nil
-        chatLines.append(ChatLine(role: "You", text: message, imageData: screenshot?.data))
+        chatLines.append(ChatLine(role: .user, text: message, imageData: screenshot?.data))
 
         do {
             let response = try await backendClient.chat(ChatRequest(
@@ -53,9 +53,9 @@ extension AppState {
                 context: chatContextSnapshot,
                 history: history
             ))
-            chatLines.append(ChatLine(role: "Assistant", text: response.answer, sources: response.sources ?? []))
+            chatLines.append(ChatLine(role: .assistant, text: response.answer, sources: response.sources))
         } catch {
-            chatLines.append(ChatLine(role: "Assistant", text: "Chat is offline right now (\(error.localizedDescription))."))
+            chatLines.append(ChatLine(role: .assistant, text: "Chat is offline right now (\(error.localizedDescription)).", isError: true))
         }
     }
 }

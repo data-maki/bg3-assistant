@@ -515,7 +515,7 @@ struct ChatResponse: Codable {
     let guideFacts: [String]
     let assistantSuggestions: [String]
     let unknowns: [String]
-    let sources: [ChatSource]?
+    let sources: [ChatSource]  // backend always sends it; app and backend ship together
 }
 
 enum PlannerTab: String, CaseIterable, Identifiable {

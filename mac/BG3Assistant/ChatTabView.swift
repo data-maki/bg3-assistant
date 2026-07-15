@@ -5,7 +5,6 @@ import SwiftUI
 struct ChatTabView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var speech = SpeechInputService()
-    @State private var showAttachmentPreview = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -98,22 +97,7 @@ struct ChatTabView: View {
         } else if let screenshot = appState.chatScreenshot,
                   let image = NSImage(data: screenshot.data) {
             HStack(spacing: 8) {
-                Button {
-                    showAttachmentPreview.toggle()
-                } label: {
-                    Image(nsImage: image)
-                        .resizable().scaledToFill()
-                        .frame(width: 64, height: 36)
-                        .clipped()
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: $showAttachmentPreview, arrowEdge: .bottom) {
-                    Image(nsImage: image)
-                        .resizable().scaledToFit()
-                        .frame(width: 560, height: 315)
-                        .padding(8)
-                }
+                ScreenshotThumbnail(image: image, compact: true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Current BG3 view").font(.caption.bold())
                     Text("Attached to your next message").font(.caption2).foregroundStyle(.secondary)
@@ -206,20 +190,21 @@ struct ChatTabView: View {
 
 private struct ChatBubble: View {
     let line: ChatLine
-    @State private var showScreenshotPreview = false
 
-    private var isUser: Bool { line.role == "You" }
+    private var isUser: Bool { line.role == .user }
+
+    private static var markdownImage: Regex<(Substring, Substring)> { /!\[[^\]]*\]\(([^)\s]+)\)/ }
 
     /// `![alt](url)` images render as real images; the rest stays markdown text.
     private var imageURLs: [URL] {
-        line.text.matches(of: /!\[[^\]]*\]\(([^)\s]+)\)/)
+        line.text.matches(of: Self.markdownImage)
             .compactMap { URL(string: String($0.output.1)) }
             .filter { $0.scheme == "https" || $0.scheme == "http" }
     }
 
     private var markdownText: AttributedString {
         let withoutImages = line.text
-            .replacing(/!\[[^\]]*\]\([^)\s]+\)/, with: "")
+            .replacing(Self.markdownImage, with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         var attributed = (try? AttributedString(
             markdown: withoutImages,
@@ -241,21 +226,7 @@ private struct ChatBubble: View {
                         .font(.system(size: 12.5))
                         .textSelection(.enabled)
                     if let data = line.imageData, let image = NSImage(data: data) {
-                        Button {
-                            showScreenshotPreview.toggle()
-                        } label: {
-                            Image(nsImage: image)
-                                .resizable().scaledToFit()
-                                .frame(maxWidth: 220, maxHeight: 130, alignment: .leading)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                        .buttonStyle(.plain)
-                        .popover(isPresented: $showScreenshotPreview, arrowEdge: .bottom) {
-                            Image(nsImage: image)
-                                .resizable().scaledToFit()
-                                .frame(width: 560, height: 315)
-                                .padding(8)
-                        }
+                        ScreenshotThumbnail(image: image)
                     }
                     ForEach(imageURLs, id: \.self) { url in
                         AsyncImage(url: url) { image in
@@ -302,5 +273,37 @@ private struct ChatBubble: View {
     private func sourceLabel(_ source: ChatSource) -> String {
         if !source.title.isEmpty { return String(source.title.prefix(40)) }
         return URL(string: source.url)?.host() ?? source.url
+    }
+}
+
+/// Chat screenshot thumbnail; click for a full-size popover preview.
+private struct ScreenshotThumbnail: View {
+    let image: NSImage
+    var compact = false  // attachment-strip crop vs in-bubble fit
+
+    @State private var showPreview = false
+
+    var body: some View {
+        Button { showPreview.toggle() } label: {
+            if compact {
+                Image(nsImage: image)
+                    .resizable().scaledToFill()
+                    .frame(width: 64, height: 36)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+            } else {
+                Image(nsImage: image)
+                    .resizable().scaledToFit()
+                    .frame(maxWidth: 220, maxHeight: 130, alignment: .leading)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showPreview, arrowEdge: .bottom) {
+            Image(nsImage: image)
+                .resizable().scaledToFit()
+                .frame(width: 560, height: 315)
+                .padding(8)
+        }
     }
 }

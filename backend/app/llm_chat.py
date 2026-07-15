@@ -46,7 +46,7 @@ and [Assistant suggestion] as an unverified hint.
 - Never tell the player an objective is complete — that is their call.
 
 Web search (when the search_web tool is available):
-- If the guide facts and run state do not answer the question, call search_web BEFORE answering.
+- Answer from the guide facts when they cover the question; call search_web only when they do not.
 - Cite every claim taken from a search result as an inline markdown link, e.g. ([bg3.wiki](https://bg3.wiki/...)).
 - Never write a URL that was not returned by search_web in this conversation — not even one you know from memory. \
 No search performed = no links in the answer.
@@ -129,15 +129,6 @@ def _run_search_calls(tool_calls: list[dict], settings: Settings) -> tuple[list[
     return messages, sources
 
 
-def _cited_first(sources: list[ChatSource], answer_text: str) -> list[ChatSource]:
-    """Dedupe by URL; sources cited in the answer lead, capped at MAX_SOURCES."""
-    unique: dict[str, ChatSource] = {}
-    for source in sources:
-        unique.setdefault(source.url, source)
-    ranked = sorted(unique.values(), key=lambda source: _page_key(source.url) not in answer_text)
-    return ranked[:MAX_SOURCES]
-
-
 _MARKDOWN_IMAGE = re.compile(r"!\[[^\]]*\]\((https?://[^)\s]+)\)")
 _MARKDOWN_LINK = re.compile(r"\[([^\]]*)\]\((https?://[^)\s]+)\)")
 
@@ -146,13 +137,14 @@ def _page_key(url: str) -> str:
     return url.split("#", 1)[0].rstrip("/")
 
 
-def _verify_citations(text: str, sources: list[ChatSource], request: ChatRequest, settings: Settings) -> tuple[str, list[ChatSource]]:
-    """Keep only links that a real search returned; models cite from memory otherwise.
+def _reconcile_citations(text: str, sources: list[ChatSource], request: ChatRequest, settings: Settings) -> tuple[str, list[ChatSource]]:
+    """Keep only links a real search returned; models cite from memory otherwise.
 
     Any markdown URL that no executed search produced gets one best-effort Exa
     check on the player's question; still-unverified links collapse to their
     label (images are dropped) so every clickable reference is real. URLs are
-    compared per page (fragment ignored).
+    compared per page (fragment ignored). Returns the cleaned text plus the
+    deduped sources, cited ones first, capped at MAX_SOURCES.
     """
 
     def verified_keys(items: list[ChatSource]) -> set[str]:
@@ -167,7 +159,12 @@ def _verify_citations(text: str, sources: list[ChatSource], request: ChatRequest
         verified = verified_keys(sources)
     text = _MARKDOWN_IMAGE.sub(lambda m: m.group(0) if _page_key(m.group(1)) in verified else "", text)
     text = _MARKDOWN_LINK.sub(lambda m: m.group(0) if _page_key(m.group(2)) in verified else m.group(1), text)
-    return text.strip(), sources
+
+    unique: dict[str, ChatSource] = {}
+    for source in sources:
+        unique.setdefault(source.url, source)
+    ranked = sorted(unique.values(), key=lambda source: _page_key(source.url) not in cited)
+    return text.strip(), ranked[:MAX_SOURCES]
 
 
 def _completion(messages: list[dict], settings: Settings, allow_tools: bool) -> dict:
@@ -200,18 +197,17 @@ def answer(
     settings: Settings,
 ) -> ChatResponse:
     """LLM answer grounded in the guide; deterministic fallback on any failure."""
-    deterministic = guide_chat.answer(checkpoint, request, step)
     if not settings.openrouter_api_key:
-        return deterministic
+        return guide_chat.answer(checkpoint, request, step)
 
-    grounding = "\n".join(guide_chat.grounding_facts(checkpoint, request, step))
-    messages: list[dict] = [
-        {"role": "system", "content": SYSTEM_PROMPT.format(grounding=grounding)},
-        *_history_messages(request),
-        {"role": "user", "content": _user_content(request, allow_search=bool(settings.exa_api_key))},
-    ]
     sources: list[ChatSource] = []
     try:
+        grounding = "\n".join(guide_chat.grounding_facts(checkpoint, request, step))
+        messages: list[dict] = [
+            {"role": "system", "content": SYSTEM_PROMPT.format(grounding=grounding)},
+            *_history_messages(request),
+            {"role": "user", "content": _user_content(request, allow_search=bool(settings.exa_api_key))},
+        ]
         text = ""
         for search_round in range(MAX_SEARCH_ROUNDS + 1):
             allow_tools = bool(settings.exa_api_key) and search_round < MAX_SEARCH_ROUNDS
@@ -228,13 +224,7 @@ def answer(
             raise ValueError("empty completion")
     except Exception:
         logger.warning("OpenRouter chat failed; using deterministic fallback", exc_info=True)
-        return deterministic
+        return guide_chat.answer(checkpoint, request, step)
 
-    # Route truth stays deterministic: guide facts, suggestions, and unknowns
-    # come from the reviewed data. The model contributes the short markdown
-    # answer on top, with web citations surfaced as clickable sources.
-    text, sources = _verify_citations(text, sources, request, settings)
-    return deterministic.model_copy(update={
-        "answer": text,
-        "sources": _cited_first(sources, text),
-    })
+    text, sources = _reconcile_citations(text, sources, request, settings)
+    return ChatResponse(answer=text, sources=sources)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .models import BuildGear, ChatRequest, PartyMember, RouteCheckpoint, WalkthroughStep
+from .models import BuildGear, BuildSummary, ChatRequest, PartyMember, RouteCheckpoint, WalkthroughStep
 from .route_data import GUIDE_VERSION, item_key, load_builds
 from .walkthrough_data import load_walkthrough, recommend_walkthrough_step, walkthrough_blockers
 
@@ -33,6 +33,18 @@ class ResolvedChatContext:
     walkthrough_outcomes: dict[str, str] = field(default_factory=dict)
     guide_version_mismatch: str | None = None
 
+    def missing_gear(self, member_id: str) -> list[BuildGear]:
+        """Reviewed gear this member should pursue and does not own yet.
+
+        The single definition of "missing": deterministic answers and LLM
+        grounding must never disagree about what a member still needs.
+        """
+        owned = set(self.equipped_by_member.get(member_id, []))
+        return [
+            gear for gear in self.relevant_gear.get(member_id, [])
+            if item_key(gear.item) not in owned and gear.item not in owned
+        ]
+
     def grounding_lines(self, checkpoint: RouteCheckpoint) -> list[str]:
         """Concise, authority-labelled state for deterministic or LLM chat."""
         lines = [
@@ -60,8 +72,7 @@ class ResolvedChatContext:
                 owned = self.equipped_by_member.get(member.id, [])
                 if owned:
                     lines.append(f"[Player-confirmed equipment] {member.name}: {', '.join(owned)}")
-                missing = [gear.item for gear in self.relevant_gear.get(member.id, []) if item_key(gear.item) not in owned]
-                if missing:
+                if missing := [gear.item for gear in self.missing_gear(member.id)]:
                     lines.append(f"[Reviewed loadout] {member.name} missing/current pursuits: {', '.join(missing[:3])}")
         else:
             lines.append("[Unknown] Equipment ownership has not been confirmed.")
@@ -80,7 +91,7 @@ def _valid_step(step_id: str | None, by_id: dict[str, WalkthroughStep]) -> Walkt
     return by_id.get(step_id) if step_id else None
 
 
-def _available_gear(build_id: str, level: int, act: int, builds: dict) -> list[BuildGear]:
+def _available_gear(build_id: str, level: int, act: int, builds: dict[str, BuildSummary]) -> list[BuildGear]:
     build = builds.get(build_id)
     if not build:
         return []
