@@ -71,7 +71,7 @@ struct RouteTabView: View {
                 Button { appState.followRecommendedRoute() } label: {
                     Label("Recommended", systemImage: "location.fill").font(.caption2.bold())
                 }
-                .assistantGlassButton().controlSize(.mini)
+                .assistantActionButton().controlSize(.mini)
             }
             HStack(spacing: 5) {
                 Image(systemName: appState.actTwoBlockers.isEmpty ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
@@ -131,7 +131,7 @@ struct RouteTabView: View {
             }
             Spacer()
             Button("Revisit") { appState.setWalkthroughDisposition(step, .pending) }
-                .assistantGlassButton().controlSize(.mini)
+                .assistantActionButton().controlSize(.mini)
         }
         .padding(7).bg3InsetSurface(accent: disposition == .completed ? BG3Theme.success : .orange)
     }
@@ -187,19 +187,23 @@ struct RouteTabView: View {
                                 Button(option.label) { appState.resolveWalkthroughStep(step, outcome: option.label) }
                             }
                         }
-                        .assistantGlassButton().controlSize(.small)
+                        .assistantActionButton().controlSize(.small)
                     }
                 }
             }
             HStack(spacing: 7) {
                 if step.decision == nil {
-                    Button("Done") { appState.setWalkthroughDisposition(step, .completed) }
-                        .assistantGlassButton().tint(BG3Theme.success)
+                    Button { appState.setWalkthroughDisposition(step, .completed) } label: {
+                        Label("Done", systemImage: "checkmark")
+                    }
+                    .assistantActionButton(accent: BG3Theme.success, prominent: true)
                 }
-                Button("Skip") { appState.setWalkthroughDisposition(step, .skipped) }
-                    .assistantGlassButton()
+                Button { appState.setWalkthroughDisposition(step, .skipped) } label: {
+                    Label("Skip", systemImage: "forward.end")
+                }
+                .assistantActionButton()
                 Button("Revisit") { appState.setWalkthroughDisposition(step, .pending) }
-                    .assistantGlassButton()
+                    .assistantActionButton()
                 Spacer()
             }
             .controlSize(.small)
@@ -240,8 +244,7 @@ struct RouteTabView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 4).padding(.horizontal, 6)
         }
-        .assistantGlassButton()
-        .tint(recommended ? BG3Theme.success : BG3Theme.bronzeBright)
+        .assistantActionButton(accent: recommended ? BG3Theme.success : BG3Theme.control, prominent: recommended)
         .controlSize(.small)
         .help(recommended ? "The guide's recommended outcome" : "The run went this way instead — later steps that assume the recommendation may not apply")
     }

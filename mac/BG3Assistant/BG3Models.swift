@@ -282,6 +282,8 @@ struct CheckpointProgress: Codable, Hashable {
 
 struct HonorRun: Codable {
     var id = UUID().uuidString
+    var name: String?
+    var createdAt: Date?
     var guideVersion = ""
     var party: [PartyMember] = [
         PartyMember(id: "tav", name: "Tav", level: 1, buildId: nil, preparedTags: [], className: nil),
@@ -306,7 +308,6 @@ struct HonorRun: Codable {
     var selectedAct: Int? = 1
     var mapRegion = "Wilderness"
     var mutedCheckpointIds: Set<String>?
-    var visualMemory: [VisualMemoryEntry]?
 
     /// One-time migration: older runs kept fight dispositions in `progress`;
     /// copy any non-pending legacy disposition into the walkthrough ledger
@@ -368,7 +369,6 @@ struct HonorRun: Codable {
         if includeCampPlans == nil { includeCampPlans = false }
         if equippedByMember == nil { equippedByMember = [:] }
         if equipmentOwnershipKnown == nil { equipmentOwnershipKnown = false }
-        if visualMemory == nil { visualMemory = [] }
     }
 
     var activeParty: [PartyMember] {
@@ -464,7 +464,6 @@ enum ChatScope: String, Codable, CaseIterable, Identifiable {
     case current
     case route
     case party
-    case loadout
 
     var id: String { rawValue }
     var title: String { rawValue.capitalized }
@@ -477,8 +476,6 @@ struct ChatContextSnapshot: Codable {
     let selectedAct: Int
     let mapRegion: String
     let routePhase: String
-    let detectionTimestamp: TimeInterval?
-    let detectionConfidence: Double?
     let recommendedStepId: String?
     let focusedStepId: String?
     let walkthroughStatuses: [String: String]
@@ -487,9 +484,19 @@ struct ChatContextSnapshot: Codable {
     let storyOutcomes: [String]
     let equippedByMember: [String: [String]]
     let equipmentOwnershipKnown: Bool
-    let visualMemorySummary: String?
-    let visualMemoryTimestamp: TimeInterval?
-    let visualMemoryCompletionStepIds: [String]
+}
+
+struct ChatTurn: Codable {
+    let role: String  // "user" | "assistant"
+    let content: String
+}
+
+struct ChatSource: Codable, Identifiable, Hashable {
+    var id: String { url }
+    let title: String
+    let url: String
+    let snippet: String?
+    let image: String?
 }
 
 struct ChatRequest: Codable {
@@ -498,10 +505,9 @@ struct ChatRequest: Codable {
     let party: [PartyMember]
     let completedCheckpointIds: [String]
     let walkthroughStepId: String?
-    let screenshotContext: String?
     var imageBase64: String? = nil  // optional BG3 screenshot for the vision model
-    var screenshotTimestamp: TimeInterval? = nil
     let context: ChatContextSnapshot
+    var history: [ChatTurn] = []  // prior turns, oldest first
 }
 
 struct ChatResponse: Codable {
@@ -509,193 +515,17 @@ struct ChatResponse: Codable {
     let guideFacts: [String]
     let assistantSuggestions: [String]
     let unknowns: [String]
-}
-
-struct ScreenDetected: Codable {
-    let game: String
-    let likelyArea: String
-    let screenKind: String
-    let visibleEnemies: [String]
-    let visibleParty: [String]
-    let visibleLevels: [Int]
-    let dialogueOrWarning: String
-    let evidence: [String]
-}
-
-struct ScreenCandidate: Codable, Identifiable, Hashable {
-    var id: String { checkpointId }
-    let checkpointId: String
-    let confidence: Double
-    let reason: String
-}
-
-struct VisualCompletionCandidate: Codable, Identifiable, Hashable {
-    var id: String { stepId }
-    let stepId: String
-    let confidence: Double
-    let reason: String
-}
-
-struct AnalysisResponse: Codable {
-    let ok: Bool
-    let analysisId: String
-    let screenSummary: String
-    let detected: ScreenDetected
-    let candidates: [ScreenCandidate]
-    let completionCandidates: [VisualCompletionCandidate]?
-    let confidence: Double
-    let latencyMs: Int
-    let error: String?
-}
-
-struct VisualMemoryEntry: Codable, Identifiable, Hashable {
-    let id: String
-    let capturedAt: Date
-    let summary: String
-    let likelyArea: String
-    let screenKind: String
-    let evidence: [String]
-    let candidates: [ScreenCandidate]
-    let completionCandidates: [VisualCompletionCandidate]
-    let confidence: Double
-
-    var fingerprint: String {
-        let current = candidates.map(\.checkpointId).sorted().joined(separator: ",")
-        let completed = completionCandidates.map(\.stepId).sorted().joined(separator: ",")
-        return "\(screenKind.lowercased())|\(likelyArea.lowercased())|\(current)|\(completed)"
-    }
-}
-
-enum VisualMemoryLedger {
-    static func recording(_ entry: VisualMemoryEntry, in entries: [VisualMemoryEntry], limit: Int = 24) -> [VisualMemoryEntry] {
-        var updated = entries
-        if updated.last?.fingerprint == entry.fingerprint { updated[updated.count - 1] = entry }
-        else { updated.append(entry) }
-        return Array(updated.suffix(max(1, limit)))
-    }
-}
-
-struct TelemetryEvent: Codable, Identifiable, Hashable {
-    var id: String { "\(sequence)-\(kind)" }
-    let sequence: Int
-    let kind: String
-    let emittedAt: Double?
-    let actor: String?
-    let target: String?
-    let combatId: String?
-    let payload: [String: String]
-}
-
-struct TelemetryStatus: Codable, Hashable {
-    let ok: Bool
-    let available: Bool
-    let active: Bool
-    let stale: Bool
-    let mode: String
-    let message: String
-    let producerVersion: String?
-    let sessionId: String?
-    let lastSequence: Int
-    let ageSeconds: Double?
-    let events: [TelemetryEvent]
-}
-
-struct TelemetrySuggestion: Hashable {
-    let title: String
-    let action: String
-    let severity: String
-}
-
-enum TelemetryGuidance {
-    static let ignoredKinds = Set(["heartbeat", "bridge_started", "session_loaded"])
-
-    static func latestSuggestion(in status: TelemetryStatus?) -> TelemetrySuggestion? {
-        guard status?.active == true,
-              let event = status?.events.last(where: { !ignoredKinds.contains($0.kind) }) else { return nil }
-        return suggestion(for: event)
-    }
-
-    static func suggestion(for event: TelemetryEvent) -> TelemetrySuggestion? {
-        switch event.kind {
-        case "combat_entered":
-            return TelemetrySuggestion(title: "Combat detected", action: "Check the current fight card before committing resources.", severity: "high")
-        case "combat_ended":
-            return TelemetrySuggestion(title: "Combat ended", action: "Stabilize, loot, then confirm the outcome yourself.", severity: "medium")
-        case "downed":
-            return TelemetrySuggestion(title: "Character downed", action: "If this is your party, open DON'T DIE and preserve an escape route.", severity: "critical")
-        case "died":
-            return TelemetrySuggestion(title: "Death detected", action: "Clear hazards and stabilize before moving or reviving.", severity: "critical")
-        case "resurrected":
-            return TelemetrySuggestion(title: "Character revived", action: "Re-equip, heal, and verify resources before continuing.", severity: "high")
-        case "dialog_roll":
-            let succeeded = event.payload["success"] == "1"
-            return TelemetrySuggestion(
-                title: succeeded ? "Dialogue roll succeeded" : "Dialogue roll failed",
-                action: "Review the current dialogue consequence; progress still needs your confirmation.",
-                severity: succeeded ? "low" : "high"
-            )
-        case "roll_result":
-            let succeeded = event.payload["success"] == "1"
-            return TelemetrySuggestion(
-                title: succeeded ? "Roll succeeded" : "Roll failed",
-                action: "Use the result as context; the guide state remains unchanged.",
-                severity: succeeded ? "low" : "medium"
-            )
-        case "leveled_up":
-            return TelemetrySuggestion(title: "Level gained", action: "Update this character's level after committing the level-up.", severity: "low")
-        case "equipped", "unequipped":
-            return TelemetrySuggestion(title: "Loadout changed", action: "Review Equipment; telemetry does not assume this is guide gear.", severity: "low")
-        case "long_rest_started":
-            return TelemetrySuggestion(title: "Long rest started", action: "Check time-sensitive warnings before accepting consequences.", severity: "high")
-        default:
-            return nil
-        }
-    }
-}
-
-struct MapAlignContext: Codable {
-    let checkpointId: String?
-    let completedCheckpointIds: [String]
-    let useActiveMarkerSync: Bool
-}
-
-struct MapAlignLatLng: Codable {
-    let lat: Double
-    let lng: Double
-}
-
-struct MapAlignTarget: Codable, Identifiable {
-    let id: String
-    let label: String
-    let kind: String
-    let danger: String
-    let lat: Double
-    let lng: Double
-    let x: Double
-    let y: Double
-    let onScreen: Bool
-}
-
-struct MapAlignResponse: Codable {
-    let ok: Bool
-    let mapOpen: Bool
-    let inliers: Int
-    let confidence: Double
-    let zoom: Double?
-    let center: MapAlignLatLng?
-    let positionUpdated: Bool
-    let targets: [MapAlignTarget]
-    let latencyMs: Int
-    let error: String?
+    let sources: [ChatSource]?
 }
 
 enum PlannerTab: String, CaseIterable, Identifiable {
-    case current = "Current"
-    case route = "Route"
+    case current = "Now"
+    case route = "Run"
     case party = "Party"
-    case loadout = "Loadout"
     case chat = "Chat"
     var id: String { rawValue }
+
+    static let primary: [PlannerTab] = [.current, .route, .party]
 }
 
 enum OverlayDensity: String, CaseIterable, Identifiable {

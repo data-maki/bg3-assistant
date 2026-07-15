@@ -18,7 +18,6 @@
       <div class="topbar-actions">
         <span id="liveStatus" class="live-status live-status--none"><i></i>No live position</span>
         <span id="summaryCount" class="summary-count">Loading markers…</span>
-        <button id="exportMarkersBtn" class="button button-primary" type="button">Export BG3 markers</button>
         <a id="mapgenieLink" class="button button-secondary" target="_blank" rel="noreferrer">Open MapGenie Wilderness ↗</a>
       </div>
     </header>
@@ -137,28 +136,6 @@
         <article id="detailCard" class="detail-card" hidden></article>
       </section>
     </main>
-
-    <dialog id="markerExportDialog" class="marker-export-dialog">
-      <form method="dialog" class="marker-export-card">
-        <header>
-          <div>
-            <p class="eyebrow">ONE-SHOT MAP SETUP</p>
-            <h2>BG3 marker export</h2>
-          </div>
-          <button class="dialog-close" value="cancel" aria-label="Close marker export">×</button>
-        </header>
-        <p id="markerExportSummary" class="marker-export-summary"></p>
-        <div id="markerExportWarnings" class="marker-export-warnings"></div>
-        <div id="markerExportList" class="marker-export-list"></div>
-        <footer>
-          <span id="markerExportFingerprint" class="marker-export-fingerprint"></span>
-          <div class="marker-export-actions">
-            <button id="confirmMarkersBtn" class="button" type="button">Placed in BG3</button>
-            <button id="downloadMarkersBtn" class="button button-primary" type="button">Download JSON</button>
-          </div>
-        </footer>
-      </form>
-    </dialog>
 
     <script src="/map-assets/vendor/leaflet/leaflet.js" defer></script>
     <!-- Modules defer by default and run after classic deferred scripts in

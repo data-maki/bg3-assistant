@@ -16,8 +16,18 @@ struct OverlayView: View {
                 set: { if !$0 { appState.cancelPendingDisposition() } }
             )
         ) {
-            Button("Confirm", role: .destructive, action: appState.confirmPendingDisposition)
+            if appState.pendingDisposition == .skipped {
+                Button("Skip Anyway", role: .destructive, action: appState.confirmPendingDisposition)
+            } else {
+                Button("Mark Done", action: appState.confirmPendingDisposition)
+            }
             Button("Cancel", role: .cancel, action: appState.cancelPendingDisposition)
+        }
+        .alert("Attach a BG3 screenshot?", isPresented: $appState.showScreenRecordingPermissionPrompt) {
+            Button("Continue", action: appState.requestScreenRecordingPermission)
+            Button("Not Now", role: .cancel) {}
+        } message: {
+            Text("Chat can capture the current BG3 window once and attach it to your next message. It excludes the overlay and is sent to OpenRouter only when you send.")
         }
     }
 
@@ -32,20 +42,20 @@ struct OverlayView: View {
 
     private var plannerNavigation: some View {
         HStack(spacing: 2) {
-            ForEach(PlannerTab.allCases) { tab in
+            ForEach(PlannerTab.primary) { tab in
                 let selected = appState.plannerTab == tab
                 Button {
                     appState.plannerTab = tab
                 } label: {
                     Text(tab.rawValue.uppercased())
                         .font(.system(size: 9.5, weight: selected ? .bold : .semibold, design: .serif))
-                        .foregroundStyle(selected ? BG3Theme.gold : BG3Theme.mutedParchment)
+                        .foregroundStyle(selected ? BG3Theme.parchment : BG3Theme.mutedParchment)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 5)
                         .background {
                             if selected {
-                                Capsule().fill(BG3Theme.bronze.opacity(0.36))
-                                    .overlay(Capsule().stroke(BG3Theme.gold.opacity(0.46), lineWidth: 0.7))
+                                Capsule().fill(BG3Theme.bronze.opacity(0.22))
+                                    .overlay(Capsule().stroke(BG3Theme.bronzeBright.opacity(0.52), lineWidth: 0.7))
                             }
                         }
                 }
@@ -66,7 +76,7 @@ struct OverlayView: View {
                 DraggableArea {
                     HStack(spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(appState.currentActivityTitle)
+                            Text(appState.plannerTab == .chat ? "Ask about this run" : appState.currentActivityTitle)
                                 .font(.system(size: 14, weight: .bold, design: .serif))
                                 .foregroundStyle(BG3Theme.parchment).lineLimit(1)
                             if appState.currentWalkthroughStep != nil || appState.currentCheckpoint != nil {
@@ -79,11 +89,20 @@ struct OverlayView: View {
                     .frame(height: 38)
                 }
                 .fixedSize(horizontal: false, vertical: true)
+                Button { appState.openActOneMap() } label: {
+                    Image(systemName: "map").frame(width: 18, height: 18)
+                }
+                .assistantActionButton()
+                .help("Open Act 1 map")
+                Button(action: appState.openChat) {
+                    Image(systemName: "bubble.left.and.bubble.right").frame(width: 18, height: 18)
+                }
+                .assistantActionButton(accent: appState.plannerTab == .chat ? BG3Theme.bronzeBright : BG3Theme.control)
+                .help("Ask about this run")
                 Button(action: appState.togglePlanner) {
                     Image(systemName: "xmark").frame(width: 18, height: 18)
                 }
-                .assistantGlassButton()
-                .tint(BG3Theme.bronzeBright)
+                .assistantActionButton()
                 .help("Close planner")
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -98,7 +117,6 @@ struct OverlayView: View {
                 case .current: currentTab
                 case .route: RouteTabView()
                 case .party: PartyTabView()
-                case .loadout: LoadoutTabView()
                 case .chat: ChatTabView()
                 }
             }
@@ -108,7 +126,7 @@ struct OverlayView: View {
         .frame(width: expandedContentSize.width, height: expandedContentSize.height, alignment: .top)
         .foregroundStyle(BG3Theme.parchment)
         .colorScheme(.dark)
-        .tint(BG3Theme.gold)
+        .tint(BG3Theme.control)
         .assistantGlassSurface(cornerRadius: 16)
         .shadow(color: .black.opacity(0.46), radius: 20, y: 8)
     }
@@ -118,10 +136,6 @@ struct OverlayView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     runResumeLine
-                    visualMemoryCard
-                    if let suggestion = appState.telemetrySuggestion {
-                        telemetryBanner(suggestion)
-                    }
                     HStack(alignment: .firstTextBaseline) {
                         Text("FIGHT").font(.system(.caption, design: .serif).bold()).foregroundStyle(BG3Theme.gold)
                         Spacer()
@@ -148,14 +162,20 @@ struct OverlayView: View {
                     .bg3InsetSurface(accent: BG3Theme.dangerColor(checkpoint.danger))
                     compactPreparation(checkpoint)
 
-                    HStack {
-                        Button("Done") { appState.requestDisposition(.completed) }
-                            .assistantGlassButton().tint(BG3Theme.success)
-                        Button("Skip") { appState.requestDisposition(.skipped) }
-                            .assistantGlassButton()
+                    HStack(spacing: 7) {
+                        Button { appState.requestDisposition(.completed) } label: {
+                            Label("Done", systemImage: "checkmark")
+                        }
+                        .assistantActionButton(accent: BG3Theme.success, prominent: true)
+                        Button { appState.requestDisposition(.skipped) } label: {
+                            Label("Skip", systemImage: "forward.end")
+                        }
+                        .assistantActionButton()
                         Spacer()
-                        Button("Choose another") { appState.plannerTab = .route }
-                            .assistantGlassButton()
+                        Button { appState.plannerTab = .route } label: {
+                            Label("Route", systemImage: "list.bullet")
+                        }
+                        .assistantActionButton()
                     }
 
                     DisclosureGroup("More context") {
@@ -182,8 +202,6 @@ struct OverlayView: View {
                                 Button("Pin tactics") { appState.pinCurrentFight() }
                                     .disabled(appState.readiness?.status == "blocked")
                                 Button("Revisit") { appState.requestDisposition(.pending) }
-                                Button("Check screen") { Task { await appState.checkScreen() } }
-                                    .disabled(appState.isLoading || !appState.gameDetected)
                             }
                             if let sourceURL = URL(string: checkpoint.source.url) {
                                 Link("Guide source • \(checkpoint.source.sheet), row \(checkpoint.source.row) ↗", destination: sourceURL)
@@ -199,7 +217,6 @@ struct OverlayView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     runResumeLine
-                    visualMemoryCard
                     walkthroughNowCard
                 }.padding(.trailing, 8)
             }
@@ -208,7 +225,7 @@ struct OverlayView: View {
                 walkthroughNowCard
                 Text(appState.route.isEmpty ? "Guide offline" : "Act 1 route complete").font(.title.bold())
                 if appState.route.isEmpty {
-                    Label("Open the control window and press Start Backend to load the guide.", systemImage: "wifi.exclamationmark").foregroundStyle(.red)
+                    Label("The local guide service is unavailable. Quit and reopen the assistant.", systemImage: "wifi.exclamationmark").foregroundStyle(.red)
                 } else if appState.actTwoBlockers.isEmpty {
                     Label("Nothing missable left — Act 2 is safe to enter.", systemImage: "checkmark.seal.fill").foregroundStyle(.green)
                 } else {
@@ -228,51 +245,6 @@ struct OverlayView: View {
         }
         .font(.system(size: 9.5, weight: .semibold))
         .foregroundStyle(BG3Theme.mutedParchment)
-    }
-
-    @ViewBuilder private var visualMemoryCard: some View {
-        if let memory = appState.latestVisualMemory {
-            VStack(alignment: .leading, spacing: 5) {
-                HStack {
-                    Label("VISUAL MEMORY · \(appState.visualMemoryAgeLabel)", systemImage: "eye.fill")
-                        .font(.system(.caption2, design: .serif).bold()).foregroundStyle(BG3Theme.gold)
-                    Spacer()
-                    Text("EVIDENCE · PROGRESS UNCHANGED")
-                        .font(.system(size: 7.5, weight: .bold)).foregroundStyle(BG3Theme.mutedParchment)
-                }
-                Text(memory.summary).font(.caption).lineLimit(2)
-                if let candidate = appState.unresolvedVisualCompletionCandidates.first,
-                   let step = appState.walkthrough.first(where: { $0.id == candidate.stepId }) {
-                    HStack(spacing: 6) {
-                        Text("LIKELY DONE · \(step.title) · \(Int(candidate.confidence * 100))%")
-                            .font(.system(size: 9.5, weight: .bold)).foregroundStyle(BG3Theme.success).lineLimit(1)
-                        Spacer()
-                        Button("Review") { appState.reviewVisualCompletion(candidate) }
-                            .assistantGlassButton().controlSize(.mini)
-                    }
-                }
-            }
-            .padding(8).frame(maxWidth: .infinity, alignment: .leading)
-            .bg3InsetSurface(accent: BG3Theme.gold)
-        } else if appState.visualMemoryEnabled {
-            Label(appState.visualMemoryStatus, systemImage: "eye")
-                .font(.caption).foregroundStyle(.secondary)
-        }
-    }
-
-    private func telemetryBanner(_ suggestion: TelemetrySuggestion) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack {
-                Label("LIVE EVENT", systemImage: "waveform.path.ecg")
-                    .font(.system(.caption2, design: .serif).bold()).foregroundStyle(BG3Theme.gold)
-                Spacer()
-                Text("ADVISORY • PROGRESS UNCHANGED").font(.system(size: 8, weight: .bold)).foregroundStyle(BG3Theme.mutedParchment)
-            }
-            Text(suggestion.title).font(.system(size: 12, weight: .bold, design: .serif))
-            Text(suggestion.action).font(.caption).foregroundStyle(BG3Theme.parchment)
-        }
-        .padding(9).frame(maxWidth: .infinity, alignment: .leading)
-        .bg3InsetSurface(accent: suggestion.severity == "critical" ? .red : BG3Theme.gold)
     }
 
     @ViewBuilder private var walkthroughNowCard: some View {
@@ -296,31 +268,39 @@ struct OverlayView: View {
                 }
                 HStack(spacing: 6) {
                     if let decision = step.decision, status != .completed {
-                        Button("✓ \(decision.recommended.label)") {
+                        Button {
                             appState.resolveWalkthroughStep(step, outcome: decision.recommended.label)
+                        } label: {
+                            Label(decision.recommended.label, systemImage: "checkmark")
                         }
-                        .assistantGlassButton().tint(BG3Theme.success)
+                        .assistantActionButton(accent: BG3Theme.success, prominent: true)
                         if !decision.alternatives.isEmpty {
                             Menu("Other outcome") {
                                 ForEach(decision.alternatives, id: \.label) { option in
                                     Button(option.label) { appState.resolveWalkthroughStep(step, outcome: option.label) }
                                 }
                             }
-                            .assistantGlassButton()
+                            .assistantActionButton()
                         }
                     } else if status != .completed {
-                        Button("Done") { appState.completeCurrentActivity() }
-                            .assistantGlassButton().tint(BG3Theme.success)
+                        Button { appState.completeCurrentActivity() } label: {
+                            Label("Done", systemImage: "checkmark")
+                        }
+                        .assistantActionButton(accent: BG3Theme.success, prominent: true)
                     }
-                    Button("Skip") { appState.skipCurrentActivity() }
-                        .assistantGlassButton()
+                    Button { appState.skipCurrentActivity() } label: {
+                        Label("Skip", systemImage: "forward.end")
+                    }
+                    .assistantActionButton()
                     if status != .pending {
                         Button("Revisit") { appState.revisitCurrentActivity() }
-                            .assistantGlassButton()
+                            .assistantActionButton()
                     }
                     Spacer()
-                    Button("Route") { appState.plannerTab = .route }
-                        .assistantGlassButton()
+                    Button { appState.plannerTab = .route } label: {
+                        Label("Route", systemImage: "list.bullet")
+                    }
+                    .assistantActionButton()
                 }
                 DisclosureGroup("More context") {
                     VStack(alignment: .leading, spacing: 8) {

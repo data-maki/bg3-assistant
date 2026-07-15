@@ -5,6 +5,8 @@ struct ChatLine: Identifiable {
     let id = UUID()
     let role: String
     let text: String
+    var sources: [ChatSource] = []
+    var imageData: Data?
 }
 
 @MainActor
@@ -16,32 +18,11 @@ final class AppState: ObservableObject {
     @Published var gameDetectionDetail = "Not checked yet"
     @Published var backendHealthy = false
     @Published var backendStatus = "Not checked yet"
-    @Published var telemetryEnabled = storedSettings.telemetryEnabled {
-        didSet {
-            persistSettings()
-            if !telemetryEnabled { telemetryStatus = nil }
-        }
-    }
-    @Published var telemetryStatus: TelemetryStatus?
-    @Published var visualMemoryEnabled = storedSettings.visualMemoryEnabled {
-        didSet {
-            persistSettings()
-            if !visualMemoryEnabled { visualMemoryStatus = "Off" }
-            Task { await automaticCapturePreferenceChanged() }
-        }
-    }
-    @Published var mapOverlayCaptureEnabled = storedSettings.mapOverlayCaptureEnabled {
-        didSet {
-            persistSettings()
-            if !mapOverlayCaptureEnabled {
-                isMapOpen = false
-                mapDetectionStatus = "Off"
-                mapOverlayController.hide()
-            }
-            Task { await automaticCapturePreferenceChanged() }
-        }
-    }
-    @Published var visualMemoryStatus = "Off"
+    @Published var openRouterKeyDraft = ""
+    @Published private(set) var hasOpenRouterKey = OpenRouterKeyStore.load() != nil
+    @Published private(set) var openRouterKeyStatus = OpenRouterKeyStore.load() == nil
+        ? "Optional for AI chat"
+        : "Saved in macOS Keychain"
     @Published var showOverlay = true { didSet { syncOverlay() } }
     @Published var forceOverlay = false { didSet { syncOverlay() } }
     @Published var overlayExpanded = false { didSet { syncOverlay() } }
@@ -66,15 +47,10 @@ final class AppState: ObservableObject {
     @Published var isLoading = false
     @Published var statusMessage = "Loading Act 1 guide…"
     @Published var errorMessage: String?
-    @Published var latestResponse: AnalysisResponse?
-    @Published var latestScreenshotSize = "none"
-    @Published var latestLatencyMs = 0
-    @Published var isMapOpen = false
-    @Published var mapDetectionStatus = "Off"
-    @Published var mapDetectionConfidence = 0.0
-    @Published var latestLocalDetectionTimestamp: TimeInterval?
     @Published var chatDraft = ""
     @Published var chatLines: [ChatLine] = []
+    @Published var chatScreenshot: ScreenshotResult?
+    @Published var isPreparingChatScreenshot = false
     @Published var chatScope: ChatScope = .current
     @Published var skipNoteDraft = ""
     @Published var pendingDisposition: CheckpointDisposition?
@@ -84,52 +60,45 @@ final class AppState: ObservableObject {
     @Published var snoozedUntil: Date?
     @Published var availableGuideVersion = ""
     @Published var newRunConfirmation = false
-    @Published var screenRecordingPreflightAllowed = PermissionManager.hasScreenRecordingPermission
-    @Published var screenRecordingPreflightStatus = PermissionManager.hasScreenRecordingPermission ? "Granted by macOS" : "Not granted by macOS"
-    @Published var screenRecordingAllowed = PermissionManager.hasScreenRecordingPermission
-    @Published var screenRecordingStatus = PermissionManager.hasScreenRecordingPermission ? "Granted by macOS" : "Not granted by macOS"
-    @Published var shouldShowScreenRecordingHelp = false
-    @Published var screenCaptureLastError: String?
+    @Published private(set) var savedRuns: [SavedRunSummary] = []
+    @Published var runNameDraft = ""
+    @Published var newRunNameDraft = ""
     @Published var screenCaptureVerifiedThisLaunch = false
-    @Published var screenCaptureVerificationStatus = PermissionManager.hasScreenRecordingPermission ? "Automatic check pending" : "Waiting for permission"
-    @Published var screenCaptureRequestStatus = "Not requested this launch"
     @Published var showScreenRecordingPermissionPrompt = false
-    @Published var appPermissionIdentity = PermissionManager.appIdentityDescription
-    let appPermissionInstallStatus = PermissionManager.installationDescription
-    let appInstalledInApplications = PermissionManager.isInstalledInApplications
 
     private let detector = BG3Detector()
-    private let backendClient = BackendClient()
+    let backendClient = BackendClient()
     private let backendProcess = BackendProcessManager()
-    private let captureService = ScreenCaptureService()
-    private let mapDetector = MapOpenDetector()
+    let captureService = ScreenCaptureService()
     private let runStore = RunStore()
     private let globalPeekHotKey = GlobalPeekHotKey()
     private let overlayController = OverlayPanelController()
-    private let mapOverlayController = MapMarkerOverlayPanelController()
     private var isStarting = false
     private var pollTask: Task<Void, Never>?
-    private var automaticCaptureTask: Task<Void, Never>?
-    private var lastAutomaticCaptureAt = Date.distantPast
-    private var automaticCaptureInFlight = false
-    private var detectedWindowFrame: CGRect?
     @Published private(set) var gameWindowFrame: CGRect?
 
     // Capture permission has three intentionally separate signals: raw TCC
     // preflight, a successful pixel capture, and whether this launch already
     // invoked the registration request. Never infer one from another.
-    private var captureAuthorized = false
-    private var permissionRequestAttemptedThisLaunch = false
-    private var permissionProbeAfterSettings = false
-    private var captureAuthorizationRefreshInFlight = false
-    private var lastCaptureProbe = Date.distantPast
+    var captureAuthorized = false
+    var permissionRequestAttemptedThisLaunch = false
+    var permissionProbeAfterSettings = false
+    var captureAuthorizationRefreshInFlight = false
+    var lastCaptureProbe = Date.distantPast
     private var activationObserver: Any?
 
     init() {
         var loaded = runStore.load()
         loaded.migrateLegacyPartySlots()
+        if loaded.name?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
+            loaded.name = "Honor Run 1"
+        }
+        if loaded.createdAt == nil { loaded.createdAt = .now }
         run = loaded
         focusedWalkthroughStepId = loaded.focusedWalkthroughStepId
+        runNameDraft = loaded.name ?? "Honor Run 1"
+        try? runStore.save(loaded)
+        reloadSavedRuns()
     }
 
     /// Checkpoint id → disposition, projected from the single walkthrough
@@ -148,31 +117,7 @@ final class AppState: ObservableObject {
         checkpointDispositions.compactMap { $0.value == .completed ? $0.key : nil }
     }
 
-    var telemetryActive: Bool { telemetryEnabled && telemetryStatus?.active == true }
-    var telemetryModeLabel: String {
-        guard telemetryEnabled else { return "Vanilla • no mod required" }
-        guard let telemetryStatus else { return "Vanilla fallback • waiting for Live Events" }
-        return telemetryStatus.active ? telemetryStatus.message : "Vanilla fallback • \(telemetryStatus.message)"
-    }
-    var telemetrySuggestion: TelemetrySuggestion? {
-        telemetryActive ? TelemetryGuidance.latestSuggestion(in: telemetryStatus) : nil
-    }
-    var automaticCaptureEnabled: Bool { visualMemoryEnabled || mapOverlayCaptureEnabled }
-    var latestVisualMemory: VisualMemoryEntry? { run.visualMemory?.last }
-    var unresolvedVisualCompletionCandidates: [VisualCompletionCandidate] {
-        guard let latestVisualMemory else { return [] }
-        return latestVisualMemory.completionCandidates.filter { candidate in
-            candidate.confidence >= 0.80
-                && walkthrough.first(where: { $0.id == candidate.stepId }).map { walkthroughDisposition($0) == .pending } == true
-        }
-    }
-    var visualMemoryAgeLabel: String {
-        guard let capturedAt = latestVisualMemory?.capturedAt else { return "No observations yet" }
-        let seconds = max(0, Int(Date().timeIntervalSince(capturedAt)))
-        if seconds < 60 { return "\(seconds)s ago" }
-        if seconds < 3600 { return "\(seconds / 60)m ago" }
-        return "\(seconds / 3600)h ago"
-    }
+    var currentRunName: String { run.name ?? "Honor Run" }
 
     var recommendedCheckpoint: RouteCheckpoint? {
         RunSafety.nextCheckpoint(route: route, dispositions: checkpointDispositions, selectedId: nil, partyLevel: lowestPartyLevel)
@@ -248,7 +193,6 @@ final class AppState: ObservableObject {
 
     var assistantPhase: AssistantPhase {
         if combatCardPinned { return .combat }
-        if latestResponse?.detected.screenKind == "level_up" { return .levelUp }
         switch currentWalkthroughStep?.kind {
         case "dialogue", "decision": return .dialogue
         case "major_fight", "mini_fight": return .preflight
@@ -351,11 +295,6 @@ final class AppState: ObservableObject {
 
     var activeParty: [PartyMember] { run.activeParty }
     var roster: [PartyMember] { run.roster ?? run.party }
-    var loadoutMembers: [PartyMember] {
-        (run.includeCampPlans ?? false)
-            ? roster.filter { [.active, .camp].contains($0.rosterStatus) }
-            : activeParty
-    }
     var lowestPartyLevel: Int { activeParty.map(\.level).min() ?? 1 }
     var selectedAct: Int { run.selectedAct ?? 1 }
     var chatContextSnapshot: ChatContextSnapshot {
@@ -366,8 +305,6 @@ final class AppState: ObservableObject {
             selectedAct: selectedAct,
             mapRegion: run.mapRegion,
             routePhase: currentWalkthroughStep?.phase ?? recommendedWalkthroughStep?.phase ?? "unknown",
-            detectionTimestamp: latestVisualMemory?.capturedAt.timeIntervalSince1970 ?? latestLocalDetectionTimestamp,
-            detectionConfidence: latestVisualMemory?.confidence ?? (latestLocalDetectionTimestamp == nil ? nil : mapDetectionConfidence),
             recommendedStepId: recommendedWalkthroughStep?.id,
             focusedStepId: run.focusedWalkthroughStepId,
             walkthroughStatuses: (run.walkthroughProgress ?? [:]).mapValues(\.rawValue),
@@ -375,10 +312,7 @@ final class AppState: ObservableObject {
             roster: roster,
             storyOutcomes: Array(run.storyOutcomes ?? []).sorted(),
             equippedByMember: (run.equippedByMember ?? [:]).mapValues { Array($0).sorted() },
-            equipmentOwnershipKnown: run.equipmentOwnershipKnown ?? false,
-            visualMemorySummary: latestVisualMemory?.summary,
-            visualMemoryTimestamp: latestVisualMemory?.capturedAt.timeIntervalSince1970,
-            visualMemoryCompletionStepIds: unresolvedVisualCompletionCandidates.map(\.stepId)
+            equipmentOwnershipKnown: run.equipmentOwnershipKnown ?? false
         )
     }
     var levelActivityPlan: LevelActivityPlan? {
@@ -439,18 +373,6 @@ final class AppState: ObservableObject {
             let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
             Task { @MainActor in await self?.handlePermissionReturn(activatedApp) }
         }
-        // Automatic capture is opt-in. Do not probe pixels or request Screen
-        // Recording on startup when both Visual Memory and map alignment are off.
-        if automaticCaptureEnabled {
-            await refreshCaptureAuthorization(force: true, promptIfMissing: true)
-        } else {
-            updateCapturePreflight(PermissionManager.hasScreenRecordingPermission)
-            screenRecordingStatus = PermissionManager.hasScreenRecordingPermission
-                ? "Granted by macOS • monitoring off"
-                : "Optional • monitoring off"
-            screenCaptureVerificationStatus = "Not checked • monitoring off"
-            shouldShowScreenRecordingHelp = false
-        }
         await refreshStatuses()
         await loadRouteIfNeeded()
         pollTask = Task { [weak self] in
@@ -459,108 +381,16 @@ final class AppState: ObservableObject {
                 try? await Task.sleep(for: .seconds(2))
             }
         }
-        automaticCaptureTask = Task { [weak self] in
-            while !Task.isCancelled {
-                let cycleStarted = Date()
-                await self?.sampleAutomaticScreen()
-                let elapsed = Date().timeIntervalSince(cycleStarted)
-                let remainingMilliseconds = max(100, Int((30 - elapsed) * 1000))
-                try? await Task.sleep(for: .milliseconds(remainingMilliseconds))
-            }
-        }
     }
 
     func stop() {
         pollTask?.cancel()
-        automaticCaptureTask?.cancel()
         pollTask = nil
-        automaticCaptureTask = nil
         if let activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(activationObserver) }
         activationObserver = nil
         overlayController.hide()
-        mapOverlayController.hide()
         globalPeekHotKey.stop()
         backendProcess.stop()
-    }
-
-    func refreshCaptureAuthorization(force: Bool = false, promptIfMissing: Bool = false) async {
-        guard !captureAuthorizationRefreshInFlight else { return }
-        captureAuthorizationRefreshInFlight = true
-        defer { captureAuthorizationRefreshInFlight = false }
-
-        let preflightGranted = PermissionManager.hasScreenRecordingPermission
-        updateCapturePreflight(preflightGranted)
-        let action = PermissionManager.authorizationAction(
-            preflightGranted: preflightGranted,
-            verifiedThisLaunch: screenCaptureVerifiedThisLaunch,
-            requestAttempted: permissionRequestAttemptedThisLaunch,
-            promptIfMissing: promptIfMissing
-        )
-        switch action {
-        case .alreadyVerified:
-            applyCaptureAuthorization(true, verifiedByPixels: true)
-        case .offerRequest:
-            applyCaptureAuthorization(false, verifiedByPixels: false)
-            showScreenRecordingPermissionPrompt = true
-        case .verifyPixels:
-            guard force || Date().timeIntervalSince(lastCaptureProbe) > 4 else { return }
-            lastCaptureProbe = Date()
-            let verified = await PermissionManager.verifyScreenRecordingAccess()
-            if verified {
-                applyCaptureAuthorization(true, verifiedByPixels: true)
-            } else if promptIfMissing && !permissionRequestAttemptedThisLaunch {
-                applyCaptureAuthorization(false, verifiedByPixels: false)
-                showScreenRecordingPermissionPrompt = true
-            } else {
-                applyCaptureAuthorization(false, verifiedByPixels: false)
-            }
-        case .wait:
-            applyCaptureAuthorization(false, verifiedByPixels: false)
-        }
-    }
-
-    private func updateCapturePreflight(_ granted: Bool) {
-        screenRecordingPreflightAllowed = granted
-        screenRecordingPreflightStatus = granted ? "Granted by macOS" : "Not granted by macOS"
-    }
-
-    private func applyCaptureAuthorization(_ authorized: Bool, verifiedByPixels: Bool) {
-        captureAuthorized = authorized
-        screenRecordingAllowed = authorized
-        if authorized {
-            if verifiedByPixels { screenCaptureVerifiedThisLaunch = true }
-            screenRecordingStatus = verifiedByPixels ? "Granted • pixel capture verified" : "Granted"
-            screenCaptureVerificationStatus = verifiedByPixels ? "Pixel access verified" : "Granted • verifying capture"
-            shouldShowScreenRecordingHelp = false
-            screenCaptureLastError = nil
-        } else {
-            screenCaptureVerifiedThisLaunch = false
-            screenRecordingStatus = "Not granted by macOS"
-            screenCaptureVerificationStatus = "Waiting for permission"
-            shouldShowScreenRecordingHelp = true
-        }
-    }
-
-    private func automaticCapturePreferenceChanged() async {
-        guard automaticCaptureEnabled else {
-            visualMemoryStatus = "Off"
-            isMapOpen = false
-            mapDetectionStatus = "Off"
-            mapOverlayController.hide()
-            return
-        }
-        await refreshCaptureAuthorization(force: true, promptIfMissing: true)
-        guard captureAuthorized || screenCaptureVerifiedThisLaunch else {
-            if visualMemoryEnabled { visualMemoryStatus = "Waiting for Screen Recording" }
-            if mapOverlayCaptureEnabled { mapDetectionStatus = "Waiting for Screen Recording" }
-            return
-        }
-        await sampleAutomaticScreen(force: true)
-    }
-
-    private func prepareCaptureForUserAction() async -> Bool {
-        await refreshCaptureAuthorization(force: true, promptIfMissing: true)
-        return captureAuthorized || screenCaptureVerifiedThisLaunch
     }
 
     func launchBG3() {
@@ -624,7 +454,7 @@ final class AppState: ObservableObject {
     func startBackend() async {
         backendStatus = "Starting backend…"
         do {
-            try backendProcess.startIfNeeded()
+            try backendProcess.startIfNeeded(openRouterAPIKey: OpenRouterKeyStore.load())
             for _ in 0..<20 {
                 if await backendClient.health() {
                     backendHealthy = true
@@ -653,26 +483,6 @@ final class AppState: ObservableObject {
 
     func showPlannerNow() {
         plannerTab = .current
-        overlayExpanded = true
-        showOverlay = true
-        syncOverlay()
-    }
-
-    func showPlannerForSetup() {
-        forceOverlay = true
-        showPlannerNow()
-    }
-
-    func showPartyLoadout() {
-        forceOverlay = true
-        plannerTab = .loadout
-        overlayExpanded = true
-        showOverlay = true
-        syncOverlay()
-    }
-
-    func openChat() {
-        plannerTab = .chat
         overlayExpanded = true
         showOverlay = true
         syncOverlay()
@@ -876,16 +686,50 @@ final class AppState: ObservableObject {
 
     func startNewRun() {
         var fresh = HonorRun()
+        let requestedName = newRunNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        fresh.name = requestedName.isEmpty ? "Honor Run \(savedRuns.count + 1)" : requestedName
+        fresh.createdAt = .now
         fresh.migrateLegacyPartySlots()
         fresh.guideVersion = availableGuideVersion
         run = fresh
+        runNameDraft = fresh.name ?? "Honor Run"
+        newRunNameDraft = ""
         skipNoteDraft = ""
         combatCardPinned = false
         focusedWalkthroughStepId = nil
-        latestResponse = nil
         chatLines = []
+        chatScreenshot = nil
         persistRun()
+        reloadSavedRuns()
         Task { await refreshReadiness() }
+    }
+
+    func renameCurrentRun() {
+        let name = runNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        run.name = name
+        persistRun()
+        reloadSavedRuns()
+    }
+
+    func switchRun(to runID: String) {
+        guard runID != run.id else { return }
+        persistRun()
+        do {
+            var selected = try runStore.activate(runID: runID)
+            selected.migrateLegacyPartySlots()
+            run = selected
+            runNameDraft = selected.name ?? "Honor Run"
+            focusedWalkthroughStepId = selected.focusedWalkthroughStepId
+            skipNoteDraft = ""
+            combatCardPinned = false
+            chatLines = []
+            chatScreenshot = nil
+            reloadSavedRuns()
+            Task { await refreshReadiness() }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func togglePreparation(_ item: String) {
@@ -1039,143 +883,6 @@ final class AppState: ObservableObject {
         run.mapRegion = checkpoint.region
     }
 
-    func requestScreenRecordingPermission() {
-        // Keep the synchronous system request in this button's event handler.
-        // The tested startup request did not create a manageable TCC row; this
-        // path guarantees explicit consent and never prompts from a timer.
-        permissionRequestAttemptedThisLaunch = true
-        permissionProbeAfterSettings = true
-        showScreenRecordingPermissionPrompt = false
-        screenRecordingStatus = "Waiting for macOS permission…"
-        let requestGranted = PermissionManager.requestScreenRecordingPermission()
-        screenCaptureRequestStatus = requestGranted
-            ? "Request returned granted"
-            : "Choose Open System Settings in the macOS dialog"
-        // On current Tahoe builds the legacy request can return false without
-        // presenting anything. One pixel request from this explicit user action
-        // opens the system-owned flow. The authorization state machine remains
-        // in `.wait` afterward, so the map timer cannot repeat this probe.
-        Task {
-            updateCapturePreflight(PermissionManager.hasScreenRecordingPermission)
-            let verified = await PermissionManager.verifyScreenRecordingAccess()
-            if verified { permissionProbeAfterSettings = false }
-            applyCaptureAuthorization(verified, verifiedByPixels: verified)
-            if !verified {
-                screenCaptureRequestStatus = "Choose Open System Settings in the macOS dialog"
-            }
-        }
-    }
-
-    private func handlePermissionReturn(_ activatedApp: NSRunningApplication?) async {
-        // Opening the privacy pane is not the grant. Wait until the player
-        // leaves System Settings, then perform exactly one real pixel probe.
-        if permissionProbeAfterSettings {
-            if activatedApp?.bundleIdentifier == "com.apple.systempreferences" { return }
-            permissionProbeAfterSettings = false
-            updateCapturePreflight(PermissionManager.hasScreenRecordingPermission)
-            let verified = await PermissionManager.verifyScreenRecordingAccess()
-            applyCaptureAuthorization(verified, verifiedByPixels: verified)
-            screenCaptureRequestStatus = verified
-                ? "Granted • pixel capture verified"
-                : "Not granted • retry and choose Open System Settings"
-            return
-        }
-        // App activation is frequent while playing. With automatic capture
-        // disabled it must not turn a harmless status refresh into a pixel
-        // probe merely because Screen Recording was granted in the past.
-        guard automaticCaptureEnabled else {
-            updateCapturePreflight(PermissionManager.hasScreenRecordingPermission)
-            screenRecordingStatus = PermissionManager.hasScreenRecordingPermission
-                ? "Granted by macOS • monitoring off"
-                : "Optional • monitoring off"
-            screenCaptureVerificationStatus = "Not checked • monitoring off"
-            return
-        }
-        await refreshCaptureAuthorization(force: true, promptIfMissing: false)
-    }
-
-    func openScreenRecordingSettings() { PermissionManager.openScreenRecordingSettings() }
-
-    func testCapture() async {
-        guard await prepareCaptureForUserAction() else { return }
-        do {
-            let screenshot = try await captureBG3(markStatus: "Allowed by BG3 capture test")
-            latestScreenshotSize = "\(screenshot.width)x\(screenshot.height)"
-            statusMessage = "BG3 window capture verified"
-            errorMessage = nil
-        } catch { }
-    }
-
-    func checkScreen() async {
-        guard !isLoading, let checkpoint = currentCheckpoint else { return }
-        guard await prepareCaptureForUserAction() else { return }
-        isLoading = true
-        errorMessage = nil
-        do {
-            let screenshot = try await captureBG3(markStatus: "Allowed by successful capture")
-            let capturedAt = Date()
-            latestScreenshotSize = "\(screenshot.width)x\(screenshot.height)"
-            let context = BackendContext(
-                gameDetected: gameDetected,
-                gameName: gameName,
-                checkpointId: checkpoint.id,
-                party: activeParty,
-                screenshotWidth: screenshot.width,
-                screenshotHeight: screenshot.height
-            )
-            let response = try await backendClient.analyze(imageData: screenshot.data, context: context)
-            latestResponse = response
-            latestLatencyMs = response.latencyMs
-            statusMessage = response.ok ? "Screen read — tap a suggestion to jump there" : "Screen analysis unavailable"
-            if response.ok { recordVisualMemory(response, capturedAt: capturedAt) }
-            else { errorMessage = response.error }
-        } catch { errorMessage = error.localizedDescription }
-        isLoading = false
-    }
-
-    func confirmScreenCandidate(_ candidate: ScreenCandidate) {
-        guard let checkpoint = route.first(where: { $0.id == candidate.checkpointId }) else { return }
-        selectCheckpoint(checkpoint)
-        latestResponse = nil
-    }
-
-    func reviewVisualCompletion(_ candidate: VisualCompletionCandidate) {
-        guard let step = walkthrough.first(where: { $0.id == candidate.stepId }),
-              walkthroughDisposition(step) == .pending else { return }
-        focusWalkthroughStep(step)
-        statusMessage = "Vision evidence only • review and confirm Done"
-        overlayExpanded = true
-        syncOverlay()
-    }
-
-    func sendChat(_ quickPrompt: String? = nil) async {
-        // Dialogue/exploration focus may not have its own fight checkpoint;
-        // ground chat in the focused walkthrough step plus the next reviewed
-        // checkpoint rather than making Ask silently do nothing.
-        guard let checkpoint = currentCheckpoint ?? recommendedCheckpoint else { return }
-        let message = quickPrompt ?? chatDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !message.isEmpty else { return }
-        chatDraft = ""
-        chatLines.append(ChatLine(role: "You", text: message))
-
-        do {
-            let response = try await backendClient.chat(ChatRequest(
-                message: message,
-                checkpointId: checkpoint.id,
-                party: activeParty,
-                completedCheckpointIds: completedIds,
-                walkthroughStepId: currentWalkthroughStep?.id,
-                screenshotContext: latestResponse?.screenSummary ?? latestVisualMemory?.summary,
-                imageBase64: nil,
-                screenshotTimestamp: latestVisualMemory?.capturedAt.timeIntervalSince1970,
-                context: chatContextSnapshot
-            ))
-            chatLines.append(ChatLine(role: "Assistant", text: response.answer))
-        } catch {
-            chatLines.append(ChatLine(role: "Assistant", text: "Chat is offline right now (\(error.localizedDescription))."))
-        }
-    }
-
     private func loadRouteIfNeeded(force: Bool = false) async {
         guard force || route.isEmpty else { return }
         guard backendHealthy else { return }
@@ -1210,209 +917,84 @@ final class AppState: ObservableObject {
         gameDetected = detection.isRunning
         gameName = detection.displayName
         gameDetectionDetail = detection.detail
-        detectedWindowFrame = detection.windowFrame
         if gameWindowFrame != detection.windowFrame { gameWindowFrame = detection.windowFrame }
-        // Capture authorization is owned by refreshCaptureAuthorization (the map
-        // loop), not this status loop, so both agree on one source of truth.
         backendHealthy = await backendClient.health()
         backendStatus = backendHealthy ? "OK" : (backendProcess.isRunning ? "Process running, /health offline" : "Offline")
         if !backendHealthy { await startBackend() }
-        if telemetryEnabled && backendHealthy {
-            telemetryStatus = try? await backendClient.telemetry()
-        } else if !telemetryEnabled || !backendHealthy {
-            telemetryStatus = nil
-        }
         await loadRouteIfNeeded()
         syncOverlay()
-        if !gameDetected { isMapOpen = false; mapOverlayController.hide() }
-    }
-
-    private func sampleAutomaticScreen(force: Bool = false) async {
-        guard automaticCaptureEnabled else { return }
-        guard force || Date().timeIntervalSince(lastAutomaticCaptureAt) >= 29 else { return }
-        guard !automaticCaptureInFlight else { return }
-        automaticCaptureInFlight = true
-        defer { automaticCaptureInFlight = false }
-        guard gameDetected else {
-            if visualMemoryEnabled { visualMemoryStatus = "Waiting for BG3" }
-            if mapOverlayCaptureEnabled { mapDetectionStatus = "Waiting for BG3" }
-            return
-        }
-        lastAutomaticCaptureAt = Date()
-        // Timer-owned checks never prompt. Enabling either feature explicitly
-        // owns the consent flow; subsequent 30-second samples only use a grant.
-        await refreshCaptureAuthorization()
-        guard captureAuthorized || screenCaptureVerifiedThisLaunch else {
-            if visualMemoryEnabled { visualMemoryStatus = "Grant Screen Recording, then return to BG3" }
-            if mapOverlayCaptureEnabled { mapDetectionStatus = "Grant Screen Recording, then return to BG3" }
-            return
-        }
-        do {
-            let screenshot = try await captureService.captureBG3Window()
-            let capturedAt = Date()
-            latestLocalDetectionTimestamp = Date().timeIntervalSince1970
-            latestScreenshotSize = "\(screenshot.width)x\(screenshot.height)"
-            markScreenCaptureAllowed(status: "Granted • capture active", verifiedByCapture: true)
-
-            if mapOverlayCaptureEnabled {
-                await updateMapAlignment(from: screenshot)
-            }
-
-            if visualMemoryEnabled {
-                guard backendHealthy else {
-                    visualMemoryStatus = "Backend unavailable"
-                    return
-                }
-                let context = BackendContext(
-                    gameDetected: gameDetected,
-                    gameName: gameName,
-                    checkpointId: currentCheckpoint?.id,
-                    party: activeParty,
-                    screenshotWidth: screenshot.width,
-                    screenshotHeight: screenshot.height
-                )
-                let response = try await backendClient.analyze(imageData: screenshot.data, context: context)
-                latestResponse = response
-                latestLatencyMs = response.latencyMs
-                if response.ok {
-                    recordVisualMemory(response, capturedAt: capturedAt)
-                } else {
-                    visualMemoryStatus = response.error ?? "Vision analysis unavailable"
-                }
-            }
-        } catch {
-            await handleScreenCaptureFailure(error, showError: false)
-            if visualMemoryEnabled { visualMemoryStatus = "Paused • \(error.localizedDescription)" }
-            if mapOverlayCaptureEnabled { mapDetectionStatus = "Paused • \(error.localizedDescription)" }
-            mapOverlayController.hide()
-        }
-    }
-
-    private func recordVisualMemory(_ response: AnalysisResponse, capturedAt: Date) {
-        let entry = VisualMemoryEntry(
-            id: response.analysisId,
-            capturedAt: capturedAt,
-            summary: response.screenSummary,
-            likelyArea: response.detected.likelyArea,
-            screenKind: response.detected.screenKind,
-            evidence: response.detected.evidence,
-            candidates: response.candidates,
-            completionCandidates: response.completionCandidates ?? [],
-            confidence: response.confidence
-        )
-        run.visualMemory = VisualMemoryLedger.recording(entry, in: run.visualMemory ?? [])
-        visualMemoryStatus = "Remembered \(entry.screenKind) • \(entry.likelyArea)"
-        persistRun()
-    }
-
-    private func updateMapAlignment(from screenshot: ScreenshotResult) async {
-        let context = MapAlignContext(
-            checkpointId: currentCheckpoint?.id,
-            completedCheckpointIds: completedIds,
-            useActiveMarkerSync: true
-        )
-        if backendHealthy,
-           let alignment = try? await backendClient.alignMap(imageData: screenshot.data, context: context),
-           alignment.ok {
-            isMapOpen = alignment.mapOpen
-            mapDetectionConfidence = alignment.confidence
-            if alignment.mapOpen {
-                mapDetectionStatus = "Overlay locked on (\(alignment.inliers) anchors)"
-                updateAlignedMapOverlay(alignment.targets, screenshot: screenshot)
-            } else {
-                mapDetectionStatus = "No map on screen"
-                mapOverlayController.hide()
-            }
-            return
-        }
-        let textResult = await mapDetector.detect(jpegData: screenshot.data)
-        isMapOpen = textResult.isOpen
-        mapDetectionConfidence = textResult.confidence
-        mapDetectionStatus = textResult.isOpen ? "Map found — start the backend to see markers" : "No map on screen"
-        mapOverlayController.hide()
-    }
-
-    private func updateAlignedMapOverlay(_ targets: [MapAlignTarget], screenshot: ScreenshotResult) {
-        guard let frame = detectedWindowFrame else { mapOverlayController.hide(); return }
-        // Screenshot pixels and the SwiftUI overlay share a top-left origin with
-        // y growing downward, so the mapping is a pure scale — no vertical flip.
-        let visible = targets.filter(\.onScreen).map { target in
-            ScreenMarker(
-                id: target.id,
-                label: target.label,
-                point: CGPoint(
-                    x: target.x / Double(screenshot.width) * frame.width,
-                    y: target.y / Double(screenshot.height) * frame.height
-                ),
-                danger: target.danger
-            )
-        }
-        mapOverlayController.show(frame: frame, markers: visible)
     }
 
     private func persistRun() {
-        do { try runStore.save(run) }
+        do {
+            try runStore.save(run)
+            reloadSavedRuns()
+        }
         catch { errorMessage = "Could not save run: \(error.localizedDescription)" }
+    }
+
+    private func reloadSavedRuns() {
+        savedRuns = runStore.listRuns().map { saved in
+            SavedRunSummary(
+                id: saved.id,
+                name: saved.name ?? "Honor Run",
+                completedSteps: saved.walkthroughProgress?.values.filter { $0 == .completed }.count ?? 0,
+                partyLevel: saved.activeParty.map(\.level).min() ?? 1
+            )
+        }
     }
 
     private func persistSettings() {
         let settings = AssistantSettings(
-            telemetryEnabled: telemetryEnabled,
-            visualMemoryEnabled: visualMemoryEnabled,
-            mapOverlayCaptureEnabled: mapOverlayCaptureEnabled,
             overlayDensity: overlayDensity.rawValue
         )
         do { try runStore.saveSettings(settings) }
         catch { errorMessage = "Could not save settings: \(error.localizedDescription)" }
     }
 
-    private func syncOverlay() {
+    func saveOpenRouterKey() async {
+        let key = openRouterKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !key.isEmpty else {
+            errorMessage = "Enter an OpenRouter key first."
+            return
+        }
+        do {
+            try OpenRouterKeyStore.save(key)
+            openRouterKeyDraft = ""
+            hasOpenRouterKey = true
+            openRouterKeyStatus = "Saved in macOS Keychain"
+            errorMessage = nil
+            await restartBackendForOpenRouterKey()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func removeOpenRouterKey() async {
+        OpenRouterKeyStore.remove()
+        openRouterKeyDraft = ""
+        hasOpenRouterKey = false
+        chatScreenshot = nil
+        openRouterKeyStatus = "Optional for AI chat"
+        await restartBackendForOpenRouterKey()
+    }
+
+    private func restartBackendForOpenRouterKey() async {
+        backendProcess.stop()
+        backendHealthy = false
+        backendStatus = "Restarting backend…"
+        for _ in 0..<20 {
+            if !(await backendClient.health()) { break }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        await startBackend()
+    }
+
+    func syncOverlay() {
         if showOverlay && (gameDetected || forceOverlay) { overlayController.show(appState: self, gameFrame: gameWindowFrame) }
         else { overlayController.hide() }
     }
 
-    private func captureBG3(markStatus: String) async throws -> ScreenshotResult {
-        do {
-            let screenshot = try await captureService.captureBG3Window()
-            markScreenCaptureAllowed(status: markStatus, verifiedByCapture: true)
-            return screenshot
-        } catch { await handleScreenCaptureFailure(error); throw error }
-    }
-
-    private func markScreenCaptureAllowed(status: String, verifiedByCapture: Bool) {
-        let priorCaptureError = screenCaptureLastError
-        captureAuthorized = true
-        screenRecordingAllowed = true
-        screenRecordingStatus = status
-        shouldShowScreenRecordingHelp = false
-        screenCaptureLastError = nil
-        if errorMessage == priorCaptureError { errorMessage = nil }
-        if verifiedByCapture {
-            screenCaptureVerifiedThisLaunch = true
-            screenCaptureVerificationStatus = "Verified this launch"
-        }
-    }
-
-    private func handleScreenCaptureFailure(_ error: Error, showError: Bool = true) async {
-        let noVisibleWindow = (error as? BG3AssistantError) == .bg3WindowNotFound
-        screenCaptureLastError = error.localizedDescription
-        if noVisibleWindow, captureAuthorized || screenCaptureVerifiedThisLaunch {
-            screenRecordingStatus = "Granted • waiting for BG3"
-            screenCaptureVerificationStatus = "Pixel access verified"
-            shouldShowScreenRecordingHelp = false
-        } else {
-            // Stream startup can report a generic audio/video failure for TCC
-            // denial. Clear the latch and reconcile with the real pixel probe.
-            captureAuthorized = false
-            screenCaptureVerifiedThisLaunch = false
-            await refreshCaptureAuthorization(force: true, promptIfMissing: false)
-            if captureAuthorized {
-                screenRecordingStatus = noVisibleWindow ? "Granted • waiting for BG3" : "Granted • BG3 capture unavailable"
-                screenCaptureVerificationStatus = "Pixel access verified"
-            }
-        }
-        if showError { errorMessage = error.localizedDescription }
-    }
 }
 
 enum BG3AssistantError: LocalizedError, Equatable {

@@ -127,13 +127,11 @@ class ChatContextSnapshot(BaseModel):
     """Player-owned run state for chat; guide prose is deliberately absent."""
 
     version: int = 1
-    scope: Literal["current", "route", "party", "loadout"] = "current"
+    scope: Literal["current", "route", "party"] = "current"
     guide_version: str = ""
     selected_act: int = Field(default=1, ge=1, le=3)
     map_region: str = "unknown"
     route_phase: str = "unknown"
-    detection_timestamp: float | None = None
-    detection_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     recommended_step_id: str | None = None
     focused_step_id: str | None = None
     walkthrough_statuses: dict[str, str] = Field(default_factory=dict)
@@ -142,9 +140,20 @@ class ChatContextSnapshot(BaseModel):
     story_outcomes: list[str] = Field(default_factory=list)
     equipped_by_member: dict[str, list[str]] = Field(default_factory=dict)
     equipment_ownership_known: bool = False
-    visual_memory_summary: str | None = None
-    visual_memory_timestamp: float | None = None
-    visual_memory_completion_step_ids: list[str] = Field(default_factory=list)
+
+
+class ChatTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class ChatSource(BaseModel):
+    """A clickable web reference backing part of a chat answer."""
+
+    title: str
+    url: str
+    snippet: str = ""
+    image: str = ""  # representative image URL, when the search result has one
 
 
 class ChatRequest(BaseModel):
@@ -153,10 +162,9 @@ class ChatRequest(BaseModel):
     party: list[PartyMember] = Field(default_factory=list)
     completed_checkpoint_ids: list[str] = Field(default_factory=list)
     walkthrough_step_id: str | None = None
-    screenshot_context: str | None = None
     image_base64: str | None = None  # optional BG3 screenshot for the vision model
-    screenshot_timestamp: float | None = None
     context: ChatContextSnapshot | None = None
+    history: list[ChatTurn] = Field(default_factory=list)  # prior turns, oldest first
 
 
 class ChatResponse(BaseModel):
@@ -164,49 +172,7 @@ class ChatResponse(BaseModel):
     guide_facts: list[str] = Field(default_factory=list)
     assistant_suggestions: list[str] = Field(default_factory=list)
     unknowns: list[str] = Field(default_factory=list)
-
-
-class ScreenDetected(BaseModel):
-    game: str = "Baldur's Gate 3 or unknown"
-    likely_area: str = "unknown"
-    screen_kind: str = "unknown"
-    visible_enemies: list[str] = Field(default_factory=list)
-    visible_party: list[str] = Field(default_factory=list)
-    visible_levels: list[int] = Field(default_factory=list)
-    dialogue_or_warning: str = "unknown"
-    evidence: list[str] = Field(default_factory=list)
-
-
-class ScreenCandidate(BaseModel):
-    checkpoint_id: str
-    confidence: float = Field(ge=0.0, le=1.0)
-    reason: str
-
-
-class VisualCompletionCandidate(BaseModel):
-    step_id: str
-    confidence: float = Field(ge=0.0, le=1.0)
-    reason: str
-
-
-class VisionResult(BaseModel):
-    screen_summary: str
-    detected: ScreenDetected = Field(default_factory=ScreenDetected)
-    candidates: list[ScreenCandidate] = Field(default_factory=list)
-    completion_candidates: list[VisualCompletionCandidate] = Field(default_factory=list)
-    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
-
-
-class AnalysisResponse(BaseModel):
-    ok: bool
-    analysis_id: str
-    screen_summary: str = ""
-    detected: ScreenDetected = Field(default_factory=ScreenDetected)
-    candidates: list[ScreenCandidate] = Field(default_factory=list)
-    completion_candidates: list[VisualCompletionCandidate] = Field(default_factory=list)
-    confidence: float = 0.0
-    latency_ms: int = 0
-    error: str | None = None
+    sources: list[ChatSource] = Field(default_factory=list)
 
 
 class HealthResponse(BaseModel):
@@ -218,44 +184,10 @@ class HealthResponse(BaseModel):
     walkthrough_count: int
 
 
-class TelemetryEvent(BaseModel):
-    sequence: int = Field(ge=1)
-    kind: str = Field(min_length=1, max_length=64)
-    emitted_at: float | None = None
-    actor: str | None = Field(default=None, max_length=256)
-    target: str | None = Field(default=None, max_length=256)
-    combat_id: str | None = Field(default=None, max_length=256)
-    payload: dict[str, str] = Field(default_factory=dict)
-
-
-class TelemetrySnapshot(BaseModel):
-    schema_version: int
-    producer_id: str
-    producer_version: str
-    session_id: str
-    written_at: float | None = None
-    sequence: int = Field(ge=0)
-    events: list[TelemetryEvent] = Field(default_factory=list, max_length=128)
-
-
-class TelemetryStatus(BaseModel):
-    ok: bool = True
-    available: bool = False
-    active: bool = False
-    stale: bool = False
-    mode: str = "vanilla"
-    message: str = "Vanilla mode • no telemetry mod required"
-    producer_version: str | None = None
-    session_id: str | None = None
-    last_sequence: int = 0
-    age_seconds: float | None = None
-    events: list[TelemetryEvent] = Field(default_factory=list)
-
-
 class PlayerPosition(BaseModel):
     lat: float
     lng: float
-    source: str = "manual"  # manual | map-align | vision
+    source: str = "manual"
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     zoom: float | None = None
     updated_at: float = 0.0  # unix timestamp
@@ -445,73 +377,6 @@ class ActOneMap(CamelModel):
     coordinate_note: str
 
 
-class MarkerSyncRequest(CamelModel):
-    act: int = Field(default=1, ge=1, le=3)
-    party_level: int = Field(ge=1, le=12)
-    build_ids: list[str] = Field(default_factory=list)
-    completed_checkpoint_ids: list[str] = Field(default_factory=list)
-    equipped_item_keys: list[str] = Field(default_factory=list)
-
-
-class MarkerSyncMarker(CamelModel):
-    id: str
-    label: str
-    type: str
-    region: str
-    area: str
-    lat: float
-    lng: float
-    precision: str
-    recommended_level: int
-    level_source: str  # guide_fact | assistant_suggestion
-    reason: str
-    source: str
-
-
-class MarkerSyncPreview(CamelModel):
-    act: int
-    party_level: int
-    phase: str
-    fingerprint: str
-    markers: list[MarkerSyncMarker] = Field(default_factory=list)
-    warnings: list[str] = Field(default_factory=list)
-    already_synced: bool = False
-
-
-class MarkerSyncConfirmRequest(CamelModel):
-    fingerprint: str
-
-
-class MarkerSyncConfirmResponse(CamelModel):
-    ok: bool = True
-    fingerprint: str
-
-
 class LatLng(BaseModel):
     lat: float
     lng: float
-
-
-class MapAlignTarget(BaseModel):
-    id: str
-    label: str
-    kind: str = "checkpoint"
-    danger: str = "moderate"
-    lat: float
-    lng: float
-    x: float  # screenshot pixel coordinates
-    y: float
-    on_screen: bool = False
-
-
-class MapAlignResponse(BaseModel):
-    ok: bool
-    map_open: bool = False
-    inliers: int = 0
-    confidence: float = 0.0
-    zoom: float | None = None
-    center: LatLng | None = None
-    position_updated: bool = False
-    targets: list[MapAlignTarget] = Field(default_factory=list)
-    latency_ms: int = 0
-    error: str | None = None

@@ -164,12 +164,6 @@ def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughS
         if context.story_outcomes:
             suggestions.append("Player-confirmed outcomes: " + "; ".join(context.story_outcomes))
 
-    if request.screenshot_context:
-        evidence = request.screenshot_context.strip()[:500]
-        if evidence:
-            captured = f" at {request.screenshot_timestamp:.0f}" if request.screenshot_timestamp else ""
-            suggestions.append(f"Latest optional screenshot evidence{captured} (not a guide fact): " + evidence)
-
     answer_parts = ["Action: " + action, "DON'T DIE: " + risk]
     if facts:
         answer_parts.append("Guide says: " + " ".join(dict.fromkeys(facts)))

@@ -30,6 +30,30 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+.DS_Store
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Internal test sources (kept locally, never published)
+backend/tests/
+mac/ModelTests/
+tests/
+
+# Generated development and QA evidence (kept locally, never published)
+outputs/
+qa/
+artifacts/
+*.inspect.ndjson
+*.formula-errors.ndjson
+
+# Internal agent and research notes (kept locally, never published)
+DESIRES.md
+LABREPORT.md
+LEARNINGS.md
+MISTAKES.md
+TOOLCALLING_FAILURES.md
+data/EXPANSION.md
 
 # Local app/backend state
 .env

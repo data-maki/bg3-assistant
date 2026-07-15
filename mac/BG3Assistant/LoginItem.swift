@@ -3,7 +3,7 @@ import ServiceManagement
 
 /// Registers the assistant as a macOS login item so it is always running in
 /// the background; the 2-second detector then shows the pet whenever BG3 is
-/// open. The user can flip this off in the control window or in
+/// open. The user can flip this off in Settings or in
 /// System Settings → General → Login Items.
 enum LoginItem {
     static var isEnabled: Bool {

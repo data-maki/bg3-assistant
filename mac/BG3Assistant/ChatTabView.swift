@@ -1,9 +1,11 @@
+import AppKit
 import SwiftUI
 
-/// The planner's Chat tab: guide Q&A with dictation and screen-scan evidence.
+/// Guide-grounded chat with dictation.
 struct ChatTabView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var speech = SpeechInputService()
+    @State private var showAttachmentPreview = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -23,43 +25,8 @@ struct ChatTabView: View {
                             }
                             .frame(maxWidth: .infinity).padding(.top, 36)
                         }
-                        if let memory = appState.latestVisualMemory {
-                            DisclosureGroup("Visual memory · \(appState.run.visualMemory?.count ?? 0) observations") {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    ForEach(Array((appState.run.visualMemory ?? []).suffix(8).reversed())) { entry in
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text("\(entry.screenKind.uppercased()) · \(entry.likelyArea) · \(entry.capturedAt.formatted(date: .omitted, time: .shortened))")
-                                                .font(.caption2.bold()).foregroundStyle(BG3Theme.gold)
-                                            Text(entry.summary).font(.caption).lineLimit(2)
-                                        }
-                                    }
-                                }.padding(.top, 5)
-                            }
-                            .font(.caption)
-                            .padding(8).frame(maxWidth: .infinity, alignment: .leading)
-                            .bg3InsetSurface(accent: BG3Theme.bronze)
-                            .accessibilityLabel("Visual memory history, latest: \(memory.summary)")
-                        }
                         ForEach(appState.chatLines) { line in
                             ChatBubble(line: line).id(line.id)
-                        }
-                        if let response = appState.latestResponse, !response.candidates.isEmpty {
-                            VStack(alignment: .leading, spacing: 5) {
-                                Label("Screen evidence", systemImage: "camera.viewfinder").font(.caption.bold())
-                                Text(response.screenSummary).font(.caption)
-                                ForEach(response.candidates) { candidate in
-                                    Button("Use \(candidate.checkpointId) (\(Int(candidate.confidence * 100))%)") {
-                                        appState.confirmScreenCandidate(candidate)
-                                    }.controlSize(.small)
-                                }
-                                ForEach((response.completionCandidates ?? []).filter { $0.confidence >= 0.80 }) { candidate in
-                                    Button("Review completion evidence (\(Int(candidate.confidence * 100))%)") {
-                                        appState.reviewVisualCompletion(candidate)
-                                    }.controlSize(.small)
-                                }
-                            }
-                            .padding(9).frame(maxWidth: .infinity, alignment: .leading)
-                            .bg3InsetSurface(accent: BG3Theme.gold)
                         }
                     }
                     .padding(.vertical, 2)
@@ -71,15 +38,13 @@ struct ChatTabView: View {
                 }
             }
 
+            attachment
+
             HStack(spacing: 6) {
                 quickPrompt("What's next?")
                 quickPrompt("How do I not die here?")
                 quickPrompt("Is my party ready?")
                 Spacer()
-                Button { Task { await appState.checkScreen() } } label: {
-                    Label("Scan screen", systemImage: "camera.viewfinder").font(.system(size: 10.5, weight: .semibold))
-                }
-                .buttonStyle(.borderless).disabled(appState.isLoading || !appState.gameDetected)
             }
 
             HStack(spacing: 7) {
@@ -102,10 +67,10 @@ struct ChatTabView: View {
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 21))
-                        .foregroundStyle(appState.chatDraft.trimmingCharacters(in: .whitespaces).isEmpty ? Color.secondary.opacity(0.5) : BG3Theme.gold)
+                        .foregroundStyle(appState.chatDraft.trimmingCharacters(in: .whitespaces).isEmpty ? Color.secondary.opacity(0.5) : BG3Theme.control)
                 }
                 .buttonStyle(.plain)
-                .disabled(appState.chatDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(appState.chatDraft.trimmingCharacters(in: .whitespaces).isEmpty || appState.isPreparingChatScreenshot)
             }
             .padding(.horizontal, 9).padding(.vertical, 6)
             .background(BG3Theme.ink.opacity(0.54))
@@ -118,6 +83,51 @@ struct ChatTabView: View {
         }
         .onChange(of: speech.transcript) { _, transcript in
             if !transcript.isEmpty { appState.chatDraft = transcript }
+        }
+    }
+
+    @ViewBuilder private var attachment: some View {
+        if appState.isPreparingChatScreenshot {
+            HStack(spacing: 7) {
+                ProgressView().controlSize(.small)
+                Text("Capturing current BG3 window…")
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 8).frame(height: 44)
+        } else if let screenshot = appState.chatScreenshot,
+                  let image = NSImage(data: screenshot.data) {
+            HStack(spacing: 8) {
+                Button {
+                    showAttachmentPreview.toggle()
+                } label: {
+                    Image(nsImage: image)
+                        .resizable().scaledToFill()
+                        .frame(width: 64, height: 36)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $showAttachmentPreview, arrowEdge: .bottom) {
+                    Image(nsImage: image)
+                        .resizable().scaledToFit()
+                        .frame(width: 560, height: 315)
+                        .padding(8)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Current BG3 view").font(.caption.bold())
+                    Text("Attached to your next message").font(.caption2).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button(action: appState.removeChatScreenshot) {
+                    Image(systemName: "xmark.circle.fill")
+                }
+                .buttonStyle(.plain)
+                .help("Remove screenshot")
+            }
+            .padding(6)
+            .background(BG3Theme.ink.opacity(0.48), in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(BG3Theme.bronze.opacity(0.35)))
         }
     }
 
@@ -165,7 +175,7 @@ struct ChatTabView: View {
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(appState.chatScope == scope ? BG3Theme.parchment : BG3Theme.mutedParchment)
                     .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(appState.chatScope == scope ? BG3Theme.bronze.opacity(0.72) : BG3Theme.ink.opacity(0.38))
+                    .background(appState.chatScope == scope ? BG3Theme.bronze.opacity(0.38) : BG3Theme.ink.opacity(0.38))
                     .clipShape(Capsule())
             }
             Spacer(minLength: 0)
@@ -190,26 +200,107 @@ struct ChatTabView: View {
             .padding(.horizontal, 8).padding(.vertical, 4)
             .background(BG3Theme.ink.opacity(0.50)).clipShape(Capsule())
             .overlay(Capsule().stroke(BG3Theme.bronze.opacity(0.36), lineWidth: 0.7))
+            .disabled(appState.isPreparingChatScreenshot)
     }
 }
 
 private struct ChatBubble: View {
     let line: ChatLine
+    @State private var showScreenshotPreview = false
 
     private var isUser: Bool { line.role == "You" }
 
+    /// `![alt](url)` images render as real images; the rest stays markdown text.
+    private var imageURLs: [URL] {
+        line.text.matches(of: /!\[[^\]]*\]\(([^)\s]+)\)/)
+            .compactMap { URL(string: String($0.output.1)) }
+            .filter { $0.scheme == "https" || $0.scheme == "http" }
+    }
+
+    private var markdownText: AttributedString {
+        let withoutImages = line.text
+            .replacing(/!\[[^\]]*\]\([^)\s]+\)/, with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        var attributed = (try? AttributedString(
+            markdown: withoutImages,
+            options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        )) ?? AttributedString(withoutImages)
+        for run in attributed.runs where run.link != nil {
+            attributed[run.range].foregroundColor = BG3Theme.gold
+            attributed[run.range].underlineStyle = .single
+        }
+        return attributed
+    }
+
     var body: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            if isUser { Spacer(minLength: 44) }
-            Text(line.text)
-                .font(.system(size: 12.5))
-                .textSelection(.enabled)
+        VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
+            HStack(alignment: .bottom, spacing: 0) {
+                if isUser { Spacer(minLength: 44) }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(markdownText)
+                        .font(.system(size: 12.5))
+                        .textSelection(.enabled)
+                    if let data = line.imageData, let image = NSImage(data: data) {
+                        Button {
+                            showScreenshotPreview.toggle()
+                        } label: {
+                            Image(nsImage: image)
+                                .resizable().scaledToFit()
+                                .frame(maxWidth: 220, maxHeight: 130, alignment: .leading)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: $showScreenshotPreview, arrowEdge: .bottom) {
+                            Image(nsImage: image)
+                                .resizable().scaledToFit()
+                                .frame(width: 560, height: 315)
+                                .padding(8)
+                        }
+                    }
+                    ForEach(imageURLs, id: \.self) { url in
+                        AsyncImage(url: url) { image in
+                            image.resizable().scaledToFit()
+                        } placeholder: {
+                            ProgressView().controlSize(.small).frame(height: 44)
+                        }
+                        .frame(maxWidth: 220, maxHeight: 130, alignment: .leading)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                }
                 .padding(.horizontal, 11).padding(.vertical, 7)
-                .background(isUser ? AnyShapeStyle(BG3Theme.bronze.opacity(0.78)) : AnyShapeStyle(BG3Theme.ink.opacity(0.58)))
+                .background(isUser ? AnyShapeStyle(BG3Theme.bronze.opacity(0.52)) : AnyShapeStyle(BG3Theme.ink.opacity(0.58)))
                 .foregroundStyle(BG3Theme.parchment)
                 .clipShape(RoundedRectangle(cornerRadius: 13))
-            if !isUser { Spacer(minLength: 44) }
+                if !isUser { Spacer(minLength: 44) }
+            }
+            if !line.sources.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 5) {
+                        ForEach(line.sources) { source in
+                            if let url = URL(string: source.url) {
+                                Link(destination: url) {
+                                    Label(sourceLabel(source), systemImage: "link")
+                                        .font(.system(size: 9.5, weight: .semibold))
+                                        .lineLimit(1)
+                                        .padding(.horizontal, 7).padding(.vertical, 4)
+                                        .background(BG3Theme.ink.opacity(0.52))
+                                        .foregroundStyle(BG3Theme.gold)
+                                        .clipShape(Capsule())
+                                        .overlay(Capsule().stroke(BG3Theme.bronze.opacity(0.34), lineWidth: 0.7))
+                                }
+                                .help(source.snippet ?? source.url)
+                            }
+                        }
+                    }
+                }
+                .accessibilityLabel("Web references for this answer")
+            }
         }
         .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+    }
+
+    private func sourceLabel(_ source: ChatSource) -> String {
+        if !source.title.isEmpty { return String(source.title.prefix(40)) }
+        return URL(string: source.url)?.host() ?? source.url
     }
 }

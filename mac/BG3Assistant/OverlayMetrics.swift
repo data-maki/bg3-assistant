@@ -34,7 +34,7 @@ enum OverlayMetrics {
         let width = min(max(reference.width * 0.22, 420), 520)
         let height = switch tab {
         case .current: min(max(reference.height * 0.46, 500), 600)
-        case .party, .loadout: min(max(reference.height * 0.58, 590), 680)
+        case .party: min(max(reference.height * 0.58, 590), 680)
         case .route, .chat: min(max(reference.height * 0.54, 550), 640)
         }
         return CGSize(width: width.rounded(), height: height.rounded())

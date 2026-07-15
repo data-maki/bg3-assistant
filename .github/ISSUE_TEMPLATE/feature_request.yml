@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest a focused improvement for Honor Mode players.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: player_problem
+    attributes:
+      label: Player problem
+      description: What decision or repeated task is currently difficult?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Smallest useful change
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Product boundary
+      options:
+        - label: This does not require a BG3 mod, memory access, save editing, automated input, or periodic capture.
+          required: true

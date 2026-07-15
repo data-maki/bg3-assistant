@@ -27,7 +27,6 @@ export const state = {
   playerMarker: null,
   follow: false,
   loadoutSyncTimer: null,
-  markerExport: null,
 };
 
 const DEFAULT_ROSTER = [
@@ -153,14 +152,6 @@ export const els = {
   liveStatus: document.querySelector("#liveStatus"),
   followBtn: document.querySelector("#followBtn"),
   locateBtn: document.querySelector("#locateBtn"),
-  exportMarkersBtn: document.querySelector("#exportMarkersBtn"),
-  markerExportDialog: document.querySelector("#markerExportDialog"),
-  markerExportSummary: document.querySelector("#markerExportSummary"),
-  markerExportWarnings: document.querySelector("#markerExportWarnings"),
-  markerExportList: document.querySelector("#markerExportList"),
-  markerExportFingerprint: document.querySelector("#markerExportFingerprint"),
-  downloadMarkersBtn: document.querySelector("#downloadMarkersBtn"),
-  confirmMarkersBtn: document.querySelector("#confirmMarkersBtn"),
 };
 
 export const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({

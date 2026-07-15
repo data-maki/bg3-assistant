@@ -43,7 +43,7 @@ final class BackendProcessManager {
         self.process = nil
     }
 
-    func startIfNeeded() throws {
+    func startIfNeeded(openRouterAPIKey: String? = nil) throws {
         if process?.isRunning == true {
             try appendLog("Backend process already running")
             return
@@ -80,6 +80,9 @@ final class BackendProcessManager {
         let stdout = try writableLogHandle(at: logDirectory.appending(path: "backend.stdout.log"))
         let stderr = try writableLogHandle(at: logDirectory.appending(path: "backend.stderr.log"))
         var environment = ProcessInfo.processInfo.environment
+        if let openRouterAPIKey, !openRouterAPIKey.isEmpty {
+            environment["OPENROUTER_API_KEY"] = openRouterAPIKey
+        }
         environment["BG3_STATE_DB_PATH"] = RunStore().databaseURL.path
         if let stateRoot = environment["BG3_ASSISTANT_STATE_DIR"], !stateRoot.isEmpty {
             environment["RUNS_DIR"] = URL(fileURLWithPath: stateRoot)

@@ -21,7 +21,7 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>The assistant reads the Baldur's Gate 3 window only for capture features you enable. Map alignment stays local; opt-in Visual Memory can send one frame every 30 seconds to your configured vision provider. Screenshots stay in memory.</string>
+	<string>AI chat can attach one screenshot of the Baldur's Gate 3 window to a message you send through OpenRouter. There is no periodic capture or recording.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The assistant uses the microphone to dictate chat questions about your run.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

@@ -1,4 +1,3 @@
-import AppKit
 import CoreGraphics
 import Foundation
 import ScreenCaptureKit
@@ -26,8 +25,8 @@ enum PermissionManager {
         if verifiedThisLaunch { return .alreadyVerified }
         if preflightGranted { return .verifyPixels }
         // A request that returned false is waiting on the user in System
-        // Settings. Do not turn the two-second status loop into repeated real
-        // capture attempts while that system-owned flow is unresolved.
+        // Settings. Do not repeat real capture attempts while that
+        // system-owned flow is unresolved.
         if requestAttempted { return .wait }
         return promptIfMissing ? .offerRequest : .wait
     }
@@ -74,33 +73,4 @@ enum PermissionManager {
         return nsError.domain == SCStreamError.errorDomain && nsError.code == -3801
     }
 
-    static func openScreenRecordingSettings() {
-        let candidates = [
-            "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
-            "x-apple.systempreferences:com.apple.preference.security?Privacy"
-        ]
-        for candidate in candidates {
-            if let url = URL(string: candidate), NSWorkspace.shared.open(url) {
-                return
-            }
-        }
-    }
-
-    static var appIdentityDescription: String {
-        let bundleID = Bundle.main.bundleIdentifier ?? "unknown bundle id"
-        let path = Bundle.main.bundleURL.path
-        return "\(bundleID) at \(path)"
-    }
-
-    static var isInstalledInApplications: Bool {
-        let path = Bundle.main.bundleURL.standardizedFileURL.path
-        let userApplications = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Applications", isDirectory: true)
-            .standardizedFileURL.path
-        return path.hasPrefix("/Applications/") || path.hasPrefix(userApplications + "/")
-    }
-
-    static var installationDescription: String {
-        isInstalledInApplications ? "Stable Applications install" : "Development path — install in Applications before granting"
-    }
 }

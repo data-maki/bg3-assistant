@@ -543,32 +543,6 @@ input[type="range"] { width: 100%; accent-color: var(--item); }
 .detail-card .detail-grid span { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
 .detail-card a { color: var(--item); }
 
-/* ---- One-shot BG3 marker export ---- */
-.marker-export-dialog {
-  width: min(680px, calc(100vw - 40px)); max-height: min(760px, calc(100vh - 40px)); padding: 0;
-  border: 1px solid #496367; border-radius: 16px; color: var(--text); background: #11191b;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, .72);
-}
-.marker-export-dialog::backdrop { background: rgba(4, 7, 8, .72); backdrop-filter: blur(5px); }
-.marker-export-card { display: flex; flex-direction: column; max-height: min(760px, calc(100vh - 40px)); }
-.marker-export-card > header, .marker-export-card > footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; }
-.marker-export-card > header { border-bottom: 1px solid var(--line); }
-.marker-export-card > footer { border-top: 1px solid var(--line); }
-.marker-export-card h2 { margin: 0; }
-.dialog-close { width: 32px; height: 32px; border: 0; border-radius: 8px; color: var(--muted); background: #202b2e; cursor: pointer; font-size: 22px; }
-.marker-export-summary { margin: 0; padding: 14px 18px 8px; color: #d5e1dd; font-size: 13px; line-height: 1.45; }
-.marker-export-warnings { padding: 0 18px; color: #ffd28a; font-size: 12px; }
-.marker-export-warnings p { margin-bottom: 6px; }
-.marker-export-list { min-height: 0; overflow-y: auto; padding: 8px 18px 16px; }
-.marker-export-row { display: grid; grid-template-columns: 54px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #253235; }
-.marker-export-row:last-child { border-bottom: 0; }
-.marker-export-kind { color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
-.marker-export-row strong { display: block; margin-bottom: 2px; font-size: 13px; }
-.marker-export-row small { color: var(--muted); font-size: 11px; }
-.marker-export-level { color: #fff0bd; font-size: 11px; font-weight: 800; }
-.marker-export-fingerprint { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
-.marker-export-actions { display: flex; gap: 8px; }
-
 @media (max-width: 1100px) {
   .workspace { grid-template-columns: 330px 1fr; }
   .filters { grid-template-columns: repeat(2, 1fr); }

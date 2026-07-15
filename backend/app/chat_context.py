@@ -31,11 +31,6 @@ class ResolvedChatContext:
     equipment_conflicts: list[str] = field(default_factory=list)
     story_outcomes: list[str] = field(default_factory=list)
     walkthrough_outcomes: dict[str, str] = field(default_factory=dict)
-    detection_timestamp: float | None = None
-    detection_confidence: float | None = None
-    visual_memory_summary: str | None = None
-    visual_memory_timestamp: float | None = None
-    visual_memory_completion_step_ids: list[str] = field(default_factory=list)
     guide_version_mismatch: str | None = None
 
     def grounding_lines(self, checkpoint: RouteCheckpoint) -> list[str]:
@@ -76,14 +71,6 @@ class ResolvedChatContext:
         if relevant_inactive:
             lines.append("[Player state] Inactive roster: " + ", ".join(f"{member.name} ({member.status})" for member in relevant_inactive))
         lines.extend(f"[Unknown] {conflict}" for conflict in self.equipment_conflicts)
-        if self.detection_timestamp is not None:
-            confidence = f" at {self.detection_confidence:.0%}" if self.detection_confidence is not None else ""
-            lines.append(f"[Local detection] Last sample {self.detection_timestamp:.0f}{confidence}; not route authority.")
-        if self.visual_memory_summary:
-            timestamp = f" at {self.visual_memory_timestamp:.0f}" if self.visual_memory_timestamp else ""
-            lines.append(f"[Vision memory] {self.visual_memory_summary[:400]}{timestamp}; assistant inference, progress unchanged.")
-        if self.visual_memory_completion_step_ids:
-            lines.append("[Vision completion candidates] " + ", ".join(self.visual_memory_completion_step_ids) + "; player confirmation required.")
         if self.guide_version_mismatch:
             lines.append(f"[Unknown] {self.guide_version_mismatch}")
         return lines
@@ -203,10 +190,5 @@ def resolve_chat_context(
         equipment_conflicts=conflicts,
         story_outcomes=snapshot.story_outcomes if snapshot else [],
         walkthrough_outcomes=outcomes,
-        detection_timestamp=snapshot.detection_timestamp if snapshot else None,
-        detection_confidence=snapshot.detection_confidence if snapshot else None,
-        visual_memory_summary=snapshot.visual_memory_summary if snapshot else None,
-        visual_memory_timestamp=snapshot.visual_memory_timestamp if snapshot else None,
-        visual_memory_completion_step_ids=snapshot.visual_memory_completion_step_ids if snapshot else [],
         guide_version_mismatch=mismatch,
     )
