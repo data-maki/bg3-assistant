@@ -36,7 +36,11 @@ struct OverlayView: View {
     }
 
     private var expandedContentSize: CGSize {
-        let panel = OverlayMetrics.expandedSize(for: referenceFrame, tab: appState.plannerTab)
+        let panel = OverlayMetrics.expandedSize(
+            for: referenceFrame,
+            tab: appState.plannerTab,
+            moreContextExpanded: appState.moreContextExpanded
+        )
         return CGSize(width: panel.width - 16, height: panel.height - 16)
     }
 
@@ -149,13 +153,7 @@ struct OverlayView: View {
     @ViewBuilder private var currentTab: some View {
         if let checkpoint = appState.currentCheckpoint {
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    runResumeLine
-                    HStack(alignment: .firstTextBaseline) {
-                        Text("FIGHT").font(.system(.caption, design: .serif).bold()).foregroundStyle(BG3Theme.gold)
-                        Spacer()
-                        levelBadge(checkpoint)
-                    }
+                VStack(alignment: .leading, spacing: 9) {
                     if appState.run.selectedCheckpointId != nil, let reason = appState.routeRecommendationReason {
                         HStack {
                             Label(reason, systemImage: "pin.fill").font(.caption.bold())
@@ -164,22 +162,11 @@ struct OverlayView: View {
                         }
                         .padding(8).bg3InsetSurface(accent: BG3Theme.gold)
                     }
-                    readinessCard
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("DO • \(checkpoint.advice)")
-                            .font(.system(size: 12, weight: .semibold)).lineLimit(3)
-                        if let failure = checkpoint.failureConditions.first {
-                            Text("AVOID • \(failure)").font(.caption.bold()).foregroundStyle(.red)
-                        }
-                    }
-                    .padding(10).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(BG3Theme.dangerColor(checkpoint.danger).opacity(0.11), in: RoundedRectangle(cornerRadius: 9))
-                    .bg3InsetSurface(accent: BG3Theme.dangerColor(checkpoint.danger))
-                    compactPreparation(checkpoint)
+                    encounterHUD(checkpoint)
 
                     HStack(spacing: 7) {
                         Button { appState.requestDisposition(.completed) } label: {
-                            Label("Done", systemImage: "checkmark")
+                            Label("Mark done", systemImage: "checkmark")
                         }
                         .assistantActionButton(accent: BG3Theme.success, prominent: true)
                         Button { appState.requestDisposition(.skipped) } label: {
@@ -193,7 +180,7 @@ struct OverlayView: View {
                         .assistantActionButton()
                     }
 
-                    DisclosureGroup("More context") {
+                    DisclosureGroup("More context", isExpanded: $appState.moreContextExpanded) {
                         VStack(alignment: .leading, spacing: 10) {
                             if let legendary = checkpoint.legendaryAction {
                                 Text("HONOR ACTION • \(legendary)").font(.caption).foregroundStyle(.orange)
@@ -206,12 +193,10 @@ struct OverlayView: View {
                                     }
                                 }
                             }
-                            checklist("All preparation", checkpoint.preparation, checked: appState.currentProgress.checkedPreparation, action: appState.togglePreparation)
                             factSection("Enemies", text: checkpoint.enemies)
                             listSection("All failure conditions", checkpoint.failureConditions, icon: "xmark.octagon.fill", color: .red)
                             listSection("Irreversible / time-sensitive", checkpoint.irreversibleWarnings, icon: "clock.badge.exclamationmark", color: .orange)
                             listSection("Quests and pickups", checkpoint.notes, icon: "bag.fill", color: BG3Theme.gold)
-                            checklist("Completion", checkpoint.completionChecks, checked: appState.currentProgress.checkedCompletion, action: appState.toggleCompletion)
                             HStack {
                                 TextField("Skip note (optional)", text: $appState.skipNoteDraft).textFieldStyle(.roundedBorder)
                                 Button("Pin tactics") { appState.pinCurrentFight() }
@@ -231,7 +216,6 @@ struct OverlayView: View {
         } else if appState.currentWalkthroughStep != nil {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
-                    runResumeLine
                     walkthroughNowCard
                 }.padding(.trailing, 8)
             }
@@ -248,18 +232,6 @@ struct OverlayView: View {
                 }
             }
         }
-    }
-
-    private var runResumeLine: some View {
-        HStack(spacing: 6) {
-            Label("\(appState.remainingCount) active", systemImage: "arrow.forward.circle.fill")
-            Text("·")
-            Label("\(appState.archivedCount) archived", systemImage: "archivebox.fill")
-            Spacer()
-            Text("Manual progress")
-        }
-        .font(.system(size: 9.5, weight: .semibold))
-        .foregroundStyle(BG3Theme.mutedParchment)
     }
 
     @ViewBuilder private var walkthroughNowCard: some View {
@@ -317,7 +289,7 @@ struct OverlayView: View {
                     }
                     .assistantActionButton()
                 }
-                DisclosureGroup("More context") {
+                DisclosureGroup("More context", isExpanded: $appState.moreContextExpanded) {
                     VStack(alignment: .leading, spacing: 8) {
                         if step.decision != nil {
                             Text("DO • \(step.summary)").font(.caption)
@@ -341,27 +313,46 @@ struct OverlayView: View {
         }
     }
 
-    private var readinessCard: some View {
-        let readiness = appState.readiness
-        let color: Color = readiness?.status == "blocked" || readiness?.status == "danger" ? .red : readiness?.status == "caution" ? .orange : .green
-        let blockers = readiness?.blockers ?? []
-        let warnings = readiness?.warnings ?? []
-        return VStack(alignment: .leading, spacing: 5) {
-            HStack {
-                Label((readiness?.status ?? "checking").uppercased(), systemImage: readiness?.status == "ready" ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
-                    .font(.subheadline.bold()).foregroundStyle(color)
+    private func encounterHUD(_ checkpoint: RouteCheckpoint) -> some View {
+        let danger = checkpoint.legendaryAction
+            ?? checkpoint.failureConditions.dropFirst().first
+            ?? checkpoint.enemies
+        return VStack(alignment: .leading, spacing: 9) {
+            HStack(alignment: .firstTextBaseline) {
+                Label("DANGER", systemImage: "exclamationmark.shield.fill")
+                    .font(.system(.caption, design: .serif).bold())
+                    .foregroundStyle(BG3Theme.dangerColor(checkpoint.danger))
                 Spacer()
-                Text("Party level \(appState.lowestPartyLevel)").font(.caption.bold())
+                Text("FIGHT • L\(checkpoint.minimumLevel)+")
+                    .font(.caption2.bold())
+                    .foregroundStyle(BG3Theme.mutedParchment)
             }
-            ForEach(blockers.prefix(1), id: \.self) { Text($0).font(.caption).foregroundStyle(.red) }
-            ForEach(warnings.prefix(blockers.isEmpty ? 1 : 0), id: \.self) { Text($0).font(.caption).foregroundStyle(.orange) }
-            if blockers.isEmpty, warnings.isEmpty, let next = readiness?.nextActions.first {
-                Text(next).font(.caption)
+            Text(danger)
+                .font(.system(size: 12, weight: .semibold))
+
+            Divider().overlay(BG3Theme.bronze.opacity(0.38))
+
+            if let failure = checkpoint.failureConditions.first {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("AVOID")
+                        .font(.caption.bold())
+                        .foregroundStyle(.red)
+                    Text(failure).font(.system(size: 12, weight: .semibold))
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("DO")
+                    .font(.caption.bold())
+                    .foregroundStyle(BG3Theme.gold)
+                Text(checkpoint.advice)
+                    .font(.system(size: 12, weight: .semibold))
             }
         }
-        .padding(10)
-        .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
-        .bg3InsetSurface(accent: color)
+        .padding(11)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(BG3Theme.dangerColor(checkpoint.danger).opacity(0.09), in: RoundedRectangle(cornerRadius: 10))
+        .bg3InsetSurface(accent: BG3Theme.dangerColor(checkpoint.danger))
     }
 
     @ViewBuilder private var levelPlanCard: some View {
@@ -391,13 +382,6 @@ struct OverlayView: View {
         }
     }
 
-    private func levelBadge(_ checkpoint: RouteCheckpoint) -> some View {
-        VStack { Text("MIN").font(.caption2); Text("L\(checkpoint.minimumLevel)").font(.title3.bold()) }
-            .padding(8)
-            .background(BG3Theme.dangerColor(checkpoint.danger).opacity(0.18), in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(BG3Theme.bronze.opacity(0.45), lineWidth: 0.7))
-    }
-
     private func factSection(_ title: String, text: String, color: Color = .secondary) -> some View {
         VStack(alignment: .leading, spacing: 4) { Text(title).font(.headline); Text(text).font(.system(size: 12)).textSelection(.enabled) }
             .padding(9).frame(maxWidth: .infinity, alignment: .leading).bg3InsetSurface(accent: color)
@@ -411,43 +395,4 @@ struct OverlayView: View {
         }
     }
 
-    private func compactPreparation(_ checkpoint: RouteCheckpoint) -> some View {
-        let checked = appState.currentProgress.checkedPreparation
-        let confirmed = checkpoint.preparation.filter(checked.contains).count
-        let remaining = checkpoint.preparation.filter { !checked.contains($0) }
-        return VStack(alignment: .leading, spacing: 5) {
-            HStack {
-                Text("PREP").font(.caption.bold()).foregroundStyle(BG3Theme.gold)
-                Spacer()
-                Text("\(confirmed)/\(checkpoint.preparation.count)").font(.caption2.bold()).foregroundStyle(.secondary)
-            }
-            if remaining.isEmpty {
-                Label("Ready to start", systemImage: "checkmark.circle.fill")
-                    .font(.caption.bold()).foregroundStyle(BG3Theme.success)
-            } else {
-                ForEach(Array(remaining.prefix(2)), id: \.self) { item in
-                    Button { appState.togglePreparation(item) } label: {
-                        Label(item, systemImage: "square").font(.system(size: 12)).lineLimit(2)
-                    }.buttonStyle(.plain)
-                }
-                if remaining.count > 2 {
-                    Text("+\(remaining.count - 2) in More context")
-                        .font(.caption2).foregroundStyle(.secondary)
-                }
-            }
-        }
-        .padding(9).frame(maxWidth: .infinity, alignment: .leading)
-        .bg3InsetSurface(accent: remaining.isEmpty ? BG3Theme.success : BG3Theme.gold)
-    }
-
-    private func checklist(_ title: String, _ items: [String], checked: Set<String>, action: @escaping (String) -> Void) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(title).font(.headline)
-            ForEach(items, id: \.self) { item in
-                Button { action(item) } label: {
-                    Label(item, systemImage: checked.contains(item) ? "checkmark.square.fill" : "square").font(.system(size: 12))
-                }.buttonStyle(.plain)
-            }
-        }
-    }
 }

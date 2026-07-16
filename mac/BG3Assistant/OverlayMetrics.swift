@@ -30,18 +30,32 @@ enum OverlayMetrics {
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
-    static func expandedSize(for reference: CGRect, tab: PlannerTab = .current) -> CGSize {
+    static func expandedSize(
+        for reference: CGRect,
+        tab: PlannerTab = .current,
+        moreContextExpanded: Bool = false
+    ) -> CGSize {
         let width = min(max(reference.width * 0.22, 420), 520)
         let height = switch tab {
-        case .current: min(max(reference.height * 0.46, 500), 600)
+        case .current: moreContextExpanded
+            ? min(max(reference.height * 0.54, 550), 640)
+            : min(max(reference.height * 0.255, 320), 350)
         case .party: min(max(reference.height * 0.58, 590), 680)
         case .route, .chat, .settings: min(max(reference.height * 0.54, 550), 640)
         }
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
-    static func panelSize(expanded: Bool, reference: CGRect, tab: PlannerTab = .current, density: OverlayDensity = .focus) -> CGSize {
-        expanded ? expandedSize(for: reference, tab: tab) : collapsedSize(for: reference, density: density)
+    static func panelSize(
+        expanded: Bool,
+        reference: CGRect,
+        tab: PlannerTab = .current,
+        density: OverlayDensity = .focus,
+        moreContextExpanded: Bool = false
+    ) -> CGSize {
+        expanded
+            ? expandedSize(for: reference, tab: tab, moreContextExpanded: moreContextExpanded)
+            : collapsedSize(for: reference, density: density)
     }
 
     static func origin(fromNormalizedAnchor anchor: CGPoint, panelSize: CGSize, reference: CGRect) -> CGPoint {

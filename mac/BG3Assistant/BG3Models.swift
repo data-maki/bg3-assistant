@@ -691,7 +691,7 @@ enum RunSafety {
             gateAdvice = "This needs L\(recommendation.minimumLevel). Do quests and the safe fights in \(routePhaseName(recommendation)), then come back."
         } else if recommendation.importance == "major" {
             activityLabel = "MAIN FIGHT"
-            gateAdvice = "You're at level. Run the prep list, then start it on your terms."
+            gateAdvice = "You're at level. Review the fight plan, then start it on your terms."
         } else {
             activityLabel = "SAFE XP"
             if let major, major.minimumLevel > partyLevel {
@@ -728,21 +728,6 @@ enum RunSafety {
         case 3: return "Grymforge"
         default: return "Mountain Pass / Crèche"
         }
-    }
-
-    static func completionConfirmationReasons(
-        checkpoint: RouteCheckpoint,
-        progress: CheckpointProgress,
-        readinessStatus: String?
-    ) -> [String] {
-        var reasons: [String] = []
-        if readinessStatus == "blocked" { reasons.append("readiness is blocked") }
-        let missing = checkpoint.completionChecks.filter { !progress.checkedCompletion.contains($0) }
-        if !missing.isEmpty { reasons.append("\(missing.count) completion check(s) are unconfirmed") }
-        if !checkpoint.irreversibleWarnings.isEmpty {
-            reasons.append("this checkpoint has irreversible or time-sensitive consequences")
-        }
-        return reasons
     }
 
     static func actTwoBlockers(route: [RouteCheckpoint], dispositions: [String: CheckpointDisposition]) -> [String] {

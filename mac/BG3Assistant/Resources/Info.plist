@@ -6,6 +6,8 @@
 	<string>BG3 Honor Mode Assistant</string>
 	<key>CFBundleExecutable</key>
 	<string>BG3HonorAssistant</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.datamaki.BG3HonorAssistant</string>
 	<key>CFBundleName</key>

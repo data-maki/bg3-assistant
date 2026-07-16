@@ -199,7 +199,6 @@ def assess_readiness(request: ReadinessRequest) -> ReadinessResponse:
     levels = [member.level for member in request.party]
     party_level = min(levels) if levels else 1
     completed = set(request.completed_checkpoint_ids)
-    checked = set(request.checked_preparation)
     blockers: list[str] = []
     warnings: list[str] = []
     build_actions: list[str] = []
@@ -210,9 +209,6 @@ def assess_readiness(request: ReadinessRequest) -> ReadinessResponse:
     if missing_prerequisites:
         names = [checkpoint_by_id(item).name for item in missing_prerequisites]
         blockers.append("Unresolved route prerequisites: " + ", ".join(names))
-    missing_preparation = [item for item in checkpoint.preparation if item not in checked]
-    if missing_preparation:
-        warnings.append(f"{len(missing_preparation)} preparation item(s) are not confirmed.")
     warnings.extend(checkpoint.irreversible_warnings)
 
     builds = {build.id: build for build in load_builds()}
@@ -250,9 +246,9 @@ def assess_readiness(request: ReadinessRequest) -> ReadinessResponse:
             warnings.append(f"Party capability not recorded: {capability}. Confirm the party has it or choose an alternative plan.")
 
     status = "blocked" if blockers else ("danger" if checkpoint.irreversible_warnings else ("caution" if warnings else "ready"))
-    next_actions = blockers[:2] + missing_preparation[:3] + build_actions[:2]
+    next_actions = blockers[:2] + build_actions[:2]
     if not next_actions:
-        next_actions = ["Confirm the pre-fight checklist, then start the encounter on your terms."]
+        next_actions = [checkpoint.advice]
     return ReadinessResponse(
         status=status,
         party_level=party_level,

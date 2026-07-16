@@ -34,6 +34,7 @@ final class AppState: ObservableObject {
     @Published var showOverlay = true { didSet { syncOverlay() } }
     @Published var forceOverlay = false { didSet { syncOverlay() } }
     @Published var overlayExpanded = false { didSet { syncOverlay() } }
+    @Published var moreContextExpanded = false { didSet { if overlayExpanded { syncOverlay() } } }
     @Published var plannerTab: PlannerTab = .current { didSet { if overlayExpanded { syncOverlay() } } }
     @Published var overlayDensity = OverlayDensity(
         rawValue: storedSettings.overlayDensity
@@ -259,10 +260,7 @@ final class AppState: ObservableObject {
 
     var readinessHeadline: String {
         guard let readiness else { return currentCheckpoint == nil ? "NO FIGHT GATE" : "CHECKING" }
-        let status = readiness.status == "danger" ? "BLOCKED" : readiness.status.uppercased()
-        let total = currentCheckpoint?.preparation.count ?? 0
-        let checked = currentProgress.checkedPreparation.count
-        return total > 0 ? "\(status) · PREP \(checked)/\(total)" : status
+        return readiness.status == "danger" ? "DANGER" : readiness.status.uppercased()
     }
 
     var readinessDetail: String? {
@@ -653,16 +651,13 @@ final class AppState: ObservableObject {
             setDisposition(.pending)
             return
         }
-        var reasons: [String] = []
         if disposition == .completed {
-            reasons = RunSafety.completionConfirmationReasons(
-                checkpoint: checkpoint,
-                progress: currentProgress,
-                readinessStatus: readiness?.status
-            )
-        } else if !checkpoint.irreversibleWarnings.isEmpty {
-            reasons.append("this checkpoint has irreversible or time-sensitive consequences")
+            setDisposition(.completed)
+            return
         }
+        let reasons = checkpoint.irreversibleWarnings.isEmpty
+            ? []
+            : ["this checkpoint has irreversible or time-sensitive consequences"]
         if reasons.isEmpty {
             setDisposition(disposition, note: disposition == .skipped ? skipNoteDraft : "")
         } else {
