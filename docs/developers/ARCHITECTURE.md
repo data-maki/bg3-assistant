@@ -2,7 +2,7 @@
 
 ## Product boundary
 
-The product is a native macOS in-game overlay. It presents one current action, one important risk, manual run progress, a focused character sheet, and guide-grounded chat. The local browser map is the only intentional external surface.
+The product is a native macOS in-game overlay. It presents one current danger, the outcome to avoid, the recommended action, manual run progress, a focused character sheet, and guide-grounded chat. The local browser map is the only intentional external surface.
 
 There are no BG3 mods, memory readers, save editors, automated inputs, periodic screenshots, or background recordings. Configured AI chat may attach one player-visible BG3-window screenshot to the next message.
 
@@ -34,7 +34,7 @@ The native app starts and owns the packaged backend. The browser map and native 
 
 ## UI ownership
 
-- `Now`: immediate action, risk, readiness, and progress controls.
+- `Now`: current danger, outcome to avoid, recommended action, and progress controls.
 - `Run`: route order, focus changes, resolved archive, and decision outcomes.
 - `Party`: one-character carousel with level, build, status, and equipment.
 - `Chat`: contextual overlay action with speech input; it is not a primary navigation tab.

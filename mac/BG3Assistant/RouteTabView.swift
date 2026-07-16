@@ -285,11 +285,6 @@ func incidentProtocolCard(_ incident: IncidentProtocol) -> some View {
         if !incident.honorDelta.isEmpty {
             Text("HONOR DELTA • \(incident.honorDelta)").font(.caption).foregroundStyle(BG3Theme.gold)
         }
-        if !incident.postFight.isEmpty {
-            Divider().overlay(BG3Theme.bronze.opacity(0.4))
-            Text("ENCOUNTER-SPECIFIC AFTERMATH").font(.caption.bold())
-            ForEach(incident.postFight, id: \.self) { Text("□ \($0)").font(.caption) }
-        }
         if let source = URL(string: incident.sourceUrl), !incident.sourceUrl.isEmpty {
             Link("\(incident.authority == "guide_fact" ? "Guide fact" : "Reviewed incident protocol") ↗", destination: source)
                 .font(.caption2)

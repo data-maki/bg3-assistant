@@ -4,27 +4,6 @@ import Foundation
 /// run and what they carry. Route/overlay orchestration stays in AppState.
 @MainActor
 extension AppState {
-    func togglePreparation(_ item: String) {
-        guard let checkpoint = currentCheckpoint else { return }
-        var progress = run.progress[checkpoint.id] ?? CheckpointProgress()
-        if progress.checkedPreparation.contains(item) { progress.checkedPreparation.remove(item) }
-        else { progress.checkedPreparation.insert(item) }
-        progress.updatedAt = .now
-        run.progress[checkpoint.id] = progress
-        persistRun()
-        Task { await refreshReadiness() }
-    }
-
-    func toggleCompletion(_ item: String) {
-        guard let checkpoint = currentCheckpoint else { return }
-        var progress = run.progress[checkpoint.id] ?? CheckpointProgress()
-        if progress.checkedCompletion.contains(item) { progress.checkedCompletion.remove(item) }
-        else { progress.checkedCompletion.insert(item) }
-        progress.updatedAt = .now
-        run.progress[checkpoint.id] = progress
-        persistRun()
-    }
-
     func updatePartyMember(_ member: PartyMember) {
         guard let index = run.roster?.firstIndex(where: { $0.id == member.id }) else { return }
         run.roster?[index] = member

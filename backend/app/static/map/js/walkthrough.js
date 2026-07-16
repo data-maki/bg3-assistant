@@ -150,7 +150,6 @@ function incidentForStep(step) {
     never: step.avoid || fight.advice,
     escape: "Preserve one character with mobility or invisibility and use the prepared exit if the encounter allows fleeing.",
     honorDelta: fight.legendaryAction || "No additional Honor-only mechanic is recorded for this encounter.",
-    postFight: [],
     authority: "guide_fact",
     sourceUrl: fight.wiki || fight.source,
   };
@@ -166,7 +165,6 @@ function incidentBlock(step) {
     <p class="incident-never"><strong>NEVER</strong> ${escapeHtml(incident.never)}</p>
     <p class="incident-escape"><strong>IF IT GOES WRONG</strong> ${escapeHtml(incident.escape)}</p>
     ${incident.honorDelta ? `<p class="incident-delta"><strong>HONOR DELTA</strong> ${escapeHtml(incident.honorDelta)}</p>` : ""}
-    ${(incident.postFight || []).length ? `<section class="incident-aftermath"><h5>ENCOUNTER-SPECIFIC AFTERMATH</h5>${incident.postFight.map((item) => `<p>□ ${escapeHtml(item)}</p>`).join("")}</section>` : ""}
     ${incident.sourceUrl ? `<a href="${escapeHtml(incident.sourceUrl)}" target="_blank" rel="noreferrer">Protocol source ↗</a>` : ""}
   </section>`;
 }

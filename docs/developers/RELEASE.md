@@ -35,7 +35,8 @@ Open the generated `.pkg` in Transporter, deliver it to App Store Connect, wait 
 - [ ] Now, Run, and Party remain usable without an OpenRouter key or Screen Recording permission.
 - [ ] Party presents one character at a time and persists level, build, status, and equipment changes.
 - [ ] Named Honor runs can be created, renamed, switched, and resumed with independent progress and party state.
-- [ ] Done, Skip, Revisit, focus, decisions, and the resolved archive persist after restart.
+- [ ] Done archives immediately; Skip, Revisit, focus, decisions, and the resolved archive persist after restart.
+- [ ] Now shows Danger, Avoid, and Do without preparation or post-fight confirmation checklists.
 - [ ] The browser map starts from the app-owned local service and shares the same run state.
 - [ ] Guide-only chat and speech input work without an OpenRouter key.
 - [ ] An OpenRouter key saves to Keychain, restarts the local service, and enables AI chat.

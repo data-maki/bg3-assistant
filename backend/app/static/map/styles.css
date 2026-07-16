@@ -230,9 +230,6 @@ input[type="range"] { width: 100%; accent-color: var(--item); }
 .incident-never strong { color: #ff826e; }
 .incident-escape { color: #f0c27d !important; }
 .incident-delta { color: #eed18b !important; }
-.incident-aftermath { margin-top: 8px; padding: 7px 8px; border: 1px solid #3d4b4d; border-radius: 7px; background: #141c1f; }
-.incident-aftermath h5 { margin: 0 0 4px; color: #dce5e2; font-size: 9px; letter-spacing: .07em; }
-.incident-aftermath p { margin: 3px 0; color: #b9c7c2; font-size: 9.8px; }
 .incident-protocol a { display: inline-block; margin-top: 7px; color: #8bbdb4; font-size: 9.5px; }
 .step-context { margin-top: 8px; border-top: 1px solid #2c3a3d; }
 .step-context > summary { padding: 7px 1px 0; cursor: pointer; color: #c7d1ce; font-size: 10px; font-weight: 800; }

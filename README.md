@@ -1,8 +1,12 @@
+<p align="center">
+  <img src="docs/images/app-logo.png" width="180" alt="HM shield logo for BG3 Honor Mode Assistant">
+</p>
+
 # BG3 Honor Mode Assistant
 
 A quiet macOS overlay for keeping an Honor Mode run on track without leaving Baldur's Gate 3.
 
-![The Now view showing the next fight, readiness warning, preparation, and progress actions](docs/images/overlay-now.png)
+![The Now view showing the current danger, outcome to avoid, recommended action, and progress controls](docs/images/overlay-now.png)
 
 See the next safe action, check the risk before a fight, manage each companion's build, and mark progress yourself. The app stays in the menu bar and opens over BG3 only when you need it.
 
@@ -10,7 +14,7 @@ See the next safe action, check the risk before a fight, manage each companion's
 
 ## What it does
 
-- **Now** keeps the immediate action, preparation, failure condition, and Done/Skip controls in one place.
+- **Now** keeps the current danger, outcome to avoid, recommended action, and Done/Skip controls in one place.
 - **Run** provides a focused Act 1 route with decisions, missable warnings, and a resolved archive.
 - **Party** shows one character at a time with current level, build plan, equipment, and item conflicts.
 - **Map** opens a local Act 1 walkthrough and pickup map in your browser.
@@ -18,7 +22,7 @@ See the next safe action, check the risk before a fight, manage each companion's
 
 | Party and loadout | Guide-grounded chat |
 | --- | --- |
-| ![The Party view showing one character's level, build, and equipment](docs/images/overlay-party.png) | ![The chat view answering a current-run preparation question](docs/images/overlay-chat.png) |
+| ![The Party view showing one character's level, build, and equipment](docs/images/overlay-party.png) | ![The chat view answering a guide-grounded question about the current run](docs/images/overlay-chat.png) |
 
 ## Install and play
 
