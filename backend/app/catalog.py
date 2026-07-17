@@ -356,6 +356,79 @@ def list_items(act: int | None = None, slot: str | None = None) -> list[CatalogI
         ]
 
 
+def _enrich(name: str) -> dict:
+    """Best-effort effect/wiki lookup for items no build has described yet:
+    data/item_effects.json first, then one short bg3.wiki extract call."""
+    key = item_key(name)
+    try:
+        effects = json.loads(route_data.ITEM_EFFECTS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        effects = {}
+    if key in effects:
+        return effects[key]
+    title = re.sub(r"\s*x\d+$", "", name).strip()
+    try:
+        query = urllib.parse.urlencode({
+            "action": "query", "prop": "extracts", "explaintext": 1,
+            "redirects": 1, "titles": title, "format": "json",
+        })
+        request = urllib.request.Request(
+            f"https://bg3.wiki/w/api.php?{query}",
+            headers={"User-Agent": "bg3-assistant-import/1.0"},
+        )
+        with urllib.request.urlopen(request, timeout=4) as response:
+            data = json.loads(response.read())
+        page = next(iter(data["query"]["pages"].values()))
+        extract = page.get("extract", "")
+        lead = extract.split("==")[0]
+        first = next((p for p in lead.split("\n\n") if p.strip()), "")
+        first = re.sub(r"\s+", " ", first).strip()[:240]
+        if first:
+            return {"effect": first, "wiki": f"https://bg3.wiki/wiki/{title.replace(' ', '_')}"}
+    except Exception:
+        pass
+    return {}
+
+
+def save_imported_build(imported: ImportedBuild) -> None:
+    ensure_seeded()
+    with _connect() as connection:
+        known = {
+            row["item_key"]
+            for row in connection.execute("SELECT item_key FROM items").fetchall()
+        }
+        enriched_gear = []
+        for gear in imported.build.gear:
+            if item_key(gear.item) not in known:
+                extra = _enrich(gear.item)
+                gear = gear.model_copy(update={
+                    "effect": extra.get("effect", gear.effect),
+                    "acquire": extra.get("acquire", gear.acquire),
+                    "wiki": extra.get("wiki", gear.wiki),
+                })
+            enriched_gear.append(gear)
+        build = imported.build.model_copy(update={"gear": enriched_gear})
+        _insert_build(
+            connection, build, origin="import", source_url=imported.source_url,
+            import_id=imported.id, overwrite_items=False,
+        )
+
+
+def imported_builds() -> list[ImportedBuild]:
+    builds = {b.id: b for b in catalog_builds()}
+    with _connect() as connection:
+        rows = connection.execute(
+            "SELECT build_id, import_id, name, source_url FROM builds WHERE origin = 'import' ORDER BY created_at DESC"
+        ).fetchall()
+    return [
+        ImportedBuild(
+            id=row["import_id"] or row["build_id"], name=row["name"],
+            source_url=row["source_url"], build=builds[row["build_id"]],
+        )
+        for row in rows
+    ]
+
+
 def _migrate_custom_loadouts(connection: sqlite3.Connection) -> None:
     exists = connection.execute(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'custom_loadouts'"

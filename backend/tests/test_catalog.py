@@ -3,9 +3,12 @@ import sqlite3
 import time
 
 import pytest
+from fastapi.testclient import TestClient
 
-from app import catalog, stores
+from app import catalog, main, stores
+from app.loadout_import import _normalize
 from app.route_data import GUIDE_VERSION, item_key, load_builds as tsv_builds, load_gear as tsv_gear
+from test_loadout_import import sample_draft
 
 
 @pytest.fixture
@@ -83,3 +86,83 @@ def test_seed_records_version_and_item_facts(db_path):
         assert row["act"] == 1
         assert "Zhentarim" in row["region"]
         assert row["effect"]  # enrichment joined from item_effects.json
+
+
+def test_save_imported_build_inserts_rows(db_path, monkeypatch):
+    monkeypatch.setattr(catalog, "_enrich", lambda name: {})
+    catalog.ensure_seeded()
+    imported = _normalize(sample_draft(), "https://example.com/swords-bard")
+    catalog.save_imported_build(imported)
+    builds = {b.id: b for b in catalog.catalog_builds()}
+    assert imported.build.id in builds
+    assert builds[imported.build.id].gear[0].item == "Titanstring Bow"
+    # known item facts win over the import's sparse copy
+    assert "Zhentarim" in builds[imported.build.id].gear[0].region
+    listed = catalog.imported_builds()
+    assert [b.id for b in listed] == [imported.id]
+    assert listed[0].source_url == "https://example.com/swords-bard"
+
+
+def test_import_unknown_item_upserts_and_enriches(db_path, monkeypatch):
+    monkeypatch.setattr(
+        catalog, "_enrich",
+        lambda name: {"effect": "Test effect text", "wiki": "https://bg3.wiki/wiki/Test"},
+    )
+    catalog.ensure_seeded()
+    draft = sample_draft()
+    draft.gear[0].item = "Completely Unknown Helm"
+    draft.gear[0].slot = "Head"
+    imported = _normalize(draft, "https://example.com/unknown")
+    catalog.save_imported_build(imported)
+    item = next(i for i in catalog.list_items(slot="Head") if i.name == "Completely Unknown Helm")
+    assert item.effect == "Test effect text"
+    assert item.map_objective is False
+
+
+def test_items_endpoint_filters(db_path):
+    client = TestClient(main.app)
+    response = client.get("/api/items", params={"act": 1, "slot": "Head"})
+    assert response.status_code == 200
+    items = response.json()
+    assert items
+    assert all(item["slot"] == "Head" and item["act"] == 1 for item in items)
+    assert {"item_key", "name", "effect", "icon"} <= set(items[0])
+
+
+def test_route_payload_builds_come_from_catalog(db_path, monkeypatch):
+    monkeypatch.setattr(catalog, "_enrich", lambda name: {})
+    catalog.ensure_seeded()
+    imported = _normalize(sample_draft(), "https://example.com/payload")
+    catalog.save_imported_build(imported)
+    client = TestClient(main.app)
+    payload = client.get("/api/act1/route").json()
+    ids = {build["id"] for build in payload["builds"]}
+    assert imported.build.id in ids
+    assert any(build["id"] == "SB-1011" for build in payload["builds"])
+
+
+def test_custom_loadouts_migration(db_path, monkeypatch):
+    monkeypatch.setattr(catalog, "_enrich", lambda name: {})
+    imported = _normalize(sample_draft(), "https://example.com/legacy")
+    # write a legacy JSON row the old way, then let ensure_seeded migrate it
+    with stores.RunDatabase().connect() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS custom_loadouts(
+                loadout_id TEXT PRIMARY KEY,
+                source_url TEXT NOT NULL,
+                payload_json TEXT NOT NULL,
+                updated_at REAL NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            "INSERT INTO custom_loadouts(loadout_id, source_url, payload_json, updated_at) VALUES(?, ?, ?, ?)",
+            (imported.id, imported.source_url, imported.model_dump_json(by_alias=True), time.time()),
+        )
+    catalog.ensure_seeded()
+    assert [b.id for b in catalog.imported_builds()] == [imported.id]
+    with sqlite3.connect(db_path) as connection:
+        assert connection.execute(
+            "SELECT name FROM sqlite_master WHERE name = 'custom_loadouts'"
+        ).fetchone() is None

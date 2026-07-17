@@ -4,7 +4,7 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
-from .models import BuildGear, BuildLevel, BuildSummary, ReadinessRequest, ReadinessResponse, RouteCheckpoint
+from .models import AbilityScores, AbilityTargetScores, ActGuideSummary, BuildGear, BuildLevel, BuildSummary, ReadinessRequest, ReadinessResponse, RouteCheckpoint
 from .paths import resource_root
 
 
@@ -14,9 +14,10 @@ ROUTE_PATH = REPO_ROOT / "data" / "act1_route.json"
 DECISIONS_PATH = REPO_ROOT / "data" / "act1_decisions.json"
 BUILDS_PATH = REPO_ROOT / "data" / "build_overview.tsv"
 BUILD_LEVELS_PATH = REPO_ROOT / "data" / "build_levels.tsv"
-BUILD_GEAR_PATH = REPO_ROOT / "data" / "build_gear.tsv"
+ACTS_PATH = REPO_ROOT / "data" / "acts"
 ITEM_EFFECTS_PATH = REPO_ROOT / "data" / "item_effects.json"
 ITEM_ICONS_PATH = REPO_ROOT / "data" / "item_icons.json"
+BUILD_ABILITY_TARGETS_PATH = REPO_ROOT / "data" / "build_ability_targets.json"
 SOURCE_URL = (
     "https://docs.google.com/spreadsheets/d/"
     "1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
@@ -67,18 +68,48 @@ def item_key(item_name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", stripped.lower()).strip("-")
 
 
-@lru_cache(maxsize=1)
-def load_gear() -> list[BuildGear]:
-    """All reviewed gear rows — the single parse of build_gear.tsv.
+def parse_ability_scores(value: str) -> AbilityScores | None:
+    fields = {
+        "STR": "strength",
+        "DEX": "dexterity",
+        "CON": "constitution",
+        "INT": "intelligence",
+        "WIS": "wisdom",
+        "CHA": "charisma",
+    }
+    scores = {
+        field: int(match.group(1))
+        for key, field in fields.items()
+        if (match := re.search(rf"\b{key}\s*(\d{{1,2}})\b", value, re.IGNORECASE))
+    }
+    if len(scores) != 6:
+        return None
+    return AbilityScores(**scores)
+
+
+def _act_metadata(act: int) -> dict:
+    if act not in (1, 2, 3):
+        raise KeyError(act)
+    return json.loads((ACTS_PATH / f"act{act}.json").read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=4)
+def load_gear(act: int | None = None) -> list[BuildGear]:
+    """Reviewed gear rows from independent act-specific databases.
 
     Consumed per-build here (filtered into BuildSummary.gear) and item-wise by
-    map_data to place Act 1 item markers, so both payloads stay on one vocabulary.
+    map_data to place act-specific item markers, so both payloads stay on one vocabulary.
     Each row is joined with data/item_effects.json (built by
     backend/scripts/fetch_item_effects.py from bg3.wiki) for what the item does
     and exactly where it comes from.
     """
-    with BUILD_GEAR_PATH.open(newline="", encoding="utf-8") as handle:
-        rows = list(csv.DictReader(handle, delimiter="\t"))
+    acts = (act,) if act is not None else (1, 2, 3)
+    rows = []
+    for current_act in acts:
+        metadata = _act_metadata(current_act)
+        path = REPO_ROOT / "data" / metadata["equipmentFile"]
+        with path.open(newline="", encoding="utf-8") as handle:
+            rows.extend(csv.DictReader(handle, delimiter="\t"))
     try:
         effects = json.loads(ITEM_EFFECTS_PATH.read_text(encoding="utf-8"))
     except Exception:
@@ -92,6 +123,7 @@ def load_gear() -> list[BuildGear]:
     for row in rows:
         key = item_key(row["Item"])
         extra = effects.get(key, {})
+        coordinate_match = re.fullmatch(r"X\s*(-?\d+)\s+Y\s*(-?\d+)", row.get("Coordinates") or "")
         minimum_level = int(row.get("Minimum level") or 1)
         maximum_level = int(row["Maximum level"]) if row.get("Maximum level") else None
         map_objective = (row.get("Map objective") or "yes").strip().lower() not in {"no", "false", "0"}
@@ -115,9 +147,23 @@ def load_gear() -> list[BuildGear]:
                 acquire=extra.get("acquire", ""),
                 wiki=extra.get("wiki", ""),
                 icon=icons_by_key.get(key, ""),
+                game_x=int(coordinate_match.group(1)) if coordinate_match else None,
+                game_y=int(coordinate_match.group(2)) if coordinate_match else None,
             )
         )
     return gear
+
+
+def load_act_catalog() -> list[ActGuideSummary]:
+    # Uncached: equipment counts come from the catalog DB, which grows when
+    # builds are imported. Function-local import avoids a module cycle
+    # (catalog imports route_data for the TSV seed parsers).
+    from . import catalog
+
+    return [
+        ActGuideSummary(**_act_metadata(act), equipment_count=len(catalog.catalog_gear(act)))
+        for act in (1, 2, 3)
+    ]
 
 
 @lru_cache(maxsize=1)
@@ -126,6 +172,7 @@ def load_builds() -> list[BuildSummary]:
         rows = list(csv.DictReader(handle, delimiter="\t"))
     with BUILD_LEVELS_PATH.open(newline="", encoding="utf-8") as handle:
         level_rows = list(csv.DictReader(handle, delimiter="\t"))
+    ability_targets = json.loads(BUILD_ABILITY_TARGETS_PATH.read_text(encoding="utf-8"))
     gear = load_gear()
     return [
         BuildSummary(
@@ -136,6 +183,11 @@ def load_builds() -> list[BuildSummary]:
             final_split=row["Final split"],
             class_progression=row["Class progression"],
             starting_abilities=row["Starting abilities"],
+            starting_ability_scores=parse_ability_scores(row["Starting abilities"]),
+            target_ability_scores=AbilityTargetScores(**ability_targets[row["Build ID"]]["scores"]),
+            target_ability_note=ability_targets[row["Build ID"]].get("note", ""),
+            ability_setups=ability_targets[row["Build ID"]].get("setups", []),
+            ability_sources=ability_targets[row["Build ID"]].get("sources", []),
             play_pattern=row["Core play pattern"],
             caveat=row["Important caveat"],
             source=row["Primary source"],
@@ -147,6 +199,7 @@ def load_builds() -> list[BuildSummary]:
                     choices=level["Feat / spells / skills"],
                     tactics=level["What changes now"],
                     confidence=level["Source confidence"],
+                    ability_score_reset=parse_ability_scores(level["Feat / spells / skills"]),
                 )
                 for level in level_rows if level["Build ID"] == row["Build ID"]
             ],
@@ -211,7 +264,9 @@ def assess_readiness(request: ReadinessRequest) -> ReadinessResponse:
         blockers.append("Unresolved route prerequisites: " + ", ".join(names))
     warnings.extend(checkpoint.irreversible_warnings)
 
-    builds = {build.id: build for build in load_builds()}
+    from . import catalog
+
+    builds = {build.id: build for build in catalog.catalog_builds()}
     assumed_build_setup: list[str] = []
     for member in request.party:
         if not member.build_id:

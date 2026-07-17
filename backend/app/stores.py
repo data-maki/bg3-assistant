@@ -272,9 +272,10 @@ def _merge_run_state_into_snapshot(snapshot: dict, state: RunState) -> None:
             progress[step_id] = "skipped"
         elif status == "revisit":
             focus = step_id
+    existing_roster = snapshot.get("roster") or snapshot.get("party") or []
     snapshot.update({
-        "party": [member.model_dump(by_alias=True, exclude_none=True) for member in state.party],
-        "roster": [member.model_dump(by_alias=True, exclude_none=True) for member in state.roster],
+        "party": _merge_member_snapshots(existing_roster, state.party),
+        "roster": _merge_member_snapshots(existing_roster, state.roster),
         "walkthroughProgress": progress,
         "walkthroughOutcomes": state.walkthrough_outcomes,
         "focusedWalkthroughStepId": focus,
@@ -285,6 +286,19 @@ def _merge_run_state_into_snapshot(snapshot: dict, state: RunState) -> None:
         "activeBuilds": state.builds,
         "doneFightIds": state.done,
     })
+
+
+def _merge_member_snapshots(existing: list[dict], members: list) -> list[dict]:
+    """Preserve fields a partial or older client does not know about."""
+    by_id = {member.get("id"): member for member in existing if isinstance(member, dict) and member.get("id")}
+    merged = []
+    for member in members:
+        # Omitted fields preserve the prior snapshot; explicit null/[]/false
+        # clear player-owned state. Pydantic retains this distinction in
+        # model_fields_set when parsing a partial web payload.
+        payload = member.model_dump(by_alias=True, exclude_unset=True)
+        merged.append({**by_id.get(member.id, {}), **payload})
+    return merged
 
 
 def _map_party_member(value: dict):
@@ -301,6 +315,10 @@ def _normalize_roster(members: list) -> list:
         ("gale", "Gale", "Wizard", False, "camp"),
         ("wyll", "Wyll", "Warlock", False, "camp"),
         ("karlach", "Karlach", "Barbarian", False, "camp"),
+        ("halsin", "Halsin", "Druid", False, "unrecruited"),
+        ("minthara", "Minthara", "Paladin", False, "unrecruited"),
+        ("jaheira", "Jaheira", "Druid", False, "unrecruited"),
+        ("minsc", "Minsc", "Ranger", False, "unrecruited"),
     ]
     roster = [member.model_copy(deep=True) for member in members]
     had_members = bool(roster)

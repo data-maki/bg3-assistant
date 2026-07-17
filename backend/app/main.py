@@ -1,20 +1,26 @@
 import os
 import sys
 
+import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import guide_chat, llm_chat, stores
+from . import catalog, guide_chat, llm_chat, loadout_import, stores
 from .config import get_settings
-from .map_data import load_act_one_map
+from .map_data import load_act_map_index, load_act_one_map
 from .models import (
+    ActGuideSummary,
+    ActMapIndex,
     ActOneMap,
+    BuildGear,
     ChatRequest,
     ChatResponse,
     HealthResponse,
+    ImportedBuild,
     LatLng,
+    LoadoutImportRequest,
     PositionResponse,
     PositionUpdateRequest,
     ReadinessRequest,
@@ -23,7 +29,7 @@ from .models import (
     RunStateResponse,
 )
 from .paths import resource_root
-from .route_data import GUIDE_VERSION, assess_readiness, checkpoint_by_id, load_builds, load_route
+from .route_data import GUIDE_VERSION, assess_readiness, checkpoint_by_id, load_act_catalog, load_route
 from .walkthrough_data import load_walkthrough, walkthrough_by_id
 
 
@@ -78,6 +84,36 @@ def act_one_markers() -> ActOneMap:
     return load_act_one_map()
 
 
+@app.get("/api/acts", response_model=list[ActGuideSummary])
+def acts() -> list[ActGuideSummary]:
+    return load_act_catalog()
+
+
+@app.get("/api/acts/{act}/equipment", response_model=list[BuildGear])
+def act_equipment(act: int) -> list[BuildGear]:
+    try:
+        return catalog.catalog_gear(act)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown act: {act}") from exc
+
+
+@app.get("/api/items")
+def catalog_items(act: int | None = None, slot: str | None = None) -> JSONResponse:
+    # Snake_case dump to match the Mac app's convertFromSnakeCase decoder,
+    # same style as /api/act1/route.
+    return JSONResponse(
+        content=[item.model_dump(mode="json") for item in catalog.list_items(act=act, slot=slot)]
+    )
+
+
+@app.get("/api/acts/{act}/map", response_model=ActMapIndex)
+def act_map(act: int) -> ActMapIndex:
+    try:
+        return load_act_map_index(act)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown act: {act}") from exc
+
+
 @app.get("/api/act1/route")
 def act_one_route() -> JSONResponse:
     # The Mac app decodes snake_case (convertFromSnakeCase), so this payload
@@ -86,10 +122,42 @@ def act_one_route() -> JSONResponse:
         content={
             "guideVersion": GUIDE_VERSION,
             "checkpoints": [item.model_dump(mode="json") for item in load_route()],
-            "builds": [item.model_dump(mode="json") for item in load_builds()],
+            "builds": [item.model_dump(mode="json") for item in catalog.catalog_builds()],
             "walkthrough": [item.model_dump(mode="json") for item in load_walkthrough()],
+            "acts": [item.model_dump(mode="json") for item in load_act_catalog()],
         }
     )
+
+
+@app.get("/api/builds/custom", response_model=list[ImportedBuild])
+def custom_builds() -> list[ImportedBuild]:
+    return catalog.imported_builds()
+
+
+@app.post("/api/builds/import", response_model=ImportedBuild)
+def import_custom_build(request: LoadoutImportRequest) -> ImportedBuild:
+    settings = get_settings()
+    if not settings.openrouter_api_key:
+        raise HTTPException(status_code=428, detail="Add an OpenRouter API key in Settings before importing a build.")
+    try:
+        imported = loadout_import.import_build(request.url, settings)
+    except loadout_import.LoadoutImportError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except httpx.HTTPStatusError as exc:
+        status = exc.response.status_code
+        if exc.request.url.host == "openrouter.ai":
+            detail = {
+                401: "OpenRouter rejected the API key.",
+                402: "The OpenRouter account needs credits for this import.",
+                429: "OpenRouter is rate-limiting imports. Try again shortly.",
+            }.get(status, "OpenRouter rejected the request.")
+        else:
+            detail = "The build page could not be downloaded."
+        raise HTTPException(status_code=502, detail=f"{detail} (HTTP {status})") from exc
+    except (httpx.HTTPError, KeyError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail="The build could not be processed. Try another public URL.") from exc
+    catalog.save_imported_build(imported)
+    return imported
 
 
 @app.post("/api/act1/readiness", response_model=ReadinessResponse)
