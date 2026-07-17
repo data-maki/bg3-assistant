@@ -361,9 +361,85 @@ extension AppState {
         run.equippedByMember?[member.id]?.contains(gear.itemKey) == true
     }
 
+    /// The member's current plan for this act: build picks filtered by act and
+    /// level, with any player slot swaps substituted in.
+    func wantedGear(for member: PartyMember) -> [BuildGear] {
+        guard let buildId = member.buildId,
+              let build = builds.first(where: { $0.id == buildId }) else { return [] }
+        let overrides = run.plannedSlotOverrides?[member.id] ?? [:]
+        var gear = build.gear.filter {
+            $0.act == selectedAct && $0.isAvailable(at: member.level)
+                && overrides[LoadoutSlot.classify($0.slot).id] == nil
+        }
+        for (slotID, itemKey) in overrides {
+            guard let item = itemCatalog.first(where: { $0.itemKey == itemKey }),
+                  item.act <= selectedAct,
+                  LoadoutSlot.classify(item.slot).id == slotID else { continue }
+            gear.append(syntheticGear(from: item))
+        }
+        return gear
+    }
+
+    /// A catalog item dressed as BuildGear so every existing gear surface
+    /// (doll grid, drawer, detail view, maps) renders player swaps unchanged.
+    func syntheticGear(from item: ItemSummary) -> BuildGear {
+        BuildGear(
+            item: item.name, slot: item.slot, priority: "Chosen", act: item.act,
+            region: item.region, acquisition: item.acquisition,
+            why: "Player-chosen replacement pick", source: item.wiki,
+            minimumLevel: nil, maximumLevel: nil, requirement: nil,
+            mapObjective: item.mapObjective, alternative: nil,
+            effect: item.effect, acquire: item.acquire, wiki: item.wiki,
+            icon: item.icon, gameX: item.gameX, gameY: item.gameY
+        )
+    }
+
+    private var assignmentClaims: [GearLogic.GearClaim] {
+        activeParty.compactMap { member in
+            guard let buildId = member.buildId,
+                  let build = builds.first(where: { $0.id == buildId }) else { return nil }
+            return GearLogic.GearClaim(
+                memberId: member.id, memberName: member.name, buildName: build.name,
+                buildAssignedAt: run.buildAssignedAt?[member.id],
+                itemKeys: Set(wantedGear(for: member).map(\.itemKey))
+            )
+        }
+    }
+
+    /// Deterministic item → member plan for the current act. Manual override
+    /// wins; otherwise the build assigned earliest ("first to request"),
+    /// ties broken alphabetically.
+    var plannedAssignments: [String: String] {
+        GearLogic.assignments(claims: assignmentClaims, overrides: run.gearAssignmentOverrides ?? [:])
+    }
+
+    func plannedOwner(ofItemKey key: String) -> PartyMember? {
+        guard let memberId = plannedAssignments[key] else { return nil }
+        return activeParty.first { $0.id == memberId }
+    }
+
+    func setGearAssignmentOverride(_ gear: BuildGear, to member: PartyMember) {
+        run.gearAssignmentOverrides = run.gearAssignmentOverrides ?? [:]
+        run.gearAssignmentOverrides?[gear.itemKey] = member.id
+        persistRun()
+    }
+
+    func slotOverride(for member: PartyMember, slot: LoadoutSlot) -> String? {
+        run.plannedSlotOverrides?[member.id]?[slot.id]
+    }
+
+    func setSlotOverride(_ slot: LoadoutSlot, itemKey: String?, for member: PartyMember) {
+        var all = run.plannedSlotOverrides ?? [:]
+        var mine = all[member.id] ?? [:]
+        mine[slot.id] = itemKey
+        all[member.id] = mine.isEmpty ? nil : mine
+        run.plannedSlotOverrides = all
+        persistRun()
+    }
+
     /// Cross-build claim on the same item: either the player already confirmed
-    /// an owner, or another active member's build wants it too and priority
-    /// decides who wears it.
+    /// an owner, or several active plans want it and assignment recency
+    /// ("first to request") decides who gets it.
     func gearConflict(for gear: BuildGear, member: PartyMember) -> GearConflict? {
         if let owner = gearOwner(gear), owner.id != member.id {
             return GearConflict(
@@ -373,36 +449,22 @@ extension AppState {
             )
         }
         let key = gear.itemKey
-        let rivals: [(name: String, rank: Int)] = activeParty.compactMap { other in
-            guard other.id != member.id,
-                  let buildId = other.buildId,
-                  let otherBuild = builds.first(where: { $0.id == buildId }),
-                  let claim = otherBuild.gear.first(where: {
-                      $0.act == selectedAct && $0.isAvailable(at: other.level) && $0.itemKey == key
-                  })
-            else { return nil }
-            return (other.name, GearLogic.priorityRank(claim.priority))
+        let rivals = activeParty.filter { other in
+            other.id != member.id && wantedGear(for: other).contains { $0.itemKey == key }
         }
-        guard let strongestRival = rivals.min(by: { $0.rank < $1.rank }) else { return nil }
-        let myRank = GearLogic.priorityRank(gear.priority)
-        if myRank < strongestRival.rank {
+        guard !rivals.isEmpty, let planned = plannedOwner(ofItemKey: key) else { return nil }
+        let rivalNames = rivals.map(\.name).joined(separator: ", ")
+        if planned.id == member.id {
             return GearConflict(
                 mine: true,
-                short: "Also wanted by \(strongestRival.name)",
-                detail: gearConflictDetail(gear, base: "\(strongestRival.name)'s build wants this too. \(member.name)'s build lists it at higher priority — \(member.name) wears it.")
-            )
-        }
-        if myRank > strongestRival.rank {
-            return GearConflict(
-                mine: false,
-                short: "Goes to \(strongestRival.name)",
-                detail: gearConflictDetail(gear, base: "\(strongestRival.name)'s build lists this at higher priority.")
+                short: "Also wanted by \(rivalNames)",
+                detail: gearConflictDetail(gear, base: "\(member.name)'s build requested it first, so \(member.name) gets it. Open the item to hand it to someone else.")
             )
         }
         return GearConflict(
-            mine: true,
-            short: "Contested with \(strongestRival.name)",
-            detail: gearConflictDetail(gear, base: "Both \(member.name) and \(strongestRival.name) want this at the same priority.")
+            mine: false,
+            short: "Assigned to \(planned.name)",
+            detail: gearConflictDetail(gear, base: "\(planned.name)'s build requested it first. Use “Give to \(member.name)” to override.")
         )
     }
 
