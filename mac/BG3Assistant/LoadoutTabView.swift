@@ -1,47 +1,19 @@
 import SwiftUI
 
-/// Focused party sheet: rotate through the roster, edit the current character,
-/// then review and confirm that character's equipment.
+/// The planner's Loadout tab as a paper doll: a visible party strip, uniform
+/// slot cells in BG3 inventory order, and a bottom drawer that previews an
+/// item on hover and pins it on click for actions (target / equip / map).
 struct LoadoutTabView: View {
     @EnvironmentObject private var appState: AppState
-    @State private var memberIndex = 0
+    @State private var selectedMemberId: String?
+    @State private var pinnedSlot: LoadoutSlot?
+    @State private var hoveredSlot: LoadoutSlot?
+    @State private var showsLater = false
 
-    var body: some View {
-        VStack(spacing: 8) {
-            header
-            characterRotator
-            if let member {
-                RosterMemberEditor(
-                    member: member,
-                    builds: appState.builds,
-                    onChange: appState.updatePartyMember,
-                    onStatusChange: { _ = appState.setRosterStatus($0, for: member) }
-                )
-            }
-            if let member, let build {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 8) {
-                        slotGrid(build: build, member: member)
-                        laterGear(build: build, member: member)
-                        footer(build: build, member: member)
-                    }
-                    .padding(.trailing, 6)
-                }
-            } else {
-                emptyState
-            }
-        }
-        .onChange(of: appState.roster.count) { _, count in
-            memberIndex = min(memberIndex, max(0, count - 1))
-        }
-    }
-
-    // MARK: - Party selection
-
-    private var party: [PartyMember] { appState.roster }
+    private var party: [PartyMember] { appState.activeParty }
 
     private var member: PartyMember? {
-        party.indices.contains(memberIndex) ? party[memberIndex] : party.first
+        party.first(where: { $0.id == selectedMemberId }) ?? party.first
     }
 
     private var build: BuildSummary? {
@@ -49,195 +21,359 @@ struct LoadoutTabView: View {
         return appState.builds.first { $0.id == id }
     }
 
+    var body: some View {
+        VStack(spacing: 7) {
+            header
+            partyStrip
+            memberSummary
+            if let member, let build {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 7) {
+                        dollGrid(build: build, member: member)
+                        laterSection(build: build, member: member)
+                        mapFooter(build: build, member: member)
+                    }
+                    .padding(.trailing, 6)
+                }
+                drawer(build: build, member: member)
+            } else {
+                emptyState
+            }
+        }
+        .onChange(of: member?.id) { _, _ in
+            pinnedSlot = nil
+            hoveredSlot = nil
+        }
+    }
+
+    // MARK: - Header / party
+
+    private var availableGear: [BuildGear] {
+        guard let member else { return [] }
+        return appState.wantedGear(for: member)
+            .sorted { GearLogic.priorityRank($0.priority) < GearLogic.priorityRank($1.priority) }
+    }
+
     private var header: some View {
-        HStack {
-            Text("LOADOUT")
-                .font(.system(.caption, design: .serif).bold())
+        let confirmable = availableGear.filter(\.isMapObjective)
+        let confirmed = member.map { m in confirmable.filter { appState.gearIsEquipped($0, by: m) } } ?? []
+        return HStack {
+            Text("Loadout · Act \(appState.selectedAct)")
+                .font(BG3Type.overline)
+                .textCase(.uppercase)
                 .foregroundStyle(BG3Theme.gold)
             Spacer()
-            Picker("Act", selection: Binding(
-                get: { appState.selectedAct },
-                set: { act in appState.setSelectedAct(act) }
-            )) {
-                ForEach(1...3, id: \.self) { act in Text("Act \(act)").tag(act) }
+            if !confirmable.isEmpty {
+                Text("\(confirmed.count)/\(confirmable.count) confirmed")
+                    .font(BG3Type.captionBold)
+                    .foregroundStyle(confirmed.count == confirmable.count ? BG3Theme.success : BG3Theme.mutedParchment)
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(width: 164)
-            .controlSize(.small)
-            .accessibilityLabel("Loadout act")
         }
     }
 
-    private var characterRotator: some View {
-        HStack(spacing: 8) {
-            rotateButton("chevron.left", label: "Previous character") {
-                memberIndex = (memberIndex - 1 + max(party.count, 1)) % max(party.count, 1)
-            }
-            VStack(spacing: 1) {
-                Text(member?.name ?? "—")
-                    .font(.system(size: 14, weight: .bold, design: .serif))
-                    .foregroundStyle(BG3Theme.parchment)
-                Text(subtitleLine)
-                    .font(.caption2).foregroundStyle(BG3Theme.mutedParchment).lineLimit(1)
-            }
-            .frame(maxWidth: .infinity)
-            .accessibilityElement(children: .combine)
-            .accessibilityValue("Character \(memberIndex + 1) of \(party.count)")
-            rotateButton("chevron.right", label: "Next character") {
-                memberIndex = (memberIndex + 1) % max(party.count, 1)
+    private var partyStrip: some View {
+        HStack(spacing: 5) {
+            ForEach(party) { candidate in
+                let selected = candidate.id == member?.id
+                Button {
+                    selectedMemberId = candidate.id
+                } label: {
+                    HStack(spacing: 4) {
+                        if candidate.buildId == nil {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 9))
+                                .foregroundStyle(BG3Theme.warning)
+                        }
+                        Text(candidate.name)
+                            .font(BG3Type.captionBold)
+                            .foregroundStyle(selected ? BG3Theme.parchment : BG3Theme.mutedParchment)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 5)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .background(RoundedRectangle(cornerRadius: 7).fill(selected ? BG3Theme.bronze.opacity(0.26) : BG3Theme.ink.opacity(0.3)))
+                .overlay(RoundedRectangle(cornerRadius: 7).stroke(selected ? BG3Theme.gold.opacity(0.6) : BG3Theme.bronze.opacity(0.3), lineWidth: 0.7))
+                .help(candidate.buildId == nil ? "\(candidate.name) has no build assigned" : candidate.name)
+                .accessibilityLabel(candidate.name)
+                .accessibilityValue(selected ? "Selected" : candidate.buildId == nil ? "No build" : "")
             }
         }
-        .padding(.vertical, 5).padding(.horizontal, 7)
-        .bg3InsetSurface(accent: BG3Theme.gold)
     }
 
-    private var subtitleLine: String {
-        guard let member else { return "" }
-        if let build { return "L\(member.level) · \(build.name)" }
-        return "L\(member.level) · no build assigned"
-    }
-
-    private func rotateButton(_ icon: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: icon).font(.system(size: 13, weight: .bold)).frame(width: 24, height: 30)
+    @ViewBuilder private var memberSummary: some View {
+        if let member {
+            HStack(spacing: 6) {
+                Text(build.map { "L\(member.level) · \($0.name)" } ?? "L\(member.level) · no build assigned")
+                    .font(BG3Type.caption)
+                    .foregroundStyle(BG3Theme.mutedParchment)
+                    .lineLimit(1)
+                Spacer()
+                Button {
+                    appState.plannerTab = .party
+                } label: {
+                    Text("edit ›").font(BG3Type.captionBold)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(BG3Theme.gold)
+                .help("Change level or build in the Party tab")
+            }
         }
-        .assistantActionButton()
-        .disabled(party.count < 2)
-        .accessibilityLabel(label)
     }
 
     private var emptyState: some View {
         VStack(spacing: 8) {
             Image(systemName: "person.crop.rectangle.badge.plus")
-                .font(.system(size: 26)).foregroundStyle(.secondary)
+                .font(.system(size: 26)).foregroundStyle(BG3Theme.mutedParchment)
             Text("\(member?.name ?? "This character") has no build yet.")
-                .font(.caption).foregroundStyle(.secondary)
-            Text("Choose a reviewed build above to see equipment.")
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
+            Button("Choose a build in Party") { appState.plannerTab = .party }
+                .assistantActionButton(accent: BG3Theme.gold, prominent: true)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - Slots
+    // MARK: - Doll grid
 
-    private func availableGear(_ build: BuildSummary, member: PartyMember) -> [BuildGear] {
-        build.gear
-            .filter { $0.act <= appState.selectedAct && $0.isAvailable(at: member.level) }
-            .sorted { priorityRank($0.priority) < priorityRank($1.priority) }
-    }
-
-    private func slotGrid(build: BuildSummary, member: PartyMember) -> some View {
-        let grouped = Dictionary(grouping: availableGear(build, member: member), by: { LoadoutSlot.classify($0.slot) })
-        let columns = [GridItem(.flexible(), spacing: 7), GridItem(.flexible(), spacing: 7)]
-        return VStack(alignment: .leading, spacing: 7) {
-            LazyVGrid(columns: columns, alignment: .leading, spacing: 7) {
+    private func dollGrid(build: BuildSummary, member: PartyMember) -> some View {
+        let grouped = Dictionary(grouping: availableGear, by: { LoadoutSlot.classify($0.slot) })
+        let columns = [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)]
+        return VStack(alignment: .leading, spacing: 6) {
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
                 ForEach(LoadoutSlot.paired) { slot in
-                    slotCell(slot, items: grouped[slot] ?? [], build: build, member: member)
+                    slotCell(slot, items: grouped[slot] ?? [], member: member)
                 }
             }
             ForEach(LoadoutSlot.fullWidth) { slot in
                 if let items = grouped[slot], !items.isEmpty {
-                    slotCell(slot, items: items, build: build, member: member)
+                    slotCell(slot, items: items, member: member)
                 }
             }
         }
     }
 
-    private func slotCell(_ slot: LoadoutSlot, items: [BuildGear], build: BuildSummary, member: PartyMember) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 5) {
-                Image(systemName: slot.icon).font(.system(size: 9.5)).foregroundStyle(BG3Theme.gold)
-                Text(slot.rawValue.uppercased())
-                    .font(.system(size: 8.5, weight: .heavy, design: .serif))
-                    .foregroundStyle(BG3Theme.gold)
-                Spacer(minLength: 0)
-            }
-            if items.isEmpty {
-                Text("No reviewed pick").font(.caption2).foregroundStyle(.tertiary)
-            } else {
-                ForEach(items) { gear in
-                    gearEntry(gear, build: build, member: member)
+    private func slotCell(_ slot: LoadoutSlot, items: [BuildGear], member: PartyMember) -> some View {
+        let pinned = pinnedSlot == slot
+        let first = items.first
+        return Button {
+            pinnedSlot = pinned ? nil : slot
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: slot.icon)
+                    .font(.system(size: 10))
+                    .foregroundStyle(first == nil ? BG3Theme.bronze.opacity(0.7) : BG3Theme.gold)
+                    .frame(width: 15)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(first.map { items.count > 1 ? "\($0.item) +\(items.count - 1)" : $0.item } ?? "no pick")
+                        .font(BG3Type.captionBold)
+                        .foregroundStyle(first == nil ? BG3Theme.mutedParchment.opacity(0.7) : BG3Theme.parchment)
+                        .lineLimit(1)
+                    Text(slot.rawValue)
+                        .font(.system(size: 9))
+                        .foregroundStyle(BG3Theme.mutedParchment.opacity(0.8))
+                        .lineLimit(1)
                 }
+                Spacer(minLength: 2)
+                slotGlyph(items, member: member)
             }
+            .padding(.horizontal, 7)
+            .frame(height: 42)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
         }
-        .padding(7)
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-        .bg3InsetSurface(accent: items.isEmpty ? BG3Theme.bronze.opacity(0.35) : BG3Theme.bronze)
+        .buttonStyle(.plain)
+        .disabled(items.isEmpty)
+        .background(RoundedRectangle(cornerRadius: 8).fill(pinned ? BG3Theme.bronze.opacity(0.26) : BG3Theme.ink.opacity(0.3)))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(pinned ? BG3Theme.gold.opacity(0.7) : BG3Theme.bronze.opacity(items.isEmpty ? 0.18 : 0.35), lineWidth: pinned ? 1 : 0.7))
+        .onHover { inside in
+            if inside { hoveredSlot = slot } else if hoveredSlot == slot { hoveredSlot = nil }
+        }
+        .accessibilityLabel("\(slot.rawValue): \(first?.item ?? "no pick")")
     }
 
-    private func gearEntry(_ gear: BuildGear, build: BuildSummary, member: PartyMember) -> some View {
-        let conflict = conflict(for: gear, member: member)
-        return HStack(alignment: .top, spacing: 6) {
-            itemIcon(gear)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(gear.item)
+    @ViewBuilder private func slotGlyph(_ items: [BuildGear], member: PartyMember) -> some View {
+        if let targeted = items.first(where: { appState.gearIsTargeted($0, for: member) }) {
+            Image(systemName: "scope")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(BG3Theme.gold)
+                .help("Current target: \(targeted.item)")
+        } else if let first = items.first {
+            let confirmable = items.filter(\.isMapObjective)
+            let equipped = confirmable.filter { appState.gearIsEquipped($0, by: member) }
+            if !confirmable.isEmpty, equipped.count == confirmable.count {
+                Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(BG3Theme.parchment).lineLimit(1)
-                Text(pickupLine(gear))
-                    .font(.caption2).foregroundStyle(BG3Theme.mutedParchment).lineLimit(2)
-                if let requirement = gear.requirement, !requirement.isEmpty {
-                    Text(requirement).font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary).lineLimit(2)
+                    .foregroundStyle(BG3Theme.success)
+            } else if let owner = appState.gearOwner(first), owner.id != member.id {
+                Image(systemName: "arrow.left.arrow.right.circle")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(BG3Theme.warning)
+                    .help("Equipped by \(owner.name)")
+            } else if let planned = appState.plannedOwner(ofItemKey: first.itemKey), planned.id != member.id {
+                Image(systemName: "arrow.left.arrow.right.circle")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(BG3Theme.warning)
+                    .help("Assigned to \(planned.name) — their build requested it first")
+            } else {
+                Image(systemName: "circle")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(BG3Theme.mutedParchment)
+            }
+        }
+    }
+
+    // MARK: - Drawer
+
+    private func drawer(build: BuildSummary, member: PartyMember) -> some View {
+        let grouped = Dictionary(grouping: availableGear, by: { LoadoutSlot.classify($0.slot) })
+        let slot = pinnedSlot ?? hoveredSlot
+        let items = slot.flatMap { grouped[$0] } ?? []
+        return Group {
+            if let slot, !items.isEmpty {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 9) {
+                        ForEach(items) { gear in
+                            GearDetailView(gear: gear, member: member, showsActions: pinnedSlot != nil)
+                        }
+                        if pinnedSlot == slot {
+                            changePickSection(slot, items: items, member: member)
+                        }
+                        if pinnedSlot == nil {
+                            Text("Click the slot to pin it and act on the item.")
+                                .font(BG3Type.caption)
+                                .foregroundStyle(BG3Theme.mutedParchment.opacity(0.8))
+                        }
+                    }
+                    .padding(9)
                 }
-                if let conflict {
-                    Label(conflict.short, systemImage: conflict.mine ? "exclamationmark.triangle.fill" : "arrow.uturn.right")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(conflict.mine ? Color.orange : Color(red: 1.0, green: 0.55, blue: 0.45))
-                        .help(conflict.detail)
+                .frame(maxHeight: 172)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .bg3InsetSurface(accent: pinnedSlot == slot ? BG3Theme.gold : BG3Theme.bronze)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("\(slot.rawValue) details")
+            } else {
+                idleDrawerSummary(member: member)
+            }
+        }
+    }
+
+    /// Alternatives for a pinned slot from the item catalog: any valid item
+    /// for this slot obtainable by the current act, with its effect explained
+    /// inline and on hover so trade-offs are visible before swapping.
+    @ViewBuilder private func changePickSection(_ slot: LoadoutSlot, items: [BuildGear], member: PartyMember) -> some View {
+        let options = appState.itemCatalog
+            .filter { option in
+                LoadoutSlot.classify(option.slot) == slot
+                    && option.act <= appState.selectedAct
+                    && !items.contains { $0.itemKey == option.itemKey }
+            }
+            .sorted { $0.name < $1.name }
+        let overridden = appState.slotOverride(for: member, slot: slot) != nil
+        if overridden || !options.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Change pick")
+                        .font(BG3Type.overline).textCase(.uppercase)
+                        .foregroundStyle(BG3Theme.gold)
+                    Spacer()
+                    if overridden {
+                        Button("Revert to build pick") {
+                            appState.setSlotOverride(slot, itemKey: nil, for: member)
+                        }
+                        .buttonStyle(.plain).font(BG3Type.captionBold)
+                        .foregroundStyle(BG3Theme.warning)
+                        .help("Drop the swapped-in item and restore the build's own pick")
+                    }
+                }
+                ForEach(options) { option in
+                    HStack(alignment: .top, spacing: 6) {
+                        GearItemIcon(gear: appState.syntheticGear(from: option), size: 20)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(option.name)
+                                .font(BG3Type.captionBold).foregroundStyle(BG3Theme.parchment)
+                            Text(option.effect.isEmpty ? "No effect description yet — see the wiki." : option.effect)
+                                .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
+                                .lineLimit(2)
+                        }
+                        Spacer(minLength: 4)
+                        Button("Use") {
+                            appState.setSlotOverride(slot, itemKey: option.itemKey, for: member)
+                        }
+                        .assistantActionButton(accent: BG3Theme.gold)
+                    }
+                    .help(option.effect.isEmpty ? option.name : option.effect)
                 }
             }
-            Spacer(minLength: 2)
-            if gear.isMapObjective {
-                let equipped = appState.gearIsEquipped(gear, by: member)
-                let owner = appState.gearOwner(gear)
+            .padding(.top, 4)
+        }
+    }
+
+    private func idleDrawerSummary(member: PartyMember) -> some View {
+        let confirmable = availableGear.filter(\.isMapObjective)
+        let confirmed = confirmable.filter { appState.gearIsEquipped($0, by: member) }
+        let contested = availableGear.filter { appState.gearConflict(for: $0, member: member) != nil }
+        var line = confirmable.isEmpty
+            ? "No obtainable picks for this act yet."
+            : "\(confirmed.count) of \(confirmable.count) picks confirmed"
+        if !contested.isEmpty { line += " · \(contested.count) contested" }
+        return HStack(spacing: 6) {
+            Image(systemName: "hand.point.up.left")
+                .font(.system(size: 11))
+                .foregroundStyle(BG3Theme.mutedParchment)
+            Text("\(line) — hover a slot for details.")
+                .font(BG3Type.caption)
+                .foregroundStyle(BG3Theme.mutedParchment)
+            Spacer(minLength: 0)
+        }
+        .padding(9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .bg3InsetSurface(accent: BG3Theme.bronze.opacity(0.6))
+    }
+
+    // MARK: - Later + footer
+
+    @ViewBuilder private func laterSection(build: BuildSummary, member: PartyMember) -> some View {
+        let later = build.gear
+            .filter { $0.act > appState.selectedAct || !$0.isAvailable(at: member.level) }
+            .sorted {
+                ($0.act, $0.minimumLevel ?? 1, GearLogic.priorityRank($0.priority))
+                    < ($1.act, $1.minimumLevel ?? 1, GearLogic.priorityRank($1.priority))
+            }
+        if !later.isEmpty {
+            VStack(alignment: .leading, spacing: 5) {
                 Button {
-                    appState.toggleGear(gear, for: member)
+                    showsLater.toggle()
                 } label: {
-                    Image(systemName: equipped ? "checkmark.circle.fill" : owner == nil ? "circle" : "arrow.left.arrow.right.circle")
-                        .font(.system(size: 12, weight: .bold))
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.fill").font(.system(size: 10)).foregroundStyle(BG3Theme.bronzeBright)
+                        Text(later.count == 1 ? "Later · 1 item" : "Later · \(later.count) items")
+                            .font(BG3Type.captionBold)
+                            .foregroundStyle(BG3Theme.parchment)
+                        Spacer()
+                        Image(systemName: showsLater ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 9))
+                            .foregroundStyle(BG3Theme.mutedParchment)
+                    }
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(equipped ? BG3Theme.success : owner == nil ? BG3Theme.mutedParchment : Color.orange)
-                .help(equipped ? "Remove confirmed assignment" : owner.map { "Transfer from \($0.name)" } ?? "Confirm \(member.name) has this")
-                .accessibilityLabel(equipped ? "Equipped by \(member.name)" : owner.map { "Transfer from \($0.name) to \(member.name)" } ?? "Mark equipped by \(member.name)")
-            }
-            if gear.act == 1 && gear.isMapObjective {
-                Button {
-                    appState.openActOneMap(buildId: build.id, item: gear.item, level: member.level)
-                } label: {
-                    Image(systemName: "mappin.and.ellipse").font(.system(size: 11))
-                }
-                .buttonStyle(.plain).foregroundStyle(BG3Theme.bronzeBright)
-                .help("Show the pickup on the map")
-            }
-        }
-        .help(gear.effect?.isEmpty == false ? gear.effect! : gear.why)
-    }
-
-    @ViewBuilder
-    private func laterGear(build: BuildSummary, member: PartyMember) -> some View {
-        let later = build.gear.filter {
-            $0.act > appState.selectedAct || !$0.isAvailable(at: member.level)
-        }
-        if !later.isEmpty {
-            DisclosureGroup("Later · \(later.count)") {
-                VStack(alignment: .leading, spacing: 5) {
-                    ForEach(later.sorted(by: {
-                        ($0.act, $0.minimumLevel ?? 1, priorityRank($0.priority))
-                            < ($1.act, $1.minimumLevel ?? 1, priorityRank($1.priority))
-                    })) { gear in
+                if showsLater {
+                    ForEach(later) { gear in
                         HStack(alignment: .top, spacing: 6) {
                             Image(systemName: "lock.fill").font(.system(size: 9)).foregroundStyle(BG3Theme.bronzeBright)
                             VStack(alignment: .leading, spacing: 1) {
-                                Text(gear.item).font(.caption.bold())
-                                Text(laterReason(gear, member: member)).font(.caption2).foregroundStyle(.secondary)
+                                Text(gear.item).font(BG3Type.captionBold).foregroundStyle(BG3Theme.parchment)
+                                Text(laterReason(gear, member: member))
+                                    .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
                             }
+                            Spacer()
                         }
                     }
-                }.padding(.top, 5)
+                }
             }
-            .font(.caption.bold())
-            .padding(7)
+            .padding(8)
             .bg3InsetSurface(accent: BG3Theme.bronze.opacity(0.5))
         }
     }
@@ -251,111 +387,15 @@ struct LoadoutTabView: View {
         return gear.requirement?.isEmpty == false ? gear.requirement! : gear.region
     }
 
-    private func itemIcon(_ gear: BuildGear) -> some View {
-        Group {
-            if let icon = gear.icon, !icon.isEmpty, let url = URL(string: "http://127.0.0.1:8787\(icon)") {
-                AsyncImage(url: url) { image in
-                    image.resizable().interpolation(.high).scaledToFill()
-                } placeholder: {
-                    Color.clear
-                }
-            } else {
-                Image(systemName: "shield.lefthalf.filled")
-                    .font(.system(size: 11)).foregroundStyle(BG3Theme.bronzeBright)
-            }
+    private func mapFooter(build: BuildSummary, member: PartyMember) -> some View {
+        Button {
+            appState.openCurrentActMap(buildId: build.id, item: nil, level: member.level)
+        } label: {
+            Label("Show all Act \(appState.selectedAct) pickups on the map", systemImage: "map.fill")
+                .font(BG3Type.captionBold)
+                .frame(maxWidth: .infinity)
         }
-        .frame(width: 26, height: 26)
-        .background(BG3Theme.ink.opacity(0.6))
-        .clipShape(RoundedRectangle(cornerRadius: 5))
-        .overlay(RoundedRectangle(cornerRadius: 5).stroke(BG3Theme.bronze.opacity(0.6), lineWidth: 0.7))
-    }
-
-    private func pickupLine(_ gear: BuildGear) -> String {
-        if let acquire = gear.acquire, !acquire.isEmpty { return acquire }
-        return gear.acquisition
-    }
-
-    private func footer(build: BuildSummary, member: PartyMember) -> some View {
-        Group {
-            if appState.selectedAct == 1 {
-                Button {
-                    appState.openActOneMap(buildId: build.id, item: nil, level: member.level)
-                } label: {
-                    Label("Show all pickups on the map", systemImage: "map.fill").font(.caption.bold())
-                        .frame(maxWidth: .infinity)
-                }
-                .assistantActionButton()
-            } else {
-                Label("The map covers Act 1 only — each item's note says where to look in Act \(appState.selectedAct).", systemImage: "map")
-                    .font(.caption2).foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    // MARK: - Cross-build conflicts
-
-    private struct GearConflict {
-        let mine: Bool  // this character has the stronger claim
-        let short: String
-        let detail: String
-    }
-
-    private func conflict(for gear: BuildGear, member: PartyMember) -> GearConflict? {
-        if let owner = appState.gearOwner(gear), owner.id != member.id {
-            return GearConflict(
-                mine: false,
-                short: "Equipped by \(owner.name)",
-                detail: conflictDetail(gear, base: "\(owner.name) is the player-confirmed owner.")
-            )
-        }
-        let key = normalizedItem(gear.item)
-        let rivals: [(name: String, rank: Int)] = party.compactMap { other in
-            guard other.id != member.id,
-                  let buildId = other.buildId,
-                  let otherBuild = appState.builds.first(where: { $0.id == buildId }),
-                  let claim = otherBuild.gear.first(where: {
-                      $0.act <= appState.selectedAct && $0.isAvailable(at: other.level) && normalizedItem($0.item) == key
-                  })
-            else { return nil }
-            return (other.name, priorityRank(claim.priority))
-        }
-        guard let strongestRival = rivals.min(by: { $0.rank < $1.rank }) else { return nil }
-        let myRank = priorityRank(gear.priority)
-        if myRank < strongestRival.rank {
-            return GearConflict(
-                mine: true,
-                short: "Also \(strongestRival.name)",
-                detail: conflictDetail(gear, base: "\(strongestRival.name)'s build wants this too. \(member.name)'s build lists it at higher priority — \(member.name) wears it.")
-            )
-        }
-        if myRank > strongestRival.rank {
-            return GearConflict(
-                mine: false,
-                short: "Goes to \(strongestRival.name)",
-                detail: conflictDetail(gear, base: "\(strongestRival.name)'s build lists this at higher priority.")
-            )
-        }
-        return GearConflict(
-            mine: true,
-            short: "Contested — \(strongestRival.name)",
-            detail: conflictDetail(gear, base: "Both \(member.name) and \(strongestRival.name) want this at the same priority.")
-        )
-    }
-
-    private func conflictDetail(_ gear: BuildGear, base: String) -> String {
-        guard let alternative = gear.alternative, !alternative.isEmpty else {
-            return "\(base) No reviewed equivalent is available; decide ownership before spending gold."
-        }
-        return "\(base) Alternative: \(alternative)"
-    }
-
-    private func normalizedItem(_ name: String) -> String {
-        name.replacingOccurrences(of: #"\s*x\d+$"#, with: "", options: .regularExpression).lowercased()
-    }
-
-    private func priorityRank(_ priority: String) -> Int {
-        ["Required", "Core", "Upgrade", "Starter", "Support", "Defence", "Supply", "Intentional", "Optional", "Endgame"]
-            .firstIndex(of: priority) ?? 99
+        .assistantActionButton()
     }
 }
 
