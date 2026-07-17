@@ -35,11 +35,6 @@ playground.xcworkspace
 .coverage
 htmlcov/
 
-# Internal test sources (kept locally, never published)
-backend/tests/
-mac/ModelTests/
-tests/
-
 # Generated development and QA evidence (kept locally, never published)
 outputs/
 qa/
