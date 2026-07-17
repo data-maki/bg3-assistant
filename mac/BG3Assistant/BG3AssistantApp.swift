@@ -1,6 +1,10 @@
 import AppKit
 import SwiftUI
 
+extension Notification.Name {
+    static let showPlannerRequested = Notification.Name("BG3HonorAssistant.showPlannerRequested")
+}
+
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let singleInstance = SingleInstanceGuard.shared
@@ -26,9 +30,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             LoginItem.setEnabled(true)
         }
 
-        // The assistant is an in-game overlay with a menu-bar launcher, not a
-        // second desktop application surface.
-        NSApp.setActivationPolicy(.accessory)
+        // Keep the application visible in the Dock; reopening it reveals the
+        // planner while the menu-bar item remains a lightweight launcher.
+        NSApp.setActivationPolicy(.regular)
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        NotificationCenter.default.post(name: .showPlannerRequested, object: nil)
+        return false
     }
 }
 
@@ -42,7 +51,8 @@ struct BG3HonorAssistantApp: App {
             MenuBarContent()
                 .environmentObject(appState)
         } label: {
-            Label("BG3 Assistant", systemImage: "shield.lefthalf.filled")
+            Image(systemName: "shield.fill")
+                .accessibilityLabel("BG3 Honor Mode Assistant")
                 // The menu-bar label always exists on a login launch, so it
                 // owns the detector loop's kick-off.
                 .task { await appState.start() }
@@ -59,7 +69,7 @@ private struct MenuBarContent: View {
     var body: some View {
         Button("Show Overlay", action: appState.showOverlayNow)
         Button("Open Planner", action: appState.showPlannerNow)
-        Button("Open Map") { appState.openActOneMap() }
+        Button("Open Map") { appState.openCurrentActMap() }
         Menu("Run: \(appState.currentRunName)") {
             ForEach(appState.savedRuns) { saved in
                 Button {

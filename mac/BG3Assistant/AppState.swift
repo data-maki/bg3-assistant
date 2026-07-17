@@ -45,11 +45,21 @@ final class AppState: ObservableObject {
         }
     }
     @Published var hotkeyPeekActive = false { didSet { syncOverlay() } }
+    // The welcome tour renders in place of the planner/peek card while
+    // non-nil; only finishing or skipping records it as seen.
+    @Published var onboardingStep: OnboardingStep? = (storedSettings.onboardingSeenVersion ?? 0) >= OnboardingStep.version
+        ? nil : .welcome { didSet { syncOverlay() } }
+    var onboardingSeenVersion: Int? = storedSettings.onboardingSeenVersion
     // Route step to scroll to and expand when the route tab opens (set by the
     // peek card's Talk shortcut so the current conversation is front and center).
-    @Published var focusedWalkthroughStepId: String?
+    // Backed by the run so cross-process adoption can never desync it.
+    var focusedWalkthroughStepId: String? {
+        get { run.focusedWalkthroughStepId }
+        set { run.focusedWalkthroughStepId = newValue }
+    }
     @Published var route: [RouteCheckpoint] = []
     @Published var walkthrough: [WalkthroughStep] = []
+    @Published var timedEvents: [TimedEvent] = []
     @Published var builds: [BuildSummary] = []
     @Published var itemCatalog: [ItemSummary] = []
     @Published var acts: [ActGuideSummary] = []
@@ -62,6 +72,7 @@ final class AppState: ObservableObject {
     @Published var chatLines: [ChatLine] = []
     @Published var chatScreenshot: ScreenshotResult?
     @Published var isPreparingChatScreenshot = false
+    @Published var isSendingChat = false
     @Published var chatScope: ChatScope = .current
     @Published var skipNoteDraft = ""
     @Published var pendingDisposition: CheckpointDisposition?
@@ -72,7 +83,7 @@ final class AppState: ObservableObject {
     @Published var snoozedUntil: Date?
     @Published var availableGuideVersion = ""
     @Published var newRunConfirmation = false
-    @Published private(set) var savedRuns: [SavedRunSummary] = []
+    @Published var savedRuns: [SavedRunSummary] = []
     @Published var runNameDraft = ""
     @Published var newRunNameDraft = ""
     @Published var screenCaptureVerifiedThisLaunch = false
@@ -81,17 +92,21 @@ final class AppState: ObservableObject {
     @Published var isImportingLoadout = false
     @Published var loadoutImportStatus: String?
     @Published var loadoutImportJSON: String?
-    @Published var loadoutImportNeedsKey = false
+    @Published private(set) var loadedGuideAct: Int?
+    @Published private(set) var loadedRouteAvailable = false
 
     private let detector = BG3Detector()
     let backendClient = BackendClient()
     private let backendProcess = BackendProcessManager()
     let captureService = ScreenCaptureService()
-    private let runStore = RunStore()
+    let runStore = RunStore()
     private let globalPeekHotKey = GlobalPeekHotKey()
-    private let overlayController = OverlayPanelController()
+    let overlayController = OverlayPanelController()
     private var isStarting = false
     private var pollTask: Task<Void, Never>?
+    private var loadingGuideAct: Int?
+    private var guideLoadGeneration = 0
+    private var readinessGeneration = 0
     @Published private(set) var gameWindowFrame: CGRect?
 
     // Capture permission has three intentionally separate signals: raw TCC
@@ -104,6 +119,7 @@ final class AppState: ObservableObject {
     var lastCaptureProbe = Date.distantPast
     private var activationObserver: Any?
     private var plannerRequestObserver: Any?
+    var sharedRunToken: RunStore.ChangeToken?
 
     init() {
         var loaded = runStore.load()
@@ -113,9 +129,9 @@ final class AppState: ObservableObject {
         }
         if loaded.createdAt == nil { loaded.createdAt = .now }
         run = loaded
-        focusedWalkthroughStepId = loaded.focusedWalkthroughStepId
         runNameDraft = loaded.name ?? "Honor Run 1"
         try? runStore.save(loaded)
+        sharedRunToken = runStore.changeToken(for: loaded)
         reloadSavedRuns()
     }
 
@@ -133,6 +149,10 @@ final class AppState: ObservableObject {
 
     var completedIds: [String] {
         checkpointDispositions.compactMap { $0.value == .completed ? $0.key : nil }
+    }
+
+    var skippedIds: [String] {
+        checkpointDispositions.compactMap { $0.value == .skipped ? $0.key : nil }
     }
 
     var currentRunName: String { run.name ?? "Honor Run" }
@@ -179,12 +199,14 @@ final class AppState: ObservableObject {
     }
 
     var currentWalkthroughStep: WalkthroughStep? {
-        focusedWalkthroughStep ?? recommendedWalkthroughStep
+        focusedWalkthroughStep
+            ?? recommendedWalkthroughStep
+            ?? activeWalkthroughSteps.min { $0.order < $1.order }
     }
 
     var currentCheckpoint: RouteCheckpoint? {
-        if let focused = focusedWalkthroughStep {
-            guard let checkpointId = focused.checkpointId else { return nil }
+        if let step = currentWalkthroughStep {
+            guard let checkpointId = step.checkpointId else { return nil }
             return route.first(where: { $0.id == checkpointId })
         }
         return recommendedCheckpoint
@@ -235,44 +257,13 @@ final class AppState: ObservableObject {
         )
     }
 
-    var currentActivityTitle: String {
-        if let context = gearTargetContext { return "Get \(context.gear.item)" }
-        return currentWalkthroughStep?.title ?? currentCheckpoint?.name ?? "Act 1 complete"
-    }
-    var currentActivityArea: String {
-        if let context = gearTargetContext { return context.gear.region }
-        return currentWalkthroughStep?.area ?? currentCheckpoint?.area ?? ""
-    }
-    var currentActivityMinimumLevel: Int { currentWalkthroughStep?.minimumLevel ?? currentCheckpoint?.minimumLevel ?? lowestPartyLevel }
-    var currentActivityAvoid: String {
-        return currentWalkthroughStep?.incident?.never
-            ?? currentWalkthroughStep?.avoid
-            ?? currentCheckpoint?.failureConditions.first
-            ?? currentCheckpoint?.advice
-            ?? "Review the Act 2 gate before advancing."
-    }
-    var currentActivityDanger: String {
-        if let checkpointId = currentWalkthroughStep?.checkpointId,
-           let danger = route.first(where: { $0.id == checkpointId })?.danger { return danger }
-        if currentWalkthroughStep?.incident != nil { return "high" }
-        return currentWalkthroughStep?.kind == "dialogue" ? "medium" : (currentCheckpoint?.danger ?? "low")
-    }
-    var currentActivityLabel: String {
-        if gearTargetContext != nil { return "TARGET" }
-        if assistantPhase == .combat { return AssistantPhase.combat.rawValue }
-        switch currentWalkthroughStep?.kind {
-        case "dialogue", "decision": return "DIALOGUE"
-        case "pickup": return "PICKUP"
-        case "exploration": return "EXPLORE"
-        case "gate": return "READINESS GATE"
-        case "major_fight": return "MAIN FIGHT"
-        case "mini_fight": return "SAFE FIGHT"
-        default: return levelActivityPlan?.activityLabel ?? "NEXT"
-        }
-    }
-
     var archivedCount: Int { archivedWalkthroughSteps.count }
     var remainingCount: Int { activeWalkthroughSteps.count }
+    var routeHasConsequentialSkips: Bool {
+        walkthrough.contains {
+            walkthroughDisposition($0) == .skipped && $0.importance != "optional"
+        }
+    }
 
     var readinessHeadline: String {
         guard let readiness else { return currentCheckpoint == nil ? "NO FIGHT GATE" : "CHECKING" }
@@ -319,6 +310,8 @@ final class AppState: ObservableObject {
     var roster: [PartyMember] { run.roster ?? run.party }
     var lowestPartyLevel: Int { activeParty.map(\.level).min() ?? 1 }
     var selectedAct: Int { run.selectedAct ?? 1 }
+    var activeGuideLoaded: Bool { loadedGuideAct == selectedAct }
+    var activeRouteAvailable: Bool { activeGuideLoaded && loadedRouteAvailable }
     var chatContextSnapshot: ChatContextSnapshot {
         ChatContextSnapshot(
             version: 2,
@@ -353,11 +346,6 @@ final class AppState: ObservableObject {
         }
         return "\(RunSafety.routePhaseName(checkpoint)) • best match for a L\(lowestPartyLevel) party"
     }
-    var guideUpdateNotice: String? {
-        guard !availableGuideVersion.isEmpty, !run.guideVersion.isEmpty, availableGuideVersion != run.guideVersion else { return nil }
-        return "Run pinned to guide \(run.guideVersion); \(availableGuideVersion) is available. Start a new run to adopt it."
-    }
-
     var warningsSuppressed: Bool {
         if let snoozedUntil, snoozedUntil > .now { return true }
         guard let id = currentCheckpoint?.id else { return false }
@@ -381,7 +369,7 @@ final class AppState: ObservableObject {
         // Do this before trusting /health. A stale frozen backend can answer
         // successfully while serving an older embedded guide after an update.
         if let runningHealth = await backendClient.healthDetails() {
-            await backendProcess.retireUnownedPackagedBackend(runningHealth)
+            await backendProcess.retireUnownedBackend(runningHealth)
         }
         globalPeekHotKey.start { [weak self] pressed in
             Task { @MainActor in self?.hotkeyPeekActive = pressed }
@@ -400,12 +388,24 @@ final class AppState: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in self?.showPlannerNow() }
         }
+        // The welcome tour must show before BG3 or the guide is up, so a
+        // first launch greets instead of sitting silent in the menu bar. The
+        // debug-tab hook overrides it ("onboarding" forces the tour, any tab
+        // suppresses it) so per-tab verification stays deterministic.
+        let debugTab = ProcessInfo.processInfo.environment["BG3_ASSISTANT_DEBUG_TAB"]
+        if let debugTab {
+            onboardingStep = debugTab.lowercased() == "onboarding" ? .welcome : nil
+        }
+        if onboardingStep != nil {
+            forceOverlay = true
+            showOverlay = true
+        }
         await refreshStatuses()
         await loadRouteIfNeeded()
         // Dev hook, like BG3_ASSISTANT_STATE_DIR: launch with the planner
         // already open on a tab (e.g. "route", "loadout") so the expanded
         // overlay can be exercised without synthetic input.
-        if let debugTab = ProcessInfo.processInfo.environment["BG3_ASSISTANT_DEBUG_TAB"] {
+        if let debugTab {
             plannerTab = PlannerTab.allCases.first { $0.rawValue.lowercased() == debugTab.lowercased() } ?? .current
             overlayExpanded = true
         }
@@ -434,13 +434,13 @@ final class AppState: ObservableObject {
         NSWorkspace.shared.open(url)
     }
 
-    func openActOneMap(buildId: String? = nil, item: String? = nil, level: Int? = nil) {
+    func openActOneMap(act: Int? = nil, buildId: String? = nil, item: String? = nil, level: Int? = nil) {
         Task {
             if !backendHealthy { await startBackend() }
             var components = URLComponents(string: "http://127.0.0.1:8787/map")
             let partyBuilds = activeParty.compactMap(\.buildId)
             var query: [URLQueryItem] = [
-                URLQueryItem(name: "act", value: String(selectedAct)),
+                URLQueryItem(name: "act", value: String(act ?? selectedAct)),
                 URLQueryItem(name: "level", value: String(level ?? lowestPartyLevel)),
                 URLQueryItem(name: "builds", value: partyBuilds.joined(separator: ",")),
                 URLQueryItem(name: "done", value: completedIds.joined(separator: ",")),
@@ -507,50 +507,8 @@ final class AppState: ObservableObject {
         }
     }
 
-    func togglePlanner() {
-        overlayExpanded.toggle()
-    }
-
-    func showOverlayNow() {
-        forceOverlay = true
-        showOverlay = true
-        syncOverlay()
-    }
-
-    func showPlannerNow() {
-        plannerTab = .current
-        forceOverlay = true
-        overlayExpanded = true
-        showOverlay = true
-        syncOverlay()
-    }
-
-    func openSettings() {
-        plannerTab = .settings
-        forceOverlay = true
-        overlayExpanded = true
-        showOverlay = true
-        syncOverlay()
-    }
-
-    func openDialogue() {
-        // Dialogue lives inside the route now: jump to the route with the
-        // current conversation step focused and expanded.
-        plannerTab = .route
-        focusedWalkthroughStepId = currentDialogueStep?.id ?? currentWalkthroughStep?.id
-        overlayExpanded = true
-        showOverlay = true
-        syncOverlay()
-    }
-
-    func hideAssistantOverlay() {
-        forceOverlay = false
-        showOverlay = false
-    }
-
     func selectCheckpoint(_ checkpoint: RouteCheckpoint) {
         run.focusedWalkthroughStepId = walkthrough.first(where: { $0.checkpointId == checkpoint.id })?.id
-        focusedWalkthroughStepId = run.focusedWalkthroughStepId
         run.selectedCheckpointId = checkpoint.id
         run.mapRegion = checkpoint.region
         persistRun()
@@ -562,7 +520,6 @@ final class AppState: ObservableObject {
 
     func followRecommendedRoute() {
         run.focusedWalkthroughStepId = nil
-        focusedWalkthroughStepId = nil
         run.selectedCheckpointId = nil
         syncRegionToRecommendation()
         persistRun()
@@ -596,6 +553,7 @@ final class AppState: ObservableObject {
     /// The run may have diverged from the guide (Rolan can leave); the ledger
     /// records reality, not the recommendation.
     func resolveWalkthroughStep(_ step: WalkthroughStep, outcome: String) {
+        guard !run.actLedgerIsLocked(selectedAct) else { return }
         var outcomes = run.walkthroughOutcomes ?? [:]
         outcomes[step.id] = outcome
         run.walkthroughOutcomes = outcomes
@@ -603,6 +561,7 @@ final class AppState: ObservableObject {
     }
 
     func setWalkthroughDisposition(_ step: WalkthroughStep, _ disposition: CheckpointDisposition) {
+        guard !run.actLedgerIsLocked(selectedAct) else { return }
         var progress = run.walkthroughProgress ?? [:]
         if disposition == .pending {
             progress.removeValue(forKey: step.id)
@@ -615,12 +574,8 @@ final class AppState: ObservableObject {
         }
         if disposition == .pending {
             run.focusedWalkthroughStepId = step.id
-            focusedWalkthroughStepId = step.id
-        } else {
-            if run.focusedWalkthroughStepId == step.id {
-                run.focusedWalkthroughStepId = nil
-                focusedWalkthroughStepId = nil
-            }
+        } else if run.focusedWalkthroughStepId == step.id {
+            run.focusedWalkthroughStepId = nil
         }
         syncRegionToRecommendation()
         persistRun()
@@ -630,7 +585,6 @@ final class AppState: ObservableObject {
     func focusWalkthroughStep(_ step: WalkthroughStep) {
         guard walkthroughDisposition(step) == .pending else { return }
         run.focusedWalkthroughStepId = step.id
-        focusedWalkthroughStepId = step.id
         run.selectedCheckpointId = step.checkpointId
         run.mapRegion = step.region
         combatCardPinned = false
@@ -640,26 +594,29 @@ final class AppState: ObservableObject {
     }
 
     func completeCurrentActivity() {
-        if gearTargetContext != nil {
+        switch currentGoal {
+        case .target:
             completeGearTarget()
-            return
-        }
-        guard selectedAct == 1 else { return }
-        guard let step = currentWalkthroughStep else {
+        case .laterAct:
+            break
+        case .checkpoint:
             requestDisposition(.completed)
-            return
+        case .routeComplete:
+            break
+        case .step(let step):
+            // Decision steps have no single "done" — the player must say which
+            // way it went. Jump to the route step so they can pick the outcome.
+            if step.decision != nil {
+                plannerTab = .route
+                focusedWalkthroughStepId = step.id
+                overlayExpanded = true
+                syncOverlay()
+            } else if step.checkpointId != nil {
+                requestDisposition(.completed)
+            } else {
+                setWalkthroughDisposition(step, .completed)
+            }
         }
-        // Decision steps have no single "done" — the player must say which
-        // way it went. Jump to the route step so they can pick the outcome.
-        if step.decision != nil {
-            plannerTab = .route
-            focusedWalkthroughStepId = step.id
-            overlayExpanded = true
-            syncOverlay()
-            return
-        }
-        if step.checkpointId != nil { requestDisposition(.completed) }
-        else { setWalkthroughDisposition(step, .completed) }
     }
 
     func skipCurrentActivity() {
@@ -713,14 +670,6 @@ final class AppState: ObservableObject {
         confirmationMessage = nil
     }
 
-    func pinCurrentFight() {
-        guard currentCheckpoint != nil, readiness?.status != "blocked" else { return }
-        combatCardPinned = true
-        overlayExpanded = false
-    }
-
-    func unpinFight() { combatCardPinned = false }
-
     func snoozeWarnings() { snoozedUntil = Date().addingTimeInterval(10 * 60) }
 
     func toggleMuteCurrentCheckpoint() {
@@ -729,54 +678,6 @@ final class AppState: ObservableObject {
         if muted.contains(id) { muted.remove(id) } else { muted.insert(id) }
         run.mutedCheckpointIds = muted
         persistRun()
-    }
-
-    func startNewRun() {
-        var fresh = HonorRun()
-        let requestedName = newRunNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        fresh.name = requestedName.isEmpty ? "Honor Run \(savedRuns.count + 1)" : requestedName
-        fresh.createdAt = .now
-        fresh.migrateLegacyPartySlots()
-        fresh.guideVersion = availableGuideVersion
-        run = fresh
-        runNameDraft = fresh.name ?? "Honor Run"
-        newRunNameDraft = ""
-        skipNoteDraft = ""
-        combatCardPinned = false
-        focusedWalkthroughStepId = nil
-        chatLines = []
-        chatScreenshot = nil
-        persistRun()
-        reloadSavedRuns()
-        Task { await refreshReadiness() }
-    }
-
-    func renameCurrentRun() {
-        let name = runNameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty else { return }
-        run.name = name
-        persistRun()
-        reloadSavedRuns()
-    }
-
-    func switchRun(to runID: String) {
-        guard runID != run.id else { return }
-        persistRun()
-        do {
-            var selected = try runStore.activate(runID: runID)
-            selected.migrateLegacyPartySlots()
-            run = selected
-            runNameDraft = selected.name ?? "Honor Run"
-            focusedWalkthroughStepId = selected.focusedWalkthroughStepId
-            skipNoteDraft = ""
-            combatCardPinned = false
-            chatLines = []
-            chatScreenshot = nil
-            reloadSavedRuns()
-            Task { await refreshReadiness() }
-        } catch {
-            errorMessage = error.localizedDescription
-        }
     }
 
     func syncRegionToRecommendation() {
@@ -798,41 +699,132 @@ final class AppState: ObservableObject {
         run.mapRegion = checkpoint.region
     }
 
-    private func loadRouteIfNeeded(force: Bool = false) async {
-        guard force || route.isEmpty else { return }
+    func resetGuideContext(load: Bool = true) {
+        guideLoadGeneration &+= 1
+        readinessGeneration &+= 1
+        loadingGuideAct = nil
+        loadedGuideAct = nil
+        loadedRouteAvailable = false
+        route = []
+        walkthrough = []
+        timedEvents = []
+        readiness = nil
+        isLoading = false
+        statusMessage = "Loading Act \(selectedAct) guide…"
+        syncOverlay()
+        if load { Task { await loadRouteIfNeeded() } }
+    }
+
+    func loadRouteIfNeeded(force: Bool = false) async {
+        let requestedAct = selectedAct
+        let requestedRunID = run.id
+        guard force || loadedGuideAct != requestedAct else { return }
+        guard force || loadingGuideAct != requestedAct else { return }
         guard backendHealthy else { return }
+        guideLoadGeneration &+= 1
+        let generation = guideLoadGeneration
+        loadingGuideAct = requestedAct
+        isLoading = true
+        if force || loadedGuideAct != requestedAct {
+            loadedGuideAct = nil
+            loadedRouteAvailable = false
+            route = []
+            walkthrough = []
+            timedEvents = []
+            readiness = nil
+        }
+        statusMessage = "Loading Act \(requestedAct) guide…"
+        defer {
+            if generation == guideLoadGeneration {
+                loadingGuideAct = nil
+                isLoading = false
+            }
+        }
         do {
-            let payload = try await backendClient.route()
+            let payload = try await backendClient.route(act: requestedAct)
+            guard generation == guideLoadGeneration,
+                  requestedRunID == run.id,
+                  requestedAct == selectedAct,
+                  payload.act == requestedAct else { return }
+            availableGuideVersion = payload.guideVersion
+            if !run.guideVersion.isEmpty, run.guideVersion != payload.guideVersion {
+                startUpdatedRun(guideVersion: payload.guideVersion, availableBuilds: payload.builds)
+                return
+            }
             route = payload.checkpoints
             walkthrough = payload.walkthrough
+            timedEvents = payload.timedEvents
             builds = payload.builds
+            acts = payload.acts
+            loadedGuideAct = payload.act
+            loadedRouteAvailable = payload.routeAvailable
+            if run.guideVersion.isEmpty {
+                run.guideVersion = payload.guideVersion
+            }
+            migrateBuildAbilityScoresIfNeeded()
+            run.migrateLegacyFightDispositions(walkthrough: payload.walkthrough)
+            statusMessage = payload.routeAvailable
+                ? "Act \(requestedAct) guide ready • \(walkthrough.count) walkthrough steps"
+                : "Act \(requestedAct) route guidance is not available yet"
+            persistRun()
+            guard generation == guideLoadGeneration,
+                  requestedRunID == run.id,
+                  requestedAct == selectedAct else { return }
             // Non-fatal: an older bundled backend without /api/items just
             // leaves the picker without alternatives.
-            itemCatalog = (try? await backendClient.items()) ?? itemCatalog
-            migrateBuildAbilityScoresIfNeeded()
-            acts = payload.acts
-            availableGuideVersion = payload.guideVersion
-            if run.guideVersion.isEmpty { run.guideVersion = payload.guideVersion }
-            run.migrateLegacyFightDispositions(walkthrough: payload.walkthrough)
-            statusMessage = "Act 1 guide ready • \(walkthrough.count) walkthrough steps"
-            persistRun()
+            if let items = try? await backendClient.items(),
+               generation == guideLoadGeneration,
+               requestedRunID == run.id,
+               requestedAct == selectedAct {
+                itemCatalog = items
+            }
             await refreshReadiness()
-        } catch { errorMessage = "Could not load Act 1 route: \(error.localizedDescription)" }
+        } catch {
+            guard generation == guideLoadGeneration,
+                  requestedRunID == run.id,
+                  requestedAct == selectedAct else { return }
+            statusMessage = "Act \(requestedAct) guide unavailable — retrying…"
+            errorMessage = "Could not load Act \(requestedAct) route: \(error.localizedDescription)"
+        }
     }
 
     func refreshReadiness() async {
-        guard selectedAct == 1, backendHealthy, let checkpoint = currentCheckpoint else { readiness = nil; return }
+        readinessGeneration &+= 1
+        let generation = readinessGeneration
+        let requestedAct = selectedAct
+        let requestedRunID = run.id
+        guard activeRouteAvailable, backendHealthy, let checkpoint = currentCheckpoint else {
+            readiness = nil
+            return
+        }
+        readiness = nil
         do {
-            readiness = try await backendClient.readiness(ReadinessRequest(
+            let response = try await backendClient.readiness(ReadinessRequest(
                 checkpointId: checkpoint.id,
                 party: activeParty,
                 completedCheckpointIds: completedIds,
-                checkedPreparation: Array(currentProgress.checkedPreparation)
-            ))
-        } catch { errorMessage = "Readiness check failed: \(error.localizedDescription)" }
+                skippedCheckpointIds: skippedIds,
+                checkedPreparation: Array(currentProgress.checkedPreparation),
+                walkthroughStatuses: (run.walkthroughProgress ?? [:]).mapValues(\.rawValue),
+                walkthroughOutcomes: run.walkthroughOutcomes ?? [:]
+            ), act: requestedAct)
+            guard generation == readinessGeneration,
+                  requestedRunID == run.id,
+                  requestedAct == selectedAct,
+                  loadedGuideAct == requestedAct,
+                  currentCheckpoint?.id == checkpoint.id else { return }
+            readiness = response
+        } catch {
+            guard generation == readinessGeneration,
+                  requestedRunID == run.id,
+                  requestedAct == selectedAct else { return }
+            readiness = nil
+            errorMessage = "Readiness check failed: \(error.localizedDescription)"
+        }
     }
 
     private func refreshStatuses() async {
+        reloadSharedRunIfNeeded()
         let detection = detector.detect()
         gameDetected = detection.isRunning
         gameName = detection.displayName
@@ -845,54 +837,24 @@ final class AppState: ObservableObject {
         syncOverlay()
     }
 
-    func persistRun() {
-        do {
-            try runStore.save(run)
-            reloadSavedRuns()
-        }
-        catch { errorMessage = "Could not save run: \(error.localizedDescription)" }
-    }
-
-    private func reloadSavedRuns() {
-        savedRuns = runStore.listRuns().map { saved in
-            SavedRunSummary(
-                id: saved.id,
-                name: saved.name ?? "Honor Run",
-                completedSteps: saved.walkthroughProgress?.values.filter { $0 == .completed }.count ?? 0,
-                partyLevel: saved.activeParty.map(\.level).min() ?? 1
-            )
-        }
-    }
-
-    private func persistSettings() {
-        let settings = AssistantSettings(
-            overlayDensity: overlayDensity.rawValue
-        )
-        do { try runStore.saveSettings(settings) }
-        catch { errorMessage = "Could not save settings: \(error.localizedDescription)" }
-    }
-
-    func saveOpenRouterKey() async {
+    @discardableResult
+    func saveOpenRouterKey() async -> Bool {
         let key = openRouterKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !key.isEmpty else {
             errorMessage = "Enter an OpenRouter key first."
-            return
+            return false
         }
         do {
-            let resumeLoadoutImport = loadoutImportNeedsKey && !loadoutURLDraft.isEmpty
             try OpenRouterKeyStore.save(key)
             openRouterKeyDraft = ""
             hasOpenRouterKey = true
             openRouterKeyStatus = "Saved in macOS Keychain"
             errorMessage = nil
             await restartBackendForOpenRouterKey()
-            if resumeLoadoutImport {
-                loadoutImportNeedsKey = false
-                plannerTab = .party
-                await importBuild()
-            }
+            return true
         } catch {
             errorMessage = error.localizedDescription
+            return false
         }
     }
 
@@ -914,11 +876,6 @@ final class AppState: ObservableObject {
             try? await Task.sleep(for: .milliseconds(100))
         }
         await startBackend()
-    }
-
-    func syncOverlay() {
-        if showOverlay && (gameDetected || forceOverlay) { overlayController.show(appState: self, gameFrame: gameWindowFrame) }
-        else { overlayController.hide() }
     }
 
 }

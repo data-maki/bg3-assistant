@@ -11,23 +11,16 @@ struct GearConflict {
 /// run and what they carry. Route/overlay orchestration stays in AppState.
 @MainActor
 extension AppState {
-    private func partyUndoSnapshot(_ message: String) -> PartyUndoState {
-        PartyUndoState(
-            message: message,
-            roster: run.roster ?? run.party,
-            equippedByMember: run.equippedByMember ?? [:]
-        )
-    }
-
     private func recordPartyUndo(_ message: String) {
-        partyUndoState = partyUndoSnapshot(message)
+        partyUndoState = PartyUndoState(runID: run.id, message: message, plan: run.partyPlan)
     }
 
     func undoLastPartyChange() {
-        guard let undo = partyUndoState else { return }
-        run.roster = undo.roster
-        run.equippedByMember = undo.equippedByMember
-        run.syncActivePartyProjection()
+        guard let undo = partyUndoState, undo.runID == run.id else {
+            partyUndoState = nil
+            return
+        }
+        run.partyPlan = undo.plan
         partyUndoState = nil
         persistRun()
         Task { await refreshReadiness() }
@@ -41,9 +34,7 @@ extension AppState {
             return nil
         }
         guard hasOpenRouterKey else {
-            loadoutImportNeedsKey = true
-            loadoutImportStatus = "Add an OpenRouter API key in Settings to import this build."
-            openSettings()
+            loadoutImportStatus = "Add an OpenRouter API key above to import this build."
             return nil
         }
         guard !isImportingLoadout else { return nil }
@@ -54,7 +45,6 @@ extension AppState {
             let imported = try await backendClient.importBuild(LoadoutImportRequest(url: url))
             applyImportedBuild(imported)
             loadoutURLDraft = ""
-            loadoutImportNeedsKey = false
             loadoutImportStatus = "Imported \(imported.name). Assign it to any character from Party."
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
@@ -72,7 +62,7 @@ extension AppState {
         guard let index = run.roster?.firstIndex(where: { $0.id == member.id }) else { return }
         recordPartyUndo("Reset \(member.name)'s character plan")
         var reset = member
-        let hireling = WithersHireling.all.first { $0.name.caseInsensitiveCompare(member.name) == .orderedSame }
+        let hireling = WithersHireling.matching(member.name)
         let companion = StoryCompanion.all.first { $0.name.caseInsensitiveCompare(member.name) == .orderedSame }
         let defaultClass = hireling?.defaultClass ?? companion?.defaultClass ?? member.className
         reset.buildId = nil
@@ -82,12 +72,15 @@ extension AppState {
         reset.abilityScores = member.isCustom == true ? .customDefault : .forClass(defaultClass)
         reset.abilityModifiers = []
         reset.usesBuildAbilityScores = false
+        reset.appliedAbilitySetupId = nil
         reset.sourceLoadoutId = nil
         run.roster?[index] = reset
         run.equippedByMember?[member.id] = nil
         run.buildAssignedAt?.removeValue(forKey: member.id)
         run.plannedSlotOverrides?.removeValue(forKey: member.id)
+        run.gearAssignmentOverrides = run.gearAssignmentOverrides?.filter { $0.value != member.id }
         run.syncActivePartyProjection()
+        validateGearTarget()
         persistRun()
         Task { await refreshReadiness() }
     }
@@ -140,7 +133,11 @@ extension AppState {
         members.remove(at: index)
         run.roster = members
         run.equippedByMember?.removeValue(forKey: member.id)
+        run.buildAssignedAt?.removeValue(forKey: member.id)
+        run.plannedSlotOverrides?.removeValue(forKey: member.id)
+        run.gearAssignmentOverrides = run.gearAssignmentOverrides?.filter { $0.value != member.id }
         run.syncActivePartyProjection()
+        validateGearTarget()
         persistRun()
         Task { await refreshReadiness() }
         return true
@@ -171,8 +168,9 @@ extension AppState {
         persistRun()
     }
 
-    func updatePartyMember(_ member: PartyMember) {
+    func updatePartyMember(_ member: PartyMember, preserveUndo: Bool = false) {
         guard let index = run.roster?.firstIndex(where: { $0.id == member.id }) else { return }
+        if !preserveUndo { partyUndoState = nil }
         run.roster?[index] = member
         run.syncActivePartyProjection()
         validateGearTarget()
@@ -194,6 +192,16 @@ extension AppState {
         updatePartyMember(copy)
     }
 
+    /// Replacing a build discards run-specific planning; confirm first when the
+    /// member has anything to lose (tracked modifiers, equipped gear, applied setup).
+    func buildReplacementNeedsConfirmation(for member: PartyMember) -> Bool {
+        member.buildId != nil && (
+            (member.abilityModifiers ?? []).contains { $0.kind != .permanent }
+                || !equippedItemKeys(for: member).isEmpty
+                || member.appliedAbilitySetupId != nil
+        )
+    }
+
     func assignBuild(_ buildID: String?, to member: PartyMember) {
         recordPartyUndo("Changed \(member.name)'s build")
         var copy = member
@@ -211,19 +219,20 @@ extension AppState {
         }
         guard let buildID,
               let build = builds.first(where: { $0.id == buildID }) else {
+            copy.abilityModifiers = (copy.abilityModifiers ?? []).filter { $0.kind == .permanent }
             copy.usesBuildAbilityScores = false
-            updatePartyMember(copy)
+            updatePartyMember(copy, preserveUndo: true)
             return
         }
         if let plan = build.levels.last(where: { $0.level <= copy.level }) {
             copy.className = plan.take
         }
-        let setup = AbilityProgression.activeSetup(in: build, at: copy.level)
-        copy.abilityScores = setup?.finalScores ?? build.startingAbilityScores ?? copy.abilityScores
+        // Keep the player's recorded in-game values until they explicitly
+        // mark the new build recipe as applied.
         // Permanent rewards belong to the character, not the selected build.
         copy.abilityModifiers = (copy.abilityModifiers ?? []).filter { $0.kind == .permanent }
         copy.usesBuildAbilityScores = true
-        updatePartyMember(copy)
+        updatePartyMember(copy, preserveUndo: true)
     }
 
     func applyAbilitySetup(_ setup: AbilitySetupPlan, to member: PartyMember) {
@@ -232,7 +241,7 @@ extension AppState {
         copy.abilityScores = setup.finalScores
         copy.usesBuildAbilityScores = true
         copy.appliedAbilitySetupId = setup.id
-        updatePartyMember(copy)
+        updatePartyMember(copy, preserveUndo: true)
     }
 
     func equippedItemKeys(for member: PartyMember) -> Set<String> {
@@ -262,6 +271,10 @@ extension AppState {
     func setAbilitySource(_ source: AbilityPlanSource, applied: Bool, for member: PartyMember) {
         guard [.permanent, .consumable].contains(source.kind), var members = run.roster,
               let memberIndex = members.firstIndex(where: { $0.id == member.id }) else { return }
+        guard !applied || (selectedAct >= source.minimumAct && member.level >= source.minimumLevel) else {
+            errorMessage = "\(source.label) is planned for Act \(source.minimumAct), level \(source.minimumLevel) or later."
+            return
+        }
         recordPartyUndo("\(applied ? "Recorded" : "Removed") \(source.label) for \(member.name)")
         if source.uniqueAcrossParty, applied {
             for index in members.indices {
@@ -292,16 +305,21 @@ extension AppState {
 
     @discardableResult
     func swapIntoActive(_ member: PartyMember, replacing activeMember: PartyMember) -> Bool {
-        guard member.rosterStatus == .camp, activeMember.rosterStatus == .active,
+        guard member.rosterStatus.canBeActive, member.rosterStatus != .active,
+              activeMember.rosterStatus == .active,
               var members = run.roster,
               let incoming = members.firstIndex(where: { $0.id == member.id }),
               let outgoing = members.firstIndex(where: { $0.id == activeMember.id }) else {
-            errorMessage = "Only a Camp member can replace an active party member."
+            errorMessage = "Only a Camp or unrecruited member can replace an active party member."
             return false
         }
         recordPartyUndo("Swapped \(member.name) for \(activeMember.name)")
-        members[outgoing].status = .camp
-        members[incoming].status = .active
+        var incomingMember = members[incoming]
+        var outgoingMember = members[outgoing]
+        incomingMember.status = .active
+        outgoingMember.status = .camp
+        members[outgoing] = incomingMember
+        members[incoming] = outgoingMember
         run.roster = members
         run.syncActivePartyProjection()
         persistRun()
@@ -330,7 +348,7 @@ extension AppState {
             )
             return false
         }
-        let undo = partyUndoSnapshot("Moved \(member.name) to \(status.rawValue)")
+        let undo = PartyUndoState(runID: run.id, message: "Moved \(member.name) to \(status.rawValue)", plan: run.partyPlan)
         guard run.applyRosterStatus(status, memberID: member.id) else {
             errorMessage = status == .active
                 ? "Active party is full. Send someone to camp first."
@@ -364,18 +382,38 @@ extension AppState {
     /// The member's current plan for this act: build picks filtered by act and
     /// level, with any player slot swaps substituted in.
     func wantedGear(for member: PartyMember) -> [BuildGear] {
+        wantedGear(for: member, in: selectedAct)
+    }
+
+    func wantedGear(for member: PartyMember, in act: Int) -> [BuildGear] {
         guard let buildId = member.buildId,
               let build = builds.first(where: { $0.id == buildId }) else { return [] }
-        let overrides = run.plannedSlotOverrides?[member.id] ?? [:]
-        var gear = build.gear.filter {
-            $0.act == selectedAct && $0.isAvailable(at: member.level)
-                && overrides[LoadoutSlot.classify($0.slot).id] == nil
+        var gear = build.gear.filter { $0.act == act && $0.isAvailable(at: member.level) }
+        let replacements = (run.plannedSlotOverrides?[member.id] ?? [:]).compactMap { storedKey, itemKey -> (String, ItemSummary)? in
+            guard let item = itemCatalog.first(where: { $0.itemKey == itemKey }), item.act <= act else { return nil }
+            let slot = LoadoutSlot.classify(item.slot, item: item.name)
+            let effectiveKey = slot == .rings && storedKey.hasPrefix("\(slot.id)#")
+                ? storedKey
+                : (slot == .rings ? "\(slot.id)#0" : slot.id)
+            return (effectiveKey, item)
         }
-        for (slotID, itemKey) in overrides {
-            guard let item = itemCatalog.first(where: { $0.itemKey == itemKey }),
-                  item.act <= selectedAct,
-                  LoadoutSlot.classify(item.slot).id == slotID else { continue }
-            gear.append(syntheticGear(from: item))
+        for (key, item) in replacements.sorted(by: { $0.0 < $1.0 }) {
+            let replacement = syntheticGear(from: item)
+            let slot = LoadoutSlot.classify(item.slot, item: item.name)
+            if slot == .rings {
+                let field = Int(key.split(separator: "#").last ?? "0") ?? 0
+                let ringIndices = gear.indices.filter {
+                    LoadoutSlot.classify(gear[$0].slot, item: gear[$0].item) == .rings
+                }
+                if field < ringIndices.count {
+                    gear[ringIndices[field]] = replacement
+                } else {
+                    gear.append(replacement)
+                }
+            } else {
+                gear.removeAll { LoadoutSlot.classify($0.slot, item: $0.item) == slot }
+                gear.append(replacement)
+            }
         }
         return gear
     }
@@ -419,19 +457,31 @@ extension AppState {
     }
 
     func setGearAssignmentOverride(_ gear: BuildGear, to member: PartyMember) {
+        partyUndoState = nil
         run.gearAssignmentOverrides = run.gearAssignmentOverrides ?? [:]
         run.gearAssignmentOverrides?[gear.itemKey] = member.id
         persistRun()
     }
 
     func slotOverride(for member: PartyMember, slot: LoadoutSlot) -> String? {
-        run.plannedSlotOverrides?[member.id]?[slot.id]
+        slotOverride(for: member, cell: DollCell(slot: slot))
+    }
+
+    func slotOverride(for member: PartyMember, cell: DollCell) -> String? {
+        let overrides = run.plannedSlotOverrides?[member.id]
+        return overrides?[cell.id] ?? (cell.field == 0 ? overrides?[cell.slot.id] : nil)
     }
 
     func setSlotOverride(_ slot: LoadoutSlot, itemKey: String?, for member: PartyMember) {
+        setSlotOverride(DollCell(slot: slot), itemKey: itemKey, for: member)
+    }
+
+    func setSlotOverride(_ cell: DollCell, itemKey: String?, for member: PartyMember) {
+        partyUndoState = nil
         var all = run.plannedSlotOverrides ?? [:]
         var mine = all[member.id] ?? [:]
-        mine[slot.id] = itemKey
+        if cell.field == 0 { mine.removeValue(forKey: cell.slot.id) }
+        mine[cell.id] = itemKey
         all[member.id] = mine.isEmpty ? nil : mine
         run.plannedSlotOverrides = all
         persistRun()
@@ -481,6 +531,7 @@ extension AppState {
     }
 
     func toggleGear(_ gear: BuildGear, for member: PartyMember) {
+        partyUndoState = nil
         let wasTargeted = gearIsTargeted(gear, for: member)
         guard gear.isMapObjective, run.toggleEquipment(itemKey: gear.itemKey, for: member.id) else { return }
         // Equipping the targeted item completes the target.
@@ -502,6 +553,7 @@ extension AppState {
 
     func setAllPartyLevels(_ level: Int) {
         guard var members = run.roster else { return }
+        partyUndoState = nil
         members = members.map { member in
             var copy = member
             guard copy.rosterStatus == .active else { return copy }

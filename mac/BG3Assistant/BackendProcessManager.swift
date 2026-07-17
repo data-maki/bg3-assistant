@@ -9,20 +9,19 @@ final class BackendProcessManager {
         process?.isRunning == true
     }
 
-    /// A force-quit or replaced app bundle can leave the frozen backend alive
-    /// after its GUI owner disappears. A valid health response proves this is
-    /// our service; the packaged flag keeps developer uvicorn out of scope.
-    func retireUnownedPackagedBackend(_ health: BackendHealth) async {
+    /// A force-quit or replaced app can leave either the frozen backend or a
+    /// development uvicorn listener alive after its GUI owner disappears.
+    /// A valid service identity makes either kind safe to replace.
+    func retireUnownedBackend(_ health: BackendHealth) async {
         guard process?.isRunning != true else { return }
         let currentPID = ProcessInfo.processInfo.processIdentifier
         guard health.ok,
               health.service == "bg3-honor-assistant",
               health.parentPid != currentPID,
-              health.packaged != false,
               let candidate = health.pid ?? listenerProcessIDs().first,
               candidate > 1,
               candidate != currentPID else { return }
-        try? appendLog("Retiring unowned packaged backend pid=\(candidate) parent=\(health.parentPid.map(String.init) ?? "legacy")")
+        try? appendLog("Retiring unowned backend pid=\(candidate) parent=\(health.parentPid.map(String.init) ?? "legacy") packaged=\(health.packaged.map(String.init) ?? "legacy")")
         _ = Darwin.kill(candidate, SIGTERM)
         for _ in 0..<20 {
             if Darwin.kill(candidate, 0) != 0 { return }
@@ -62,14 +61,14 @@ final class BackendProcessManager {
             let uvPath = findExecutable(named: "uv")
             let pythonPath = backendDirectory.appending(path: ".venv/bin/python").path
             newProcess.currentDirectoryURL = backendDirectory
-            if let uvPath {
-                newProcess.executableURL = URL(fileURLWithPath: uvPath)
-                newProcess.arguments = ["run", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8787"]
-                try appendLog("Starting backend with uv=\(uvPath) cwd=\(backendDirectory.path)")
-            } else if FileManager.default.isExecutableFile(atPath: pythonPath) {
+            if FileManager.default.isExecutableFile(atPath: pythonPath) {
                 newProcess.executableURL = URL(fileURLWithPath: pythonPath)
                 newProcess.arguments = ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8787"]
                 try appendLog("Starting backend with python=\(pythonPath) cwd=\(backendDirectory.path)")
+            } else if let uvPath {
+                newProcess.executableURL = URL(fileURLWithPath: uvPath)
+                newProcess.arguments = ["run", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8787"]
+                try appendLog("Starting backend with uv=\(uvPath) cwd=\(backendDirectory.path)")
             } else {
                 try appendLog("No backend runner found. pythonPath=\(pythonPath)")
                 throw BackendProcessError.uvNotFound

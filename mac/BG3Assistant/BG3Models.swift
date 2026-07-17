@@ -8,7 +8,7 @@ enum CheckpointDisposition: String, Codable, CaseIterable {
 
 struct GuideSource: Codable, Hashable {
     let sheet: String
-    let row: Int
+    let row: Int?
     let url: String
 }
 
@@ -143,8 +143,8 @@ struct RouteCheckpoint: Codable, Identifiable, Hashable {
     let name: String
     let area: String
     let region: String
-    let x: Int
-    let y: Int
+    let x: Int?
+    let y: Int?
     let minimumLevel: Int
     let importance: String
     let danger: String
@@ -218,6 +218,7 @@ struct AbilityPlanSource: Codable, Hashable, Identifiable {
     let mode: AbilityModifierMode
     let value: Int
     let label: String
+    var minimumAct: Int = 1
     var minimumLevel: Int = 1
     var maximumLevel: Int? = nil
     var itemKey: String? = nil
@@ -324,23 +325,23 @@ struct AbilityScores: Codable, Hashable {
     var charisma: Int
 
     static let customDefault = AbilityScores(
-        strength: 16, dexterity: 14, constitution: 14,
-        intelligence: 10, wisdom: 12, charisma: 10
+        strength: 17, dexterity: 15, constitution: 14,
+        intelligence: 10, wisdom: 10, charisma: 8
     )
 
     static func forClass(_ className: String?) -> AbilityScores {
         switch className?.lowercased() {
         case "barbarian": .init(strength: 17, dexterity: 13, constitution: 15, intelligence: 8, wisdom: 12, charisma: 10)
         case "bard": .init(strength: 8, dexterity: 15, constitution: 13, intelligence: 12, wisdom: 10, charisma: 17)
-        case "cleric": .init(strength: 14, dexterity: 12, constitution: 15, intelligence: 8, wisdom: 17, charisma: 10)
+        case "cleric": .init(strength: 10, dexterity: 14, constitution: 15, intelligence: 8, wisdom: 17, charisma: 10)
         case "druid": .init(strength: 10, dexterity: 14, constitution: 15, intelligence: 8, wisdom: 17, charisma: 10)
         case "fighter": .init(strength: 17, dexterity: 13, constitution: 15, intelligence: 10, wisdom: 12, charisma: 8)
         case "monk": .init(strength: 12, dexterity: 17, constitution: 14, intelligence: 8, wisdom: 14, charisma: 10)
-        case "paladin": .init(strength: 17, dexterity: 12, constitution: 13, intelligence: 8, wisdom: 10, charisma: 16)
-        case "ranger": .init(strength: 12, dexterity: 17, constitution: 14, intelligence: 8, wisdom: 16, charisma: 8)
+        case "paladin": .init(strength: 17, dexterity: 10, constitution: 13, intelligence: 8, wisdom: 10, charisma: 16)
+        case "ranger": .init(strength: 10, dexterity: 17, constitution: 14, intelligence: 8, wisdom: 16, charisma: 8)
         case "rogue": .init(strength: 8, dexterity: 17, constitution: 14, intelligence: 13, wisdom: 13, charisma: 10)
         case "sorcerer": .init(strength: 8, dexterity: 13, constitution: 15, intelligence: 12, wisdom: 10, charisma: 17)
-        case "warlock": .init(strength: 8, dexterity: 13, constitution: 14, intelligence: 13, wisdom: 10, charisma: 17)
+        case "warlock": .init(strength: 8, dexterity: 14, constitution: 14, intelligence: 12, wisdom: 10, charisma: 17)
         case "wizard": .init(strength: 8, dexterity: 13, constitution: 15, intelligence: 17, wisdom: 10, charisma: 12)
         default: .customDefault
         }
@@ -386,6 +387,7 @@ struct StoryCompanion: Identifiable, Hashable {
         StoryCompanion(name: "Gale", defaultClass: "Wizard"),
         StoryCompanion(name: "Wyll", defaultClass: "Warlock"),
         StoryCompanion(name: "Karlach", defaultClass: "Barbarian"),
+        StoryCompanion(name: "Dark Urge", defaultClass: "Sorcerer"),
     ]
 
     static let recruitable = [
@@ -420,6 +422,10 @@ struct WithersHireling: Identifiable, Hashable {
         WithersHireling(name: "Kree Derryck", race: "Duergar", defaultClass: "Warlock"),
         WithersHireling(name: "Sir Fuzzalump", race: "Rock Gnome", defaultClass: "Wizard"),
     ]
+
+    static func matching(_ name: String) -> WithersHireling? {
+        all.first { $0.name.caseInsensitiveCompare(name) == .orderedSame }
+    }
 }
 
 enum RosterStatus: String, Codable, CaseIterable, Identifiable {
@@ -431,7 +437,7 @@ enum RosterStatus: String, Codable, CaseIterable, Identifiable {
     case departed
 
     var id: String { rawValue }
-    var canBeActive: Bool { self == .active || self == .camp }
+    var canBeActive: Bool { self == .active || self == .camp || self == .unrecruited }
 }
 
 struct PartyMember: Codable, Identifiable, Hashable {
@@ -458,10 +464,106 @@ struct PartyMember: Codable, Identifiable, Hashable {
     }
 }
 
+/// Everything party planning owns, as one value: snapshot and restore go
+/// through this single projection so undo can never miss a field.
+struct PartyPlan {
+    var roster: [PartyMember]
+    var equippedByMember: [String: Set<String>]
+    var buildAssignedAt: [String: Date]
+    var gearAssignmentOverrides: [String: String]
+    var plannedSlotOverrides: [String: [String: String]]
+    var gearTarget: GearTarget?
+}
+
+extension HonorRun {
+    var partyPlan: PartyPlan {
+        get {
+            PartyPlan(
+                roster: roster ?? party,
+                equippedByMember: equippedByMember ?? [:],
+                buildAssignedAt: buildAssignedAt ?? [:],
+                gearAssignmentOverrides: gearAssignmentOverrides ?? [:],
+                plannedSlotOverrides: plannedSlotOverrides ?? [:],
+                gearTarget: gearTarget
+            )
+        }
+        set {
+            roster = newValue.roster
+            equippedByMember = newValue.equippedByMember
+            buildAssignedAt = newValue.buildAssignedAt
+            gearAssignmentOverrides = newValue.gearAssignmentOverrides
+            plannedSlotOverrides = newValue.plannedSlotOverrides
+            gearTarget = newValue.gearTarget
+            syncActivePartyProjection()
+        }
+    }
+
+    /// Fork a clean run while carrying forward only reusable character and
+    /// build choices. All route, story, level, ability, and equipment state
+    /// comes from the fresh HonorRun defaults.
+    func freshRun(
+        name: String,
+        guideVersion: String,
+        availableBuilds: [BuildSummary],
+        createdAt: Date = .now
+    ) -> HonorRun {
+        var source = self
+        source.migrateLegacyPartySlots()
+
+        var fresh = HonorRun()
+        fresh.migrateLegacyPartySlots()
+        fresh.name = name
+        fresh.createdAt = createdAt
+        fresh.guideVersion = guideVersion
+
+        let buildsByID = Dictionary(uniqueKeysWithValues: availableBuilds.map { ($0.id, $0) })
+        let defaultMembers = Dictionary(uniqueKeysWithValues: (fresh.roster ?? fresh.party).map { ($0.id, $0) })
+        fresh.roster = (source.roster ?? source.party).map { member in
+            let build = member.buildId.flatMap { buildsByID[$0] }
+            let defaultMember = defaultMembers[member.id]
+            let status: RosterStatus
+            switch member.rosterStatus {
+            case .active, .camp, .unrecruited:
+                status = member.rosterStatus
+            case .unavailable, .dead, .departed:
+                status = defaultMember?.rosterStatus ?? .camp
+            }
+            let className = build?.abilitySetups?
+                .min(by: { $0.level < $1.level })?.firstClass
+                ?? build?.levels.min(by: { $0.level < $1.level })?.take
+                ?? defaultMember?.className
+                ?? member.className
+            return PartyMember(
+                id: member.id,
+                name: member.name,
+                level: 1,
+                buildId: build?.id,
+                preparedTags: [],
+                className: className,
+                status: status,
+                roleOverride: member.roleOverride,
+                isCustom: member.isCustom,
+                abilityScores: build?.startingAbilityScores
+                    ?? (member.isCustom == true ? .customDefault : .forClass(className)),
+                isHireling: member.isHireling,
+                sourceLoadoutId: nil,
+                abilityModifiers: [],
+                usesBuildAbilityScores: build != nil,
+                appliedAbilitySetupId: nil
+            )
+        }
+        fresh.buildAssignedAt = Dictionary(uniqueKeysWithValues: (fresh.roster ?? []).compactMap { member in
+            member.buildId == nil ? nil : (member.id, createdAt)
+        })
+        fresh.syncActivePartyProjection()
+        return fresh
+    }
+}
+
 struct PartyUndoState {
+    let runID: String
     let message: String
-    let roster: [PartyMember]
-    let equippedByMember: [String: Set<String>]
+    let plan: PartyPlan
 }
 
 struct CheckpointProgress: Codable, Hashable {
@@ -486,6 +588,7 @@ struct ActTransitionRecord: Codable, Hashable, Identifiable {
     let fromAct: Int
     let toAct: Int
     let gearReview: [String: ActGearReviewStatus]
+    var gear: [BuildGear]? = nil
     let unresolvedRouteCount: Int
     let advancedAt: Date
 }
@@ -528,6 +631,7 @@ struct HonorRun: Codable {
     var selectedAct: Int? = 1
     var actGearReview: [Int: [String: ActGearReviewStatus]]?
     var actTransitions: [ActTransitionRecord]?
+    var finalActRecord: ActTransitionRecord?
     var mapRegion = "Wilderness"
     var mutedCheckpointIds: Set<String>?
 
@@ -639,6 +743,21 @@ struct HonorRun: Codable {
         equippedByMember?.first(where: { $0.value.contains(itemKey) })?.key
     }
 
+    func actLedgerIsLocked(_ act: Int) -> Bool {
+        act < (selectedAct ?? 1) || (act == 3 && finalActRecord != nil)
+    }
+
+    func lockedActRecord(for act: Int) -> ActTransitionRecord? {
+        guard actLedgerIsLocked(act) else { return nil }
+        return act == 3
+            ? finalActRecord
+            : actTransitions?.first(where: { $0.fromAct == act })
+    }
+
+    func lockedActGearReviewStatus(for itemKey: String, in act: Int) -> ActGearReviewStatus? {
+        lockedActRecord(for: act)?.gearReview[itemKey]
+    }
+
     @discardableResult
     mutating func toggleEquipment(itemKey: String, for memberID: String) -> Bool {
         guard (roster ?? party).contains(where: { $0.id == memberID }) else { return false }
@@ -672,10 +791,24 @@ struct PendingRosterStatusChange: Identifiable {
 
 struct RoutePayload: Codable {
     let guideVersion: String
+    let act: Int
+    let routeAvailable: Bool
     let checkpoints: [RouteCheckpoint]
     let builds: [BuildSummary]
     let walkthrough: [WalkthroughStep]
+    let timedEvents: [TimedEvent]
     let acts: [ActGuideSummary]
+}
+
+struct TimedEvent: Codable, Identifiable, Hashable {
+    let id: String
+    let name: String
+    let kind: String
+    let trigger: String
+    let deadline: String
+    let consequence: String
+    let severity: String
+    let source: String
 }
 
 struct ActGuideSummary: Codable, Identifiable, Hashable {
@@ -692,6 +825,19 @@ struct ActGuideSummary: Codable, Identifiable, Hashable {
     let equipmentCount: Int
 }
 
+enum ActMapHandoff: Equatable {
+    case local
+    case external(URL)
+}
+
+extension ActGuideSummary {
+    var mapHandoff: ActMapHandoff? {
+        if localMapAvailable { return .local }
+        guard let url = URL(string: mapUrl) else { return nil }
+        return .external(url)
+    }
+}
+
 struct BackendHealth: Codable, Equatable {
     let ok: Bool
     let service: String
@@ -705,7 +851,10 @@ struct ReadinessRequest: Codable {
     let checkpointId: String
     let party: [PartyMember]
     let completedCheckpointIds: [String]
+    let skippedCheckpointIds: [String]
     let checkedPreparation: [String]
+    let walkthroughStatuses: [String: String]
+    let walkthroughOutcomes: [String: String]
 }
 
 struct ReadinessResponse: Codable {
@@ -758,9 +907,11 @@ struct ChatSource: Codable, Identifiable, Hashable {
 
 struct ChatRequest: Codable {
     let message: String
-    let checkpointId: String
+    let checkpointId: String?
     let party: [PartyMember]
     let completedCheckpointIds: [String]
+    let skippedCheckpointIds: [String]
+    let checkedPreparation: [String]
     let walkthroughStepId: String?
     var imageBase64: String? = nil  // optional BG3 screenshot for the vision model
     let context: ChatContextSnapshot
@@ -801,200 +952,4 @@ enum AssistantPhase: String {
     case dialogue = "DIALOGUE"
     case combat = "COMBAT"
     case levelUp = "LEVEL UP"
-}
-
-enum RunSafety {
-    static func walkthroughDisposition(
-        _ step: WalkthroughStep,
-        walkthroughProgress: [String: CheckpointDisposition]
-    ) -> CheckpointDisposition {
-        walkthroughProgress[step.id] ?? .pending
-    }
-
-    static func nextWalkthroughStep(
-        walkthrough: [WalkthroughStep],
-        walkthroughProgress: [String: CheckpointDisposition],
-        selectedCheckpointId _: String?,
-        walkthroughOutcomes: [String: String] = [:],
-        partyLevel: Int
-    ) -> WalkthroughStep? {
-        let disposition: (WalkthroughStep) -> CheckpointDisposition = { step in
-            walkthroughDisposition(step, walkthroughProgress: walkthroughProgress)
-        }
-        let pending = walkthrough.filter { disposition($0) == .pending }
-        guard let phase = pending.map(\.phaseOrder).min() else { return nil }
-        let phasePending = pending.filter { $0.phaseOrder == phase }.sorted { $0.order < $1.order }
-        let eligible = phasePending.filter {
-            dependencyBlockers(
-                for: $0,
-                walkthrough: walkthrough,
-                walkthroughProgress: walkthroughProgress,
-                walkthroughOutcomes: walkthroughOutcomes
-            ).isEmpty
-        }
-        guard !eligible.isEmpty else { return nil }
-        return eligible.first(where: { $0.minimumLevel <= partyLevel }) ?? eligible.first
-    }
-
-    static func dependencyBlockers(
-        for step: WalkthroughStep,
-        walkthrough: [WalkthroughStep],
-        walkthroughProgress: [String: CheckpointDisposition],
-        walkthroughOutcomes: [String: String] = [:]
-    ) -> [String] {
-        let titles = Dictionary(uniqueKeysWithValues: walkthrough.map { ($0.id, $0.title) })
-        return step.dependencies.compactMap { dependency in
-            let status = walkthroughProgress[dependency.stepId] ?? .pending
-            let satisfied: Bool
-            switch dependency.kind {
-            case "warning_only":
-                satisfied = true
-            case "completion_required":
-                satisfied = status == .completed
-            case "outcome_required":
-                satisfied = status == .completed
-                    && walkthroughOutcomes[dependency.stepId] == dependency.requiredOutcome
-            default:
-                satisfied = status != .pending
-            }
-            guard !satisfied else { return nil }
-            if status == .skipped,
-               dependency.kind == "completion_required" || dependency.kind == "outcome_required" {
-                return "Revisit \(titles[dependency.stepId] ?? dependency.stepId) — \(dependency.reason)"
-            }
-            return dependency.reason
-        }
-    }
-
-    static func nextDialogueStep(
-        walkthrough: [WalkthroughStep],
-        walkthroughProgress: [String: CheckpointDisposition],
-        selectedCheckpointId: String?,
-        partyLevel: Int
-    ) -> WalkthroughStep? {
-        let current = nextWalkthroughStep(
-            walkthrough: walkthrough,
-            walkthroughProgress: walkthroughProgress,
-            selectedCheckpointId: selectedCheckpointId,
-            walkthroughOutcomes: [:],
-            partyLevel: partyLevel
-        )
-        if let current, current.kind == "dialogue" || current.kind == "decision" { return current }
-        let currentOrder = current?.order ?? 0
-        let disposition: (WalkthroughStep) -> CheckpointDisposition = { step in
-            walkthroughDisposition(step, walkthroughProgress: walkthroughProgress)
-        }
-        return walkthrough
-            .filter {
-                ($0.kind == "dialogue" || $0.kind == "decision")
-                    && disposition($0) == .pending
-                    && $0.order >= currentOrder
-            }
-            .sorted { $0.order < $1.order }
-            .first
-    }
-
-    static func nextCheckpoint(
-        route: [RouteCheckpoint],
-        dispositions: [String: CheckpointDisposition],
-        selectedId: String?,
-        partyLevel: Int
-    ) -> RouteCheckpoint? {
-        if let selectedId, let selected = route.first(where: { $0.id == selectedId }) { return selected }
-        let pending = route.filter { (dispositions[$0.id] ?? .pending) == .pending }
-        guard let phase = pending.map(routePhase).min() else { return nil }
-        let phasePending = pending.filter { routePhase($0) == phase }
-        let resolved = Set(dispositions.compactMap { $0.value != .pending ? $0.key : nil })
-        let eligible = phasePending.filter { checkpoint in
-            checkpoint.prerequisites.allSatisfy { resolved.contains($0) }
-        }
-        let candidates = eligible.isEmpty ? phasePending : eligible
-        let atOrBelowLevel = candidates.filter { $0.minimumLevel <= partyLevel }
-        return (atOrBelowLevel.isEmpty ? candidates : atOrBelowLevel).min { lhs, rhs in
-            let lhsDistance = abs(lhs.minimumLevel - partyLevel)
-            let rhsDistance = abs(rhs.minimumLevel - partyLevel)
-            return lhsDistance == rhsDistance ? lhs.routeOrder < rhs.routeOrder : lhsDistance < rhsDistance
-        }
-    }
-
-    static func activityPlan(
-        route: [RouteCheckpoint],
-        dispositions: [String: CheckpointDisposition],
-        selectedId: String?,
-        partyLevel: Int
-    ) -> LevelActivityPlan? {
-        guard let recommendation = nextCheckpoint(
-            route: route, dispositions: dispositions, selectedId: selectedId, partyLevel: partyLevel
-        ) else { return nil }
-        let pending = route.filter { (dispositions[$0.id] ?? .pending) == .pending }
-        let phase = routePhase(recommendation)
-        let phasePending = pending.filter { routePhase($0) == phase }
-        let resolved = Set(dispositions.compactMap { $0.value != .pending ? $0.key : nil })
-        let eligible = phasePending.filter { checkpoint in
-            checkpoint.prerequisites.allSatisfy { resolved.contains($0) }
-        }
-        let safeXP = eligible
-            .filter { $0.importance == "minor" && $0.minimumLevel <= partyLevel }
-            .sorted { $0.routeOrder < $1.routeOrder }
-        let major = phasePending
-            .filter { $0.importance == "major" }
-            .min { lhs, rhs in
-                let lhsDistance = abs(lhs.minimumLevel - partyLevel)
-                let rhsDistance = abs(rhs.minimumLevel - partyLevel)
-                return lhsDistance == rhsDistance ? lhs.routeOrder < rhs.routeOrder : lhsDistance < rhsDistance
-            }
-        let activityLabel: String
-        let gateAdvice: String
-        if recommendation.minimumLevel > partyLevel {
-            activityLabel = "EARN XP FIRST"
-            gateAdvice = "This needs L\(recommendation.minimumLevel). Do quests and the safe fights in \(routePhaseName(recommendation)), then come back."
-        } else if recommendation.importance == "major" {
-            activityLabel = "MAIN FIGHT"
-            gateAdvice = "You're at level. Review the fight plan, then start it on your terms."
-        } else {
-            activityLabel = "SAFE XP"
-            if let major, major.minimumLevel > partyLevel {
-                gateAdvice = "Safe at your level — builds XP toward \(major.name) (L\(major.minimumLevel))."
-            } else {
-                gateAdvice = "Safe at your level. Clear it before the main fight."
-            }
-        }
-        return LevelActivityPlan(
-            activityLabel: activityLabel,
-            phaseName: routePhaseName(recommendation),
-            recommendation: recommendation,
-            safeXP: safeXP,
-            coreChallenge: major,
-            gateAdvice: gateAdvice
-        )
-    }
-
-    static func routePhase(_ checkpoint: RouteCheckpoint) -> Int {
-        switch checkpoint.region {
-        case "Nautiloid": return 0
-        case "Underdark": return 2
-        case "Grymforge": return 3
-        case "Crèche Y'llek": return 4
-        default: return 1
-        }
-    }
-
-    static func routePhaseName(_ checkpoint: RouteCheckpoint) -> String {
-        switch routePhase(checkpoint) {
-        case 0: return "Nautiloid"
-        case 1: return "Wilderness cleanup"
-        case 2: return "Underdark"
-        case 3: return "Grymforge"
-        default: return "Mountain Pass / Crèche"
-        }
-    }
-
-    static func actTwoBlockers(route: [RouteCheckpoint], dispositions: [String: CheckpointDisposition]) -> [String] {
-        route.compactMap { checkpoint in
-            let state = dispositions[checkpoint.id] ?? .pending
-            guard state != .completed, checkpoint.importance == "major" || !checkpoint.irreversibleWarnings.isEmpty else { return nil }
-            let prefix = state == .skipped ? "Skipped" : "Unresolved"
-            return "\(prefix) — \(checkpoint.name): \(checkpoint.irreversibleWarnings.first ?? "major checkpoint unresolved")"
-        }
-    }
 }

@@ -44,5 +44,6 @@ if [[ -n "$SIGN_IDENTITY" ]]; then
 else
   /usr/bin/codesign --force --deep --entitlements "$ENTITLEMENTS" --sign - --identifier "$BUNDLE_ID" "$APP_DIR"
 fi
+/usr/bin/codesign --verify --deep --strict "$APP_DIR"
 
 echo "$PWD/$APP_DIR"

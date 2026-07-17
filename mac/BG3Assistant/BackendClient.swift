@@ -25,8 +25,11 @@ struct BackendClient {
         } catch { return nil }
     }
 
-    func route() async throws -> RoutePayload {
-        let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: "api/act1/route"))
+    static func guidePath(for act: Int) -> String { "api/acts/\(act)/guide" }
+    static func readinessPath(for act: Int) -> String { "api/acts/\(act)/readiness" }
+
+    func route(act: Int) async throws -> RoutePayload {
+        let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: Self.guidePath(for: act)))
         try validate(response, data: data)
         return try decoder.decode(RoutePayload.self, from: data)
     }
@@ -37,8 +40,8 @@ struct BackendClient {
         return try decoder.decode([ItemSummary].self, from: data)
     }
 
-    func readiness(_ requestBody: ReadinessRequest) async throws -> ReadinessResponse {
-        try await postJSON(path: "api/act1/readiness", body: requestBody, response: ReadinessResponse.self)
+    func readiness(_ requestBody: ReadinessRequest, act: Int) async throws -> ReadinessResponse {
+        try await postJSON(path: Self.readinessPath(for: act), body: requestBody, response: ReadinessResponse.self)
     }
 
     func chat(_ requestBody: ChatRequest) async throws -> ChatResponse {
@@ -46,12 +49,21 @@ struct BackendClient {
     }
 
     func importBuild(_ requestBody: LoadoutImportRequest) async throws -> ImportedBuild {
-        try await postJSON(path: "api/builds/import", body: requestBody, response: ImportedBuild.self)
+        try await postJSON(
+            path: "api/builds/import", body: requestBody,
+            response: ImportedBuild.self, timeout: 180
+        )
     }
 
-    private func postJSON<Body: Encodable, Response: Decodable>(path: String, body: Body, response: Response.Type) async throws -> Response {
+    private func postJSON<Body: Encodable, Response: Decodable>(
+        path: String,
+        body: Body,
+        response: Response.Type,
+        timeout: TimeInterval = 60
+    ) async throws -> Response {
         var request = URLRequest(url: baseURL.appending(path: path))
         request.httpMethod = "POST"
+        request.timeoutInterval = timeout
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(body)
         let (data, urlResponse) = try await URLSession.shared.data(for: request)
