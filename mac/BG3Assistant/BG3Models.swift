@@ -506,6 +506,13 @@ struct HonorRun: Codable {
     var includeCampPlans: Bool?
     var equippedByMember: [String: Set<String>]?
     var equipmentOwnershipKnown: Bool?
+    // Deterministic gear assignment: when each member's current build was
+    // assigned ("first to request" recency), the player's manual item →
+    // member overrides, and per-slot catalog swaps replacing a build's pick.
+    // Optional so old snapshots decode.
+    var buildAssignedAt: [String: Date]?
+    var gearAssignmentOverrides: [String: String]?
+    var plannedSlotOverrides: [String: [String: String]]?
     var progress: [String: CheckpointProgress] = [:]
     var walkthroughProgress: [String: CheckpointDisposition]?
     // step id → the decision option that actually happened in this run
@@ -590,6 +597,17 @@ struct HonorRun: Codable {
         if storyOutcomes == nil { storyOutcomes = [] }
         if includeCampPlans == nil { includeCampPlans = false }
         if equippedByMember == nil { equippedByMember = [:] }
+        if buildAssignedAt == nil {
+            // Legacy runs: every existing build assignment gets the same epoch
+            // stamp so recency ties resolve alphabetically (deterministic).
+            var stamps: [String: Date] = [:]
+            for member in members where member.buildId != nil {
+                stamps[member.id] = Date(timeIntervalSince1970: 0)
+            }
+            buildAssignedAt = stamps
+        }
+        if gearAssignmentOverrides == nil { gearAssignmentOverrides = [:] }
+        if plannedSlotOverrides == nil { plannedSlotOverrides = [:] }
         if equipmentOwnershipKnown == nil { equipmentOwnershipKnown = false }
         if actGearReview == nil { actGearReview = [:] }
         if actTransitions == nil { actTransitions = [] }
