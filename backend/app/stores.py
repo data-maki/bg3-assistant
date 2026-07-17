@@ -194,7 +194,11 @@ def save_run_state(state: RunState) -> RunState:
     current = _run_state_from_snapshot(snapshot)
     for field_name in state.model_fields_set:
         setattr(current, field_name, getattr(state, field_name))
-    roster_source = current.party if "party" in state.model_fields_set and "roster" not in state.model_fields_set else (current.roster or current.party)
+    # `roster` is the sole write vocabulary; `party` is server-derived output.
+    if "roster" in state.model_fields_set:
+        roster_source = current.roster
+    else:
+        roster_source = current.roster or current.party
     roster = _normalize_roster(roster_source)
     active_party = [member for member in roster if member.status == "active"][:4]
     normalized = RunState(
@@ -315,6 +319,7 @@ def _normalize_roster(members: list) -> list:
         ("gale", "Gale", "Wizard", False, "camp"),
         ("wyll", "Wyll", "Warlock", False, "camp"),
         ("karlach", "Karlach", "Barbarian", False, "camp"),
+        ("dark-urge", "Dark Urge", "Sorcerer", False, "camp"),
         ("halsin", "Halsin", "Druid", False, "unrecruited"),
         ("minthara", "Minthara", "Paladin", False, "unrecruited"),
         ("jaheira", "Jaheira", "Druid", False, "unrecruited"),
@@ -336,7 +341,7 @@ def _normalize_roster(members: list) -> list:
             name=name,
             level=baseline_level,
             class_name=class_name,
-            status="camp" if had_members else status,
+            status="camp" if had_members and status == "active" else status,
             is_custom=is_custom,
         ))
     active_count = 0

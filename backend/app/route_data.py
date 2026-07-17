@@ -4,14 +4,11 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
-from .models import AbilityScores, AbilityTargetScores, ActGuideSummary, BuildGear, BuildLevel, BuildSummary, ReadinessRequest, ReadinessResponse, RouteCheckpoint
+from .models import AbilityScores, AbilityTargetScores, ActGuideSummary, BuildGear, BuildLevel, BuildSummary, ReadinessRequest, ReadinessResponse, RouteCheckpoint, TimedEvent
 from .paths import resource_root
 
 
 REPO_ROOT = resource_root()
-FIGHTS_PATH = REPO_ROOT / "data" / "act1_fights.json"
-ROUTE_PATH = REPO_ROOT / "data" / "act1_route.json"
-DECISIONS_PATH = REPO_ROOT / "data" / "act1_decisions.json"
 BUILDS_PATH = REPO_ROOT / "data" / "build_overview.tsv"
 BUILD_LEVELS_PATH = REPO_ROOT / "data" / "build_levels.tsv"
 ACTS_PATH = REPO_ROOT / "data" / "acts"
@@ -22,17 +19,27 @@ SOURCE_URL = (
     "https://docs.google.com/spreadsheets/d/"
     "1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
 )
-GUIDE_VERSION = "2026-07-12"
+GUIDE_VERSION = "2026-07-18-all-act-review"
 
 
-@lru_cache(maxsize=1)
-def load_route() -> list[RouteCheckpoint]:
-    fights = {row["id"]: row for row in json.loads(FIGHTS_PATH.read_text(encoding="utf-8"))}
-    reviewed = json.loads(ROUTE_PATH.read_text(encoding="utf-8"))
-    decisions = json.loads(DECISIONS_PATH.read_text(encoding="utf-8"))
+@lru_cache(maxsize=3)
+def load_route(act: int = 1) -> list[RouteCheckpoint]:
+    metadata = _act_metadata(act)
+    if not metadata["routeAvailable"]:
+        return []
+    prefix = REPO_ROOT / "data" / f"act{act}"
+    fights = {row["id"]: row for row in json.loads(prefix.with_name(f"act{act}_fights.json").read_text(encoding="utf-8"))}
+    reviewed = json.loads(prefix.with_name(f"act{act}_route.json").read_text(encoding="utf-8"))
+    decisions_path = prefix.with_name(f"act{act}_decisions.json")
+    decisions = json.loads(decisions_path.read_text(encoding="utf-8")) if decisions_path.exists() else {}
     checkpoints: list[RouteCheckpoint] = []
     for route in reviewed:
         fight = fights[route["id"]]
+        source = route.get("source") or {
+            "sheet": "Act 1 - fights + Act 1 - Notes",
+            "row": route["sourceRow"],
+            "url": SOURCE_URL,
+        }
         checkpoints.append(
             RouteCheckpoint(
                 id=fight["id"],
@@ -55,10 +62,19 @@ def load_route() -> list[RouteCheckpoint]:
                 prerequisites=route["prerequisites"],
                 notes=route["notes"],
                 honor_decisions=decisions.get(fight["id"], []),
-                source={"sheet": "Act 1 - fights + Act 1 - Notes", "row": route["sourceRow"], "url": SOURCE_URL},
+                source=source,
             )
         )
     return sorted(checkpoints, key=lambda item: item.route_order)
+
+
+@lru_cache(maxsize=3)
+def load_timed_events(act: int = 1) -> list[TimedEvent]:
+    metadata = _act_metadata(act)
+    path = REPO_ROOT / "data" / f"act{act}_timed_events.json"
+    if not metadata["routeAvailable"] or not path.exists():
+        return []
+    return [TimedEvent(**event) for event in json.loads(path.read_text(encoding="utf-8"))]
 
 
 def item_key(item_name: str) -> str:
@@ -97,8 +113,9 @@ def _act_metadata(act: int) -> dict:
 def load_gear(act: int | None = None) -> list[BuildGear]:
     """Reviewed gear rows from independent act-specific databases.
 
-    Consumed per-build here (filtered into BuildSummary.gear) and item-wise by
-    map_data to place act-specific item markers, so both payloads stay on one vocabulary.
+    Consumed per-build here (filtered into BuildSummary.gear), which seeds the
+    relational catalog; item-wise serving (map markers, per-act equipment) now
+    reads catalog.catalog_gear instead of this loader.
     Each row is joined with data/item_effects.json (built by
     backend/scripts/fetch_item_effects.py from bg3.wiki) for what the item does
     and exactly where it comes from.
@@ -209,8 +226,8 @@ def load_builds() -> list[BuildSummary]:
     ]
 
 
-def checkpoint_by_id(checkpoint_id: str) -> RouteCheckpoint:
-    for checkpoint in load_route():
+def checkpoint_by_id(checkpoint_id: str, act: int = 1) -> RouteCheckpoint:
+    for checkpoint in load_route(act):
         if checkpoint.id == checkpoint_id:
             return checkpoint
     raise KeyError(checkpoint_id)
@@ -226,11 +243,11 @@ def _route_phase(checkpoint: RouteCheckpoint) -> int:
 
 
 def next_checkpoint(
-    completed: set[str], skipped: set[str] | None = None, party_level: int = 1
+    completed: set[str], skipped: set[str] | None = None, party_level: int = 1, act: int = 1
 ) -> RouteCheckpoint | None:
     skipped = skipped or set()
     resolved = completed | skipped
-    pending = [checkpoint for checkpoint in load_route() if checkpoint.id not in resolved]
+    pending = [checkpoint for checkpoint in load_route(act) if checkpoint.id not in resolved]
     if not pending:
         return None
     current_phase = min(_route_phase(checkpoint) for checkpoint in pending)
@@ -247,28 +264,49 @@ def next_checkpoint(
     )
 
 
-def assess_readiness(request: ReadinessRequest) -> ReadinessResponse:
-    checkpoint = checkpoint_by_id(request.checkpoint_id)
-    levels = [member.level for member in request.party]
+def assess_readiness(request: ReadinessRequest, act: int = 1) -> ReadinessResponse:
+    checkpoint = checkpoint_by_id(request.checkpoint_id, act)
+    active_party = [member for member in request.party if member.status in {None, "active"}]
+    levels = [member.level for member in active_party]
     party_level = min(levels) if levels else 1
     completed = set(request.completed_checkpoint_ids)
+    resolved = completed | set(request.skipped_checkpoint_ids)
     blockers: list[str] = []
     warnings: list[str] = []
     build_actions: list[str] = []
 
+    if not active_party:
+        blockers.append("No active party is recorded; confirm the active group before using readiness.")
     if party_level < checkpoint.minimum_level:
         blockers.append(f"Lowest party member is level {party_level}; guide minimum is level {checkpoint.minimum_level}.")
-    missing_prerequisites = [item for item in checkpoint.prerequisites if item not in completed]
+    missing_prerequisites = [item for item in checkpoint.prerequisites if item not in resolved]
     if missing_prerequisites:
-        names = [checkpoint_by_id(item).name for item in missing_prerequisites]
-        blockers.append("Unresolved route prerequisites: " + ", ".join(names))
+        names = [checkpoint_by_id(item, act).name for item in missing_prerequisites]
+        blockers.append("Unresolved reviewed route sequence: " + ", ".join(names))
+
+    from .walkthrough_data import load_walkthrough, walkthrough_blockers
+
+    steps = load_walkthrough(act)
+    owning_step = next((step for step in steps if step.checkpoint_id == checkpoint.id), None)
+    if owning_step:
+        blockers.extend(
+            walkthrough_blockers(
+                owning_step,
+                steps,
+                request.walkthrough_statuses,
+                request.walkthrough_outcomes,
+            )
+        )
     warnings.extend(checkpoint.irreversible_warnings)
+    unchecked_preparation = [item for item in checkpoint.preparation if item not in request.checked_preparation]
+    if unchecked_preparation:
+        warnings.append("Preparation not confirmed: " + "; ".join(unchecked_preparation))
 
     from . import catalog
 
     builds = {build.id: build for build in catalog.catalog_builds()}
     assumed_build_setup: list[str] = []
-    for member in request.party:
+    for member in active_party:
         if not member.build_id:
             continue
         build = builds.get(member.build_id)
@@ -283,7 +321,6 @@ def assess_readiness(request: ReadinessRequest) -> ReadinessResponse:
                 build.play_pattern,
                 build.class_progression,
                 *(f"{item.take} {item.subclass_choice} {item.choices} {item.tactics}" for item in reviewed_levels),
-                *(f"{item.item} {item.why} {item.acquisition}" for item in build.gear),
             ]
         )
         if level_plan:
@@ -294,14 +331,21 @@ def assess_readiness(request: ReadinessRequest) -> ReadinessResponse:
     capability_terms = ["silence", "calm emotions", "sanctuary", "command", "bludgeoning", "fire", "counterspell", "initiative", "control"]
     requested_text = " ".join([checkpoint.advice, *checkpoint.preparation]).lower()
     recorded_capabilities = " ".join(
-        [*(tag for member in request.party for tag in member.prepared_tags), *assumed_build_setup]
+        [*(tag for member in active_party for tag in member.prepared_tags), *assumed_build_setup]
     ).lower()
     for capability in capability_terms:
         if capability in requested_text and capability not in recorded_capabilities:
             warnings.append(f"Party capability not recorded: {capability}. Confirm the party has it or choose an alternative plan.")
 
-    status = "blocked" if blockers else ("danger" if checkpoint.irreversible_warnings else ("caution" if warnings else "ready"))
-    next_actions = blockers[:2] + build_actions[:2]
+    if blockers:
+        status = "blocked"
+    elif checkpoint.danger == "extreme" or checkpoint.irreversible_warnings:
+        status = "danger"
+    elif checkpoint.danger == "high" or warnings:
+        status = "caution"
+    else:
+        status = "ready"
+    next_actions = blockers[:2] + unchecked_preparation[:2] + build_actions[:2]
     if not next_actions:
         next_actions = [checkpoint.advice]
     return ReadinessResponse(

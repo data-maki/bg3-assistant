@@ -91,26 +91,50 @@ CREATE TABLE IF NOT EXISTS build_items(
 );
 """
 
-_seeded = False
+# Path of the database whose schema/seed this process has already ensured.
+# Keyed on the path so tests pointing at fresh temp databases reseed them.
+_seeded_path = None
 
 
 def reset_for_tests() -> None:
-    global _seeded
-    _seeded = False
+    global _seeded_path
+    _seeded_path = None
 
 
 def _connect() -> sqlite3.Connection:
+    """Cheap per-call connection; ensure_seeded owns schema creation/migration."""
     connection = stores.RunDatabase().connect()
     connection.row_factory = sqlite3.Row
-    connection.executescript(SCHEMA)
     return connection
 
 
+def _migrate_schema(connection: sqlite3.Connection) -> None:
+    """Add catalog columns introduced after the first relational release."""
+    additions = {
+        "builds": {
+            "target_ability_note": "TEXT NOT NULL DEFAULT ''",
+            "ability_setups_json": "TEXT NOT NULL DEFAULT '[]'",
+            "ability_sources_json": "TEXT NOT NULL DEFAULT '[]'",
+        },
+        "build_items": {
+            "item_label": "TEXT NOT NULL DEFAULT ''",
+        },
+    }
+    for table, columns in additions.items():
+        existing = {row["name"] for row in connection.execute(f"PRAGMA table_info({table})").fetchall()}
+        for name, definition in columns.items():
+            if name not in existing:
+                connection.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
+
+
 def ensure_seeded() -> None:
-    global _seeded
-    if _seeded:
+    global _seeded_path
+    path = stores.RunDatabase().path
+    if _seeded_path == path:
         return
     with _connect() as connection:
+        connection.executescript(SCHEMA)
+        _migrate_schema(connection)
         row = connection.execute(
             "SELECT value FROM settings WHERE key = 'catalog_seed_version'"
         ).fetchone()
@@ -124,7 +148,7 @@ def ensure_seeded() -> None:
                 (GUIDE_VERSION, time.time()),
             )
         _migrate_custom_loadouts(connection)
-    _seeded = True
+    _seeded_path = path
 
 
 def _upsert_item(connection: sqlite3.Connection, gear: BuildGear) -> None:

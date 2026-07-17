@@ -29,7 +29,7 @@ from .models import (
     RunStateResponse,
 )
 from .paths import resource_root
-from .route_data import GUIDE_VERSION, assess_readiness, checkpoint_by_id, load_act_catalog, load_route
+from .route_data import GUIDE_VERSION, assess_readiness, checkpoint_by_id, load_act_catalog, load_route, load_timed_events
 from .walkthrough_data import load_walkthrough, walkthrough_by_id
 
 
@@ -116,15 +116,28 @@ def act_map(act: int) -> ActMapIndex:
 
 @app.get("/api/act1/route")
 def act_one_route() -> JSONResponse:
+    return act_guide(1)
+
+
+@app.get("/api/acts/{act}/guide")
+def act_guide(act: int) -> JSONResponse:
     # The Mac app decodes snake_case (convertFromSnakeCase), so this payload
     # dumps by field name rather than by the camelCase web alias.
+    try:
+        acts = load_act_catalog()
+        guide = next(item for item in acts if item.act == act)
+    except (KeyError, StopIteration) as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown act: {act}") from exc
     return JSONResponse(
         content={
             "guideVersion": GUIDE_VERSION,
-            "checkpoints": [item.model_dump(mode="json") for item in load_route()],
+            "act": act,
+            "routeAvailable": guide.route_available,
+            "checkpoints": [item.model_dump(mode="json") for item in load_route(act)],
             "builds": [item.model_dump(mode="json") for item in catalog.catalog_builds()],
-            "walkthrough": [item.model_dump(mode="json") for item in load_walkthrough()],
-            "acts": [item.model_dump(mode="json") for item in load_act_catalog()],
+            "walkthrough": [item.model_dump(mode="json") for item in load_walkthrough(act)],
+            "timedEvents": [item.model_dump(mode="json") for item in load_timed_events(act)],
+            "acts": [item.model_dump(mode="json") for item in acts],
         }
     )
 
@@ -138,7 +151,7 @@ def custom_builds() -> list[ImportedBuild]:
 def import_custom_build(request: LoadoutImportRequest) -> ImportedBuild:
     settings = get_settings()
     if not settings.openrouter_api_key:
-        raise HTTPException(status_code=428, detail="Add an OpenRouter API key in Settings before importing a build.")
+        raise HTTPException(status_code=428, detail="An OpenRouter API key is required to import a build.")
     try:
         imported = loadout_import.import_build(request.url, settings)
     except loadout_import.LoadoutImportError as exc:
@@ -162,22 +175,33 @@ def import_custom_build(request: LoadoutImportRequest) -> ImportedBuild:
 
 @app.post("/api/act1/readiness", response_model=ReadinessResponse)
 def readiness(request: ReadinessRequest) -> ReadinessResponse:
+    return act_readiness(1, request)
+
+
+@app.post("/api/acts/{act}/readiness", response_model=ReadinessResponse)
+def act_readiness(act: int, request: ReadinessRequest) -> ReadinessResponse:
     try:
-        return assess_readiness(request)
+        return assess_readiness(request, act)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Unknown checkpoint: {exc.args[0]}") from exc
 
 
 @app.post("/api/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
+    act = request.context.selected_act if request.context else 1
     try:
-        checkpoint = checkpoint_by_id(request.checkpoint_id)
-    except KeyError as exc:
-        raise HTTPException(status_code=404, detail=f"Unknown checkpoint: {exc.args[0]}") from exc
-    try:
-        walkthrough_step = walkthrough_by_id(request.walkthrough_step_id) if request.walkthrough_step_id else None
+        walkthrough_step = walkthrough_by_id(request.walkthrough_step_id, act) if request.walkthrough_step_id else None
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Unknown walkthrough step: {exc.args[0]}") from exc
+    checkpoint_id = request.checkpoint_id or (walkthrough_step.checkpoint_id if walkthrough_step else None)
+    try:
+        checkpoint = checkpoint_by_id(checkpoint_id, act) if checkpoint_id else None
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown checkpoint: {exc.args[0]}") from exc
+    if walkthrough_step and checkpoint and walkthrough_step.checkpoint_id != checkpoint.id:
+        raise HTTPException(status_code=422, detail="Walkthrough step and checkpoint do not match.")
+    if not walkthrough_step and not checkpoint:
+        raise HTTPException(status_code=422, detail="A walkthrough step or checkpoint is required.")
     return llm_chat.answer(checkpoint, request, walkthrough_step, get_settings())
 
 

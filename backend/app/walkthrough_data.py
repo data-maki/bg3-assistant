@@ -5,7 +5,7 @@ from .models import WalkthroughDependency, WalkthroughStep
 from .paths import resource_root
 
 
-WALKTHROUGH_PATH = resource_root() / "data" / "act1_walkthrough.json"
+DATA_PATH = resource_root() / "data"
 
 SOURCES = {
     "sheet": (
@@ -55,15 +55,21 @@ SOURCES = {
 }
 
 
-@lru_cache(maxsize=1)
-def load_walkthrough() -> list[WalkthroughStep]:
-    rows = json.loads(WALKTHROUGH_PATH.read_text(encoding="utf-8"))
+@lru_cache(maxsize=3)
+def load_walkthrough(act: int = 1) -> list[WalkthroughStep]:
+    metadata = json.loads((DATA_PATH / "acts" / f"act{act}.json").read_text(encoding="utf-8"))
+    if not metadata["routeAvailable"]:
+        return []
+    rows = json.loads((DATA_PATH / f"act{act}_walkthrough.json").read_text(encoding="utf-8"))
     titles = {row["id"]: row["title"] for row in rows}
     steps = []
     for raw in rows:
         row = dict(raw)
-        source_key = row.pop("source")
-        source_label, source_url = SOURCES[source_key]
+        source = row.pop("source")
+        if isinstance(source, str):
+            source_label, source_url = SOURCES[source]
+        else:
+            source_label, source_url = source["label"], source["url"]
         explicit = {item["stepId"]: item for item in row.get("dependencies", [])}
         dependencies = []
         for prerequisite_id in row.get("prerequisites", []):
@@ -178,8 +184,8 @@ def recommend_walkthrough_step(
     return revisit or next((step for step in eligible if step.minimum_level <= party_level), eligible[0])
 
 
-def walkthrough_by_id(step_id: str) -> WalkthroughStep:
-    for step in load_walkthrough():
+def walkthrough_by_id(step_id: str, act: int = 1) -> WalkthroughStep:
+    for step in load_walkthrough(act):
         if step.id == step_id:
             return step
     raise KeyError(step_id)

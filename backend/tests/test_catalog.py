@@ -1,23 +1,12 @@
-import json
 import sqlite3
 import time
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app import catalog, main, stores
 from app.loadout_import import _normalize
 from app.route_data import GUIDE_VERSION, item_key, load_builds as tsv_builds, load_gear as tsv_gear
-from test_loadout_import import sample_draft
-
-
-@pytest.fixture
-def db_path(tmp_path, monkeypatch):
-    path = tmp_path / "state.sqlite3"
-    monkeypatch.setattr(stores.RunDatabase, "path", property(lambda self: path))
-    catalog.reset_for_tests()
-    yield path
-    catalog.reset_for_tests()
+from conftest import sample_draft
 
 
 def table_count(path, table):
@@ -43,6 +32,18 @@ def test_seed_is_idempotent(db_path):
     catalog.reset_for_tests()
     catalog.ensure_seeded()
     assert table_count(db_path, "build_items") == first
+
+
+def test_catalog_schema_migrates_party_ability_columns():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    connection.execute("CREATE TABLE builds(build_id TEXT PRIMARY KEY)")
+    connection.execute("CREATE TABLE build_items(item_key TEXT)")
+    catalog._migrate_schema(connection)
+    build_columns = {row["name"] for row in connection.execute("PRAGMA table_info(builds)")}
+    join_columns = {row["name"] for row in connection.execute("PRAGMA table_info(build_items)")}
+    assert {"target_ability_note", "ability_setups_json", "ability_sources_json"} <= build_columns
+    assert "item_label" in join_columns
 
 
 def test_catalog_builds_match_tsv_seed(db_path):
