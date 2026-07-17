@@ -1,0 +1,181 @@
+{
+  "SB-A1": {
+    "scores": {"strength": 8, "dexterity": 16, "constitution": 14, "intelligence": 10, "wisdom": 10, "charisma": 16},
+    "note": "Act 1 target before the later Control Martial transition.",
+    "setups": [{
+      "id": "creation", "level": 1, "label": "Character creation", "reason": "Start the Act 1 Swords Bard plan.",
+      "pointBuyScores": {"strength": 8, "dexterity": 15, "constitution": 14, "intelligence": 10, "wisdom": 10, "charisma": 14},
+      "bonusTwo": "charisma", "bonusOne": "dexterity",
+      "finalScores": {"strength": 8, "dexterity": 16, "constitution": 14, "intelligence": 10, "wisdom": 10, "charisma": 16},
+      "firstClass": "Bard", "classOrder": "Bard 1-6"
+    }],
+    "sources": []
+  },
+  "SB-102": {
+    "scores": {"strength": 22, "dexterity": 18, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 16},
+    "note": "Strength includes the level 4 ASI and permanent-boon plan; Dexterity assumes Gloves of Dexterity. The level 7 respec moves the freed Dexterity points into Wisdom.",
+    "setups": [
+      {
+        "id": "creation", "level": 1, "label": "Character creation", "reason": "Start as a Bard before the Paladin-first rebuild.",
+        "pointBuyScores": {"strength": 15, "dexterity": 10, "constitution": 14, "intelligence": 8, "wisdom": 8, "charisma": 15},
+        "bonusTwo": "strength", "bonusOne": "charisma",
+        "finalScores": {"strength": 17, "dexterity": 10, "constitution": 14, "intelligence": 8, "wisdom": 8, "charisma": 16},
+        "firstClass": "Bard", "classOrder": "Bard 1-6"
+      },
+      {
+        "id": "respec-l7", "level": 7, "label": "Level 7 Withers respec", "reason": "Take Paladin first for heavy armour and let Gloves of Dexterity replace allocated Dexterity.",
+        "pointBuyScores": {"strength": 15, "dexterity": 8, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 15},
+        "bonusTwo": "strength", "bonusOne": "charisma",
+        "finalScores": {"strength": 17, "dexterity": 8, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 16},
+        "firstClass": "Paladin", "classOrder": "Paladin 1 -> Bard 6 -> Paladin 2 -> Bard 10"
+      }
+    ],
+    "sources": [
+      {"id": "l4-str-asi", "ability": "strength", "kind": "asi", "mode": "add", "value": 2, "label": "Level 4 Ability Improvement", "minimumLevel": 4, "note": "Choose +2 Strength."},
+      {"id": "ethel-hair-str", "ability": "strength", "kind": "permanent", "mode": "add", "value": 1, "label": "Auntie Ethel's Hair", "uniqueAcrossParty": true, "note": "Assign the once-per-run +1 to Strength."},
+      {"id": "everlasting-vigour-str", "ability": "strength", "kind": "permanent", "mode": "add", "value": 2, "label": "Potion of Everlasting Vigour", "minimumAct": 2, "uniqueAcrossParty": true, "note": "Permanent +2 Strength from Araj Oblodra."},
+      {"id": "gloves-dex-18", "ability": "dexterity", "kind": "equipment", "mode": "minimum", "value": 18, "label": "Gloves of Dexterity", "minimumLevel": 7, "itemKey": "gloves-of-dexterity", "uniqueAcrossParty": true, "note": "Sets Dexterity to 18 while equipped."}
+    ]
+  },
+  "SB-1011": {
+    "scores": {"strength": 8, "dexterity": 18, "constitution": 14, "intelligence": 16, "wisdom": 10, "charisma": 20},
+    "note": "Post-respec target; Dexterity assumes Gloves of Dexterity and Charisma uses the permanent-boon plan.",
+    "setups": [
+      {
+        "id": "creation", "level": 1, "label": "Character creation", "reason": "Use the safe Bard progression through level 7.",
+        "pointBuyScores": {"strength": 8, "dexterity": 15, "constitution": 14, "intelligence": 10, "wisdom": 10, "charisma": 14},
+        "bonusTwo": "charisma", "bonusOne": "dexterity",
+        "finalScores": {"strength": 8, "dexterity": 16, "constitution": 14, "intelligence": 10, "wisdom": 10, "charisma": 16},
+        "firstClass": "Bard", "classOrder": "Bard 1-7"
+      },
+      {
+        "id": "respec-l8", "level": 8, "label": "Level 8 Withers respec", "reason": "Fighter must be first for proficiencies; Gloves replace allocated Dexterity.",
+        "pointBuyScores": {"strength": 8, "dexterity": 8, "constitution": 14, "intelligence": 15, "wisdom": 10, "charisma": 15},
+        "bonusTwo": "charisma", "bonusOne": "intelligence",
+        "finalScores": {"strength": 8, "dexterity": 8, "constitution": 14, "intelligence": 16, "wisdom": 10, "charisma": 17},
+        "firstClass": "Fighter", "classOrder": "Fighter 1 -> Wizard 1 -> Bard 6, then Bard to 10"
+      }
+    ],
+    "sources": [
+      {"id": "gloves-dex-18", "ability": "dexterity", "kind": "equipment", "mode": "minimum", "value": 18, "label": "Gloves of Dexterity", "minimumLevel": 8, "itemKey": "gloves-of-dexterity", "uniqueAcrossParty": true, "note": "Sets Dexterity to 18 while equipped."},
+      {"id": "ethel-hair-cha", "ability": "charisma", "kind": "permanent", "mode": "add", "value": 1, "label": "Auntie Ethel's Hair", "uniqueAcrossParty": true, "note": "Assign the once-per-run +1 to Charisma."},
+      {"id": "mirror-loss-cha", "ability": "charisma", "kind": "permanent", "mode": "add", "value": 2, "label": "Mirror of Loss", "minimumAct": 3, "uniqueAcrossParty": true, "note": "Use the permanent +2 Charisma outcome."}
+    ]
+  },
+  "CL-102": {
+    "scores": {"strength": 10, "dexterity": 14, "constitution": 15, "intelligence": 8, "wisdom": 18, "charisma": 12},
+    "note": "Includes the level 10 split ability improvement.",
+    "setups": [{
+      "id": "creation", "level": 1, "label": "Character creation", "reason": "This reviewed progression does not require a respec.",
+      "pointBuyScores": {"strength": 10, "dexterity": 14, "constitution": 13, "intelligence": 8, "wisdom": 15, "charisma": 12},
+      "bonusTwo": "wisdom", "bonusOne": "constitution",
+      "finalScores": {"strength": 10, "dexterity": 14, "constitution": 14, "intelligence": 8, "wisdom": 17, "charisma": 12},
+      "firstClass": "Cleric", "classOrder": "Cleric 1-5 -> Druid 1-2 -> Cleric to 10"
+    }],
+    "sources": [
+      {"id": "l10-wis-asi", "ability": "wisdom", "kind": "asi", "mode": "add", "value": 1, "label": "Level 10 split Ability Improvement", "minimumLevel": 10, "note": "Choose +1 Wisdom."},
+      {"id": "l10-con-asi", "ability": "constitution", "kind": "asi", "mode": "add", "value": 1, "label": "Level 10 split Ability Improvement", "minimumLevel": 10, "note": "Choose +1 Constitution."}
+    ]
+  },
+  "MO-OH": {
+    "scores": {"strength": 21, "dexterity": 16, "constitution": 16, "intelligence": 8, "wisdom": 17, "charisma": 8},
+    "note": "Strength assumes Hill Giant Strength elixir; Constitution includes Tavern Brawler; Wisdom includes Resilient.",
+    "setups": [
+      {
+        "id": "creation", "level": 1, "label": "Character creation", "reason": "Start as Monk and rely on elixirs rather than allocated Strength.",
+        "pointBuyScores": {"strength": 10, "dexterity": 15, "constitution": 15, "intelligence": 8, "wisdom": 14, "charisma": 8},
+        "bonusTwo": "wisdom", "bonusOne": "dexterity",
+        "finalScores": {"strength": 10, "dexterity": 16, "constitution": 15, "intelligence": 8, "wisdom": 16, "charisma": 8},
+        "firstClass": "Monk", "classOrder": "Monk 1-5 -> Cleric 1 -> Monk 6"
+      },
+      {
+        "id": "respec-l8", "level": 8, "label": "Level 8 Withers respec", "reason": "Take Fighter first for heavy armour and shield proficiency.",
+        "pointBuyScores": {"strength": 10, "dexterity": 15, "constitution": 15, "intelligence": 8, "wisdom": 14, "charisma": 8},
+        "bonusTwo": "wisdom", "bonusOne": "dexterity",
+        "finalScores": {"strength": 10, "dexterity": 16, "constitution": 15, "intelligence": 8, "wisdom": 16, "charisma": 8},
+        "firstClass": "Fighter", "classOrder": "Fighter 1 -> Monk 6 -> Cleric 1"
+      },
+      {
+        "id": "respec-l10", "level": 10, "label": "Level 10 Withers respec", "reason": "Rebuild around Thief 3 for the second bonus action.",
+        "pointBuyScores": {"strength": 10, "dexterity": 15, "constitution": 15, "intelligence": 8, "wisdom": 14, "charisma": 8},
+        "bonusTwo": "wisdom", "bonusOne": "dexterity",
+        "finalScores": {"strength": 10, "dexterity": 16, "constitution": 15, "intelligence": 8, "wisdom": 16, "charisma": 8},
+        "firstClass": "Fighter", "classOrder": "Fighter 1 -> Monk 6 -> Thief 3 -> Cleric 1 -> Rogue 4"
+      }
+    ],
+    "sources": [
+      {"id": "hill-giant-elixir", "ability": "strength", "kind": "consumable", "mode": "minimum", "value": 21, "label": "Elixir of Hill Giant Strength", "minimumLevel": 4, "itemKey": "elixir-of-hill-giant-strength", "note": "Drink after each long rest; only one elixir can be active."},
+      {"id": "l4-tavern-brawler-con", "ability": "constitution", "kind": "feat", "mode": "add", "value": 1, "label": "Tavern Brawler", "minimumLevel": 4, "note": "Choose +1 Constitution."},
+      {"id": "l12-resilient-wis", "ability": "wisdom", "kind": "feat", "mode": "add", "value": 1, "label": "Resilient: Wisdom", "minimumLevel": 12, "note": "Adds +1 Wisdom and saving throw proficiency."}
+    ]
+  },
+  "PA-FL": {
+    "scores": {"strength": 10, "dexterity": 16, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 20},
+    "note": "Includes both recommended Charisma ability improvements.",
+    "setups": [{
+      "id": "creation", "level": 1, "label": "Character creation", "reason": "Start Druid for the Flame Blade and Shillelagh progression.",
+      "pointBuyScores": {"strength": 10, "dexterity": 15, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 14},
+      "bonusTwo": "charisma", "bonusOne": "dexterity",
+      "finalScores": {"strength": 10, "dexterity": 16, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 16},
+      "firstClass": "Druid", "classOrder": "Druid 1-3 -> Paladin 1-5 -> Sorcerer 1-4"
+    }],
+    "sources": [
+      {"id": "l7-cha-asi", "ability": "charisma", "kind": "asi", "mode": "add", "value": 2, "label": "Level 7 Ability Improvement", "minimumLevel": 7, "note": "Choose +2 Charisma."},
+      {"id": "l12-cha-asi", "ability": "charisma", "kind": "asi", "mode": "add", "value": 2, "label": "Level 12 Ability Improvement", "minimumLevel": 12, "note": "Choose +2 Charisma."}
+    ]
+  },
+  "SO-111": {
+    "scores": {"strength": 8, "dexterity": 16, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 20},
+    "note": "Baseline guide target using permanent Charisma boons.",
+    "setups": [{
+      "id": "creation", "level": 1, "label": "Character creation", "reason": "Start Sorcerer for Constitution saving throw proficiency.",
+      "pointBuyScores": {"strength": 8, "dexterity": 15, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 15},
+      "bonusTwo": "charisma", "bonusOne": "dexterity",
+      "finalScores": {"strength": 8, "dexterity": 16, "constitution": 14, "intelligence": 8, "wisdom": 10, "charisma": 17},
+      "firstClass": "Sorcerer", "classOrder": "Sorcerer 1-6 -> Warlock 1 -> Sorcerer to 11"
+    }],
+    "sources": [
+      {"id": "ethel-hair-cha", "ability": "charisma", "kind": "permanent", "mode": "add", "value": 1, "label": "Auntie Ethel's Hair", "uniqueAcrossParty": true, "note": "Assign the once-per-run +1 to Charisma."},
+      {"id": "mirror-loss-cha", "ability": "charisma", "kind": "permanent", "mode": "add", "value": 2, "label": "Mirror of Loss", "minimumAct": 3, "uniqueAcrossParty": true, "note": "Use the permanent +2 Charisma outcome."}
+    ]
+  },
+  "WI-BS": {
+    "scores": {"strength": 8, "dexterity": 20, "constitution": 14, "intelligence": 17, "wisdom": 10, "charisma": 8},
+    "note": "Uses the guide's Dexterity-focused ability-improvement path.",
+    "setups": [{
+      "id": "creation", "level": 1, "label": "Character creation", "reason": "Prioritize Intelligence and Dexterity for spellcasting and Bladesong.",
+      "pointBuyScores": {"strength": 8, "dexterity": 15, "constitution": 14, "intelligence": 15, "wisdom": 10, "charisma": 8},
+      "bonusTwo": "intelligence", "bonusOne": "dexterity",
+      "finalScores": {"strength": 8, "dexterity": 16, "constitution": 14, "intelligence": 17, "wisdom": 10, "charisma": 8},
+      "firstClass": "Wizard", "classOrder": "Wizard 1-12"
+    }],
+    "sources": [
+      {"id": "l4-dex-asi", "ability": "dexterity", "kind": "asi", "mode": "add", "value": 2, "label": "Level 4 Ability Improvement", "minimumLevel": 4, "note": "Choose the recommended +2 Dexterity path."},
+      {"id": "l12-dex-asi", "ability": "dexterity", "kind": "asi", "mode": "add", "value": 2, "label": "Level 12 Ability Improvement", "minimumLevel": 12, "note": "Finish Dexterity at 20."}
+    ]
+  },
+  "FI-WEK": {
+    "scores": {"strength": 8, "dexterity": 14, "constitution": 16, "intelligence": 8, "wisdom": 10, "charisma": 20},
+    "note": "Includes the recommended Charisma improvement and a permanent +1 target.",
+    "setups": [
+      {
+        "id": "creation", "level": 1, "label": "Character creation", "reason": "Use Warlock as the reviewed early-game bridge.",
+        "pointBuyScores": {"strength": 8, "dexterity": 14, "constitution": 15, "intelligence": 8, "wisdom": 10, "charisma": 15},
+        "bonusTwo": "charisma", "bonusOne": "constitution",
+        "finalScores": {"strength": 8, "dexterity": 14, "constitution": 16, "intelligence": 8, "wisdom": 10, "charisma": 17},
+        "firstClass": "Warlock", "classOrder": "Warlock 1-5"
+      },
+      {
+        "id": "respec-l6", "level": 6, "label": "Level 6 Withers respec", "reason": "Rebuild Fighter-first for proficiencies and the Eldritch Knight progression.",
+        "pointBuyScores": {"strength": 8, "dexterity": 14, "constitution": 15, "intelligence": 8, "wisdom": 10, "charisma": 15},
+        "bonusTwo": "charisma", "bonusOne": "constitution",
+        "finalScores": {"strength": 8, "dexterity": 14, "constitution": 16, "intelligence": 8, "wisdom": 10, "charisma": 17},
+        "firstClass": "Fighter", "classOrder": "Fighter 1-8 -> Warlock 1-4"
+      }
+    ],
+    "sources": [
+      {"id": "l8-cha-asi", "ability": "charisma", "kind": "asi", "mode": "add", "value": 2, "label": "Level 8 Ability Improvement", "minimumLevel": 8, "note": "Choose +2 Charisma."},
+      {"id": "ethel-hair-cha", "ability": "charisma", "kind": "permanent", "mode": "add", "value": 1, "label": "Auntie Ethel's Hair", "uniqueAcrossParty": true, "note": "Assign the once-per-run +1 to Charisma."}
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "act": 2,
+  "title": "Shadow-Cursed Lands",
+  "routeAvailable": false,
+  "localMapAvailable": false,
+  "mapName": "Shadow-Cursed Lands",
+  "mapUrl": "https://mapgenie.io/baldurs-gate-3/maps/shadow-cursed-lands",
+  "equipmentFile": "gear/act2.tsv",
+  "coordinateSystem": "BG3 in-game XY",
+  "coordinateNote": "Act 2 equipment markers use coordinates verified from each cited bg3.wiki item page. The app hands off to the public Shadow-Cursed Lands map until a redistributable local tileset is available."
+}

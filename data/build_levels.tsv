@@ -24,9 +24,9 @@ SB-1011	4	Bard 4	-	Sharpshooter	Toggle off against high Armour Class until Bless
 SB-1011	5	Bard 5	-	Font of Inspiration; Glyph of Warding	Flourishes now refresh on short rest; Glyph is reliable area control	Guide-derived
 SB-1011	6	Bard 6	College of Swords	Extra Attack	Core Act 1 damage package is complete	Guide-derived
 SB-1011	7	Bard 7	-	Fourth-level spell slot progression	Continue as Bard for one level; prepare for the level 8 respec	Guide-derived
-SB-1011	8	Respec: Fighter 1 / Wizard 1 / Bard 6	Fighter first; Archery fighting style	CHA 17, INT 16, CON 14; use Gloves of Dexterity; scribe Shield and utility spells	Class order grants proficiencies and Archery while Wizard adds scroll flexibility	Guide-derived
+SB-1011	8	Respec: Fighter 1 / Wizard 1 / Bard 6	Fighter first; Archery fighting style	STR 8, DEX 8, CON 14, INT 16, WIS 10, CHA 17; use Gloves of Dexterity; scribe Shield and utility spells	Class order grants proficiencies and Archery while Wizard adds scroll flexibility	Guide-derived
 SB-1011	9	Bard 7	-	Fourth-level Bard spells	Use Fear or Confusion when enemies cannot be efficiently killed this round	Guide-derived
-SB-1011	10	Bard 8	-	Dual Wielder; use +2 CHA instead if carrying a shield	Dual wielding enables two powerful stat sticks in the final loadout	Guide-derived
+SB-1011	10	Bard 8	-	Dual Wielder (recommended); Charisma ASI is the shield alternative	Dual wielding enables two powerful stat sticks in the final loadout	Guide-derived
 SB-1011	11	Bard 9	-	Hold Monster	Build acuity first, then lock down the most dangerous eligible enemy	Guide-derived
 SB-1011	12	Bard 10	Magical Secrets	Command and Counterspell	Attack to build Arcane Acuity, then cast Command as a bonus action through Mystic Scoundrel	Guide-derived
 MO-OH	1	Monk 1	-	DEX 16, CON 15, WIS 16	Use unarmed bonus attacks and high movement; do not overextend ahead of support	Guide-derived
@@ -61,14 +61,14 @@ SO-111	5	Sorcerer 5	Red Draconic	Haste	Twin Haste only when concentration is saf
 SO-111	6	Sorcerer 6	Red Draconic	Elemental Affinity; Fireball; replace Magic Missile with Counterspell	Charisma now adds to fire damage; Fireball clears grouped enemies	Guide-derived
 SO-111	7	Warlock 1	The Fiend	Command	The build comes online: Fire Acuity plus Extended Command can deny multiple enemy turns	Guide-derived
 SO-111	8	Sorcerer 7	Red Draconic	Daylight	Use Daylight for encounters where magical darkness or sunlight sensitivity matters	Guide-derived
-SO-111	9	Sorcerer 8	Red Draconic	Elemental Adept: Fire by default; alternatives +2 CHA, Alert, War Caster; Dimension Door	Ignore fire resistance and retain a strong emergency reposition	Guide-derived
+SO-111	9	Sorcerer 8	Red Draconic	Elemental Adept: Fire (recommended); Charisma ASI, Alert, or War Caster are alternatives; Dimension Door	Ignore fire resistance and retain a strong emergency reposition	Guide-derived
 SO-111	10	Sorcerer 9	Red Draconic	Hold Monster	Stack acuity first, then paralyse an eligible boss	Guide-derived
 SO-111	11	Sorcerer 10	Red Draconic	Careful Spell; Telekinesis	Careful Spell makes large control effects safer around allies	Guide-derived
 SO-111	12	Sorcerer 11	Red Draconic	Chain Lightning	Use lightning only when it beats the fire package or targets are wet; core loop remains Scorching Ray plus control	Guide-derived
 WI-BS	1	Wizard 1	-	Booming Blade, Ray of Frost, Toll the Dead; Mage Armour, Longstrider, Shield, Magic Missile, Chromatic Orb, Enhance Leap	Play as a protected full caster; keep Mage Armour and Longstrider active after each long rest	Guide-derived
 WI-BS	2	Wizard 2	Bladesinging	Witch Bolt, Feather Fall; Bladesong	Bladesong raises Armour Class, movement, concentration, and Dexterity saves before dangerous turns	Guide-derived
 WI-BS	3	Wizard 3	Bladesinging	Shadow Blade, Cloud of Daggers	Choose melee pressure with concentration on Shadow Blade or safer area damage with Cloud of Daggers	Guide-derived
-WI-BS	4	Wizard 4	Bladesinging	Minor Illusion; Hold Person, Misty Step; +2 DEX or +2 INT	Raise Dexterity for melee and defence, or Intelligence for stronger spellcasting; the guide supports either path	Guide-derived
+WI-BS	4	Wizard 4	Bladesinging	Minor Illusion; Hold Person, Misty Step; Ability Improvement: +2 DEX (recommended); Intelligence path is an alternative	Raise Dexterity for melee and defence, or Intelligence for stronger spellcasting; the guide supports either path	Guide-derived
 WI-BS	5	Wizard 5	Bladesinging	Counterspell, Lightning Bolt	Counter deadly enemy spells; combine Wet with Lightning Bolt when allies can set it up safely	Guide-derived
 WI-BS	6	Wizard 6	Bladesinging	Extra Attack; Hypnotic Pattern, Glyph of Warding	The melee plan comes online with two attacks, while Hypnotic Pattern remains the safer group-control option	Guide-derived
 WI-BS	7	Wizard 7	Bladesinging	Ice Storm, Confusion	Use wide-area control when entering melee would expose concentration or positioning	Guide-derived
@@ -76,7 +76,7 @@ WI-BS	8	Wizard 8	Bladesinging	Dimension Door; Savage Attacker	Savage Attacker im
 WI-BS	9	Wizard 9	Bladesinging	Hold Monster, Cone of Cold	Disable an eligible boss before closing to melee, or punish clustered enemies with cold damage	Guide-derived
 WI-BS	10	Wizard 10	Bladesinging	Friends or Bone Chill; Conjure Elemental	Add a durable summon so enemy actions are divided before the Bladesinger commits	Guide-derived
 WI-BS	11	Wizard 11	Bladesinging	Chain Lightning, Globe of Invulnerability	Use Globe to stabilize lethal encounters; Chain Lightning excels after Wet setup	Guide-derived
-WI-BS	12	Wizard 12	Bladesinging	Sentinel: Vengeance or +2 DEX / INT	Finish the chosen ability path or take Sentinel for stronger melee reaction pressure	Guide-derived
+WI-BS	12	Wizard 12	Bladesinging	Ability Improvement: +2 DEX (recommended); Sentinel: Vengeance is the melee-control alternative	Finish the chosen ability path or take Sentinel for stronger melee reaction pressure	Guide-derived
 CL-102	1	Cleric 1	Light Domain	WIS 17; Guiding Bolt, Bless, Healing Word, Command; cantrips Produce Flame, Sacred Flame, Resistance	Light Domain from level 1; Warding Flare blunts one dangerous attack per short rest	Guide-derived, respec-free order
 CL-102	2	Cleric 2	Light Domain	Radiance of the Dawn (Channel Divinity)	Radiance clears grouped weak enemies without spending spell slots	Guide-derived, respec-free order
 CL-102	3	Cleric 3	Light Domain	Aid, Spiritual Weapon, Protection from Evil and Good	Upcast Aid after each long rest; Spiritual Weapon adds bonus-action damage	Guide-derived, respec-free order

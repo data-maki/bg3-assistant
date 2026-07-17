@@ -1279,8 +1279,28 @@
     "source": "wiki_sussur"
   },
   {
-    "id": "walk-grymforge-arrival",
+    "id": "walk-duergar-boat",
     "order": 45,
+    "phase": "Underdark expedition",
+    "phaseOrder": 7,
+    "title": "Defeat the duergar patrol on the boat",
+    "kind": "mini_fight",
+    "importance": "required",
+    "region": "Underdark",
+    "area": "Ebonlake crossing",
+    "minimumLevel": 5,
+    "summary": "Take the skiff from the Decrepit Village, keep the party away from the gunwales, and focus Corsair Greymon when his patrol boards.",
+    "avoid": "Do not cluster at the boat edges or shove Greymon into the lake if you want to recover his loot.",
+    "why": "Makes the mandatory crossing encounter explicit before the route enters Grymforge.",
+    "rewards": ["Corsair Greymon's loot", "Safe passage to Grymforge"],
+    "completionChecks": ["Duergar patrol defeated", "Corsair Greymon's loot recovered", "Party crossed the Ebonlake"],
+    "prerequisites": ["walk-duergar-glut"],
+    "authority": "guide_fact",
+    "source": "steam"
+  },
+  {
+    "id": "walk-grymforge-arrival",
+    "order": 46,
     "phase": "Grymforge",
     "phaseOrder": 8,
     "title": "Enter Grymforge without starting the Nere clock",
@@ -1289,11 +1309,11 @@
     "region": "Grymforge",
     "area": "Main dock and ruins",
     "minimumLevel": 5,
-    "summary": "Use drow/branded dialogue on the boat, collect dead-gnome and ruin loot, and avoid the main cave-in until ready.",
+    "summary": "After the boat fight, collect dead-gnome and ruin loot, secure the waypoint, and avoid the main cave-in until ready.",
     "avoid": "Do not interact with the cave-in and then long rest or fast travel.",
     "why": "The cave-in starts Nere's one-rest deadline.",
     "completionChecks": ["Grymforge waypoint secured", "Callarduran ring checked", "Cave-in not triggered prematurely"],
-    "prerequisites": ["walk-duergar-glut"],
+    "prerequisites": ["walk-duergar-boat"],
     "incident": {
       "trigger": "A moving platform fails to carry every grouped party member.",
       "safeActions": ["Ungroup before every Grymforge platform", "Send one character first", "Secure the destination waypoint before regrouping"],
@@ -1308,7 +1328,7 @@
   },
   {
     "id": "walk-philomeen",
-    "order": 46,
+    "order": 47,
     "phase": "Grymforge",
     "phaseOrder": 8,
     "title": "Visit Philomeen before freeing Nere",
@@ -1336,7 +1356,7 @@
   },
   {
     "id": "walk-brithvar-eye",
-    "order": 47,
+    "order": 48,
     "phase": "Grymforge",
     "phaseOrder": 8,
     "title": "Recruit Brithvar and remove the Scrying Eye",
@@ -1371,7 +1391,7 @@
   },
   {
     "id": "walk-nere",
-    "order": 48,
+    "order": 49,
     "phase": "Grymforge",
     "phaseOrder": 8,
     "title": "Free and defeat Nere before resting",
@@ -1401,7 +1421,7 @@
   },
   {
     "id": "walk-mithral-moulds",
-    "order": 49,
+    "order": 50,
     "phase": "Grymforge",
     "phaseOrder": 8,
     "title": "Collect two Mithral Ore and choose two moulds",
@@ -1436,7 +1456,7 @@
   },
   {
     "id": "walk-grym",
-    "order": 50,
+    "order": 51,
     "phase": "Grymforge",
     "phaseOrder": 8,
     "title": "Fight Grym only at level 6",
@@ -1473,7 +1493,7 @@
   },
   {
     "id": "walk-mountain-pass-gate",
-    "order": 51,
+    "order": 52,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Run the surface point-of-no-return check",
@@ -1491,7 +1511,7 @@
   },
   {
     "id": "walk-death-shepherds",
-    "order": 52,
+    "order": 53,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Kill the Death Shepherds first",
@@ -1509,7 +1529,7 @@
   },
   {
     "id": "walk-rosymorn-weapons",
-    "order": 53,
+    "order": 54,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Collect the ceremonial weapons",
@@ -1528,7 +1548,7 @@
   },
   {
     "id": "walk-blood-of-lathander",
-    "order": 54,
+    "order": 55,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Take the Blood of Lathander with the crest",
@@ -1571,7 +1591,7 @@
   },
   {
     "id": "walk-creche-tour",
-    "order": 55,
+    "order": 56,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Shop and prepare before the infirmary",
@@ -1589,7 +1609,7 @@
   },
   {
     "id": "walk-zaithisk",
-    "order": 56,
+    "order": 57,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Choose the zaith'isk occupant deliberately",
@@ -1634,7 +1654,7 @@
   },
   {
     "id": "walk-vlaakith-audience",
-    "order": 57,
+    "order": 58,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Survive Vlaakith's audience",
@@ -1679,7 +1699,7 @@
   },
   {
     "id": "walk-wargaz",
-    "order": 58,
+    "order": 59,
     "phase": "Mountain Pass and crèche",
     "phaseOrder": 9,
     "title": "Choose whether to fight or bypass W'wargaz",
@@ -1732,7 +1752,7 @@
   },
   {
     "id": "walk-act-two-gate",
-    "order": 59,
+    "order": 60,
     "phase": "Act 2 readiness",
     "phaseOrder": 10,
     "title": "Close the Act 1 ledger before advancing",
