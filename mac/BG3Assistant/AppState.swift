@@ -29,7 +29,7 @@ final class AppState: ObservableObject {
     @Published var openRouterKeyDraft = ""
     @Published private(set) var hasOpenRouterKey = OpenRouterKeyStore.load() != nil
     @Published private(set) var openRouterKeyStatus = OpenRouterKeyStore.load() == nil
-        ? "Optional for AI chat"
+        ? "Optional for AI features"
         : "Saved in macOS Keychain"
     @Published var showOverlay = true { didSet { syncOverlay() } }
     @Published var forceOverlay = false { didSet { syncOverlay() } }
@@ -51,6 +51,8 @@ final class AppState: ObservableObject {
     @Published var route: [RouteCheckpoint] = []
     @Published var walkthrough: [WalkthroughStep] = []
     @Published var builds: [BuildSummary] = []
+    @Published var itemCatalog: [ItemSummary] = []
+    @Published var acts: [ActGuideSummary] = []
     @Published var run: HonorRun
     @Published var readiness: ReadinessResponse?
     @Published var isLoading = false
@@ -65,6 +67,7 @@ final class AppState: ObservableObject {
     @Published var pendingDisposition: CheckpointDisposition?
     @Published var confirmationMessage: String?
     @Published var pendingRosterStatusChange: PendingRosterStatusChange?
+    @Published var partyUndoState: PartyUndoState?
     @Published var combatCardPinned = false
     @Published var snoozedUntil: Date?
     @Published var availableGuideVersion = ""
@@ -74,6 +77,11 @@ final class AppState: ObservableObject {
     @Published var newRunNameDraft = ""
     @Published var screenCaptureVerifiedThisLaunch = false
     @Published var showScreenRecordingPermissionPrompt = false
+    @Published var loadoutURLDraft = ""
+    @Published var isImportingLoadout = false
+    @Published var loadoutImportStatus: String?
+    @Published var loadoutImportJSON: String?
+    @Published var loadoutImportNeedsKey = false
 
     private let detector = BG3Detector()
     let backendClient = BackendClient()
@@ -95,6 +103,7 @@ final class AppState: ObservableObject {
     var captureAuthorizationRefreshInFlight = false
     var lastCaptureProbe = Date.distantPast
     private var activationObserver: Any?
+    private var plannerRequestObserver: Any?
 
     init() {
         var loaded = runStore.load()
@@ -226,8 +235,14 @@ final class AppState: ObservableObject {
         )
     }
 
-    var currentActivityTitle: String { currentWalkthroughStep?.title ?? currentCheckpoint?.name ?? "Act 1 complete" }
-    var currentActivityArea: String { currentWalkthroughStep?.area ?? currentCheckpoint?.area ?? "" }
+    var currentActivityTitle: String {
+        if let context = gearTargetContext { return "Get \(context.gear.item)" }
+        return currentWalkthroughStep?.title ?? currentCheckpoint?.name ?? "Act 1 complete"
+    }
+    var currentActivityArea: String {
+        if let context = gearTargetContext { return context.gear.region }
+        return currentWalkthroughStep?.area ?? currentCheckpoint?.area ?? ""
+    }
     var currentActivityMinimumLevel: Int { currentWalkthroughStep?.minimumLevel ?? currentCheckpoint?.minimumLevel ?? lowestPartyLevel }
     var currentActivityAvoid: String {
         return currentWalkthroughStep?.incident?.never
@@ -243,6 +258,7 @@ final class AppState: ObservableObject {
         return currentWalkthroughStep?.kind == "dialogue" ? "medium" : (currentCheckpoint?.danger ?? "low")
     }
     var currentActivityLabel: String {
+        if gearTargetContext != nil { return "TARGET" }
         if assistantPhase == .combat { return AssistantPhase.combat.rawValue }
         switch currentWalkthroughStep?.kind {
         case "dialogue", "decision": return "DIALOGUE"
@@ -379,8 +395,20 @@ final class AppState: ObservableObject {
             let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
             Task { @MainActor in await self?.handlePermissionReturn(activatedApp) }
         }
+        plannerRequestObserver = NotificationCenter.default.addObserver(
+            forName: .showPlannerRequested, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.showPlannerNow() }
+        }
         await refreshStatuses()
         await loadRouteIfNeeded()
+        // Dev hook, like BG3_ASSISTANT_STATE_DIR: launch with the planner
+        // already open on a tab (e.g. "route", "loadout") so the expanded
+        // overlay can be exercised without synthetic input.
+        if let debugTab = ProcessInfo.processInfo.environment["BG3_ASSISTANT_DEBUG_TAB"] {
+            plannerTab = PlannerTab.allCases.first { $0.rawValue.lowercased() == debugTab.lowercased() } ?? .current
+            overlayExpanded = true
+        }
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.refreshStatuses()
@@ -394,6 +422,8 @@ final class AppState: ObservableObject {
         pollTask = nil
         if let activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(activationObserver) }
         activationObserver = nil
+        if let plannerRequestObserver { NotificationCenter.default.removeObserver(plannerRequestObserver) }
+        plannerRequestObserver = nil
         overlayController.hide()
         globalPeekHotKey.stop()
         backendProcess.stop()
@@ -610,6 +640,11 @@ final class AppState: ObservableObject {
     }
 
     func completeCurrentActivity() {
+        if gearTargetContext != nil {
+            completeGearTarget()
+            return
+        }
+        guard selectedAct == 1 else { return }
         guard let step = currentWalkthroughStep else {
             requestDisposition(.completed)
             return
@@ -744,12 +779,6 @@ final class AppState: ObservableObject {
         }
     }
 
-    func setSelectedAct(_ act: Int) {
-        guard (1...3).contains(act) else { return }
-        run.selectedAct = act
-        persistRun()
-    }
-
     func syncRegionToRecommendation() {
         if let step = RunSafety.nextWalkthroughStep(
             walkthrough: walkthrough,
@@ -777,6 +806,11 @@ final class AppState: ObservableObject {
             route = payload.checkpoints
             walkthrough = payload.walkthrough
             builds = payload.builds
+            // Non-fatal: an older bundled backend without /api/items just
+            // leaves the picker without alternatives.
+            itemCatalog = (try? await backendClient.items()) ?? itemCatalog
+            migrateBuildAbilityScoresIfNeeded()
+            acts = payload.acts
             availableGuideVersion = payload.guideVersion
             if run.guideVersion.isEmpty { run.guideVersion = payload.guideVersion }
             run.migrateLegacyFightDispositions(walkthrough: payload.walkthrough)
@@ -787,7 +821,7 @@ final class AppState: ObservableObject {
     }
 
     func refreshReadiness() async {
-        guard backendHealthy, let checkpoint = currentCheckpoint else { readiness = nil; return }
+        guard selectedAct == 1, backendHealthy, let checkpoint = currentCheckpoint else { readiness = nil; return }
         do {
             readiness = try await backendClient.readiness(ReadinessRequest(
                 checkpointId: checkpoint.id,
@@ -845,12 +879,18 @@ final class AppState: ObservableObject {
             return
         }
         do {
+            let resumeLoadoutImport = loadoutImportNeedsKey && !loadoutURLDraft.isEmpty
             try OpenRouterKeyStore.save(key)
             openRouterKeyDraft = ""
             hasOpenRouterKey = true
             openRouterKeyStatus = "Saved in macOS Keychain"
             errorMessage = nil
             await restartBackendForOpenRouterKey()
+            if resumeLoadoutImport {
+                loadoutImportNeedsKey = false
+                plannerTab = .party
+                await importBuild()
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -861,7 +901,7 @@ final class AppState: ObservableObject {
         openRouterKeyDraft = ""
         hasOpenRouterKey = false
         chatScreenshot = nil
-        openRouterKeyStatus = "Optional for AI chat"
+        openRouterKeyStatus = "Optional for AI features"
         await restartBackendForOpenRouterKey()
     }
 

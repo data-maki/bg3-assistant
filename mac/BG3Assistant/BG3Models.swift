@@ -177,6 +177,56 @@ struct BuildLevel: Codable, Hashable {
     let choices: String
     let tactics: String
     let confidence: String
+    var abilityScoreReset: AbilityScores? = nil
+}
+
+struct AbilitySetupPlan: Codable, Hashable, Identifiable {
+    let id: String
+    let level: Int
+    let label: String
+    let reason: String
+    let pointBuyScores: AbilityScores
+    let bonusTwo: Ability
+    let bonusOne: Ability
+    let finalScores: AbilityScores
+    let firstClass: String
+    let classOrder: String
+}
+
+enum AbilityPlanSourceKind: String, Codable, Hashable {
+    case asi
+    case feat
+    case permanent
+    case equipment
+    case consumable
+
+    var label: String {
+        switch self {
+        case .asi: "Ability improvement"
+        case .feat: "Feat"
+        case .permanent: "Permanent"
+        case .equipment: "Equipment"
+        case .consumable: "Consumable"
+        }
+    }
+}
+
+struct AbilityPlanSource: Codable, Hashable, Identifiable {
+    let id: String
+    let ability: Ability
+    let kind: AbilityPlanSourceKind
+    let mode: AbilityModifierMode
+    let value: Int
+    let label: String
+    var minimumLevel: Int = 1
+    var maximumLevel: Int? = nil
+    var itemKey: String? = nil
+    var uniqueAcrossParty: Bool = false
+    var note: String = ""
+
+    func applies(at level: Int) -> Bool {
+        level >= minimumLevel && (maximumLevel == nil || level <= maximumLevel!)
+    }
 }
 
 struct BuildGear: Codable, Hashable, Identifiable {
@@ -199,6 +249,8 @@ struct BuildGear: Codable, Hashable, Identifiable {
     var acquire: String? = nil
     var wiki: String? = nil
     var icon: String? = nil  // path under the local backend, e.g. /map-assets/icons/x.webp
+    var gameX: Int? = nil
+    var gameY: Int? = nil
 
     func isAvailable(at level: Int) -> Bool {
         level >= (minimumLevel ?? 1) && (maximumLevel == nil || level <= maximumLevel!)
@@ -214,6 +266,35 @@ struct BuildGear: Codable, Hashable, Identifiable {
     }
 }
 
+/// One catalog item served by GET /api/items — item facts only (no
+/// per-build opinions). Decoded with convertFromSnakeCase like RoutePayload.
+struct ItemSummary: Codable, Hashable, Identifiable {
+    var id: String { itemKey }
+    let itemKey: String
+    let name: String
+    let slot: String
+    let act: Int
+    var region: String = ""
+    var acquisition: String = ""
+    var gameX: Int? = nil
+    var gameY: Int? = nil
+    var mapObjective: Bool = true
+    var effect: String = ""
+    var acquire: String = ""
+    var wiki: String = ""
+    var icon: String = ""
+    var source: String = ""
+}
+
+/// A player-chosen equipment goal. Mirrors `focusedWalkthroughStepId`:
+/// player-owned intent, separate from the route recommendation. One at a
+/// time; setting a new target replaces the old one.
+struct GearTarget: Codable, Hashable {
+    let memberId: String
+    let buildId: String
+    let gearId: String
+}
+
 struct BuildSummary: Codable, Identifiable, Hashable {
     let id: String
     let name: String
@@ -222,6 +303,11 @@ struct BuildSummary: Codable, Identifiable, Hashable {
     let finalSplit: String
     let classProgression: String
     let startingAbilities: String
+    var startingAbilityScores: AbilityScores? = nil
+    var targetAbilityScores: AbilityScores? = nil
+    var targetAbilityNote: String? = nil
+    var abilitySetups: [AbilitySetupPlan]? = nil
+    var abilitySources: [AbilityPlanSource]? = nil
     let playPattern: String
     let caveat: String
     let source: String
@@ -229,18 +315,110 @@ struct BuildSummary: Codable, Identifiable, Hashable {
     let gear: [BuildGear]
 }
 
+struct AbilityScores: Codable, Hashable {
+    var strength: Int
+    var dexterity: Int
+    var constitution: Int
+    var intelligence: Int
+    var wisdom: Int
+    var charisma: Int
+
+    static let customDefault = AbilityScores(
+        strength: 16, dexterity: 14, constitution: 14,
+        intelligence: 10, wisdom: 12, charisma: 10
+    )
+
+    static func forClass(_ className: String?) -> AbilityScores {
+        switch className?.lowercased() {
+        case "barbarian": .init(strength: 17, dexterity: 13, constitution: 15, intelligence: 8, wisdom: 12, charisma: 10)
+        case "bard": .init(strength: 8, dexterity: 15, constitution: 13, intelligence: 12, wisdom: 10, charisma: 17)
+        case "cleric": .init(strength: 14, dexterity: 12, constitution: 15, intelligence: 8, wisdom: 17, charisma: 10)
+        case "druid": .init(strength: 10, dexterity: 14, constitution: 15, intelligence: 8, wisdom: 17, charisma: 10)
+        case "fighter": .init(strength: 17, dexterity: 13, constitution: 15, intelligence: 10, wisdom: 12, charisma: 8)
+        case "monk": .init(strength: 12, dexterity: 17, constitution: 14, intelligence: 8, wisdom: 14, charisma: 10)
+        case "paladin": .init(strength: 17, dexterity: 12, constitution: 13, intelligence: 8, wisdom: 10, charisma: 16)
+        case "ranger": .init(strength: 12, dexterity: 17, constitution: 14, intelligence: 8, wisdom: 16, charisma: 8)
+        case "rogue": .init(strength: 8, dexterity: 17, constitution: 14, intelligence: 13, wisdom: 13, charisma: 10)
+        case "sorcerer": .init(strength: 8, dexterity: 13, constitution: 15, intelligence: 12, wisdom: 10, charisma: 17)
+        case "warlock": .init(strength: 8, dexterity: 13, constitution: 14, intelligence: 13, wisdom: 10, charisma: 17)
+        case "wizard": .init(strength: 8, dexterity: 13, constitution: 15, intelligence: 17, wisdom: 10, charisma: 12)
+        default: .customDefault
+        }
+    }
+}
+
+struct ImportedLoadoutCharacter: Codable, Hashable {
+    let name: String
+    let className: String
+    let level: Int
+    let isCustom: Bool
+    let abilityScores: AbilityScores
+    let build: BuildSummary
+}
+
+struct ImportedLoadout: Codable, Identifiable, Hashable {
+    let id: String
+    let name: String
+    let sourceUrl: String
+    let characters: [ImportedLoadoutCharacter]
+}
+
+struct ImportedBuild: Codable, Identifiable, Hashable {
+    let id: String
+    let name: String
+    let sourceUrl: String
+    let build: BuildSummary
+}
+
+struct LoadoutImportRequest: Codable {
+    let url: String
+}
+
 struct StoryCompanion: Identifiable, Hashable {
     var id: String { name }
     let name: String
     let defaultClass: String
 
-    static let actOne = [
+    static let origins = [
         StoryCompanion(name: "Shadowheart", defaultClass: "Cleric"),
         StoryCompanion(name: "Lae'zel", defaultClass: "Fighter"),
         StoryCompanion(name: "Astarion", defaultClass: "Rogue"),
         StoryCompanion(name: "Gale", defaultClass: "Wizard"),
         StoryCompanion(name: "Wyll", defaultClass: "Warlock"),
         StoryCompanion(name: "Karlach", defaultClass: "Barbarian"),
+    ]
+
+    static let recruitable = [
+        StoryCompanion(name: "Halsin", defaultClass: "Druid"),
+        StoryCompanion(name: "Minthara", defaultClass: "Paladin"),
+        StoryCompanion(name: "Jaheira", defaultClass: "Druid"),
+        StoryCompanion(name: "Minsc", defaultClass: "Ranger"),
+    ]
+
+    static let all = origins + recruitable
+}
+
+struct WithersHireling: Identifiable, Hashable {
+    var id: String { name }
+    let name: String
+    let race: String
+    let defaultClass: String
+
+    var defaultAbilityScores: AbilityScores { .forClass(defaultClass) }
+
+    static let all = [
+        WithersHireling(name: "Eldra Luthrinn", race: "Gold Dwarf", defaultClass: "Barbarian"),
+        WithersHireling(name: "Brinna Brightsong", race: "Lightfoot Halfling", defaultClass: "Bard"),
+        WithersHireling(name: "Zenith Feur'sel", race: "High Elf", defaultClass: "Cleric"),
+        WithersHireling(name: "Danton", race: "Mephistopheles Tiefling", defaultClass: "Druid"),
+        WithersHireling(name: "Varanna Sunblossom", race: "Wood Half-Elf", defaultClass: "Fighter"),
+        WithersHireling(name: "Sina'zith", race: "Githyanki", defaultClass: "Monk"),
+        WithersHireling(name: "Kerz", race: "Half-Orc", defaultClass: "Paladin"),
+        WithersHireling(name: "Ver'yll Wenkiir", race: "Seldarine Drow", defaultClass: "Ranger"),
+        WithersHireling(name: "Maddala Deadeye", race: "Human", defaultClass: "Rogue"),
+        WithersHireling(name: "Jacelyn", race: "High Half-Elf", defaultClass: "Sorcerer"),
+        WithersHireling(name: "Kree Derryck", race: "Duergar", defaultClass: "Warlock"),
+        WithersHireling(name: "Sir Fuzzalump", race: "Rock Gnome", defaultClass: "Wizard"),
     ]
 }
 
@@ -266,8 +444,24 @@ struct PartyMember: Codable, Identifiable, Hashable {
     var status: RosterStatus? = nil
     var roleOverride: String? = nil
     var isCustom: Bool? = nil
+    var abilityScores: AbilityScores? = nil
+    var isHireling: Bool? = nil
+    var sourceLoadoutId: String? = nil
+    var abilityModifiers: [AbilityModifier]? = nil
+    var usesBuildAbilityScores: Bool? = nil
+    var appliedAbilitySetupId: String? = nil
 
     var rosterStatus: RosterStatus { status ?? .active }
+
+    var effectiveAbilityScores: AbilityScores {
+        abilityScores ?? .forClass(className)
+    }
+}
+
+struct PartyUndoState {
+    let message: String
+    let roster: [PartyMember]
+    let equippedByMember: [String: Set<String>]
 }
 
 struct CheckpointProgress: Codable, Hashable {
@@ -278,6 +472,22 @@ struct CheckpointProgress: Codable, Hashable {
     var checkedCompletion: Set<String> = []
     var skipNote = ""
     var updatedAt = Date()
+}
+
+enum ActGearReviewStatus: String, Codable, CaseIterable, Identifiable {
+    case obtained
+    case missed
+
+    var id: String { rawValue }
+}
+
+struct ActTransitionRecord: Codable, Hashable, Identifiable {
+    var id: String { "\(fromAct)-\(toAct)" }
+    let fromAct: Int
+    let toAct: Int
+    let gearReview: [String: ActGearReviewStatus]
+    let unresolvedRouteCount: Int
+    let advancedAt: Date
 }
 
 struct HonorRun: Codable {
@@ -304,8 +514,13 @@ struct HonorRun: Codable {
     // recommendation. Open-world runs are allowed to diverge without losing
     // the recommended sequence.
     var focusedWalkthroughStepId: String?
+    // Player-chosen equipment goal; shown on the Now page instead of the
+    // route goal until acquired or cleared. Optional so old snapshots decode.
+    var gearTarget: GearTarget?
     var selectedCheckpointId: String?
     var selectedAct: Int? = 1
+    var actGearReview: [Int: [String: ActGearReviewStatus]]?
+    var actTransitions: [ActTransitionRecord]?
     var mapRegion = "Wilderness"
     var mutedCheckpointIds: Set<String>?
 
@@ -340,9 +555,16 @@ struct HonorRun: Codable {
             if members[index].isCustom == nil {
                 members[index].isCustom = members[index].id == "tav" || index == 0
             }
+            if members[index].abilityScores == nil {
+                members[index].abilityScores = members[index].isCustom == true
+                    ? .customDefault
+                    : .forClass(members[index].className)
+            }
+            if members[index].isHireling == nil { members[index].isHireling = false }
         }
         let existingNames = Set(members.map { $0.name.lowercased() })
-        for companion in StoryCompanion.actOne where !existingNames.contains(companion.name.lowercased()) {
+        let recruitableNames = Set(StoryCompanion.recruitable.map { $0.name.lowercased() })
+        for companion in StoryCompanion.all where !existingNames.contains(companion.name.lowercased()) {
             let stableID = companion.name.lowercased()
                 .replacingOccurrences(of: "'", with: "")
                 .replacingOccurrences(of: " ", with: "-")
@@ -353,7 +575,7 @@ struct HonorRun: Codable {
                 buildId: nil,
                 preparedTags: [],
                 className: companion.defaultClass,
-                status: .camp,
+                status: recruitableNames.contains(companion.name.lowercased()) ? .unrecruited : .camp,
                 roleOverride: nil,
                 isCustom: false
             ))
@@ -369,6 +591,8 @@ struct HonorRun: Codable {
         if includeCampPlans == nil { includeCampPlans = false }
         if equippedByMember == nil { equippedByMember = [:] }
         if equipmentOwnershipKnown == nil { equipmentOwnershipKnown = false }
+        if actGearReview == nil { actGearReview = [:] }
+        if actTransitions == nil { actTransitions = [] }
     }
 
     var activeParty: [PartyMember] {
@@ -433,6 +657,21 @@ struct RoutePayload: Codable {
     let checkpoints: [RouteCheckpoint]
     let builds: [BuildSummary]
     let walkthrough: [WalkthroughStep]
+    let acts: [ActGuideSummary]
+}
+
+struct ActGuideSummary: Codable, Identifiable, Hashable {
+    var id: Int { act }
+    let act: Int
+    let title: String
+    let routeAvailable: Bool
+    let localMapAvailable: Bool
+    let mapName: String
+    let mapUrl: String
+    let equipmentFile: String
+    let coordinateSystem: String
+    let coordinateNote: String
+    let equipmentCount: Int
 }
 
 struct BackendHealth: Codable, Equatable {
@@ -520,13 +759,15 @@ struct ChatResponse: Codable {
 
 enum PlannerTab: String, CaseIterable, Identifiable {
     case current = "Now"
-    case route = "Run"
+    case route = "Route"
     case party = "Party"
+    case loadout = "Loadout"
+    case act = "Act"
     case chat = "Chat"
     case settings = "Settings"
     var id: String { rawValue }
 
-    static let primary: [PlannerTab] = [.current, .route, .party]
+    static let primary: [PlannerTab] = [.current, .route, .party, .loadout, .act]
 }
 
 enum OverlayDensity: String, CaseIterable, Identifiable {
