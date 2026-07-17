@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS build_items(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     build_id TEXT NOT NULL REFERENCES builds(build_id) ON DELETE CASCADE,
     item_key TEXT NOT NULL REFERENCES items(item_key),
+    item_label TEXT NOT NULL DEFAULT '',
     act INTEGER NOT NULL,
     priority TEXT NOT NULL DEFAULT '',
     minimum_level INTEGER NOT NULL DEFAULT 1,
@@ -211,16 +212,17 @@ def _insert_build(
             _upsert_item(connection, gear)
         connection.execute(
             """
-            INSERT INTO build_items(build_id, item_key, act, priority, minimum_level,
+            INSERT INTO build_items(build_id, item_key, item_label, act, priority, minimum_level,
                 maximum_level, requirement, alternative, why)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(build_id, item_key, act) DO UPDATE SET
+                item_label = excluded.item_label,
                 priority = excluded.priority, minimum_level = excluded.minimum_level,
                 maximum_level = excluded.maximum_level, requirement = excluded.requirement,
                 alternative = excluded.alternative, why = excluded.why
             """,
             (
-                build.id, item_key(gear.item), gear.act, gear.priority,
+                build.id, item_key(gear.item), gear.item, gear.act, gear.priority,
                 gear.minimum_level, gear.maximum_level, gear.requirement,
                 gear.alternative, gear.why,
             ),
@@ -240,6 +242,118 @@ def _seed(connection: sqlite3.Connection) -> None:
             connection, build, origin="seed", source_url=build.source,
             import_id=None, overwrite_items=True,
         )
+
+
+def _gear_from_join(row: sqlite3.Row, build_ids: list[str]) -> BuildGear:
+    """Build one BuildGear from a build_items × items joined row.
+
+    The SELECT must list bi.* before i.* — on duplicate column names
+    (act, item_key) sqlite3.Row keeps the first occurrence, and the
+    join row's act (the build's opinion) is the one that matters.
+    """
+    return BuildGear(
+        item=row["item_label"] or row["name"], slot=row["slot"],
+        priority=row["priority"], act=row["act"],
+        region=row["region"], acquisition=row["acquisition"],
+        why=row["why"], source=row["source"], build_ids=build_ids,
+        minimum_level=row["minimum_level"], maximum_level=row["maximum_level"],
+        requirement=row["requirement"], map_objective=bool(row["map_objective"]),
+        alternative=row["alternative"], effect=row["effect"],
+        acquire=row["acquire"], wiki=row["wiki"], icon=row["icon"],
+        game_x=row["game_x"], game_y=row["game_y"],
+    )
+
+
+def catalog_builds() -> list[BuildSummary]:
+    ensure_seeded()
+    with _connect() as connection:
+        builds = []
+        for row in connection.execute(
+            "SELECT * FROM builds ORDER BY origin = 'import', created_at, build_id"
+        ).fetchall():
+            level_rows = connection.execute(
+                "SELECT * FROM build_levels WHERE build_id = ? ORDER BY level", (row["build_id"],)
+            ).fetchall()
+            join_rows = connection.execute(
+                """
+                SELECT bi.*, i.* FROM build_items bi
+                JOIN items i ON i.item_key = bi.item_key
+                WHERE bi.build_id = ? ORDER BY bi.id
+                """,
+                (row["build_id"],),
+            ).fetchall()
+            builds.append(BuildSummary(
+                id=row["build_id"], name=row["name"], honor_status=row["honor_status"],
+                role=row["role"], final_split=row["final_split"],
+                class_progression=row["class_progression"],
+                starting_abilities=row["starting_abilities"],
+                starting_ability_scores=AbilityScores.model_validate_json(row["starting_scores_json"]) if row["starting_scores_json"] else None,
+                target_ability_scores=AbilityTargetScores.model_validate_json(row["target_scores_json"]) if row["target_scores_json"] else None,
+                target_ability_note=row["target_ability_note"],
+                ability_setups=json.loads(row["ability_setups_json"]),
+                ability_sources=json.loads(row["ability_sources_json"]),
+                play_pattern=row["play_pattern"], caveat=row["caveat"],
+                source=row["source_url"],
+                levels=[
+                    BuildLevel(
+                        level=lr["level"], take=lr["take"], subclass_choice=lr["subclass_choice"],
+                        choices=lr["choices"], tactics=lr["tactics"], confidence=lr["confidence"],
+                        ability_score_reset=AbilityScores.model_validate_json(lr["ability_score_reset_json"]) if lr["ability_score_reset_json"] else None,
+                    )
+                    for lr in level_rows
+                ],
+                gear=[_gear_from_join(jr, [row["build_id"]]) for jr in join_rows],
+            ))
+        return builds
+
+
+def catalog_gear(act: int | None = None) -> list[BuildGear]:
+    """Item-wise gear rows (one per item+act, build_ids merged) for map markers
+    and the per-act equipment endpoint. Matches the legacy shared-TSV-row shape."""
+    ensure_seeded()
+    if act is not None and act not in (1, 2, 3):
+        raise KeyError(act)
+    with _connect() as connection:
+        clause = "WHERE bi.act = ?" if act is not None else ""
+        rows = connection.execute(
+            f"""
+            SELECT bi.*, i.*, GROUP_CONCAT(bi.build_id, ';') AS merged_build_ids
+            FROM build_items bi JOIN items i ON i.item_key = bi.item_key
+            {clause}
+            GROUP BY bi.item_key, bi.act ORDER BY MIN(bi.id)
+            """,
+            (act,) if act is not None else (),
+        ).fetchall()
+        return [
+            _gear_from_join(row, sorted(set((row["merged_build_ids"] or "").split(";"))))
+            for row in rows
+        ]
+
+
+def list_items(act: int | None = None, slot: str | None = None) -> list[CatalogItem]:
+    ensure_seeded()
+    with _connect() as connection:
+        clauses, params = [], []
+        if act is not None:
+            clauses.append("act = ?")
+            params.append(act)
+        if slot is not None:
+            clauses.append("LOWER(slot) = LOWER(?)")
+            params.append(slot)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        rows = connection.execute(
+            f"SELECT * FROM items {where} ORDER BY slot, name", params
+        ).fetchall()
+        return [
+            CatalogItem(
+                item_key=row["item_key"], name=row["name"], slot=row["slot"], act=row["act"],
+                region=row["region"], acquisition=row["acquisition"],
+                game_x=row["game_x"], game_y=row["game_y"],
+                map_objective=bool(row["map_objective"]), effect=row["effect"],
+                acquire=row["acquire"], wiki=row["wiki"], icon=row["icon"], source=row["source"],
+            )
+            for row in rows
+        ]
 
 
 def _migrate_custom_loadouts(connection: sqlite3.Connection) -> None:

@@ -42,6 +42,32 @@ def test_seed_is_idempotent(db_path):
     assert table_count(db_path, "build_items") == first
 
 
+def test_catalog_builds_match_tsv_seed(db_path):
+    expected = {(b.id, b.name, len(b.levels), len(b.gear)) for b in tsv_builds()}
+    actual = {(b.id, b.name, len(b.levels), len(b.gear)) for b in catalog.catalog_builds()}
+    assert actual == expected
+    sample = next(b for b in catalog.catalog_builds() if b.id == "SB-1011")
+    tsv_sample = next(b for b in tsv_builds() if b.id == "SB-1011")
+    assert {g.item for g in sample.gear} == {g.item for g in tsv_sample.gear}
+    assert sample.target_ability_scores == tsv_sample.target_ability_scores
+    assert [level.take for level in sample.levels] == [level.take for level in tsv_sample.levels]
+
+
+def test_catalog_gear_merges_build_ids(db_path):
+    rows = catalog.catalog_gear(act=1)
+    caustic = next(row for row in rows if row.item.startswith("Caustic Band"))
+    assert len(caustic.build_ids) >= 2  # shared TSV row references several builds
+    assert all(row.act == 1 for row in rows)
+
+
+def test_list_items_filters(db_path):
+    helmets = catalog.list_items(act=1, slot="Head")
+    assert helmets
+    assert all(item.slot == "Head" and item.act == 1 for item in helmets)
+    everything = catalog.list_items()
+    assert len(everything) > len(helmets)
+
+
 def test_seed_records_version_and_item_facts(db_path):
     catalog.ensure_seeded()
     with sqlite3.connect(db_path) as connection:
