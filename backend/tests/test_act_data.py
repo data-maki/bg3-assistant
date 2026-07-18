@@ -11,10 +11,10 @@ client = TestClient(app)
 
 
 def test_act_catalog_uses_separate_equipment_databases():
-    response = client.get("/api/acts")
+    response = client.get("/api/acts/1/guide")
     assert response.status_code == 200
-    acts = response.json()
-    assert [entry["equipmentFile"] for entry in acts] == [
+    acts = response.json()["acts"]
+    assert [entry["equipment_file"] for entry in acts] == [
         "gear/act1.tsv",
         "gear/act2.tsv",
         "gear/act3.tsv",
@@ -25,9 +25,9 @@ def test_act_catalog_uses_separate_equipment_databases():
         len({item_key(item.item) for item in load_gear(act)})
         for act in (1, 2, 3)
     ]
-    assert [entry["equipmentCount"] for entry in acts] == expected
-    assert acts[0]["routeAvailable"] is True
-    assert acts[1]["routeAvailable"] is False
+    assert [entry["equipment_count"] for entry in acts] == expected
+    assert acts[0]["route_available"] is True
+    assert acts[1]["route_available"] is False
 
 
 def test_act_two_equipment_is_isolated_and_coordinate_backed():
@@ -38,28 +38,17 @@ def test_act_two_equipment_is_isolated_and_coordinate_backed():
     helmet = next(item for item in act_two if item.item == "Helmet of Arcane Acuity")
     assert (helmet.game_x, helmet.game_y) == (107, -758)
 
-    response = client.get("/api/acts/2/map")
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["mapName"] == "Shadow-Cursed Lands"
-    assert payload["mapUrl"].endswith("/shadow-cursed-lands")
-    assert len(payload["equipment"]) == len({item_key(item.item) for item in act_two if item.map_objective})
-
 
 def test_unknown_act_is_not_exposed():
-    assert client.get("/api/acts/4/equipment").status_code == 404
-    assert client.get("/api/acts/4/map").status_code == 404
     assert client.get("/api/acts/4/guide").status_code == 404
 
 
 def test_act_guides_are_isolated_and_act_three_is_app_ready():
-    act_one = client.get("/api/act1/route")
-    generic_act_one = client.get("/api/acts/1/guide")
+    act_one = client.get("/api/acts/1/guide")
     act_two = client.get("/api/acts/2/guide")
     act_three = client.get("/api/acts/3/guide")
 
-    assert act_one.status_code == generic_act_one.status_code == 200
-    assert act_one.json() == generic_act_one.json()
+    assert act_one.status_code == 200
     assert act_two.status_code == 200
     assert act_two.json()["act"] == 2
     assert act_two.json()["routeAvailable"] is False

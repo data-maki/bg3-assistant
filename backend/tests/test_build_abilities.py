@@ -50,7 +50,7 @@ def test_ability_plan_uses_native_and_browser_key_aliases():
 
 def test_native_and_map_endpoints_publish_ability_recipes():
     client = TestClient(main.app)
-    native_build = next(build for build in client.get("/api/act1/route").json()["builds"] if build["id"] == "SB-1011")
+    native_build = next(build for build in client.get("/api/acts/1/guide").json()["builds"] if build["id"] == "SB-1011")
     map_build = next(build for build in client.get("/api/act1/markers").json()["builds"] if build["id"] == "SB-1011")
     assert native_build["ability_setups"][1]["id"] == "respec-l8"
     assert native_build["target_ability_note"]

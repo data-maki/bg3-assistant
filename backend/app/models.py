@@ -255,26 +255,6 @@ class ActGuideSummary(CamelModel):
     equipment_count: int = 0
 
 
-class ActMapEquipment(CamelModel):
-    item: str
-    area: str
-    acquisition: str
-    source: str
-    build_ids: list[str] = Field(default_factory=list)
-    game_x: int | None = None
-    game_y: int | None = None
-
-
-class ActMapIndex(CamelModel):
-    act: int = Field(ge=1, le=3)
-    title: str
-    map_name: str
-    map_url: str
-    coordinate_system: str
-    coordinate_note: str
-    equipment: list[ActMapEquipment] = Field(default_factory=list)
-
-
 class ImportedBuildLevel(StrictCamelModel):
     level: int = Field(ge=1, le=12)
     take: str
@@ -309,20 +289,6 @@ class ImportedBuildDraft(StrictCamelModel):
     caveat: str
     levels: list[ImportedBuildLevel]
     gear: list[ImportedBuildGear]
-
-
-class ImportedCharacterDraft(StrictCamelModel):
-    name: str
-    class_name: str
-    level: int = Field(ge=1, le=12)
-    is_custom: bool
-    ability_scores: AbilityScores
-    build: ImportedBuildDraft
-
-
-class ImportedPartyDraft(StrictCamelModel):
-    name: str
-    characters: list[ImportedCharacterDraft] = Field(min_length=1, max_length=12)
 
 
 class ImportedLoadoutCharacter(CamelModel):
@@ -663,8 +629,3 @@ class ActOneMap(CamelModel):
     mapgenie_url: str
     mapgenie: MapTiles
     coordinate_note: str
-
-
-class LatLng(BaseModel):
-    lat: float
-    lng: float

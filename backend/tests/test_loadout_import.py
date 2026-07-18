@@ -172,7 +172,7 @@ def test_imported_builds_are_available_to_native_and_map_clients(tmp_path: Path,
         imported = loadout_import._normalize(sample_draft(), "https://example.com/build")
         catalog.save_imported_build(imported)
         client = TestClient(main.app)
-        native = client.get("/api/act1/route").json()
+        native = client.get("/api/acts/1/guide").json()
         web_map = client.get("/api/act1/markers").json()
         build_id = imported.build.id
         assert build_id in {build["id"] for build in native["builds"]}

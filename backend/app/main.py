@@ -7,19 +7,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import catalog, guide_chat, llm_chat, loadout_import, stores
+from . import catalog, llm_chat, loadout_import, stores
 from .config import get_settings
-from .map_data import load_act_map_index, load_act_one_map
+from .map_data import load_act_one_map
 from .models import (
-    ActGuideSummary,
-    ActMapIndex,
     ActOneMap,
-    BuildGear,
     ChatRequest,
     ChatResponse,
     HealthResponse,
     ImportedBuild,
-    LatLng,
     LoadoutImportRequest,
     PositionResponse,
     PositionUpdateRequest,
@@ -85,39 +81,13 @@ def act_one_markers() -> ActOneMap:
     return load_act_one_map()
 
 
-@app.get("/api/acts", response_model=list[ActGuideSummary])
-def acts() -> list[ActGuideSummary]:
-    return load_act_catalog()
-
-
-@app.get("/api/acts/{act}/equipment", response_model=list[BuildGear])
-def act_equipment(act: int) -> list[BuildGear]:
-    try:
-        return catalog.catalog_gear(act)
-    except KeyError as exc:
-        raise HTTPException(status_code=404, detail=f"Unknown act: {act}") from exc
-
-
 @app.get("/api/items")
 def catalog_items(act: int | None = None, slot: str | None = None) -> JSONResponse:
     # Snake_case dump to match the Mac app's convertFromSnakeCase decoder,
-    # same style as /api/act1/route.
+    # same style as /api/acts/{act}/guide.
     return JSONResponse(
         content=[item.model_dump(mode="json") for item in catalog.list_items(act=act, slot=slot)]
     )
-
-
-@app.get("/api/acts/{act}/map", response_model=ActMapIndex)
-def act_map(act: int) -> ActMapIndex:
-    try:
-        return load_act_map_index(act)
-    except KeyError as exc:
-        raise HTTPException(status_code=404, detail=f"Unknown act: {act}") from exc
-
-
-@app.get("/api/act1/route")
-def act_one_route() -> JSONResponse:
-    return act_guide(1)
 
 
 @app.get("/api/acts/{act}/guide")
@@ -141,11 +111,6 @@ def act_guide(act: int) -> JSONResponse:
             "acts": [item.model_dump(mode="json") for item in acts],
         }
     )
-
-
-@app.get("/api/builds/custom", response_model=list[ImportedBuild])
-def custom_builds() -> list[ImportedBuild]:
-    return catalog.imported_builds()
 
 
 @app.post("/api/builds/import", response_model=ImportedBuild)
@@ -172,11 +137,6 @@ def import_custom_build(request: LoadoutImportRequest) -> ImportedBuild:
         raise HTTPException(status_code=502, detail="The build could not be processed. Try another public URL.") from exc
     catalog.save_imported_build(imported)
     return imported
-
-
-@app.post("/api/act1/readiness", response_model=ReadinessResponse)
-def readiness(request: ReadinessRequest) -> ReadinessResponse:
-    return act_readiness(1, request)
 
 
 @app.post("/api/acts/{act}/readiness", response_model=ReadinessResponse)

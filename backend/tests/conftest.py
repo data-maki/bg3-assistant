@@ -1,6 +1,13 @@
 """Shared fixtures and helpers for the backend test suite."""
 
+import os
 from pathlib import Path
+
+# Tests must exercise the deterministic guide path regardless of the
+# developer's environment; a real key here would route chat through the live
+# LLM and make assertions network-dependent. Set before any app import so the
+# cached Settings never sees the real key.
+os.environ["OPENROUTER_API_KEY"] = ""
 
 import pytest
 

@@ -136,7 +136,7 @@ def test_route_payload_builds_come_from_catalog(db_path, monkeypatch):
     imported = _normalize(sample_draft(), "https://example.com/payload")
     catalog.save_imported_build(imported)
     client = TestClient(main.app)
-    payload = client.get("/api/act1/route").json()
+    payload = client.get("/api/acts/1/guide").json()
     ids = {build["id"] for build in payload["builds"]}
     assert imported.build.id in ids
     assert any(build["id"] == "SB-1011" for build in payload["builds"])
