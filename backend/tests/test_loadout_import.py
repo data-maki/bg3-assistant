@@ -56,7 +56,7 @@ def test_normalized_import_produces_reusable_build_contract():
     assert not hasattr(imported, "characters")
 
 
-def test_import_rejects_impossible_starting_ability_allocation(db_path, monkeypatch):
+def test_import_rejects_impossible_starting_ability_allocation(monkeypatch):
     """An LLM response with illegal starting scores yields the targeted 422, not a generic 502."""
     payload = sample_draft().model_dump(by_alias=True)
     payload["startingAbilityScores"] = {
@@ -111,11 +111,15 @@ def test_structured_output_schema_rejects_unknown_fields():
     assert schema["$defs"]["AbilityScores"]["additionalProperties"] is False
 
 
-def test_import_endpoint_nudges_when_openrouter_key_is_missing(monkeypatch):
+def test_import_endpoint_reports_unavailable_when_openrouter_key_is_missing(monkeypatch):
+    # The key is backend-held; users have no key Settings, so the error must
+    # not send them looking for one.
     monkeypatch.setattr(main, "get_settings", lambda: Settings(OPENROUTER_API_KEY=""))
     response = TestClient(main.app).post("/api/builds/import", json={"url": "https://example.com/build"})
     assert response.status_code == 428
-    assert response.json()["detail"] == "An OpenRouter API key is required to import a build."
+    detail = response.json()["detail"]
+    assert "not available" in detail
+    assert "key" not in detail.lower()
 
 
 def test_import_endpoint_saves_validated_build(monkeypatch):
@@ -145,6 +149,7 @@ def test_gemini_request_uses_configured_model_and_strict_json_schema(monkeypatch
         return FakeResponse()
 
     monkeypatch.setattr(loadout_import.httpx, "post", fake_post)
+    assert Settings(OPENROUTER_API_KEY="test-key").openrouter_model == "google/gemini-3-flash-preview"
     actual = loadout_import._extract_draft(
         "https://example.com/build",
         "A sufficiently detailed public BG3 build page with levels, starting abilities, choices, tactics, and equipment.",

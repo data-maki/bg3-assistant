@@ -201,8 +201,8 @@
     "legendaryAction": "When attacked, Nere creates three duplicates. While a duplicate remains, he is immune to slashing, piercing, and bludgeoning damage.",
     "failureConditions": ["Gnomes die", "A character is shoved into lava", "The duergar and Nere are fought as one hostile group", "The cave-in timer expires"],
     "preparation": ["Reach level 5", "Visit Philomeen first", "Recruit Brithvar or clear duergar before freeing Nere", "Remove scrying eyes", "Keep the party away from lava and ledges"],
-    "completionChecks": ["Nere resolved", "Gnomes saved if intended", "Tadpole and head outcomes collected", "Thrinn's boots reward handled"],
-    "irreversibleWarnings": ["Nere's rescue becomes time-sensitive after entering Grymforge", "Visit Philomeen before resolving the cave-in"],
+    "completionChecks": ["Nere resolved", "Gnomes saved if intended", "Tadpole and head outcomes collected", "Disintegrating Night Walkers reward handled"],
+    "irreversibleWarnings": ["Nere's rescue becomes time-sensitive after interacting with or speaking through the cave-in", "Visit Philomeen before resolving the cave-in"],
     "prerequisites": ["fight-sussur-hook-horrors"],
     "notes": ["Killing the duergar first can make the Nere conversation and second fight safer."],
     "sourceRow": 17

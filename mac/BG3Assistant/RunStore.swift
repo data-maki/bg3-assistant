@@ -6,6 +6,11 @@ struct AssistantSettings: Codable, Equatable {
     /// Tour version last finished or skipped; nil shows the welcome tour.
     /// Optional so settings rows written before the tour existed still decode.
     var onboardingSeenVersion: Int? = nil
+    /// True only when the intake wizard was finished (not skipped). Gates
+    /// side effects that need informed consent, like the login item.
+    var onboardingCompleted: Bool? = nil
+    /// One-time hint bubbles already shown (HintID raw values).
+    var seenHints: [String]? = nil
 
     static func migrating(_ defaults: UserDefaults = .standard) -> AssistantSettings {
         AssistantSettings(

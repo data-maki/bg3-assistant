@@ -19,7 +19,7 @@ SOURCE_URL = (
     "https://docs.google.com/spreadsheets/d/"
     "1XLF6fH9D4uqmDfSoNzkTs1TuHxGn0K-4EJ82BVUQJqk/edit?gid=0#gid=0"
 )
-GUIDE_VERSION = "2026-07-18-all-act-review"
+GUIDE_VERSION = "2026-07-18-all-act-review-v2"
 
 
 @lru_cache(maxsize=3)
@@ -270,16 +270,15 @@ def assess_readiness(request: ReadinessRequest, act: int = 1) -> ReadinessRespon
     levels = [member.level for member in active_party]
     party_level = min(levels) if levels else 1
     completed = set(request.completed_checkpoint_ids)
-    resolved = completed | set(request.skipped_checkpoint_ids)
     blockers: list[str] = []
     warnings: list[str] = []
     build_actions: list[str] = []
 
     if not active_party:
         blockers.append("No active party is recorded; confirm the active group before using readiness.")
-    if party_level < checkpoint.minimum_level:
+    elif party_level < checkpoint.minimum_level:
         blockers.append(f"Lowest party member is level {party_level}; guide minimum is level {checkpoint.minimum_level}.")
-    missing_prerequisites = [item for item in checkpoint.prerequisites if item not in resolved]
+    missing_prerequisites = [item for item in checkpoint.prerequisites if item not in completed]
     if missing_prerequisites:
         names = [checkpoint_by_id(item, act).name for item in missing_prerequisites]
         blockers.append("Unresolved reviewed route sequence: " + ", ".join(names))

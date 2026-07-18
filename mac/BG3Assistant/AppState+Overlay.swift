@@ -78,4 +78,26 @@ extension AppState {
         if showOverlay && (forceOverlay || gameDetected && guideReady) { overlayController.show(appState: self, gameFrame: gameWindowFrame) }
         else { overlayController.hide() }
     }
+
+    // MARK: - One-time hints
+
+    /// Show a coach mark only when it can land: never over the wizard or a
+    /// pinned fight, never twice, and at most one per session so a first play
+    /// session is not a hint parade.
+    func maybeShowHint(_ hint: HintID) {
+        guard onboardingStep == nil,
+              activeHint == nil,
+              !hintShownThisSession,
+              !combatCardPinned,
+              !seenHints.contains(hint.rawValue) else { return }
+        activeHint = hint
+        hintShownThisSession = true
+    }
+
+    func dismissActiveHint() {
+        guard let hint = activeHint else { return }
+        seenHints.insert(hint.rawValue)
+        persistSettings()
+        activeHint = nil
+    }
 }

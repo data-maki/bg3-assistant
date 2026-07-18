@@ -17,102 +17,127 @@ struct OnboardingFact: Equatable {
     static func reward(_ text: String) -> OnboardingFact { .init(glyph: "★", role: .reward, text: text) }
 }
 
-/// Planner surface a tour step can hand off to when it finishes early.
-enum OnboardingHandoff {
-    case party
-    case settings
-
-    var title: String {
-        switch self {
-        case .party: "Open Party Tab"
-        case .settings: "Open Settings"
-        }
-    }
+/// How this run enters the assistant: from the Nautiloid beach, or adopted
+/// mid-run with a catch-up step that syncs the route ledger.
+enum OnboardingMode {
+    case fresh
+    case midRun
 }
 
-/// The first-run welcome tour, shown by the overlay in place of the planner
-/// or peek card until finished or skipped. Pure model (Foundation only) so
-/// the flow is verifiable without XCTest.
+/// The first-run intake wizard, shown by the overlay in place of the planner
+/// or peek card until finished or skipped. Unlike the old fact tour, every
+/// step captures run state; teaching moved to one-time hints. Pure model
+/// (Foundation only) so the flow is verifiable without XCTest.
 enum OnboardingStep: Int, CaseIterable {
     case welcome
-    case peek
-    case planner
     case party
-    case chat
+    case catchUp
+    case ready
 
-    /// Bump after a UX overhaul to re-show the tour once. Finishing or
+    /// Bump after a UX overhaul to re-show the wizard once. Finishing or
     /// skipping records this in `AssistantSettings.onboardingSeenVersion`.
-    static let version = 1
+    static let version = 2
 
-    var isFirst: Bool { self == Self.allCases.first }
-    var isLast: Bool { self == Self.allCases.last }
-    var next: OnboardingStep? { OnboardingStep(rawValue: rawValue + 1) }
-    var previous: OnboardingStep? { OnboardingStep(rawValue: rawValue - 1) }
-    var stepNumber: Int { rawValue + 1 }
+    static func steps(for mode: OnboardingMode) -> [OnboardingStep] {
+        mode == .midRun ? [.welcome, .party, .catchUp, .ready] : [.welcome, .party, .ready]
+    }
+
+    static func stepCount(for mode: OnboardingMode) -> Int { steps(for: mode).count }
+
+    func next(for mode: OnboardingMode) -> OnboardingStep? {
+        let steps = Self.steps(for: mode)
+        guard let index = steps.firstIndex(of: self), index + 1 < steps.count else { return nil }
+        return steps[index + 1]
+    }
+
+    func previous(for mode: OnboardingMode) -> OnboardingStep? {
+        let steps = Self.steps(for: mode)
+        guard let index = steps.firstIndex(of: self), index > 0 else { return nil }
+        return steps[index - 1]
+    }
+
+    func stepNumber(for mode: OnboardingMode) -> Int {
+        (Self.steps(for: mode).firstIndex(of: self) ?? 0) + 1
+    }
+
+    var isFirst: Bool { self == .welcome }
+
+    func isLast(for mode: OnboardingMode) -> Bool { next(for: mode) == nil }
 
     var title: String {
         switch self {
         case .welcome: "Well Met, Adventurer"
-        case .peek: "The Peek Card"
-        case .planner: "The Planner"
-        case .party: "Make It Your Party"
-        case .chat: "An Optional AI Seer"
+        case .party: "Who Is at Your Table?"
+        case .catchUp: "Where Are You?"
+        case .ready: "Ready to Adventure"
         }
     }
 
     var intro: String {
         switch self {
         case .welcome:
-            "This is your Honor Mode companion. It floats above Baldur's Gate 3 and keeps the run on the rails."
-        case .peek:
-            "Collapsed, the assistant shows only what matters right now."
-        case .planner:
-            "The chevron on the peek card — or the menu-bar shield — opens the full planner."
+            "Your Honor Mode companion floats above Baldur's Gate 3. Two quick questions and its advice matches your run — not a default one."
         case .party:
-            "Tell the assistant who you are actually playing so its advice matches your table."
-        case .chat:
-            "Add an OpenRouter API key in Settings to unlock chat about your run."
+            "Set who is actually in the party and their level. Fight readiness and danger warnings key off your lowest active level."
+        case .catchUp:
+            "Pick the last landmark you finished. Everything before it is marked caught up so the route resumes exactly where you are."
+        case .ready:
+            "Everything is saved locally on this Mac — no account, no sign-in. The guide works fully offline."
         }
     }
 
+    /// Short teaching facts for the final card; everything else is captured
+    /// state, not reading.
     var facts: [OnboardingFact] {
         switch self {
-        case .welcome: [
-            .action("The overlay appears automatically whenever BG3 is running."),
-            .insight("Advice comes from a curated act guide: route, fights, party, and gear."),
-            .reward("Everything is saved locally on this Mac — no account, no sign-in."),
-        ]
-        case .peek: [
-            .action("Your current task, its danger level, and what to avoid — at a glance."),
-            .action("Hold Option-Space to peek while playing; release to tuck it away."),
-            .action("Drag the card anywhere; it remembers its place."),
-            .insight("Right-click the card for density (Minimal · Focus · Reference) and snoozing warnings."),
-        ]
-        case .planner: [
-            .action("NOW recommends the next safe step; mark it done or skip it honestly."),
-            .action("ROUTE, PARTY, LOADOUT, and ACT hold the walkthrough, roster, and gear plan."),
+        case .ready: [
+            .action("Hold Option-Space to peek at the current task while playing."),
+            .action("The chevron on the card — or the menu-bar shield — opens the full planner."),
             .insight("The map button opens an interactive act map in your browser, synced to this run."),
+            .reward("Ask anything in CHAT; answers cite the guide they came from."),
         ]
-        case .party: [
-            .action("Set members, levels, and builds in the PARTY tab."),
-            .insight("Fight readiness and danger warnings key off your lowest party level."),
-            .reward("With builds chosen, the LOADOUT tab plans who carries every notable item."),
-        ]
-        case .chat: [
-            .action("Ask anything in CHAT; answers cite the guide they came from."),
-            .action("Attach a BG3 screenshot to ask about exactly what is on screen."),
-            .insight("No key? Everything else still works — the guide is fully local."),
-        ]
+        default: []
         }
     }
 
-    var primaryActionTitle: String { isLast ? "Start Adventuring" : "Continue" }
-
-    var handoff: OnboardingHandoff? {
+    /// nil = the step advances through its own controls (welcome's fork).
+    func primaryActionTitle(for mode: OnboardingMode) -> String? {
         switch self {
-        case .party: .party
-        case .chat: .settings
-        default: nil
+        case .welcome: nil
+        case .party: "Continue"
+        case .catchUp: "Catch Up & Continue"
+        case .ready: "Start Adventuring"
         }
+    }
+}
+
+/// Bulk mid-run adoption of the walkthrough ledger.
+enum CatchUp {
+    /// The ledger after marking every still-pending step up to and including
+    /// the landmark's owning step as `caughtUp`. Existing entries are
+    /// preserved — the player's explicit history always wins. Returns nil
+    /// when no walkthrough step owns the checkpoint.
+    static func ledger(
+        markingThrough checkpointId: String,
+        walkthrough: [WalkthroughStep],
+        existing: [String: CheckpointDisposition]
+    ) -> [String: CheckpointDisposition]? {
+        guard let landmark = walkthrough.first(where: { $0.checkpointId == checkpointId }) else { return nil }
+        var ledger = existing
+        for step in walkthrough where step.order <= landmark.order && ledger[step.id] == nil {
+            ledger[step.id] = .caughtUp
+        }
+        return ledger
+    }
+
+    /// How many steps `ledger(markingThrough:)` would newly mark — drives the
+    /// wizard's confirmation caption.
+    static func markedCount(
+        markingThrough checkpointId: String,
+        walkthrough: [WalkthroughStep],
+        existing: [String: CheckpointDisposition]
+    ) -> Int {
+        guard let landmark = walkthrough.first(where: { $0.checkpointId == checkpointId }) else { return 0 }
+        return walkthrough.count { $0.order <= landmark.order && existing[$0.id] == nil }
     }
 }

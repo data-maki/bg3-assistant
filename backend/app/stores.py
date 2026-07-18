@@ -228,10 +228,12 @@ def save_run_state(state: RunState) -> RunState:
 def _run_state_from_snapshot(snapshot: dict) -> RunState:
     raw_statuses = snapshot.get("walkthroughProgress") or {}
     focused = snapshot.get("focusedWalkthroughStepId")
+    # `caughtUp` is the native app's bulk mid-run adoption marker; the map
+    # vocabulary has no such distinction, so it reads as done.
     statuses = {
-        step_id: "done" if status == "completed" else status
+        step_id: "done" if status in {"completed", "caughtUp"} else status
         for step_id, status in raw_statuses.items()
-        if status in {"completed", "skipped"}
+        if status in {"completed", "caughtUp", "skipped"}
     }
     if focused and focused not in statuses:
         statuses[focused] = "revisit"
@@ -269,9 +271,12 @@ def _run_state_from_snapshot(snapshot: dict) -> RunState:
 def _merge_run_state_into_snapshot(snapshot: dict, state: RunState) -> None:
     progress: dict[str, str] = {}
     focus = state.focused_walkthrough_step_id
+    # The map can only say "done"; a step the native app marked caughtUp must
+    # keep that marker instead of being silently upgraded to completed.
+    original = snapshot.get("walkthroughProgress") or {}
     for step_id, status in state.walkthrough_statuses.items():
         if status == "done":
-            progress[step_id] = "completed"
+            progress[step_id] = "caughtUp" if original.get(step_id) == "caughtUp" else "completed"
         elif status == "skipped":
             progress[step_id] = "skipped"
         elif status == "revisit":

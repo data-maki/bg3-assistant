@@ -460,6 +460,10 @@ class HealthResponse(BaseModel):
     parent_pid: int
     packaged: bool
     walkthrough_count: int
+    # Whether server-side AI features (chat, build import) can run. The key
+    # lives with the backend; clients gate AI UI on this instead of holding
+    # their own credentials.
+    ai_available: bool = False
 
 
 class PlayerPosition(BaseModel):

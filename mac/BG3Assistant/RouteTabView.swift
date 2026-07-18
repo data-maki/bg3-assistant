@@ -10,6 +10,7 @@ struct RouteTabView: View {
     @State private var expandedPickupPhases: Set<Int> = []
     @State private var showsDone = false
     @State private var showsSkipped = false
+    @State private var showsCaughtUp = false
     @State private var showsOtherPickups = false
     @State private var showsGateDetail = false
     @State private var showsDeadlines = false
@@ -52,6 +53,7 @@ struct RouteTabView: View {
         expandedPickupPhases = []
         showsDone = false
         showsSkipped = false
+        showsCaughtUp = false
         showsOtherPickups = false
         showsGateDetail = false
         showsDeadlines = false
@@ -314,7 +316,7 @@ struct RouteTabView: View {
         // after a build or catalog refresh while pushed.
         let member = appState.activeParty.first { $0.id == memberId }
         let gear = member.flatMap { member in
-            appState.builds.first { $0.id == member.buildId }?.gear.first { $0.itemKey == itemKey }
+            appState.wantedGear(for: member).first { $0.itemKey == itemKey }
         }
         return VStack(alignment: .leading, spacing: 8) {
             Button {
@@ -345,6 +347,7 @@ struct RouteTabView: View {
     @ViewBuilder private func bottomSummaries(otherPickups: [GearLogic.Pickup]) -> some View {
         let done = appState.archivedWalkthroughSteps.filter { appState.walkthroughDisposition($0) == .completed }
         let skipped = appState.archivedWalkthroughSteps.filter { appState.walkthroughDisposition($0) == .skipped }
+        let caughtUp = appState.archivedWalkthroughSteps.filter { appState.walkthroughDisposition($0) == .caughtUp }
         VStack(spacing: 5) {
             if !skipped.isEmpty {
                 BG3Disclosure(
@@ -362,6 +365,14 @@ struct RouteTabView: View {
                     ForEach(done.sorted { $0.order > $1.order }) { archivedRow($0) }
                 }
             }
+            if !caughtUp.isEmpty {
+                BG3Disclosure(
+                    title: "Caught up (\(caughtUp.count))", systemImage: "clock.arrow.circlepath",
+                    tint: BG3Theme.bronzeBright, inset: true, isExpanded: $showsCaughtUp
+                ) {
+                    ForEach(caughtUp.sorted { $0.order > $1.order }) { archivedRow($0) }
+                }
+            }
             if !otherPickups.isEmpty {
                 BG3Disclosure(
                     title: "Other pickups (\(otherPickups.count))", systemImage: "bag.fill",
@@ -375,11 +386,21 @@ struct RouteTabView: View {
     }
 
     private func archivedRow(_ step: WalkthroughStep) -> some View {
-        let completed = appState.walkthroughDisposition(step) == .completed
+        let disposition = appState.walkthroughDisposition(step)
+        let icon = switch disposition {
+        case .completed: "checkmark.circle.fill"
+        case .caughtUp: "clock.arrow.circlepath"
+        default: "forward.circle.fill"
+        }
+        let tint = switch disposition {
+        case .completed: BG3Theme.success
+        case .caughtUp: BG3Theme.bronzeBright
+        default: BG3Theme.warning
+        }
         return HStack(spacing: 7) {
-            Image(systemName: completed ? "checkmark.circle.fill" : "forward.circle.fill")
+            Image(systemName: icon)
                 .font(.system(size: 11))
-                .foregroundStyle(completed ? BG3Theme.success : BG3Theme.warning)
+                .foregroundStyle(tint)
             VStack(alignment: .leading, spacing: 0) {
                 Text(step.title).font(BG3Type.body).foregroundStyle(BG3Theme.parchment).lineLimit(1)
                 Text(step.area).font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment).lineLimit(1)

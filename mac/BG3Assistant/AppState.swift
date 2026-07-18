@@ -25,15 +25,16 @@ final class AppState: ObservableObject {
     @Published var gameName = "Not detected"
     @Published var gameDetectionDetail = "Not checked yet"
     @Published var backendHealthy = false
+    @Published var backendAIAvailable = false
     @Published var backendStatus = "Not checked yet"
-    @Published var openRouterKeyDraft = ""
-    @Published private(set) var hasOpenRouterKey = OpenRouterKeyStore.load() != nil
-    @Published private(set) var openRouterKeyStatus = OpenRouterKeyStore.load() == nil
-        ? "Optional for AI features"
-        : "Saved in macOS Keychain"
     @Published var showOverlay = true { didSet { syncOverlay() } }
     @Published var forceOverlay = false { didSet { syncOverlay() } }
-    @Published var overlayExpanded = false { didSet { syncOverlay() } }
+    @Published var overlayExpanded = false {
+        didSet {
+            if overlayExpanded { maybeShowHint(.plannerMap) }
+            syncOverlay()
+        }
+    }
     @Published var moreContextExpanded = false { didSet { if overlayExpanded { syncOverlay() } } }
     @Published var plannerTab: PlannerTab = .current { didSet { if overlayExpanded { syncOverlay() } } }
     @Published var overlayDensity = OverlayDensity(
@@ -45,11 +46,22 @@ final class AppState: ObservableObject {
         }
     }
     @Published var hotkeyPeekActive = false { didSet { syncOverlay() } }
-    // The welcome tour renders in place of the planner/peek card while
+    // The active one-time coach mark; at most one per session (see
+    // maybeShowHint in AppState+Overlay).
+    @Published var activeHint: HintID? { didSet { syncOverlay() } }
+    var hintShownThisSession = false
+    // The intake wizard renders in place of the planner/peek card while
     // non-nil; only finishing or skipping records it as seen.
     @Published var onboardingStep: OnboardingStep? = (storedSettings.onboardingSeenVersion ?? 0) >= OnboardingStep.version
         ? nil : .welcome { didSet { syncOverlay() } }
+    @Published var onboardingMode: OnboardingMode = .fresh
+    @Published var onboardingCatchUpCheckpointId: String?
+    // Login-item consent, applied only when the wizard finishes (never on
+    // skip). Defaults on: the disclosure sits next to the toggle.
+    @Published var onboardingEnableLoginItem = true
     var onboardingSeenVersion: Int? = storedSettings.onboardingSeenVersion
+    var onboardingCompleted: Bool = storedSettings.onboardingCompleted ?? false
+    var seenHints: Set<String> = Set(storedSettings.seenHints ?? [])
     // Route step to scroll to and expand when the route tab opens (set by the
     // peek card's Talk shortcut so the current conversation is front and center).
     // Backed by the run so cross-process adoption can never desync it.
@@ -107,6 +119,7 @@ final class AppState: ObservableObject {
     private var loadingGuideAct: Int?
     private var guideLoadGeneration = 0
     private var readinessGeneration = 0
+    var chatGeneration = 0
     @Published private(set) var gameWindowFrame: CGRect?
 
     // Capture permission has three intentionally separate signals: raw TCC
@@ -148,7 +161,7 @@ final class AppState: ObservableObject {
     }
 
     var completedIds: [String] {
-        checkpointDispositions.compactMap { $0.value == .completed ? $0.key : nil }
+        checkpointDispositions.compactMap { $0.value.countsAsCompleted ? $0.key : nil }
     }
 
     var skippedIds: [String] {
@@ -453,7 +466,11 @@ final class AppState: ObservableObject {
                let rosterJSON = String(data: rosterData, encoding: .utf8) {
                 query.append(URLQueryItem(name: "roster", value: rosterJSON))
             }
-            if let walkthroughData = try? JSONEncoder().encode(run.walkthroughProgress ?? [:]),
+            // The map's status vocabulary has no caught-up notion; project it
+            // to completed for display (the run store keeps the distinction).
+            let mapProgress = (run.walkthroughProgress ?? [:])
+                .mapValues { $0 == .caughtUp ? CheckpointDisposition.completed : $0 }
+            if let walkthroughData = try? JSONEncoder().encode(mapProgress),
                let walkthroughJSON = String(data: walkthroughData, encoding: .utf8) {
                 query.append(URLQueryItem(name: "walkthrough", value: walkthroughJSON))
             }
@@ -702,6 +719,7 @@ final class AppState: ObservableObject {
     func resetGuideContext(load: Bool = true) {
         guideLoadGeneration &+= 1
         readinessGeneration &+= 1
+        invalidateChatRequests()
         loadingGuideAct = nil
         loadedGuideAct = nil
         loadedRouteAvailable = false
@@ -830,52 +848,19 @@ final class AppState: ObservableObject {
         gameName = detection.displayName
         gameDetectionDetail = detection.detail
         if gameWindowFrame != detection.windowFrame { gameWindowFrame = detection.windowFrame }
-        backendHealthy = await backendClient.health()
+        let health = await backendClient.healthDetails()
+        backendHealthy = health?.ok == true
+        backendAIAvailable = health?.aiAvailable == true
         backendStatus = backendHealthy ? "OK" : (backendProcess.isRunning ? "Process running, /health offline" : "Offline")
         if !backendHealthy { await startBackend() }
         await loadRouteIfNeeded()
+        // One-time hints fire at the moment of relevance: basics the first
+        // time the game is seen, fight tools the first pre-fight moment.
+        if gameDetected, !overlayExpanded {
+            maybeShowHint(.peekBasics)
+            if assistantPhase == .preflight { maybeShowHint(.fightTools) }
+        }
         syncOverlay()
-    }
-
-    @discardableResult
-    func saveOpenRouterKey() async -> Bool {
-        let key = openRouterKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !key.isEmpty else {
-            errorMessage = "Enter an OpenRouter key first."
-            return false
-        }
-        do {
-            try OpenRouterKeyStore.save(key)
-            openRouterKeyDraft = ""
-            hasOpenRouterKey = true
-            openRouterKeyStatus = "Saved in macOS Keychain"
-            errorMessage = nil
-            await restartBackendForOpenRouterKey()
-            return true
-        } catch {
-            errorMessage = error.localizedDescription
-            return false
-        }
-    }
-
-    func removeOpenRouterKey() async {
-        OpenRouterKeyStore.remove()
-        openRouterKeyDraft = ""
-        hasOpenRouterKey = false
-        chatScreenshot = nil
-        openRouterKeyStatus = "Optional for AI features"
-        await restartBackendForOpenRouterKey()
-    }
-
-    private func restartBackendForOpenRouterKey() async {
-        backendProcess.stop()
-        backendHealthy = false
-        backendStatus = "Restarting backend…"
-        for _ in 0..<20 {
-            if !(await backendClient.health()) { break }
-            try? await Task.sleep(for: .milliseconds(100))
-        }
-        await startBackend()
     }
 
 }
