@@ -71,7 +71,7 @@ def test_act_guides_are_isolated_and_act_three_is_app_ready():
     assert payload["act"] == 3
     assert payload["routeAvailable"] is True
     assert len(payload["checkpoints"]) == 13
-    assert len(payload["walkthrough"]) == 18
+    assert len(payload["walkthrough"]) == 19
     assert len(payload["timedEvents"]) == 9
     assert payload["checkpoints"][0]["x"] is None
     assert payload["checkpoints"][0]["y"] is None
@@ -92,6 +92,8 @@ def test_act_three_readiness_is_scoped_to_act_three():
     response = client.post("/api/acts/3/readiness", json=payload)
     assert response.status_code == 200
     assert response.json()["minimum_level"] == 10
+    assert any("No active party" in blocker for blocker in response.json()["blockers"])
+    assert not any("Lowest party member" in blocker for blocker in response.json()["blockers"])
     assert client.post("/api/acts/1/readiness", json=payload).status_code == 404
 
 
@@ -118,7 +120,7 @@ def test_readiness_uses_active_party_walkthrough_state_and_checked_preparation()
     assert not any("Preparation not confirmed" in warning for warning in payload["warnings"])
 
 
-def test_readiness_treats_skipped_route_prerequisite_as_resolved():
+def test_readiness_blocks_skipped_required_route_prerequisite():
     request = ReadinessRequest(
         checkpoint_id="act3-orin",
         party=[PartyMember(id="tav", name="Tav", level=12, status="active")],
@@ -128,7 +130,8 @@ def test_readiness_treats_skipped_route_prerequisite_as_resolved():
 
     payload = client.post("/api/acts/3/readiness", json=request.model_dump(mode="json")).json()
 
-    assert not any("Unresolved reviewed route sequence" in blocker for blocker in payload["blockers"])
+    assert any("Unresolved reviewed route sequence" in blocker for blocker in payload["blockers"])
+    assert any("Revisit" in blocker for blocker in payload["blockers"])
 
 
 def test_chat_accepts_reviewed_walkthrough_step_without_checkpoint():

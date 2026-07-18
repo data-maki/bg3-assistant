@@ -33,8 +33,8 @@ extension AppState {
             loadoutImportStatus = "Paste a public build URL first."
             return nil
         }
-        guard hasOpenRouterKey else {
-            loadoutImportStatus = "Add an OpenRouter API key above to import this build."
+        guard backendAIAvailable else {
+            loadoutImportStatus = "AI build import is not available right now. Check that the assistant is up to date."
             return nil
         }
         guard !isImportingLoadout else { return nil }
@@ -468,8 +468,7 @@ extension AppState {
     }
 
     func slotOverride(for member: PartyMember, cell: DollCell) -> String? {
-        let overrides = run.plannedSlotOverrides?[member.id]
-        return overrides?[cell.id] ?? (cell.field == 0 ? overrides?[cell.slot.id] : nil)
+        resolvedSlotOverride(for: member, cell: cell)?.itemKey
     }
 
     func setSlotOverride(_ slot: LoadoutSlot, itemKey: String?, for member: PartyMember) {
@@ -480,11 +479,29 @@ extension AppState {
         partyUndoState = nil
         var all = run.plannedSlotOverrides ?? [:]
         var mine = all[member.id] ?? [:]
+        if let existing = resolvedSlotOverride(for: member, cell: cell) {
+            mine.removeValue(forKey: existing.key)
+        }
         if cell.field == 0 { mine.removeValue(forKey: cell.slot.id) }
         mine[cell.id] = itemKey
         all[member.id] = mine.isEmpty ? nil : mine
         run.plannedSlotOverrides = all
         persistRun()
+    }
+
+    private func resolvedSlotOverride(for member: PartyMember, cell: DollCell) -> (key: String, itemKey: String)? {
+        for (key, itemKey) in run.plannedSlotOverrides?[member.id] ?? [:] {
+            guard let item = itemCatalog.first(where: { $0.itemKey == itemKey }) else { continue }
+            let slot = LoadoutSlot.classify(item.slot, item: item.name)
+            let effectiveID: String
+            if slot == .rings {
+                effectiveID = key.hasPrefix("\(slot.id)#") ? key : "\(slot.id)#0"
+            } else {
+                effectiveID = DollCell(slot: slot).id
+            }
+            if effectiveID == cell.id { return (key, itemKey) }
+        }
+        return nil
     }
 
     /// Cross-build claim on the same item: either the player already confirmed

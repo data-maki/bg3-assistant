@@ -66,6 +66,7 @@ def health() -> HealthResponse:
         parent_pid=os.getppid(),
         packaged=bool(getattr(sys, "frozen", False)),
         walkthrough_count=len(load_walkthrough()),
+        ai_available=bool(get_settings().openrouter_api_key),
     )
 
 
@@ -151,7 +152,7 @@ def custom_builds() -> list[ImportedBuild]:
 def import_custom_build(request: LoadoutImportRequest) -> ImportedBuild:
     settings = get_settings()
     if not settings.openrouter_api_key:
-        raise HTTPException(status_code=428, detail="Add an OpenRouter API key in Settings before importing a build.")
+        raise HTTPException(status_code=428, detail="AI build import is not available right now. Check that the assistant is up to date.")
     try:
         imported = loadout_import.import_build(request.url, settings)
     except loadout_import.LoadoutImportError as exc:

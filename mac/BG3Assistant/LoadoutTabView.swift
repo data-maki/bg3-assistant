@@ -51,7 +51,6 @@ struct LoadoutTabView: View {
     private var availableGear: [BuildGear] {
         guard let member else { return [] }
         return appState.wantedGear(for: member)
-            .sorted { GearLogic.priorityRank($0.priority) < GearLogic.priorityRank($1.priority) }
     }
 
     private var header: some View {

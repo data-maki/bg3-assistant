@@ -21,8 +21,7 @@ extension AppState {
         guard let target = run.gearTarget,
               let member = activeParty.first(where: { $0.id == target.memberId }),
               member.buildId == target.buildId,
-              let build = builds.first(where: { $0.id == target.buildId }),
-              let gear = build.gear.first(where: { $0.id == target.gearId }),
+              let gear = wantedGear(for: member).first(where: { $0.id == target.gearId }),
               gear.act == selectedAct
         else { return nil }
         return GearTargetContext(member: member, gear: gear)
@@ -88,7 +87,8 @@ extension AppState {
         for member in activeParty {
             let wanted = wantedGear(for: member)
                 .filter {
-                    gearOwner($0) == nil
+                    $0.act == selectedAct
+                        && gearOwner($0) == nil
                         && (plannedOwner(ofItemKey: $0.itemKey)?.id ?? member.id) == member.id
                 }
                 .sorted { GearLogic.priorityRank($0.priority) < GearLogic.priorityRank($1.priority) }

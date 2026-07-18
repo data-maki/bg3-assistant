@@ -225,4 +225,61 @@ final class RunSafetyTests: XCTestCase {
 
         XCTAssertEqual(RunSafety.routePhaseName(checkpoint), "Iron Throne")
     }
+
+    // MARK: caughtUp (mid-run adoption) semantics
+
+    func testCaughtUpCountsAsCompleted() {
+        XCTAssertTrue(CheckpointDisposition.caughtUp.countsAsCompleted)
+        XCTAssertTrue(CheckpointDisposition.completed.countsAsCompleted)
+        XCTAssertFalse(CheckpointDisposition.pending.countsAsCompleted)
+        XCTAssertFalse(CheckpointDisposition.skipped.countsAsCompleted)
+    }
+
+    func testCaughtUpSatisfiesCompletionRequiredDependency() {
+        let target = step(id: "b", order: 2, dependencies: [dependency(on: "a", kind: "completion_required")])
+        let blockers = RunSafety.dependencyBlockers(
+            for: target, walkthrough: [step(id: "a", order: 1), target],
+            walkthroughProgress: ["a": .caughtUp]
+        )
+        XCTAssertTrue(blockers.isEmpty)
+    }
+
+    func testCaughtUpSatisfiesOutcomeRequiredDependencyWithoutRecordedOutcome() {
+        // Catch-up assumes the guide's recommended path happened; no outcome
+        // is recorded, and the dependency must not nag forever.
+        let target = step(
+            id: "b", order: 2,
+            dependencies: [dependency(on: "a", kind: "outcome_required", requiredOutcome: "Spared")]
+        )
+        let blockers = RunSafety.dependencyBlockers(
+            for: target, walkthrough: [step(id: "a", order: 1), target],
+            walkthroughProgress: ["a": .caughtUp], walkthroughOutcomes: [:]
+        )
+        XCTAssertTrue(blockers.isEmpty)
+    }
+
+    func testRouteConsequencesIgnoreCaughtUpCheckpoints() {
+        let route = [
+            checkpoint(id: "adopted", routeOrder: 1, importance: "major", irreversibleWarnings: ["Point of no return"]),
+            checkpoint(id: "open", routeOrder: 2, importance: "major"),
+        ]
+        let consequences = RunSafety.routeConsequences(
+            route: route, dispositions: ["adopted": .caughtUp]
+        )
+        XCTAssertEqual(consequences, ["Unresolved — Name open: major checkpoint unresolved"])
+    }
+
+    func testNextStepRecommendsFirstPendingAfterCaughtUpBlock() {
+        let walkthrough = [
+            step(id: "a", order: 1),
+            step(id: "b", order: 2),
+            step(id: "c", order: 3),
+        ]
+        let next = RunSafety.nextWalkthroughStep(
+            walkthrough: walkthrough,
+            walkthroughProgress: ["a": .caughtUp, "b": .caughtUp],
+            selectedCheckpointId: nil, partyLevel: 3
+        )
+        XCTAssertEqual(next?.id, "c")
+    }
 }

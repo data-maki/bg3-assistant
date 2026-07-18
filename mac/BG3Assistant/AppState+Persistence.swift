@@ -15,6 +15,8 @@ extension AppState {
         sharedRunToken = token
         reloadSavedRuns()
         if guideContextChanged {
+            chatLines = []
+            chatScreenshot = nil
             resetGuideContext()
         } else {
             Task { await refreshReadiness() }
@@ -136,7 +138,7 @@ extension AppState {
             SavedRunSummary(
                 id: saved.id,
                 name: saved.name ?? "Honor Run",
-                completedSteps: saved.walkthroughProgress?.values.filter { $0 == .completed }.count ?? 0,
+                completedSteps: saved.walkthroughProgress?.values.filter(\.countsAsCompleted).count ?? 0,
                 partyLevel: saved.activeParty.map(\.level).min() ?? 1
             )
         }
@@ -145,7 +147,9 @@ extension AppState {
     func persistSettings() {
         let settings = AssistantSettings(
             overlayDensity: overlayDensity.rawValue,
-            onboardingSeenVersion: onboardingSeenVersion
+            onboardingSeenVersion: onboardingSeenVersion,
+            onboardingCompleted: onboardingCompleted ? true : nil,
+            seenHints: seenHints.isEmpty ? nil : seenHints.sorted()
         )
         do { try runStore.saveSettings(settings) }
         catch { errorMessage = "Could not save settings: \(error.localizedDescription)" }

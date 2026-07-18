@@ -5,7 +5,6 @@ struct BuildImportView: View {
     @Environment(\.dismiss) private var dismiss
     var assignToMemberID: String? = nil
     @State private var pendingAssignment: BuildSummary?
-    @State private var isSavingKey = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -15,31 +14,21 @@ struct BuildImportView: View {
                 ? "Paste one public build guide. It will be added to every character's build picker."
                 : "Paste one public build guide. After review, it will be assigned to this character and remain available to everyone.")
                 .font(.caption).foregroundStyle(BG3Theme.mutedParchment)
-            if !appState.hasOpenRouterKey {
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("An OpenRouter key is required for AI build extraction.", systemImage: "key.fill")
-                        .font(.caption2).foregroundStyle(.orange)
-                    SecureField("OpenRouter API key", text: $appState.openRouterKeyDraft)
-                        .textFieldStyle(.roundedBorder)
-                        .disabled(isSavingKey)
-                    Text("Saved only in macOS Keychain. It also enables AI chat and screenshot questions.")
-                        .font(.caption2).foregroundStyle(BG3Theme.mutedParchment)
-                }
-                .padding(9)
-                .bg3InsetSurface(accent: BG3Theme.warning)
+            if !appState.backendAIAvailable {
+                Label("AI build import is not available right now. Check that the assistant is up to date.", systemImage: "wifi.exclamationmark")
+                    .font(.caption2).foregroundStyle(.orange)
+                    .padding(9)
+                    .bg3InsetSurface(accent: BG3Theme.warning)
             }
             HStack(spacing: 6) {
                 TextField("https://…", text: $appState.loadoutURLDraft)
                     .textFieldStyle(.roundedBorder)
-                    .disabled(appState.isImportingLoadout || isSavingKey)
+                    .disabled(appState.isImportingLoadout)
                 Button(action: beginImport) {
-                    if appState.isImportingLoadout || isSavingKey {
+                    if appState.isImportingLoadout {
                         ProgressView().controlSize(.small)
                     } else {
-                        Label(
-                            appState.hasOpenRouterKey ? "Import" : "Save key & import",
-                            systemImage: "square.and.arrow.down"
-                        )
+                        Label("Import", systemImage: "square.and.arrow.down")
                     }
                 }
                 .assistantActionButton(accent: BG3Theme.gold, prominent: true)
@@ -88,23 +77,12 @@ struct BuildImportView: View {
 
     private var importIsDisabled: Bool {
         appState.isImportingLoadout
-            || isSavingKey
+            || !appState.backendAIAvailable
             || appState.loadoutURLDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            || (!appState.hasOpenRouterKey
-                && appState.openRouterKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     }
 
     private func beginImport() {
         Task {
-            if !appState.hasOpenRouterKey {
-                isSavingKey = true
-                let saved = await appState.saveOpenRouterKey()
-                isSavingKey = false
-                guard saved else {
-                    appState.loadoutImportStatus = appState.errorMessage ?? "The OpenRouter key could not be saved."
-                    return
-                }
-            }
             guard let build = await appState.importBuild() else { return }
             if let assignToMemberID,
                let member = appState.roster.first(where: { $0.id == assignToMemberID }) {

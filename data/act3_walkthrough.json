@@ -1,5 +1,24 @@
 [
   {
+    "id": "walk-act3-astral-transition",
+    "order": 0,
+    "phase": "Astral Plane transition",
+    "phaseOrder": -1,
+    "title": "Secure the one-time Astral Plane transition rewards",
+    "kind": "major_fight",
+    "importance": "recommended",
+    "region": "Astral Plane",
+    "area": "Emperor's Hideout",
+    "minimumLevel": 9,
+    "summary": "Defeat the attacking githyanki, loot Prelate Lir'i'c for the Boots of Uninhibited Kushigo, and finish the Astral Prism decision before the portal closes.",
+    "avoid": "Do not leave the transition encounter before looting the prelate; this Astral Plane visit cannot be revisited from Rivington.",
+    "why": "The boots are a core Open Hand Monk item and this is their only acquisition window.",
+    "rewards": ["Boots of Uninhibited Kushigo"],
+    "completionChecks": ["Prelate Lir'i'c looted", "Boots of Uninhibited Kushigo obtained or deliberately missed", "Astral Prism decision resolved"],
+    "prerequisites": [],
+    "source": {"label": "BG3 Wiki - Boots of Uninhibited Kushigo", "url": "https://bg3.wiki/wiki/Boots_of_Uninhibited_Kushigo"}
+  },
+  {
     "id": "walk-act3-rivington",
     "order": 1,
     "phase": "Rivington setup",
@@ -242,6 +261,7 @@
     "rewards": ["Orin's Netherstone", "Bloodthirst", "Crimson Mischief"],
     "completionChecks": ["Hostage alive, unchained, and safely returned from the temple", "Orin dead", "Netherstone and weapons recovered"],
     "prerequisites": ["walk-act3-sarevok"],
+    "dependencies": [{"stepId": "walk-act3-sarevok", "kind": "completion_required", "reason": "Defeat Sarevok and recover the Amulet of Bhaal before entering Orin's temple."}],
     "checkpointId": "act3-orin",
     "source": {"label": "BG3 Wiki - Orin combat", "url": "https://bg3.wiki/wiki/Orin/Combat"}
   },
@@ -261,6 +281,7 @@
     "why": "This preserves Ravengard, Omeluum, and Gondian hostages while weakening Gortash's political and industrial control.",
     "completionChecks": ["Ravengard aboard", "Omeluum aboard if present", "Intended Gondians aboard", "All party members returned before collapse"],
     "prerequisites": ["walk-act3-orin"],
+    "dependencies": [{"stepId": "walk-act3-orin", "kind": "completion_required", "reason": "Defeat Orin before breaking the temporary Gortash alliance at the Iron Throne."}],
     "checkpointId": "act3-iron-throne",
     "incident": {
       "trigger": "The submersible docks and the five-turn Honor countdown begins.",
@@ -291,6 +312,7 @@
     "rewards": ["Gontr Mael", "Steel Watch disabled", "Gondian or Ironhand outcome"],
     "completionChecks": ["Iron Throne already completed", "Motivators disabled", "Titan defeated or bypassed", "Foundry destroyed"],
     "prerequisites": ["walk-act3-iron-throne"],
+    "dependencies": [{"stepId": "walk-act3-iron-throne", "kind": "completion_required", "reason": "Complete the Iron Throne rescue before destroying the Foundry."}],
     "checkpointId": "act3-steel-titan",
     "source": {"label": "BG3 Wiki - Steel Watcher Titan combat", "url": "https://bg3.wiki/wiki/Steel_Watcher_Titan/Combat"}
   },
@@ -331,6 +353,10 @@
     "rewards": ["Gortash's Netherstone", "Gauntlet of the Tyrant", "Fabricated Arbalest"],
     "completionChecks": ["Steel Watch disabled", "Gortash dead", "Netherstone recovered", "Karlach confrontation resolved if desired"],
     "prerequisites": ["walk-act3-orin", "walk-act3-foundry"],
+    "dependencies": [
+      {"stepId": "walk-act3-orin", "kind": "completion_required", "reason": "Recover Orin's Netherstone before ending the temporary Gortash route."},
+      {"stepId": "walk-act3-foundry", "kind": "completion_required", "reason": "Disable the Steel Watch before assaulting Gortash's office."}
+    ],
     "checkpointId": "act3-gortash",
     "source": {"label": "BG3 Wiki - Gortash combat", "url": "https://bg3.wiki/wiki/Enver_Gortash/Combat"}
   },
@@ -350,6 +376,13 @@
     "why": "The skiff is Act 3's event horizon: camp, storage, party swaps, Withers, respecs, and ordinary long rests are gone afterward.",
     "completionChecks": ["All optional route steps completed or deliberately skipped", "Final four and builds locked", "All three Netherstones carried", "Orphic Hammer carried if needed", "Consumables and gear moved from camp", "Allies reviewed"],
     "prerequisites": ["walk-act3-cazador", "walk-act3-viconia", "walk-act3-raphael", "walk-act3-ansur", "walk-act3-gortash"],
+    "dependencies": [
+      {"stepId": "walk-act3-cazador", "kind": "resolution_required", "reason": "Complete or deliberately skip Cazador before the Morphic Pool."},
+      {"stepId": "walk-act3-viconia", "kind": "resolution_required", "reason": "Complete or deliberately skip Viconia before the Morphic Pool."},
+      {"stepId": "walk-act3-raphael", "kind": "resolution_required", "reason": "Complete or deliberately skip Raphael before the Morphic Pool."},
+      {"stepId": "walk-act3-ansur", "kind": "resolution_required", "reason": "Complete or deliberately skip Ansur before the Morphic Pool."},
+      {"stepId": "walk-act3-gortash", "kind": "completion_required", "reason": "Defeat Gortash and carry all three Netherstones before the Morphic Pool."}
+    ],
     "riskReward": {"reward": "Begins the final sequence.", "risk": "Permanently loses all remaining open-city access and camp services.", "skipCost": "There is no safe skip; unresolved desired content becomes unavailable.", "returnBy": "Before interacting with the Morphic Pool skiff."},
     "source": {"label": "BG3 Wiki - Morphic Pool", "url": "https://bg3.wiki/wiki/Morphic_Pool"}
   },
@@ -369,6 +402,7 @@
     "why": "This irreversible sequence determines who wields the stones and delivers the party to the final arena.",
     "completionChecks": ["Morphic Pool confrontation complete", "Valid illithid wielder exists", "Prism choice recorded", "Party reaches the brainstem"],
     "prerequisites": ["walk-act3-lockout"],
+    "dependencies": [{"stepId": "walk-act3-lockout", "kind": "completion_required", "reason": "Complete the final lockout audit before using the Morphic Pool skiff."}],
     "checkpointId": "act3-high-hall",
     "decision": {
       "prompt": "Who should wield the Netherstones as an illithid?",
@@ -398,6 +432,7 @@
     "why": "Aegis of the Absolute makes the brain immune to every type used in the preceding round, so the final burst must be planned across rounds.",
     "completionChecks": ["Karsus' Compulsion completed", "Entire party entered the portal", "Marked platforms vacated", "Netherbrain defeated", "Final destroy or control choice recorded"],
     "prerequisites": ["walk-act3-high-hall"],
+    "dependencies": [{"stepId": "walk-act3-high-hall", "kind": "completion_required", "reason": "Reach the brainstem with a valid Netherstone wielder before confronting the Netherbrain."}],
     "checkpointId": "act3-netherbrain",
     "incident": {
       "trigger": "The party enters the Crown portal and Aegis begins recording damage types.",

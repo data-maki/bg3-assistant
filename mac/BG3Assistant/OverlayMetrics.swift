@@ -57,18 +57,24 @@ enum OverlayMetrics {
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
+    /// Extra panel height for a one-time hint bubble above the card.
+    static let hintBand: CGFloat = 52
+
     static func panelSize(
         expanded: Bool,
         reference: CGRect,
         tab: PlannerTab = .current,
         density: OverlayDensity = .focus,
         moreContextExpanded: Bool = false,
-        onboarding: Bool = false
+        onboarding: Bool = false,
+        hint: Bool = false
     ) -> CGSize {
         if onboarding { return onboardingSize(for: reference) }
-        return expanded
+        var size = expanded
             ? expandedSize(for: reference, tab: tab, moreContextExpanded: moreContextExpanded)
             : collapsedSize(for: reference, density: density)
+        if hint { size.height += hintBand }
+        return size
     }
 
     static func origin(fromNormalizedAnchor anchor: CGPoint, panelSize: CGSize, reference: CGRect) -> CGPoint {

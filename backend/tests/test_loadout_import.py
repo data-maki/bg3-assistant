@@ -111,11 +111,15 @@ def test_structured_output_schema_rejects_unknown_fields():
     assert schema["$defs"]["AbilityScores"]["additionalProperties"] is False
 
 
-def test_import_endpoint_nudges_when_openrouter_key_is_missing(monkeypatch):
+def test_import_endpoint_reports_unavailable_when_openrouter_key_is_missing(monkeypatch):
+    # The key is backend-held; users have no key Settings, so the error must
+    # not send them looking for one.
     monkeypatch.setattr(main, "get_settings", lambda: Settings(OPENROUTER_API_KEY=""))
     response = TestClient(main.app).post("/api/builds/import", json={"url": "https://example.com/build"})
     assert response.status_code == 428
-    assert "Settings" in response.json()["detail"]
+    detail = response.json()["detail"]
+    assert "not available" in detail
+    assert "key" not in detail.lower()
 
 
 def test_import_endpoint_saves_validated_build(monkeypatch):

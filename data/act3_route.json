@@ -136,7 +136,7 @@
     "legendaryAction": "Tyrannical Branding places Tyrant's Curse; unless removed, Bane's fist falls at the end of the target's next turn for 20d10 force damage.",
     "failureConditions": ["The Steel Watch remains active", "Tyrant's Curse is not removed, even after Gortash dies or combat ends", "Grenade impellers and force curtains control the arena"],
     "preparation": ["Defeat Orin and disable the Steel Watch", "Bring Remove Curse, trap disarming, summons, and mobile ranged damage", "Bring Karlach if her confrontation is desired"],
-    "completionChecks": ["Gortash dead", "Netherstone recovered", "Karlach scene resolved", "All three Netherstones held"],
+    "completionChecks": ["Gortash dead", "Netherstone recovered", "Karlach scene resolved if desired", "All three Netherstones held"],
     "irreversibleWarnings": ["Killing Gortash before the Iron Throne destroys the prison"],
     "prerequisites": ["act3-orin", "act3-steel-titan"],
     "notes": ["Fight in his office only after the fortress has been weakened"],

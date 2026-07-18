@@ -49,10 +49,13 @@ enum RunSafety {
             case "warning_only":
                 satisfied = true
             case "completion_required":
-                satisfied = status == .completed
+                satisfied = status.countsAsCompleted
             case "outcome_required":
-                satisfied = status == .completed
-                    && walkthroughOutcomes[dependency.stepId] == dependency.requiredOutcome
+                // caughtUp has no recorded outcome; catch-up assumes the
+                // guide's recommended path, so the dependency must not nag.
+                satisfied = status == .caughtUp
+                    || (status == .completed
+                        && walkthroughOutcomes[dependency.stepId] == dependency.requiredOutcome)
             default:
                 satisfied = status != .pending
             }
@@ -196,7 +199,7 @@ enum RunSafety {
     static func routeConsequences(route: [RouteCheckpoint], dispositions: [String: CheckpointDisposition]) -> [String] {
         route.compactMap { checkpoint in
             let state = dispositions[checkpoint.id] ?? .pending
-            guard state != .completed, checkpoint.importance == "major" || !checkpoint.irreversibleWarnings.isEmpty else { return nil }
+            guard !state.countsAsCompleted, checkpoint.importance == "major" || !checkpoint.irreversibleWarnings.isEmpty else { return nil }
             let prefix = state == .skipped ? "Skipped" : "Unresolved"
             return "\(prefix) — \(checkpoint.name): \(checkpoint.irreversibleWarnings.first ?? "major checkpoint unresolved")"
         }
