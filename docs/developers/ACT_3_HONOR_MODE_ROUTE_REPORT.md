@@ -12,7 +12,7 @@
 
 - `data/act3_fights.json`: 13 checkpoint summaries.
 - `data/act3_route.json`: ordered encounter preparation, failure conditions, completion checks, and Honor mechanics.
-- `data/act3_walkthrough.json`: 18 player-facing route steps.
+- `data/act3_walkthrough.json`: 19 player-facing route steps.
 - `data/act3_timed_events.json`: 9 trigger-based deadlines and lockouts.
 - `data/acts/act3.json`: route enabled, with an external Baldur's Gate map handoff.
 
@@ -20,6 +20,7 @@ The route API serves these records only for Act 3. Nullable source rows and coor
 
 ## Route assumptions
 
+- Loot Prelate Lir'i'c during the one-time Astral Plane transition into Act 3 if the Open Hand Monk plan needs the Boots of Uninhibited Kushigo.
 - Attend Gortash's coronation peacefully. This moves Duke Ravengard to the Iron Throne and avoids fighting the audience hall's Steel Watchers.
 - Triage the Lower City deadlines as soon as their local trigger fires. Most Act 3 quests are safe to postpone; Florrick, Cora, Devella, Stop the Presses, Volo, and the Iron Throne are not.
 - Recruit Minsc and use controlled side quests to reach level 12 before the companion finales and Chosen fights.

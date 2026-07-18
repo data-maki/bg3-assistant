@@ -21,14 +21,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard singleInstance.ownsLock else { return }
 
-        // First launch registers the login item so the assistant is always
-        // running and the pet appears whenever BG3 is open. Settings or the
-        // macOS Login Items pane can turn it back off.
-        let defaults = UserDefaults.standard
-        if !defaults.bool(forKey: "BG3LoginItemConfigured") {
-            defaults.set(true, forKey: "BG3LoginItemConfigured")
-            LoginItem.setEnabled(true)
-        }
+        // The login item is no longer enabled silently here: the intake
+        // wizard's final card discloses it and enables it only when the
+        // wizard is finished (AppState.finishOnboarding). Settings or the
+        // macOS Login Items pane can change it anytime.
 
         // Keep the application visible in the Dock; reopening it reveals the
         // planner while the menu-bar item remains a lightweight launcher.

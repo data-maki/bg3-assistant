@@ -22,30 +22,9 @@ struct SettingsView: View {
                 Button {
                     appState.replayOnboarding()
                 } label: {
-                    Label("Replay Welcome Tour", systemImage: "sparkles")
+                    Label("Replay Tour & Hints", systemImage: "sparkles")
                 }
                 .buttonStyle(.bordered)
-            }
-
-            Section("AI Features") {
-                SecureField("OpenRouter API key", text: $appState.openRouterKeyDraft)
-                Text("Optional. Enables AI chat, screenshot questions, and Gemini-powered build imports. Saved only in macOS Keychain.")
-                    .font(.caption).foregroundStyle(.secondary)
-                HStack {
-                    Button { Task { await appState.saveOpenRouterKey() } } label: {
-                        Label("Save Key", systemImage: "key.fill")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(appState.openRouterKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    if appState.hasOpenRouterKey {
-                        Button(role: .destructive) { Task { await appState.removeOpenRouterKey() } } label: {
-                            Label("Remove", systemImage: "trash")
-                        }
-                    }
-                    Spacer()
-                    Text(appState.hasOpenRouterKey ? "AI features ready" : "Guide-only without a key")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
             }
 
             Section("Honor Runs") {
@@ -76,6 +55,7 @@ struct SettingsView: View {
             DisclosureGroup("Diagnostics") {
                 LabeledContent("Baldur's Gate 3", value: appState.gameDetected ? "Running" : "Not running")
                 LabeledContent("Local service", value: appState.backendHealthy ? "Ready" : "Unavailable")
+                LabeledContent("AI features", value: appState.backendAIAvailable ? "Available" : "Unavailable")
                 if let error = appState.errorMessage {
                     Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled)
                 }

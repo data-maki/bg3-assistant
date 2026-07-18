@@ -32,6 +32,14 @@ cp "$PET_SOURCE" "$RESOURCES/twilight-cleric.webp"
 BACKEND_DIST="$ROOT_DIR/backend/dist/bg3-honor-backend"
 test -x "$BACKEND_DIST/bg3-honor-backend"
 cp -R "$BACKEND_DIST" "$RESOURCES/backend"
+# Server-held AI key: users never enter or see a key. When set, it is sealed
+# into the bundle (codesign below) and read by config.py's dotenv chain.
+# Note a determined user can still extract it from the bundle — keep spend
+# limits on the OpenRouter key, or point a future build at a hosted relay.
+if [[ -n "${RELEASE_OPENROUTER_API_KEY:-}" ]]; then
+  printf 'OPENROUTER_API_KEY=%s\n' "$RELEASE_OPENROUTER_API_KEY" > "$RESOURCES/backend/.env"
+  chmod 600 "$RESOURCES/backend/.env"
+fi
 printf 'APPL????' > "$CONTENTS/PkgInfo"
 chmod +x "$MACOS/BG3HonorAssistant"
 SIGN_IDENTITY="$(security find-identity -p codesigning -v 2>/dev/null | awk -F '"' '/Developer ID Application/ { print $2; exit }')"

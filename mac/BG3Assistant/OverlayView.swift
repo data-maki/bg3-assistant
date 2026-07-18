@@ -1,13 +1,48 @@
 import SwiftUI
 
+/// A one-time coach mark docked above the card. Fixed height so the panel's
+/// `OverlayMetrics.hintBand` allotment always fits it exactly.
+struct HintBubbleView: View {
+    @EnvironmentObject private var appState: AppState
+    let hint: HintID
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(BG3Theme.gold)
+            Text(hint.text)
+                .font(BG3Type.caption)
+                .foregroundStyle(BG3Theme.parchment)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 4)
+            Button("Got it", action: appState.dismissActiveHint)
+                .assistantActionButton(accent: BG3Theme.bronzeBright)
+                .controlSize(.mini)
+                .accessibilityLabel("Dismiss hint")
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 46)
+        .frame(maxWidth: .infinity)
+        .colorScheme(.dark)
+        .assistantGlassSurface(cornerRadius: 12)
+        .shadow(color: .black.opacity(0.4), radius: 10, y: 4)
+        .accessibilityElement(children: .contain)
+    }
+}
+
 struct OverlayView: View {
     @EnvironmentObject private var appState: AppState
 
     var body: some View {
-        Group {
-            if let onboardingStep = appState.onboardingStep { OnboardingCardView(step: onboardingStep) }
-            else if appState.overlayExpanded { planner }
-            else { PeekCardView() }
+        VStack(spacing: 6) {
+            if let onboardingStep = appState.onboardingStep {
+                OnboardingCardView(step: onboardingStep)
+            } else {
+                if let hint = appState.activeHint { HintBubbleView(hint: hint) }
+                if appState.overlayExpanded { planner } else { PeekCardView() }
+            }
         }
         .padding(8)
         .confirmationDialog(
@@ -28,7 +63,7 @@ struct OverlayView: View {
             Button("Continue", action: appState.requestScreenRecordingPermission)
             Button("Not Now", role: .cancel) {}
         } message: {
-            Text("Chat can capture the current BG3 window once and attach it to your next message. It excludes the overlay and is sent to OpenRouter only when you send.")
+            Text("Chat can capture the current BG3 window once and attach it to your next message. It excludes the overlay and is sent to the AI service only when you send.")
         }
     }
 

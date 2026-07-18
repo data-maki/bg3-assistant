@@ -4,6 +4,13 @@ enum CheckpointDisposition: String, Codable, CaseIterable {
     case pending
     case completed
     case skipped
+    /// Bulk-marked by mid-run catch-up: resolved before the assistant was
+    /// installed, assumed to have followed the guide's recommended path.
+    /// Satisfies dependencies (including outcome requirements) but renders
+    /// distinctly so the player can revisit and record what really happened.
+    case caughtUp
+
+    var countsAsCompleted: Bool { self == .completed || self == .caughtUp }
 }
 
 struct GuideSource: Codable, Hashable {
@@ -845,6 +852,9 @@ struct BackendHealth: Codable, Equatable {
     let parentPid: Int32?
     let packaged: Bool?
     let walkthroughCount: Int?
+    /// Server-side AI features (chat, build import) are usable. The key is
+    /// backend-held; older backends omit the field.
+    let aiAvailable: Bool?
 }
 
 struct ReadinessRequest: Codable {

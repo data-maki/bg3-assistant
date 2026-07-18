@@ -11,7 +11,7 @@ extension AppState {
     }
 
     func prepareChatScreenshot() async {
-        guard hasOpenRouterKey, gameDetected, chatScreenshot == nil, !isPreparingChatScreenshot else { return }
+        guard backendAIAvailable, gameDetected, chatScreenshot == nil, !isPreparingChatScreenshot else { return }
         isPreparingChatScreenshot = true
         defer { isPreparingChatScreenshot = false }
 
@@ -47,8 +47,12 @@ extension AppState {
         guard !message.isEmpty else { return }
         let requestedRunID = run.id
         let requestedAct = selectedAct
+        chatGeneration &+= 1
+        let generation = chatGeneration
         isSendingChat = true
-        defer { isSendingChat = false }
+        defer {
+            if generation == chatGeneration { isSendingChat = false }
+        }
         chatDraft = ""
 
         let history = chatLines.suffix(8)
@@ -71,11 +75,20 @@ extension AppState {
                 context: chatContextSnapshot,
                 history: history
             ))
-            guard requestedRunID == run.id, requestedAct == selectedAct else { return }
+            guard generation == chatGeneration,
+                  requestedRunID == run.id,
+                  requestedAct == selectedAct else { return }
             chatLines.append(ChatLine(role: .assistant, text: response.answer, sources: response.sources))
         } catch {
-            guard requestedRunID == run.id, requestedAct == selectedAct else { return }
+            guard generation == chatGeneration,
+                  requestedRunID == run.id,
+                  requestedAct == selectedAct else { return }
             chatLines.append(ChatLine(role: .assistant, text: "Chat is offline right now (\(error.localizedDescription)).", isError: true))
         }
+    }
+
+    func invalidateChatRequests() {
+        chatGeneration &+= 1
+        isSendingChat = false
     }
 }

@@ -26,10 +26,13 @@ extension AppState {
             let satisfied: Bool
             switch dependency.kind {
             case "completion_required":
-                satisfied = disposition == .completed
+                satisfied = disposition.countsAsCompleted
             case "outcome_required":
-                satisfied = disposition == .completed
-                    && walkthroughOutcome(prerequisite) == dependency.requiredOutcome
+                // Caught-up steps carry no recorded outcome; assume the
+                // guide's recommended path (mirrors RunSafety).
+                satisfied = disposition == .caughtUp
+                    || (disposition == .completed
+                        && walkthroughOutcome(prerequisite) == dependency.requiredOutcome)
             default:
                 satisfied = disposition != .pending
             }
