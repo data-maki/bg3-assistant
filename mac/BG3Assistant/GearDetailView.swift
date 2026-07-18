@@ -126,6 +126,7 @@ struct GearDetailView: View {
 struct GearItemIcon: View {
     let gear: BuildGear
     var size: CGFloat = 26
+    var borderColor: Color = BG3Theme.bronze
 
     var body: some View {
         Group {
@@ -144,7 +145,8 @@ struct GearItemIcon: View {
         .frame(width: size, height: size)
         .background(BG3Theme.ink.opacity(0.6))
         .clipShape(RoundedRectangle(cornerRadius: 5))
-        .overlay(RoundedRectangle(cornerRadius: 5).stroke(BG3Theme.bronze.opacity(0.6), lineWidth: 0.7))
+        .overlay(RoundedRectangle(cornerRadius: 5).stroke(borderColor.opacity(0.75), lineWidth: 0.8))
+        .accessibilityHidden(true)
     }
 
     private var fallback: some View {
