@@ -93,7 +93,7 @@ extension AppState {
         } else {
             fresh.name = name
             fresh.createdAt = .now
-            fresh.migrateLegacyPartySlots()
+            fresh.normalizeRoster()
             fresh.guideVersion = targetGuideVersion
         }
         run = fresh
@@ -122,7 +122,7 @@ extension AppState {
         persistRun()
         do {
             var selected = try runStore.activate(runID: runID)
-            selected.migrateLegacyPartySlots()
+            selected.normalizeRoster()
             adoptRun(selected, token: runStore.changeToken(for: selected))
             skipNoteDraft = ""
             combatCardPinned = false
@@ -148,7 +148,6 @@ extension AppState {
         let settings = AssistantSettings(
             overlayDensity: overlayDensity.rawValue,
             onboardingSeenVersion: onboardingSeenVersion,
-            onboardingCompleted: onboardingCompleted ? true : nil,
             seenHints: seenHints.isEmpty ? nil : seenHints.sorted()
         )
         do { try runStore.saveSettings(settings) }

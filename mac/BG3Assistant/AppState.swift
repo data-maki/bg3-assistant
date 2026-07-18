@@ -56,7 +56,6 @@ final class AppState: ObservableObject {
     // skip). Defaults on: the disclosure sits next to the toggle.
     @Published var onboardingEnableLoginItem = true
     var onboardingSeenVersion: Int? = storedSettings.onboardingSeenVersion
-    var onboardingCompleted: Bool = storedSettings.onboardingCompleted ?? false
     var seenHints: Set<String> = Set(storedSettings.seenHints ?? [])
     // Route step to scroll to and expand when the route tab opens (set by the
     // peek card's Talk shortcut so the current conversation is front and center).
@@ -129,7 +128,7 @@ final class AppState: ObservableObject {
 
     init() {
         var loaded = runStore.load()
-        loaded.migrateLegacyPartySlots()
+        loaded.normalizeRoster()
         if loaded.name?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
             loaded.name = "Honor Run 1"
         }
@@ -715,7 +714,6 @@ final class AppState: ObservableObject {
                 run.guideVersion = payload.guideVersion
             }
             migrateBuildAbilityScoresIfNeeded()
-            run.migrateLegacyFightDispositions(walkthrough: payload.walkthrough)
             statusMessage = payload.routeAvailable
                 ? "Act \(requestedAct) guide ready • \(walkthrough.count) walkthrough steps"
                 : "Act \(requestedAct) route guidance is not available yet"

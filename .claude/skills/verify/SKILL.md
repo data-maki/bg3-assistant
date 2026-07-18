@@ -27,14 +27,16 @@ with `swiftc` (BG3Models only imports Foundation) and run assertions.
   Mode Assistant"'`), verify, then `open "mac/BG3 Honor Mode
   Assistant.app"` to restore. State is SQLite-persisted on every
   mutation, so quit/relaunch is safe by design.
-- Isolate state with `BG3_ASSISTANT_STATE_DIR=<tmpdir>`. Seed a run by
-  writing `run.json` into that dir (RunStore migrates it into SQLite on
-  first load) — party members, `buildId`s (e.g. `SB-1011`, `CL-102`),
-  and `gearTarget` all round-trip.
+- Isolate state with `BG3_ASSISTANT_STATE_DIR=<tmpdir>`. A fresh dir
+  seeds a default run (SQLite only — the old `run.json` migration was
+  removed). To seed custom state, launch once, then rewrite
+  `snapshot_json` in the `runs` table of `state.sqlite3` — party
+  members, `buildId`s (e.g. `SB-1011`, `CL-102`), and `gearTarget`
+  all round-trip.
 - The debug binary self-manages the backend: it spawns
   `backend/.venv/bin/uvicorn` on 8787 and retires unowned packaged
-  backends. Get build/gear data from `GET /api/act1/route` (there is no
-  `/builds` endpoint; see `/openapi.json`).
+  backends. Get build/gear data from `GET /api/acts/1/guide` (there is
+  no `/builds` endpoint; see `/openapi.json`).
 
 ## Drive
 
@@ -51,7 +53,8 @@ BG3_ASSISTANT_STATE_DIR=<tmpdir> BG3_ASSISTANT_DEBUG_TAB=route \
 launches with the planner expanded on that tab, so each tab renders at
 startup with real backend data. Evidence = process stays alive ~10s +
 app log free of SwiftUI warnings/crashes + post-run SQLite state.
-Launch once per tab; probe bad state by seeding a corrupt `run.json`.
+Launch once per tab; probe bad state by corrupting `snapshot_json` in
+the seeded `state.sqlite3`.
 
 `mac/DebugCapture` only screenshots the **game** window (com.larian.bg3),
 not the overlay — useless unless BG3 is running.

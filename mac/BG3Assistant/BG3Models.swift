@@ -499,10 +499,10 @@ extension HonorRun {
         createdAt: Date = .now
     ) -> HonorRun {
         var source = self
-        source.migrateLegacyPartySlots()
+        source.normalizeRoster()
 
         var fresh = HonorRun()
-        fresh.migrateLegacyPartySlots()
+        fresh.normalizeRoster()
         fresh.name = name
         fresh.createdAt = createdAt
         fresh.guideVersion = guideVersion
@@ -558,9 +558,6 @@ struct PartyUndoState {
 }
 
 struct CheckpointProgress: Codable, Hashable {
-    // disposition here is legacy — the walkthrough ledger is the source of
-    // truth; only read during migrateLegacyFightDispositions.
-    var disposition: CheckpointDisposition = .pending
     var checkedPreparation: Set<String> = []
     var checkedCompletion: Set<String> = []
     var skipNote = ""
@@ -626,31 +623,12 @@ struct HonorRun: Codable {
     var mapRegion = "Wilderness"
     var mutedCheckpointIds: Set<String>?
 
-    /// One-time migration: older runs kept fight dispositions in `progress`;
-    /// copy any non-pending legacy disposition into the walkthrough ledger
-    /// unless the ledger already has an entry. Idempotent.
-    mutating func migrateLegacyFightDispositions(walkthrough: [WalkthroughStep]) {
-        var ledger = walkthroughProgress ?? [:]
-        for step in walkthrough {
-            guard ledger[step.id] == nil,
-                  let checkpointId = step.checkpointId,
-                  let legacy = progress[checkpointId]?.disposition,
-                  legacy != .pending else { continue }
-            ledger[step.id] = legacy
-        }
-        walkthroughProgress = ledger
-    }
-
-    mutating func migrateLegacyPartySlots() {
+    /// Roster invariant enforcement and seeding: a fresh run (roster nil)
+    /// gets its full roster built from the default party plus every story
+    /// companion; existing rosters get nil fields seeded and the 4-active
+    /// cap enforced. Idempotent — safe to call on every load.
+    mutating func normalizeRoster() {
         if !(1...3).contains(selectedAct ?? 0) { selectedAct = 1 }
-        let defaults = HonorRun().party
-        while party.count < defaults.count { party.append(defaults[party.count]) }
-        if party.count > defaults.count { party = Array(party.prefix(defaults.count)) }
-        for index in 1..<party.count where party[index].name == "Companion \(index)" || party[index].name.isEmpty {
-            party[index].name = defaults[index].name
-            if party[index].buildId == nil { party[index].className = defaults[index].className }
-        }
-
         var members = roster ?? party
         for index in members.indices {
             if roster == nil { members[index].status = .active }

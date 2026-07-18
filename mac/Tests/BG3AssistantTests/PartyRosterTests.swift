@@ -5,7 +5,7 @@ final class PartyRosterTests: XCTestCase {
     func testMigrationAddsDarkUrgeToCamp() {
         var run = HonorRun()
 
-        run.migrateLegacyPartySlots()
+        run.normalizeRoster()
 
         let darkUrge = run.roster?.first { $0.id == "dark-urge" }
         XCTAssertEqual(darkUrge?.name, "Dark Urge")
@@ -16,7 +16,7 @@ final class PartyRosterTests: XCTestCase {
 
     func testUnrecruitedCompanionCanFillAnOpenPartySlot() {
         var run = HonorRun()
-        run.migrateLegacyPartySlots()
+        run.normalizeRoster()
 
         guard let laezelID = run.roster?.first(where: { $0.name == "Lae'zel" })?.id else {
             return XCTFail("Lae'zel should exist after roster migration")
