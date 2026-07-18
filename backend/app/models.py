@@ -23,7 +23,7 @@ class StrictCamelModel(CamelModel):
 
 class GuideSource(BaseModel):
     sheet: str
-    row: int
+    row: int | None = None
     url: str
 
 
@@ -38,8 +38,8 @@ class RouteCheckpoint(CamelModel):
     name: str
     area: str
     region: str
-    x: int
-    y: int
+    x: int | None = None
+    y: int | None = None
     minimum_level: int
     importance: str
     danger: str
@@ -128,6 +128,13 @@ class AbilityTargetScores(StrictCamelModel):
 
 AbilityName = Literal["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
 
+ABILITY_NAMES: tuple[AbilityName, ...] = (
+    "strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"
+)
+
+# BG3 character creation: point cost of each purchasable score; 27 points total.
+POINT_BUY_COSTS = {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9}
+
 
 class PointBuyScores(StrictCamelModel):
     strength: int = Field(ge=8, le=15)
@@ -136,6 +143,29 @@ class PointBuyScores(StrictCamelModel):
     intelligence: int = Field(ge=8, le=15)
     wisdom: int = Field(ge=8, le=15)
     charisma: int = Field(ge=8, le=15)
+
+
+def check_point_buy(
+    point_buy_scores: PointBuyScores,
+    bonus_two: AbilityName,
+    bonus_one: AbilityName,
+    final_scores: AbilityScores,
+) -> str | None:
+    """Single authority on BG3 creation legality: the reason a plan is illegal, or None."""
+    if bonus_two == bonus_one:
+        return "BG3 +2 and +1 ability bonuses must use different abilities"
+    spent = sum(POINT_BUY_COSTS[getattr(point_buy_scores, ability)] for ability in ABILITY_NAMES)
+    if spent != 27:
+        return f"BG3 point buy must spend exactly 27 points, got {spent}"
+    for ability in ABILITY_NAMES:
+        expected = getattr(point_buy_scores, ability)
+        if ability == bonus_two:
+            expected += 2
+        elif ability == bonus_one:
+            expected += 1
+        if getattr(final_scores, ability) != expected:
+            return f"Final {ability} must equal point buy plus its assigned ability bonus"
+    return None
 
 
 class AbilitySetupPlan(StrictCamelModel):
@@ -152,22 +182,29 @@ class AbilitySetupPlan(StrictCamelModel):
 
     @model_validator(mode="after")
     def validate_bg3_point_buy(self):
-        if self.bonus_two == self.bonus_one:
-            raise ValueError("BG3 +2 and +1 ability bonuses must use different abilities")
-        costs = {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9}
-        ability_names = ("strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma")
-        spent = sum(costs[getattr(self.point_buy_scores, ability)] for ability in ability_names)
-        if spent != 27:
-            raise ValueError(f"BG3 point buy must spend exactly 27 points, got {spent}")
-        for ability in ability_names:
-            expected = getattr(self.point_buy_scores, ability)
-            if ability == self.bonus_two:
-                expected += 2
-            elif ability == self.bonus_one:
-                expected += 1
-            if getattr(self.final_scores, ability) != expected:
-                raise ValueError(f"Final {ability} must equal point buy plus its assigned ability bonus")
+        reason = check_point_buy(self.point_buy_scores, self.bonus_two, self.bonus_one, self.final_scores)
+        if reason is not None:
+            raise ValueError(reason)
         return self
+
+
+def derive_bg3_point_buy(scores: AbilityScores) -> tuple[PointBuyScores, AbilityName, AbilityName] | None:
+    """Return one deterministic legal +2/+1 decomposition for final scores."""
+    ordered = sorted(ABILITY_NAMES, key=lambda ability: (-getattr(scores, ability), ABILITY_NAMES.index(ability)))
+    for bonus_two in ordered:
+        for bonus_one in ordered:
+            if bonus_one == bonus_two:
+                continue
+            values = {
+                ability: getattr(scores, ability) - (2 if ability == bonus_two else 1 if ability == bonus_one else 0)
+                for ability in ABILITY_NAMES
+            }
+            if any(value not in POINT_BUY_COSTS for value in values.values()):
+                continue
+            point_buy = PointBuyScores(**values)
+            if check_point_buy(point_buy, bonus_two, bonus_one, scores) is None:
+                return point_buy, bonus_two, bonus_one
+    return None
 
 
 class AbilityPlanSource(StrictCamelModel):
@@ -177,6 +214,7 @@ class AbilityPlanSource(StrictCamelModel):
     mode: Literal["add", "minimum"]
     value: int = Field(ge=1, le=30)
     label: str
+    minimum_act: int = Field(default=1, ge=1, le=3)
     minimum_level: int = Field(default=1, ge=1, le=12)
     maximum_level: int | None = Field(default=None, ge=1, le=12)
     item_key: str | None = None
@@ -346,7 +384,10 @@ class ReadinessRequest(BaseModel):
     checkpoint_id: str
     party: list[PartyMember] = Field(default_factory=list)
     completed_checkpoint_ids: list[str] = Field(default_factory=list)
+    skipped_checkpoint_ids: list[str] = Field(default_factory=list)
     checked_preparation: list[str] = Field(default_factory=list)
+    walkthrough_statuses: dict[str, str] = Field(default_factory=dict)
+    walkthrough_outcomes: dict[str, str] = Field(default_factory=dict)
 
 
 class ReadinessResponse(BaseModel):
@@ -393,9 +434,11 @@ class ChatSource(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
-    checkpoint_id: str
+    checkpoint_id: str | None = None
     party: list[PartyMember] = Field(default_factory=list)
     completed_checkpoint_ids: list[str] = Field(default_factory=list)
+    skipped_checkpoint_ids: list[str] = Field(default_factory=list)
+    checked_preparation: list[str] = Field(default_factory=list)
     walkthrough_step_id: str | None = None
     image_base64: str | None = None  # optional BG3 screenshot for the vision model
     context: ChatContextSnapshot | None = None

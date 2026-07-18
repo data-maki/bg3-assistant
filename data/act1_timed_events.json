@@ -5,7 +5,7 @@
     "kind": "point_of_no_return",
     "trigger": "Entering Rosymorn Monastery Trail (or the Shadow-Cursed Lands)",
     "deadline": "Finish grove-related quests first",
-    "consequence": "Rescue the Gnome, Rescue the Grand Duke, Rescue the Trapped Man, Save the Goblin Sazza, Save the Refugees, and Rescue the Druid Halsin all fail silently.",
+    "consequence": "Unresolved grove quests auto-resolve; Barcus, Sazza, the refugees, Halsin, Florrick, and Benryn outcomes can be lost. The multi-act Grand Duke quest itself continues.",
     "severity": "critical",
     "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
   },
@@ -64,7 +64,7 @@
     "name": "Free True Soul Nere",
     "kind": "long_rest",
     "trigger": "Interacting with the cave-in rubble in Grymforge",
-    "deadline": "1 long rest / fast travel",
+    "deadline": "Do not long rest or fast travel after speaking with Nere through the rubble",
     "consequence": "Nere and the trapped deep gnomes die behind the rubble.",
     "severity": "high",
     "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
@@ -81,12 +81,12 @@
   },
   {
     "id": "timed-owlbear-hunters",
-    "name": "Andrick & Brynna hunt the owlbear",
+    "name": "Owlbear cave state advances",
     "kind": "long_rest",
-    "trigger": "Telling the hunters to finish the owlbear",
-    "deadline": "1 long rest",
-    "consequence": "The owlbear (and cub recruitment chance) can be lost.",
-    "severity": "moderate",
+    "trigger": "Interacting with the Owlbear Mother in her cave and leaving her alive",
+    "deadline": "Before the next long rest if the party wants to resolve the mother encounter itself",
+    "consequence": "Goblins kill the mother and the cub moves toward the Goblin Camp; the cub recruitment route remains available if the cub survives.",
+    "severity": "low",
     "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
   },
   {
@@ -95,8 +95,8 @@
     "kind": "point_of_no_return",
     "trigger": "Entering the goblin camp courtyard before opening his sarcophagus",
     "deadline": "Visit the Dank Crypt early",
-    "consequence": "Withers can disappear from the tomb — losing respecs and hireling revives for the run.",
-    "severity": "high",
+    "consequence": "Withers moves to camp and his sarcophagus becomes empty; his respec, resurrection, and hireling services remain available.",
+    "severity": "low",
     "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
   },
   {

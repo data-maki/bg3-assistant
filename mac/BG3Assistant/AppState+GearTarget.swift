@@ -1,5 +1,15 @@
 import Foundation
 
+/// A resolved gear target: member and item both verified against live state.
+struct GearTargetContext {
+    let member: PartyMember
+    let gear: BuildGear
+
+    func matches(gearId: String, memberId: String) -> Bool {
+        gear.id == gearId && member.id == memberId
+    }
+}
+
 /// Player-chosen equipment goal. The target replaces the Now-page goal and
 /// the peek headline until the item is acquired or the target is cleared;
 /// route recommendation logic underneath is untouched.
@@ -7,7 +17,7 @@ extension AppState {
     /// Resolves the stored target against live party/build state. A stale
     /// target (member gone, build changed, act moved on) resolves to nil and
     /// the Now page falls back to the route goal.
-    var gearTargetContext: (member: PartyMember, gear: BuildGear)? {
+    var gearTargetContext: GearTargetContext? {
         guard let target = run.gearTarget,
               let member = activeParty.first(where: { $0.id == target.memberId }),
               member.buildId == target.buildId,
@@ -15,7 +25,7 @@ extension AppState {
               let gear = build.gear.first(where: { $0.id == target.gearId }),
               gear.act == selectedAct
         else { return nil }
-        return (member, gear)
+        return GearTargetContext(member: member, gear: gear)
     }
 
     var gearTargetPath: [GearLogic.PathRow] {

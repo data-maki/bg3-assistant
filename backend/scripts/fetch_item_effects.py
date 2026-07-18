@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fetch per-item effect and acquisition text from bg3.wiki.
 
-Reads the gear TSV, queries the wiki's public MediaWiki API for every unique
+Reads the act-specific gear TSVs, queries the wiki's public MediaWiki API for every unique
 item of the requested act(s), and merges the results into data/item_effects.json:
 
     { "<item-key>": {"name", "effect", "acquire", "wiki"} }
@@ -11,8 +11,8 @@ item of the requested act(s), and merges the results into data/item_effects.json
 - wiki    = canonical page URL for the detail card's source link
 
 Hand-curated edits to item_effects.json survive re-runs: existing entries are
-only overwritten with --force. To expand to Act 2/3, add the act's rows to
-build_gear.tsv and run:  python3 scripts/fetch_item_effects.py --act 2
+only overwritten with --force. Update the relevant `data/gear/actN.tsv`, then
+run:  python3 scripts/fetch_item_effects.py --act 2
 
 Run from backend/:  python3 scripts/fetch_item_effects.py --act 1
 """
@@ -27,7 +27,7 @@ import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-GEAR_PATH = REPO_ROOT / "data" / "build_gear.tsv"
+GEAR_DIR = REPO_ROOT / "data" / "gear"
 EFFECTS_PATH = REPO_ROOT / "data" / "item_effects.json"
 API = "https://bg3.wiki/w/api.php"
 USER_AGENT = "BG3AssistantLocal/1.0 (personal local companion tool)"
@@ -105,12 +105,14 @@ def main() -> None:
     parser.add_argument("--force", action="store_true", help="overwrite existing entries")
     args = parser.parse_args()
 
-    with GEAR_PATH.open(newline="", encoding="utf-8") as handle:
-        rows = list(csv.DictReader(handle, delimiter="\t"))
+    acts = [args.act] if args.act is not None else [1, 2, 3]
+    rows = []
+    for act in acts:
+        with (GEAR_DIR / f"act{act}.tsv").open(newline="", encoding="utf-8") as handle:
+            rows.extend(csv.DictReader(handle, delimiter="\t"))
     names = sorted({
         wiki_title(row["Item"]) for row in rows
-        if (args.act is None or row["Act"] == str(args.act))
-        and (row.get("Map objective") or "yes").strip().lower() not in {"no", "false", "0"}
+        if (row.get("Map objective") or "yes").strip().lower() not in {"no", "false", "0"}
     })
 
     effects: dict = json.loads(EFFECTS_PATH.read_text()) if EFFECTS_PATH.exists() else {}

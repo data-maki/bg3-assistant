@@ -19,6 +19,11 @@ let package = Package(
                 .linkedLibrary("sqlite3"),
                 .linkedFramework("Security"),
             ]
-        )
+        ),
+        .testTarget(
+            name: "BG3AssistantTests",
+            dependencies: ["BG3HonorAssistant"],
+            path: "Tests/BG3AssistantTests"
+        ),
     ]
 )

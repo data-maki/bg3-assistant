@@ -1,52 +1,13 @@
+import json
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app import catalog, loadout_import, main, map_data, stores
+from app import catalog, loadout_import, main, stores
 from app.config import Settings
 from app.models import ImportedBuild, ImportedBuildDraft
-
-
-def sample_draft() -> ImportedBuildDraft:
-    return ImportedBuildDraft.model_validate({
-        "name": "Swords Bard",
-        "role": "Face and ranged striker",
-        "finalSplit": "Bard 12",
-        "classProgression": "Bard",
-        "startingAbilityScores": {
-            "strength": 8,
-            "dexterity": 16,
-            "constitution": 14,
-            "intelligence": 10,
-            "wisdom": 10,
-            "charisma": 17,
-        },
-        "playPattern": "Control, then flourish",
-        "caveat": "Keep inspiration available",
-        "levels": [{
-            "level": 4,
-            "take": "Bard 4",
-            "subclassChoice": "College of Swords",
-            "choices": "Ability Improvement: +2 DEX",
-            "tactics": "Use Slashing Flourish",
-            "confidence": "source",
-        }],
-        "gear": [{
-            "item": "Titanstring Bow",
-            "slot": "Ranged",
-            "priority": "Core",
-            "act": 1,
-            "region": "Wilderness",
-            "acquisition": "Buy from Brem",
-            "why": "Strong ranged damage",
-            "minimumLevel": 4,
-            "maximumLevel": None,
-            "requirement": "",
-            "alternative": "Bow of Awareness",
-        }],
-    })
+from conftest import sample_draft
 
 
 def test_url_import_blocks_private_and_credentialed_urls(monkeypatch):
@@ -70,6 +31,18 @@ def test_html_extraction_removes_executable_content():
     assert "SECRET_SCRIPT" not in text
 
 
+def test_html_extraction_keeps_embedded_build_json():
+    html = b"""
+    <html><body><main>Interactive build planner</main>
+    <script id="__NEXT_DATA__" type="application/json">
+    {"build":{"name":"Swords Bard","levels":[{"level":1,"class":"Bard"}],"gear":["Titanstring Bow"]}}
+    </script></body></html>
+    """
+    text = loadout_import._source_text(html, "text/html")
+    assert "Swords Bard" in text
+    assert "Titanstring Bow" in text
+
+
 def test_normalized_import_produces_reusable_build_contract():
     imported = loadout_import._normalize(sample_draft(), "https://example.com/build")
     assert imported.id.startswith("import-")
@@ -78,7 +51,33 @@ def test_normalized_import_produces_reusable_build_contract():
     assert imported.build.starting_ability_scores.charisma == 17
     assert imported.build.gear[0].build_ids == [imported.build.id]
     assert imported.build.gear[0].map_objective is False
+    assert imported.build.ability_setups[0].point_buy_scores.charisma == 15
+    assert imported.build.ability_setups[0].bonus_two == "charisma"
     assert not hasattr(imported, "characters")
+
+
+def test_import_rejects_impossible_starting_ability_allocation(monkeypatch):
+    """An LLM response with illegal starting scores yields the targeted 422, not a generic 502."""
+    payload = sample_draft().model_dump(by_alias=True)
+    payload["startingAbilityScores"] = {
+        "strength": 20, "dexterity": 20, "constitution": 20,
+        "intelligence": 20, "wisdom": 20, "charisma": 20,
+    }
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"choices": [{"message": {"content": json.dumps(payload)}}]}
+
+    page = b"<html><body>" + b"A sufficiently detailed public BG3 build page. " * 4 + b"</body></html>"
+    monkeypatch.setattr(main, "get_settings", lambda: Settings(OPENROUTER_API_KEY="test-key"))
+    monkeypatch.setattr(loadout_import, "_download", lambda url: ("https://example.com/build", page, "text/html"))
+    monkeypatch.setattr(loadout_import.httpx, "post", lambda url, **kwargs: FakeResponse())
+    response = TestClient(main.app).post("/api/builds/import", json={"url": "https://example.com/build"})
+    assert response.status_code == 422
+    assert "not a legal BG3 27-point allocation" in response.json()["detail"]
 
 
 def test_custom_build_database_round_trip(tmp_path: Path, monkeypatch):
@@ -131,7 +130,7 @@ def test_import_endpoint_saves_validated_build(monkeypatch):
     assert saved == [imported]
 
 
-def test_gemini_request_uses_flash_3_and_strict_json_schema(monkeypatch):
+def test_gemini_request_uses_configured_model_and_strict_json_schema(monkeypatch):
     captured = {}
 
     class FakeResponse:
@@ -146,13 +145,14 @@ def test_gemini_request_uses_flash_3_and_strict_json_schema(monkeypatch):
         return FakeResponse()
 
     monkeypatch.setattr(loadout_import.httpx, "post", fake_post)
+    assert Settings(OPENROUTER_API_KEY="test-key").openrouter_model == "google/gemini-3-flash-preview"
     actual = loadout_import._extract_draft(
         "https://example.com/build",
         "A sufficiently detailed public BG3 build page with levels, starting abilities, choices, tactics, and equipment.",
-        Settings(OPENROUTER_API_KEY="test-key"),
+        Settings(OPENROUTER_API_KEY="test-key", OPENROUTER_MODEL="test/import-model"),
     )
     assert actual.name == "Swords Bard"
-    assert captured["json"]["model"] == "google/gemini-3-flash-preview"
+    assert captured["json"]["model"] == "test/import-model"
     assert captured["json"]["response_format"]["type"] == "json_schema"
     assert captured["json"]["response_format"]["json_schema"]["strict"] is True
     assert captured["headers"]["Authorization"] == "Bearer test-key"

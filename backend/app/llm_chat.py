@@ -191,7 +191,7 @@ def _completion(messages: list[dict], settings: Settings, allow_tools: bool) -> 
 
 
 def answer(
-    checkpoint: RouteCheckpoint,
+    checkpoint: RouteCheckpoint | None,
     request: ChatRequest,
     step: WalkthroughStep | None,
     settings: Settings,

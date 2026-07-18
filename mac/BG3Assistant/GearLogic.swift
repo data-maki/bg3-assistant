@@ -15,10 +15,86 @@ enum GearLogic {
     }
 
     /// One unowned build item surfaced on the route, tagged with who wants it.
-    struct Pickup: Equatable {
+    struct Pickup: Equatable, Identifiable {
         let gear: BuildGear
         let memberId: String
         let memberName: String
+
+        /// Same key AppState uses to dedupe pickups: one row per member+item.
+        var id: String { "\(memberId)|\(gear.itemKey)" }
+    }
+
+    /// Thematic identity of a route region. Ordering and membership are one
+    /// table (`regionStages`); tints live in GearPresentation.
+    enum RegionCluster: Equatable {
+        case wilderness, settlement, hostile, underdark, forge, mountainPass, rivington, other
+    }
+
+    struct RegionStage {
+        let keywords: [String]
+        let cluster: RegionCluster
+    }
+
+    /// One canonical route-order table per act: earlier stage = earlier on the
+    /// route. Both act-gear sorting and region tinting derive from this.
+    static let regionStages: [Int: [RegionStage]] = [
+        1: [
+            RegionStage(keywords: ["nautiloid"], cluster: .other),
+            RegionStage(keywords: ["anywhere"], cluster: .other),
+            RegionStage(keywords: ["druid grove"], cluster: .wilderness),
+            RegionStage(keywords: ["blighted village"], cluster: .settlement),
+            RegionStage(keywords: ["apothecary"], cluster: .settlement),
+            RegionStage(keywords: ["goblin camp", "shattered sanctum"], cluster: .hostile),
+            RegionStage(keywords: ["waukeen"], cluster: .settlement),
+            RegionStage(keywords: ["sunlit wetlands", "riverside teahouse"], cluster: .wilderness),
+            RegionStage(keywords: ["risen road"], cluster: .wilderness),
+            RegionStage(keywords: ["zhentarim"], cluster: .hostile),
+            RegionStage(keywords: ["selûnite outpost"], cluster: .underdark),
+            RegionStage(keywords: ["myconid colony"], cluster: .underdark),
+            RegionStage(keywords: ["underdark"], cluster: .underdark),
+            RegionStage(keywords: ["grymforge"], cluster: .forge),
+            RegionStage(keywords: ["adamantine forge"], cluster: .forge),
+            RegionStage(keywords: ["rosymorn monastery trail"], cluster: .mountainPass),
+            RegionStage(keywords: ["rosymorn monastery"], cluster: .mountainPass),
+            RegionStage(keywords: ["crèche y'llek"], cluster: .mountainPass),
+        ],
+        2: [
+            RegionStage(keywords: ["ruined battlefield"], cluster: .underdark),
+            RegionStage(keywords: ["last light inn"], cluster: .wilderness),
+            RegionStage(keywords: ["reithwin"], cluster: .settlement),
+            RegionStage(keywords: ["moonrise towers", "moonrise"], cluster: .hostile),
+            RegionStage(keywords: ["gauntlet of shar"], cluster: .underdark),
+            RegionStage(keywords: ["mind flayer colony", "mind flayer"], cluster: .hostile),
+        ],
+        3: [
+            RegionStage(keywords: ["rivington", "circus of the last days", "circus"], cluster: .rivington),
+            RegionStage(keywords: ["lower city"], cluster: .settlement),
+            RegionStage(keywords: ["sorcerous sundries", "ramazith"], cluster: .settlement),
+            RegionStage(keywords: ["cazador"], cluster: .hostile),
+            RegionStage(keywords: ["murder tribunal"], cluster: .hostile),
+            RegionStage(keywords: ["house of hope"], cluster: .hostile),
+        ],
+    ]
+
+    /// Route position of a region within its act; unknown regions sort last.
+    static func routeRank(region: String, act: Int) -> Int {
+        let region = region.lowercased()
+        let stages = regionStages[act] ?? []
+        return stages.firstIndex { stage in
+            stage.keywords.contains { region.contains($0) }
+        } ?? stages.count
+    }
+
+    /// Cluster identity of a region, searched across acts in order so the
+    /// result is deterministic when a region name matches more than one act.
+    static func regionCluster(for region: String) -> RegionCluster {
+        let region = region.lowercased()
+        for act in regionStages.keys.sorted() {
+            if let stage = regionStages[act]?.first(where: { $0.keywords.contains { region.contains($0) } }) {
+                return stage.cluster
+            }
+        }
+        return .other
     }
 
     static func regionParts(_ region: String) -> [String] {

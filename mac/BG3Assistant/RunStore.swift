@@ -3,6 +3,9 @@ import SQLite3
 
 struct AssistantSettings: Codable, Equatable {
     var overlayDensity = OverlayDensity.focus.rawValue
+    /// Tour version last finished or skipped; nil shows the welcome tour.
+    /// Optional so settings rows written before the tour existed still decode.
+    var onboardingSeenVersion: Int? = nil
 
     static func migrating(_ defaults: UserDefaults = .standard) -> AssistantSettings {
         AssistantSettings(
@@ -168,6 +171,50 @@ struct RunStore {
 
     var databaseURL: URL { baseDirectory.appending(path: "state.sqlite3") }
     var runURL: URL { baseDirectory.appending(path: "run.json") }
+
+    // MARK: - Cross-process change detection
+
+    /// Opaque change token for the active run. `rawSnapshot` is the exact
+    /// stored text, so the steady-state poll is a byte compare with no decode;
+    /// `fingerprint` is the canonical re-encoding, so a formatting-only rewrite
+    /// by the other writer (the localhost map backend) is not a change.
+    struct ChangeToken: Equatable {
+        let rawSnapshot: String
+        let fingerprint: Data?
+    }
+
+    enum PollResult {
+        case unchanged
+        /// Bytes moved but content is identical — adopt the token, keep state.
+        case tokenRefreshed(ChangeToken)
+        case changed(HonorRun, ChangeToken)
+    }
+
+    func changeToken(for run: HonorRun) -> ChangeToken? {
+        guard let data = try? encoder.encode(run),
+              let raw = String(data: data, encoding: .utf8) else { return nil }
+        return ChangeToken(rawSnapshot: raw, fingerprint: Self.fingerprint(run))
+    }
+
+    func pollActiveRun(since token: ChangeToken?) -> PollResult {
+        guard let data = ((try? activeSnapshot()) ?? nil),
+              let raw = String(data: data, encoding: .utf8) else { return .unchanged }
+        if raw == token?.rawSnapshot { return .unchanged }
+        guard var shared = try? decoder.decode(HonorRun.self, from: Data(raw.utf8)) else { return .unchanged }
+        shared.migrateLegacyPartySlots()
+        let fingerprint = Self.fingerprint(shared)
+        let newToken = ChangeToken(rawSnapshot: raw, fingerprint: fingerprint)
+        if let token, let fingerprint, fingerprint == token.fingerprint {
+            return .tokenRefreshed(newToken)
+        }
+        return .changed(shared, newToken)
+    }
+
+    private static func fingerprint(_ run: HonorRun) -> Data? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try? encoder.encode(run)
+    }
 
     private func activeSnapshot() throws -> Data? {
         try withDatabase { database in

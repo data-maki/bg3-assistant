@@ -6,8 +6,8 @@ import SwiftUI
 struct LoadoutTabView: View {
     @EnvironmentObject private var appState: AppState
     @State private var selectedMemberId: String?
-    @State private var pinnedSlot: LoadoutSlot?
-    @State private var hoveredSlot: LoadoutSlot?
+    @State private var pinnedCell: DollCell?
+    @State private var hoveredCell: DollCell?
     @State private var showsLater = false
 
     private var party: [PartyMember] { appState.activeParty }
@@ -41,8 +41,8 @@ struct LoadoutTabView: View {
             }
         }
         .onChange(of: member?.id) { _, _ in
-            pinnedSlot = nil
-            hoveredSlot = nil
+            pinnedCell = nil
+            hoveredCell = nil
         }
     }
 
@@ -137,43 +137,73 @@ struct LoadoutTabView: View {
 
     // MARK: - Doll grid
 
+    /// Grid rows in BG3 inventory order; `nil` leaves a cell blank so the two
+    /// ring fields stack in the right column. Weapon and off-hand sit on the
+    /// left, torch and bow on the right.
+    private static let dollRows: [[DollCell?]] = [
+        [DollCell(slot: .helmet), DollCell(slot: .armour)],
+        [DollCell(slot: .gloves), DollCell(slot: .boots)],
+        [DollCell(slot: .amulet), DollCell(slot: .rings, field: 0)],
+        [nil, DollCell(slot: .rings, field: 1)],
+        [DollCell(slot: .mainHand), DollCell(slot: .torch)],
+        [DollCell(slot: .offHand), DollCell(slot: .ranged)],
+    ]
+
+    private var groupedGear: [LoadoutSlot: [BuildGear]] {
+        Dictionary(grouping: availableGear) { LoadoutSlot.classify($0.slot, item: $0.item) }
+    }
+
     private func dollGrid(build: BuildSummary, member: PartyMember) -> some View {
-        let grouped = Dictionary(grouping: availableGear, by: { LoadoutSlot.classify($0.slot) })
-        let columns = [GridItem(.flexible(), spacing: 6), GridItem(.flexible(), spacing: 6)]
+        let grouped = groupedGear
         return VStack(alignment: .leading, spacing: 6) {
-            LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
-                ForEach(LoadoutSlot.paired) { slot in
-                    slotCell(slot, items: grouped[slot] ?? [], member: member)
+            ForEach(Self.dollRows.indices, id: \.self) { rowIndex in
+                HStack(spacing: 6) {
+                    ForEach(Self.dollRows[rowIndex], id: \.self) { cell in
+                        if let cell {
+                            slotCell(cell, items: cell.items(in: grouped), member: member)
+                        } else {
+                            Color.clear
+                                .frame(height: 42)
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
                 }
             }
-            ForEach(LoadoutSlot.fullWidth) { slot in
-                if let items = grouped[slot], !items.isEmpty {
-                    slotCell(slot, items: items, member: member)
-                }
+            if let extras = grouped[.extras], !extras.isEmpty {
+                slotCell(DollCell(slot: .extras), items: extras, member: member)
             }
         }
     }
 
-    private func slotCell(_ slot: LoadoutSlot, items: [BuildGear], member: PartyMember) -> some View {
-        let pinned = pinnedSlot == slot
+    private func slotCell(_ cell: DollCell, items: [BuildGear], member: PartyMember) -> some View {
+        let pinned = pinnedCell == cell
         let first = items.first
+        let accessibilityText = [cell.label, first?.item ?? "no pick", first?.region]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: ", ")
         return Button {
-            pinnedSlot = pinned ? nil : slot
+            pinnedCell = pinned ? nil : cell
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: slot.icon)
+                Image(systemName: cell.slot.icon)
                     .font(.system(size: 10))
                     .foregroundStyle(first == nil ? BG3Theme.bronze.opacity(0.7) : BG3Theme.gold)
                     .frame(width: 15)
+                if let first {
+                    GearItemIcon(gear: first, size: 28, borderColor: first.rarityTint)
+                }
                 VStack(alignment: .leading, spacing: 0) {
                     Text(first.map { items.count > 1 ? "\($0.item) +\(items.count - 1)" : $0.item } ?? "no pick")
                         .font(BG3Type.captionBold)
-                        .foregroundStyle(first == nil ? BG3Theme.mutedParchment.opacity(0.7) : BG3Theme.parchment)
+                        .foregroundStyle(first?.rarityTint ?? BG3Theme.mutedParchment.opacity(0.7))
                         .lineLimit(1)
-                    Text(slot.rawValue)
-                        .font(.system(size: 9))
-                        .foregroundStyle(BG3Theme.mutedParchment.opacity(0.8))
-                        .lineLimit(1)
+                    if let first {
+                        Text(first.region.isEmpty ? "Location unknown" : first.region)
+                            .font(.system(size: 9))
+                            .foregroundStyle(first.regionTint)
+                            .lineLimit(1)
+                    }
                 }
                 Spacer(minLength: 2)
                 slotGlyph(items, member: member)
@@ -188,9 +218,9 @@ struct LoadoutTabView: View {
         .background(RoundedRectangle(cornerRadius: 8).fill(pinned ? BG3Theme.bronze.opacity(0.26) : BG3Theme.ink.opacity(0.3)))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(pinned ? BG3Theme.gold.opacity(0.7) : BG3Theme.bronze.opacity(items.isEmpty ? 0.18 : 0.35), lineWidth: pinned ? 1 : 0.7))
         .onHover { inside in
-            if inside { hoveredSlot = slot } else if hoveredSlot == slot { hoveredSlot = nil }
+            if inside { hoveredCell = cell } else if hoveredCell == cell { hoveredCell = nil }
         }
-        .accessibilityLabel("\(slot.rawValue): \(first?.item ?? "no pick")")
+        .accessibilityLabel(accessibilityText)
     }
 
     @ViewBuilder private func slotGlyph(_ items: [BuildGear], member: PartyMember) -> some View {
@@ -227,20 +257,20 @@ struct LoadoutTabView: View {
     // MARK: - Drawer
 
     private func drawer(build: BuildSummary, member: PartyMember) -> some View {
-        let grouped = Dictionary(grouping: availableGear, by: { LoadoutSlot.classify($0.slot) })
-        let slot = pinnedSlot ?? hoveredSlot
-        let items = slot.flatMap { grouped[$0] } ?? []
+        let grouped = groupedGear
+        let cell = pinnedCell ?? hoveredCell
+        let cellItems = cell.map { $0.items(in: grouped) } ?? []
         return Group {
-            if let slot, !items.isEmpty {
+            if let cell, !cellItems.isEmpty {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 9) {
-                        ForEach(items) { gear in
-                            GearDetailView(gear: gear, member: member, showsActions: pinnedSlot != nil)
+                        ForEach(cellItems) { gear in
+                            GearDetailView(gear: gear, member: member, showsActions: pinnedCell != nil)
                         }
-                        if pinnedSlot == slot {
-                            changePickSection(slot, items: items, member: member)
+                        if pinnedCell == cell {
+                            changePickSection(cell, items: grouped[cell.slot] ?? [], member: member)
                         }
-                        if pinnedSlot == nil {
+                        if pinnedCell == nil {
                             Text("Click the slot to pin it and act on the item.")
                                 .font(BG3Type.caption)
                                 .foregroundStyle(BG3Theme.mutedParchment.opacity(0.8))
@@ -250,9 +280,9 @@ struct LoadoutTabView: View {
                 }
                 .frame(maxHeight: 172)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .bg3InsetSurface(accent: pinnedSlot == slot ? BG3Theme.gold : BG3Theme.bronze)
+                .bg3InsetSurface(accent: pinnedCell == cell ? BG3Theme.gold : BG3Theme.bronze)
                 .accessibilityElement(children: .contain)
-                .accessibilityLabel("\(slot.rawValue) details")
+                .accessibilityLabel("\(cell.label) details")
             } else {
                 idleDrawerSummary(member: member)
             }
@@ -262,15 +292,15 @@ struct LoadoutTabView: View {
     /// Alternatives for a pinned slot from the item catalog: any valid item
     /// for this slot obtainable by the current act, with its effect explained
     /// inline and on hover so trade-offs are visible before swapping.
-    @ViewBuilder private func changePickSection(_ slot: LoadoutSlot, items: [BuildGear], member: PartyMember) -> some View {
+    @ViewBuilder private func changePickSection(_ cell: DollCell, items: [BuildGear], member: PartyMember) -> some View {
         let options = appState.itemCatalog
             .filter { option in
-                LoadoutSlot.classify(option.slot) == slot
+                LoadoutSlot.classify(option.slot, item: option.name) == cell.slot
                     && option.act <= appState.selectedAct
                     && !items.contains { $0.itemKey == option.itemKey }
             }
             .sorted { $0.name < $1.name }
-        let overridden = appState.slotOverride(for: member, slot: slot) != nil
+        let overridden = appState.slotOverride(for: member, cell: cell) != nil
         if overridden || !options.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -280,7 +310,7 @@ struct LoadoutTabView: View {
                     Spacer()
                     if overridden {
                         Button("Revert to build pick") {
-                            appState.setSlotOverride(slot, itemKey: nil, for: member)
+                            appState.setSlotOverride(cell, itemKey: nil, for: member)
                         }
                         .buttonStyle(.plain).font(BG3Type.captionBold)
                         .foregroundStyle(BG3Theme.warning)
@@ -299,7 +329,7 @@ struct LoadoutTabView: View {
                         }
                         Spacer(minLength: 4)
                         Button("Use") {
-                            appState.setSlotOverride(slot, itemKey: option.itemKey, for: member)
+                            appState.setSlotOverride(cell, itemKey: option.itemKey, for: member)
                         }
                         .assistantActionButton(accent: BG3Theme.gold)
                     }
@@ -342,39 +372,23 @@ struct LoadoutTabView: View {
                     < ($1.act, $1.minimumLevel ?? 1, GearLogic.priorityRank($1.priority))
             }
         if !later.isEmpty {
-            VStack(alignment: .leading, spacing: 5) {
-                Button {
-                    showsLater.toggle()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "lock.fill").font(.system(size: 10)).foregroundStyle(BG3Theme.bronzeBright)
-                        Text(later.count == 1 ? "Later · 1 item" : "Later · \(later.count) items")
-                            .font(BG3Type.captionBold)
-                            .foregroundStyle(BG3Theme.parchment)
-                        Spacer()
-                        Image(systemName: showsLater ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 9))
-                            .foregroundStyle(BG3Theme.mutedParchment)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                if showsLater {
-                    ForEach(later) { gear in
-                        HStack(alignment: .top, spacing: 6) {
-                            Image(systemName: "lock.fill").font(.system(size: 9)).foregroundStyle(BG3Theme.bronzeBright)
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(gear.item).font(BG3Type.captionBold).foregroundStyle(BG3Theme.parchment)
-                                Text(laterReason(gear, member: member))
-                                    .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
-                            }
-                            Spacer()
+            BG3Disclosure(
+                title: later.count == 1 ? "Later · 1 item" : "Later · \(later.count) items",
+                systemImage: "lock.fill", tint: BG3Theme.bronzeBright,
+                inset: true, isExpanded: $showsLater
+            ) {
+                ForEach(later) { gear in
+                    HStack(alignment: .top, spacing: 6) {
+                        Image(systemName: "lock.fill").font(.system(size: 9)).foregroundStyle(BG3Theme.bronzeBright)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(gear.item).font(BG3Type.captionBold).foregroundStyle(BG3Theme.parchment)
+                            Text(laterReason(gear, member: member))
+                                .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
                         }
+                        Spacer()
                     }
                 }
             }
-            .padding(8)
-            .bg3InsetSurface(accent: BG3Theme.bronze.opacity(0.5))
         }
     }
 
@@ -396,55 +410,5 @@ struct LoadoutTabView: View {
                 .frame(maxWidth: .infinity)
         }
         .assistantActionButton()
-    }
-}
-
-/// Canonical equipment slots, in BG3 inventory order. TSV slot strings map in.
-enum LoadoutSlot: String, CaseIterable, Identifiable {
-    case helmet = "Helmet"
-    case armour = "Armour"
-    case gloves = "Gloves"
-    case boots = "Boots"
-    case amulet = "Amulet"
-    case rings = "Rings"
-    case mainHand = "Main hand"
-    case offHand = "Off-hand"
-    case ranged = "Ranged"
-    case extras = "Camp & consumables"
-
-    var id: String { rawValue }
-
-    /// Slots shown as a two-column grid, in reading order.
-    static let paired: [LoadoutSlot] = [.helmet, .armour, .gloves, .boots, .amulet, .rings, .mainHand, .offHand]
-    /// Slots rendered full-width below the grid (hidden when empty).
-    static let fullWidth: [LoadoutSlot] = [.ranged, .extras]
-
-    var icon: String {
-        switch self {
-        case .helmet: "crown.fill"
-        case .armour: "tshirt.fill"
-        case .gloves: "hand.raised.fill"
-        case .boots: "shoeprints.fill"
-        case .amulet: "medal.fill"
-        case .rings: "circlebadge.2.fill"
-        case .mainHand: "hammer.fill"
-        case .offHand: "shield.fill"
-        case .ranged: "scope"
-        case .extras: "backpack.fill"
-        }
-    }
-
-    static func classify(_ tsvSlot: String) -> LoadoutSlot {
-        let slot = tsvSlot.lowercased()
-        if slot.contains("head") { return .helmet }
-        if slot.contains("chest") { return .armour }
-        if slot.contains("off-hand") || slot.contains("shield") { return .offHand }
-        if slot.contains("hands") { return .gloves }
-        if slot.contains("feet") { return .boots }
-        if slot.contains("amulet") { return .amulet }
-        if slot.contains("ring") { return .rings }
-        if slot.contains("ranged") { return .ranged }
-        if slot.contains("melee") { return .mainHand }
-        return .extras
     }
 }

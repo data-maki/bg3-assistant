@@ -20,13 +20,14 @@ enum OverlayMetrics {
     static func collapsedSize(for reference: CGRect, density: OverlayDensity = .focus) -> CGSize {
         let s = scale(for: reference)
         if density == .minimal {
+            // The passive companion plus its separate reveal control.
             return CGSize(width: 112, height: 86)
         }
         // A BG3-style horizontal tooltip: wide enough for the checkpoint and
-        // one warning, short enough to stay between minimap and hotbar. The
-        // height fits the 64pt pet portrait plus the icon shortcut row.
-        let width = min(max(310 * s, 288), 336)
-        let height = density == .reference ? min(max(170 * s, 162), 182) : min(max(150 * s, 142), 158)
+        // one warning, short enough to stay between minimap and hotbar. Leave
+        // room for a wrapped objective above the 48pt shortcut row.
+        let width = min(max(460 * s, 430), 500)
+        let height = density == .reference ? min(max(194 * s, 184), 206) : min(max(174 * s, 164), 182)
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
@@ -39,10 +40,20 @@ enum OverlayMetrics {
         let height = switch tab {
         case .current: moreContextExpanded
             ? min(max(reference.height * 0.54, 550), 640)
-            : min(max(reference.height * 0.255, 320), 350)
-        case .party: min(max(reference.height * 0.58, 590), 680)
-        case .route, .chat, .settings: min(max(reference.height * 0.54, 550), 640)
+            : min(max(reference.height * 0.34, 410), 440)
+        case .party: min(max(reference.height * 0.52, 540), 620)
+        case .loadout: min(max(reference.height * 0.58, 590), 680)
+        case .route, .act, .chat, .settings: min(max(reference.height * 0.54, 550), 640)
         }
+        return CGSize(width: width.rounded(), height: height.rounded())
+    }
+
+    /// One welcome-tour page: wider than the peek card, shorter than the
+    /// planner, and independent of tab and density so hotkey peeks or menu
+    /// actions cannot resize the card mid-tour.
+    static func onboardingSize(for reference: CGRect) -> CGSize {
+        let width = min(max(reference.width * 0.22, 430), 520)
+        let height = min(max(reference.height * 0.46, 470), 540)
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
@@ -51,9 +62,11 @@ enum OverlayMetrics {
         reference: CGRect,
         tab: PlannerTab = .current,
         density: OverlayDensity = .focus,
-        moreContextExpanded: Bool = false
+        moreContextExpanded: Bool = false,
+        onboarding: Bool = false
     ) -> CGSize {
-        expanded
+        if onboarding { return onboardingSize(for: reference) }
+        return expanded
             ? expandedSize(for: reference, tab: tab, moreContextExpanded: moreContextExpanded)
             : collapsedSize(for: reference, density: density)
     }
@@ -83,7 +96,11 @@ enum OverlayMetrics {
         let x = reference.maxX - panelSize.width - edgeMargin
         let bottomLimit = reference.minY + reference.height * hotbarBand
         let centeredY = reference.midY - panelSize.height / 2
-        let y = max(centeredY, bottomLimit)
+        let minimapBottom = reference.maxY - reference.height * minimapBand
+        let highestSafeY = minimapBottom - panelSize.height
+        let y = highestSafeY >= bottomLimit
+            ? min(max(centeredY, bottomLimit), highestSafeY)
+            : max(centeredY, bottomLimit)
         return CGPoint(x: x, y: min(y, reference.maxY - panelSize.height))
     }
 

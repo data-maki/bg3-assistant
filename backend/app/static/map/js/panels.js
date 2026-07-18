@@ -6,6 +6,8 @@
 import {
   state, els, escapeHtml, markerClass, isItemEquipped, isResolved, iconUrl,
   effectSnippet, equippedSet, memberEquipment, equipmentOwner, plannedRosterMembers,
+  currentBuildStep, WITHERS_HIRELINGS, hirelingProfile,
+  sourceRecorded, sourceEquipped, sourceOwner, canActivateRosterStatus,
 } from "./state.js";
 
 // ---------------------------------------------------------------------------
@@ -94,54 +96,157 @@ function partyMembers() {
   }));
 }
 
-function currentBuildStep(build, level) {
-  const plan = build?.levels || [];
-  return plan.find((row) => row.level === level)
-    || [...plan].reverse().find((row) => row.level <= level)
-    || plan[0];
+// The party panel is rebuilt wholesale, so the focused control (identified by
+// its data-* attributes) is captured before the innerHTML swap and re-focused
+// after — every mutation can then funnel through the full render() safely.
+function partyFocusSelector() {
+  const active = document.activeElement;
+  if (!active || !els.partyPanel.contains(active)) return null;
+  const attributes = active.getAttributeNames?.().filter((name) => name.startsWith("data-")) || [];
+  if (!attributes.length) return null;
+  return attributes.map((name) => `[${name}="${CSS.escape(active.getAttribute(name))}"]`).join("");
+}
+
+function partyViewHtml() {
+  if (!state.roster.length) {
+    return `<p class="panel-note">Open this map from the companion to configure the full roster.</p>`;
+  }
+  if (state.partyView === "setup") return partySetupView();
+  if (state.partyView === "member") {
+    const member = state.roster.find((entry) => entry.id === state.selectedPartyMemberId);
+    if (member) return partyMemberView(member);
+    state.partyView = "guidance";
+    state.selectedPartyMemberId = null;
+  }
+  return partyGuidanceView();
 }
 
 export function renderParty() {
-  if (!state.roster.length) {
-    els.partyPanel.innerHTML = `<p class="panel-note">Open this map from the companion to configure the full roster.</p>`;
-    return;
-  }
-  const active = state.roster.filter((member) => member.status === "active");
-  const inactive = state.roster.filter((member) => member.status !== "active");
-  const statusOptions = ["active", "camp", "unrecruited", "unavailable", "dead", "departed"];
-  const memberRow = (member) => {
+  const focusSelector = partyFocusSelector();
+  els.partyPanel.innerHTML = partyViewHtml();
+  if (focusSelector) els.partyPanel.querySelector(focusSelector)?.focus();
+}
+
+const ABILITIES = [
+  ["strength", "STR"], ["dexterity", "DEX"], ["constitution", "CON"],
+  ["intelligence", "INT"], ["wisdom", "WIS"], ["charisma", "CHA"],
+];
+
+function statusLabel(status) {
+  return ({ active: "Active", camp: "Camp", unrecruited: "Not recruited", unavailable: "Unavailable", dead: "Dead", departed: "Departed" })[status] || status;
+}
+
+function activeAbilitySetup(build, level) {
+  return [...(build?.abilitySetups || [])].filter((setup) => setup.level <= level).sort((a, b) => b.level - a.level)[0];
+}
+
+function plannedAbilityScore(member, build, ability) {
+  const level = Number(member.level) || 1;
+  const setup = activeAbilitySetup(build, level);
+  let score = Number(setup?.finalScores?.[ability] ?? member.abilityScores?.[ability] ?? build?.startingAbilityScores?.[ability] ?? 10);
+  (build?.abilitySources || []).filter((source) => source.ability === ability && source.minimumLevel <= level && (!source.maximumLevel || source.maximumLevel >= level)).forEach((source) => {
+    if (!["asi", "feat"].includes(source.kind) && !sourceRecorded(member, source) && !sourceEquipped(member, source)) return;
+    score = source.mode === "minimum" ? Math.max(score, source.value) : score + source.value;
+  });
+  return score;
+}
+
+function partyGuidanceView() {
+  const active = state.roster.filter((member) => member.status === "active").slice(0, 4);
+  const rows = active.map((member) => {
     const build = state.data.builds.find((entry) => entry.id === member.buildId);
-    const level = Number(member.level) || Number(els.level.value);
-    const step = currentBuildStep(build, level);
-    const buildOptions = `<option value="">No reviewed build</option>${state.data.builds.map((entry) => `<option value="${escapeHtml(entry.id)}" ${entry.id === member.buildId ? "selected" : ""}>${escapeHtml(entry.name)}</option>`).join("")}`;
-    const levelOptions = Array.from({ length: 12 }, (_, index) => index + 1).map((value) => `<option value="${value}" ${value === level ? "selected" : ""}>L${value}</option>`).join("");
-    return `<article class="build-card party-member-card roster-${escapeHtml(member.status)}" data-build="${escapeHtml(member.buildId || "")}">
-      <header>
-        <div class="build-title"><p class="party-member-name">${escapeHtml(member.name)}</p><h3>${escapeHtml(build?.name || member.className || "Unassigned")}</h3></div>
-        <select class="roster-status" data-roster-status="${escapeHtml(member.id)}" aria-label="${escapeHtml(member.name)} roster status">${statusOptions.map((status) => `<option value="${status}" ${status === member.status ? "selected" : ""}>${status}</option>`).join("")}</select>
-      </header>
-      <div class="roster-controls"><select data-roster-level="${escapeHtml(member.id)}" aria-label="${escapeHtml(member.name)} level">${levelOptions}</select><select data-roster-build="${escapeHtml(member.id)}" aria-label="${escapeHtml(member.name)} build">${buildOptions}</select></div>
-      <p class="build-role">${escapeHtml(build?.role || "No role assigned")}${build ? ` · ${escapeHtml(build.finalSplit)}` : ""}</p>
-      ${step ? `<div class="level-now">
-        <div class="level-now__badge">L${step.level}</div>
-        <div class="level-now__body">
-          <strong>${escapeHtml(step.take)}</strong>${step.subclassChoice && step.subclassChoice !== "-" ? ` · ${escapeHtml(step.subclassChoice)}` : ""}
-          ${step.choices ? `<p class="level-now__pick"><span>Take</span> ${escapeHtml(step.choices)}</p>` : ""}
-          ${step.tactics ? `<p class="level-now__do"><span>Do now</span> ${escapeHtml(step.tactics)}</p>` : ""}
-        </div>
-      </div>` : `<p class="panel-note">Assign a reviewed build to see this level's action.</p>`}
-    </article>`;
-  };
+    const step = currentBuildStep(build, Number(member.level) || 1);
+    const exact = step?.level === Number(member.level);
+    const setup = activeAbilitySetup(build, Number(member.level) || 1);
+    const setupApplied = setup && member.appliedAbilitySetupId === setup.id;
+    const next = build?.levels?.find((entry) => entry.level > Number(member.level));
+    return `<button class="party-guidance-card ${exact ? "is-now" : ""} ${build ? "" : "needs-build"}" type="button" data-action="open-member" data-id="${escapeHtml(member.id)}">
+      <span class="party-guidance-card__head"><strong>${escapeHtml(member.name)}</strong><span>L${member.level} · ${escapeHtml(build?.name || member.className || "No build")}</span><b>›</b></span>
+      ${step ? `<span class="party-guidance-card__step"><em>${exact ? `NOW L${step.level}` : `LATEST L${step.level}`}</em><strong>${escapeHtml(step.take)}</strong></span>
+        ${step.choices && step.choices !== "-" ? `<span class="party-guidance-card__fact"><b>TAKE</b>${escapeHtml(step.choices)}</span>` : ""}
+        ${step.tactics && step.tactics !== "-" ? `<span class="party-guidance-card__fact do"><b>DO</b>${escapeHtml(step.tactics)}</span>` : ""}`
+        : `<span class="party-guidance-card__missing">Choose a reviewed build</span>`}
+      <span class="party-guidance-card__foot"><span>${next ? `Next L${next.level}: ${escapeHtml(next.take)}` : build ? "Final reviewed step reached" : "Build required"}</span>${setup ? `<strong class="${setupApplied ? "party-status-ok" : "party-status-warn"}">${setupApplied ? "Stats recorded" : "Stats setup due"}</strong>` : ""}</span>
+    </button>`;
+  }).join("");
+  return `<div class="party-page-title" tabindex="-1"><div><strong>Party guidance</strong><span>What your active party needs at this level</span></div><b>${active.length}/4 active</b></div>
+    <div class="party-guidance-list">${rows || `<p class="panel-note">No active party members. A solo run is valid; add someone only when you want Party guidance.</p>`}</div>
+    <button class="party-primary-action" type="button" data-action="show-setup">Manage roster, builds, and abilities <b>›</b></button>`;
+}
+
+function setupMemberRow(member, active, available) {
+  const build = state.data.builds.find((entry) => entry.id === member.buildId);
+  const swap = active && available.length ? `<select data-action="swap-member" data-id="${escapeHtml(member.id)}" aria-label="Replace ${escapeHtml(member.name)}"><option value="">Swap...</option>${available.map((candidate) => `<option value="${escapeHtml(candidate.id)}">${escapeHtml(candidate.name)}</option>`).join("")}</select>` : "";
+  const camp = active ? `<button type="button" data-action="return-camp" data-id="${escapeHtml(member.id)}">Camp</button>` : "";
+  const add = !active && canActivateRosterStatus(member.status) ? `<button type="button" data-action="activate-member" data-id="${escapeHtml(member.id)}">Add</button>` : "";
+  const record = member.status === "unrecruited" ? `<button type="button" data-action="record-recruited" data-id="${escapeHtml(member.id)}">Record recruited</button>` : "";
+  return `<div class="party-setup-row"><button type="button" data-action="open-member" data-id="${escapeHtml(member.id)}"><strong>${escapeHtml(member.name)}</strong><span>L${member.level} · ${escapeHtml(build?.name || member.className || "No build")}</span></button>${swap}${camp}${add}${record}</div>`;
+}
+
+function partySetupView() {
+  const active = state.roster.filter((member) => member.status === "active").slice(0, 4);
+  const camp = state.roster.filter((member) => member.status === "camp");
+  const recruitable = state.roster.filter((member) => member.status === "unrecruited");
+  const available = [...camp, ...recruitable];
+  const outside = state.roster.filter((member) => ["unavailable", "dead", "departed"].includes(member.status));
+  const selectedHirelings = state.roster.filter((member) => member.isHireling);
+  const selectedNames = new Set(selectedHirelings.map((member) => member.name));
+  const hirelings = WITHERS_HIRELINGS.filter((hireling) => !selectedNames.has(hireling.name));
   const karlach = state.roster.find((member) => member.name === "Karlach");
   const outcomeRows = karlach?.status === "dead" ? `<div class="story-outcomes"><strong>Karlach outcome</strong>
-    <label><input type="checkbox" data-story-outcome="karlach_killed_for_robe" ${state.storyOutcomes.includes("karlach_killed_for_robe") ? "checked" : ""}> Killed for Mizora/Wyll path</label>
-    <label><input type="checkbox" data-story-outcome="infernal_robe_obtained" ${state.storyOutcomes.includes("infernal_robe_obtained") ? "checked" : ""}> Infernal Robe obtained</label>
-  </div>` : "";
-  els.partyPanel.innerHTML = `<div class="roster-heading"><strong>Active party</strong><span>${active.length}/4</span></div>
-    <div class="build-list">${active.map(memberRow).join("")}</div>
-    <details class="roster-inactive"><summary>Camp & unavailable <strong>${inactive.length}</strong></summary><div class="build-list">${inactive.map(memberRow).join("")}</div></details>
+    <label><input type="checkbox" data-action="toggle-story-outcome" data-id="karlach_killed_for_robe" ${state.storyOutcomes.includes("karlach_killed_for_robe") ? "checked" : ""}> Killed for Mizora/Wyll path</label>
+    <label><input type="checkbox" data-action="toggle-story-outcome" data-id="infernal_robe_obtained" ${state.storyOutcomes.includes("infernal_robe_obtained") ? "checked" : ""}> Infernal Robe obtained</label></div>` : "";
+  return `<button class="party-back" type="button" data-action="show-guidance">‹ Party</button>
+    <div class="party-page-title" tabindex="-1"><div><strong>Party setup</strong><span>Four is the maximum, not a requirement</span></div><b>${active.length}/4 active</b></div>
+    <section class="party-setup-section"><h3>Active slots</h3>${active.map((member) => setupMemberRow(member, true, available)).join("") || `<p class="panel-note">No active characters.</p>`}</section>
+    <details class="party-setup-section" open><summary>Camp <b>${camp.length}</b></summary>${camp.map((member) => setupMemberRow(member, false, available)).join("") || `<p class="panel-note">No characters at Camp.</p>`}</details>
+    <details class="party-setup-section"><summary>Not recorded as recruited <b>${recruitable.length}</b></summary>${recruitable.map((member) => setupMemberRow(member, false, available)).join("")}</details>
+    <details class="party-setup-section"><summary>Withers hirelings <b>${selectedHirelings.length}/3</b></summary>${hirelings.map((hireling) => `<div class="party-setup-row"><span><strong>${escapeHtml(hireling.name)}</strong><small>${escapeHtml(hireling.race)} · ${escapeHtml(hireling.className)}</small></span><button type="button" data-action="add-hireling" data-id="${escapeHtml(hireling.id)}" ${selectedHirelings.length >= 3 ? "disabled" : ""}>Record recruited</button></div>`).join("")}</details>
+    ${outside.length ? `<details class="party-setup-section"><summary>Dead, departed, or unavailable <b>${outside.length}</b></summary>${outside.map((member) => `<div class="party-setup-row"><button type="button" data-action="open-member" data-id="${escapeHtml(member.id)}"><strong>${escapeHtml(member.name)}</strong><span>${escapeHtml(statusLabel(member.status))}</span></button><button type="button" data-action="return-camp" data-id="${escapeHtml(member.id)}">Return to Camp</button></div>`).join("")}</details>` : ""}
     ${outcomeRows}
-    <label class="include-camp"><input type="checkbox" data-include-camp ${state.includeCampPlans ? "checked" : ""}> Include camp builds in Equipment</label>`;
+    <label class="include-camp"><input type="checkbox" data-action="toggle-include-camp" ${state.includeCampPlans ? "checked" : ""}> Include Camp builds in Equipment</label>`;
+}
+
+function abilityRecipe(setup) {
+  const bonus = (ability) => ability === setup.bonusTwo ? "+2" : ability === setup.bonusOne ? "+1" : "-";
+  return `<table class="ability-recipe"><thead><tr><th></th>${ABILITIES.map(([, short]) => `<th>${short}</th>`).join("")}</tr></thead><tbody>
+    <tr><th>1 Point buy</th>${ABILITIES.map(([ability]) => `<td>${setup.pointBuyScores[ability]}</td>`).join("")}</tr>
+    <tr><th>2 Bonus</th>${ABILITIES.map(([ability]) => `<td>${bonus(ability)}</td>`).join("")}</tr>
+    <tr class="ability-recipe__final"><th>3 Enter</th>${ABILITIES.map(([ability]) => `<td>${setup.finalScores[ability]}</td>`).join("")}</tr>
+  </tbody></table>`;
+}
+
+function abilitySourceRow(source, member) {
+  const recorded = sourceRecorded(member, source);
+  const equipped = sourceEquipped(member, source);
+  const owner = source.uniqueAcrossParty ? sourceOwner(source) : null;
+  const effect = source.mode === "minimum" ? `→ ${source.value}` : `+${source.value}`;
+  let action = `<span class="source-state">L${source.minimumLevel}</span>`;
+  if (source.kind === "equipment") action = equipped ? `<span class="source-state ok">Equipped</span>` : owner ? `<span class="source-state warn">Used by ${escapeHtml(owner.name)}</span>` : `<button type="button" data-action="open-loadout">Loadout</button>`;
+  if (["permanent", "consumable"].includes(source.kind)) action = `<button type="button" data-action="toggle-ability-source" data-id="${escapeHtml(source.id)}" data-source-applied="${recorded}">${recorded ? "Recorded" : owner ? "Move" : "Record"}</button>`;
+  return `<div class="ability-source"><b>${escapeHtml(source.ability.slice(0, 3).toUpperCase())}</b><span><strong>${escapeHtml(source.label)} <em>${escapeHtml(effect)}</em></strong><small>${escapeHtml(source.kind)} · ${escapeHtml(source.minimumLevel > 1 ? `from L${source.minimumLevel}` : source.note || "build plan")}</small>${source.minimumLevel > 1 && source.note ? `<small>${escapeHtml(source.note)}</small>` : ""}</span>${action}</div>`;
+}
+
+function partyMemberView(member) {
+  const build = state.data.builds.find((entry) => entry.id === member.buildId);
+  const level = Number(member.level) || 1;
+  const step = currentBuildStep(build, level);
+  const exact = step?.level === level;
+  const setup = activeAbilitySetup(build, level);
+  const setupApplied = setup && member.appliedAbilitySetupId === setup.id;
+  const statuses = ["active", "camp", "unrecruited", "unavailable", "dead", "departed"];
+  const levelOptions = Array.from({ length: 12 }, (_, index) => index + 1).map((value) => `<option value="${value}" ${value === level ? "selected" : ""}>Level ${value}</option>`).join("");
+  const buildOptions = `<option value="">No reviewed build</option>${state.data.builds.map((entry) => `<option value="${escapeHtml(entry.id)}" ${entry.id === member.buildId ? "selected" : ""}>${escapeHtml(entry.name)}</option>`).join("")}`;
+  const scores = build ? `<div class="ability-score-grid">${ABILITIES.map(([ability, short]) => { const score = plannedAbilityScore(member, build, ability); const target = build.targetAbilityScores?.[ability] ?? score; const modifier = Math.floor((score - 10) / 2); return `<div><b>${short}</b><strong>${score}</strong><span>${modifier >= 0 ? "+" : ""}${modifier} / ${target}</span></div>`; }).join("")}</div>` : "";
+  const hireling = hirelingProfile(member);
+  return `<button class="party-back" type="button" data-action="${state.partyMemberReturnView === "setup" ? "show-setup" : "show-guidance"}">‹ ${state.partyMemberReturnView === "setup" ? "Party setup" : "Party guidance"}</button>
+    <div class="party-page-title" tabindex="-1"><div>${member.isCustom ? `<label class="party-name-field">Character name<input data-action="rename-member" data-id="${escapeHtml(member.id)}" value="${escapeHtml(member.name)}"></label>` : `<strong>${escapeHtml(member.name)}</strong>${hireling ? `<span>${escapeHtml(hireling.race)} · Withers hireling</span>` : ""}`}</div><b>${escapeHtml(statusLabel(member.status))}</b></div>
+    <div class="roster-controls"><select data-action="set-level" data-id="${escapeHtml(member.id)}" aria-label="${escapeHtml(member.name)} level">${levelOptions}</select><select class="roster-status" data-action="set-status" data-id="${escapeHtml(member.id)}" aria-label="${escapeHtml(member.name)} roster status">${statuses.map((status) => `<option value="${status}" ${status === member.status ? "selected" : ""}>${escapeHtml(statusLabel(status))}</option>`).join("")}</select></div>
+    ${step ? `<div class="level-now"><div class="level-now__badge">${exact ? "NOW" : "LATEST"}<small>L${step.level}</small></div><div class="level-now__body"><strong>${escapeHtml(step.take)}</strong>${step.subclassChoice && step.subclassChoice !== "-" ? ` · ${escapeHtml(step.subclassChoice)}` : ""}${step.choices && step.choices !== "-" ? `<p class="level-now__pick"><span>Take</span>${escapeHtml(step.choices)}</p>` : ""}${step.tactics && step.tactics !== "-" ? `<p class="level-now__do"><span>Do now</span>${escapeHtml(step.tactics)}</p>` : ""}</div></div>` : `<p class="panel-note">Assign a reviewed build to see current guidance.</p>`}
+    <section class="party-member-section"><h3>Ability Points ${setup ? `<span class="${setupApplied ? "party-status-ok" : "party-status-warn"}">${setupApplied ? "Recorded" : "Setup due"}</span>` : ""}</h3>${setup ? abilityRecipe(setup) : `<p class="panel-note">No validated point-buy recipe is available for this build.</p>`}${setup ? `<p><strong>First class:</strong> ${escapeHtml(setup.firstClass)}<br><span>${escapeHtml(setup.classOrder)}</span></p><p>${escapeHtml(setup.reason)}</p>${setupApplied ? "" : `<button class="party-primary-action" type="button" data-action="apply-setup" data-id="${escapeHtml(setup.id)}">Mark these values applied in BG3</button>`}` : ""}${scores}</section>
+    <section class="party-member-section"><h3>Where every boost comes from</h3>${(build?.abilitySources || []).map((source) => abilitySourceRow(source, member)).join("") || `<p class="panel-note">No additional ability sources are required.</p>`}${build?.targetAbilityNote ? `<p class="panel-note">${escapeHtml(build.targetAbilityNote)}</p>` : ""}</section>
+    <section class="party-member-section"><h3>Build</h3><select data-action="set-build" data-id="${escapeHtml(member.id)}" aria-label="Reviewed build for ${escapeHtml(member.name)}">${buildOptions}</select>${build ? `<p><strong>${escapeHtml(build.role)}</strong><br>${escapeHtml(build.finalSplit)} · ${escapeHtml(build.honorStatus)}</p><p class="build-caveat">${escapeHtml(build.caveat)}</p>` : ""}<div class="build-import"><input type="url" data-build-import-url aria-label="Public build URL" placeholder="Public build URL"><button type="button" data-action="import-build" data-id="${escapeHtml(member.id)}">Import and assign</button></div></section>
+    <section class="party-member-section danger-zone"><h3>Dangerous actions</h3><button type="button" data-action="reset-member" data-id="${escapeHtml(member.id)}">Reset character plan...</button>${member.isHireling ? `<button type="button" data-action="dismiss-hireling" data-id="${escapeHtml(member.id)}" ${member.status === "active" ? "disabled" : ""}>Dismiss hireling...</button>` : ""}</section>`;
 }
 
 function gearForMember(member) {

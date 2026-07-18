@@ -1,0 +1,92 @@
+[
+  {
+    "id": "act3-timed-geraldus",
+    "name": "Geraldus and the Harper contact",
+    "kind": "point_of_no_return",
+    "trigger": "Entering Wyrm's Crossing",
+    "deadline": "Visit Danthelon's Dancing Axe before entering the Lower City",
+    "consequence": "Geraldus is killed and the Harper basement encounter is lost.",
+    "severity": "high",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "act3-timed-ox",
+    "name": "Strange Ox delivery",
+    "kind": "point_of_no_return",
+    "trigger": "Meeting the Strange Ox in Rivington",
+    "deadline": "Carry it into the Lower City before entering without it",
+    "consequence": "Help the Devilish Ox fails.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "act3-timed-florrick",
+    "name": "Counsellor Florrick's execution",
+    "kind": "long_rest",
+    "trigger": "Reading an Execution Notice or speaking to the enthralled Ravengard immediately after the coronation",
+    "deadline": "Before completing the fifth qualifying long rest",
+    "consequence": "Florrick is executed in Wyrm's Rock Prison.",
+    "severity": "critical",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "act3-timed-cora",
+    "name": "Dolor targets Cora Highberry",
+    "kind": "long_rest",
+    "trigger": "Reading the murder list and approaching the Wine Festival, or entering the Murder Tribunal",
+    "deadline": "1 long rest",
+    "consequence": "Cora is murdered.",
+    "severity": "high",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "act3-timed-devella",
+    "name": "Speak with Devella after saving Cora",
+    "kind": "long_rest",
+    "trigger": "Saving Cora before first meeting Devella",
+    "deadline": "Before the next long rest",
+    "consequence": "Devella disappears and her scenes and quest updates are lost.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "act3-timed-presses",
+    "name": "Stop the Presses",
+    "kind": "long_rest",
+    "trigger": "Speaking to Ettvard Needle after the quest starts",
+    "deadline": "1 long rest",
+    "consequence": "The hostile article is printed and the party's reputation is tarnished.",
+    "severity": "moderate",
+    "source": "https://bg3.wiki/wiki/Time-sensitive_activities"
+  },
+  {
+    "id": "act3-timed-volo",
+    "name": "Volo at Grey Harbour Docks",
+    "kind": "immediate",
+    "trigger": "Approaching Churg Elvek's mob and the smokepowder cart",
+    "deadline": "Before the burning trail detonates the eight Smokepowder Barrels during the encounter",
+    "consequence": "Volo dies in the explosion.",
+    "severity": "high",
+    "source": "https://bg3.wiki/wiki/Grey_Harbour_Docks"
+  },
+  {
+    "id": "act3-timed-iron-throne",
+    "name": "Iron Throne collapse",
+    "kind": "immediate",
+    "trigger": "Docking the submersible at the Iron Throne",
+    "deadline": "5 combat turns on Honor",
+    "consequence": "Every party member and prisoner outside the submersible dies.",
+    "severity": "critical",
+    "source": "https://bg3.wiki/wiki/Iron_Throne"
+  },
+  {
+    "id": "act3-timed-morphic-pool",
+    "name": "Morphic Pool final lockout",
+    "kind": "point_of_no_return",
+    "trigger": "Using the skiff at the Morphic Pool Dock",
+    "deadline": "Finish all city and camp preparation first",
+    "consequence": "Camp, storage, party swaps, Withers, respecs, ordinary long rests, and all city content become unavailable.",
+    "severity": "critical",
+    "source": "https://bg3.wiki/wiki/Morphic_Pool"
+  }
+]
