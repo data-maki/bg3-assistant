@@ -1,0 +1,11 @@
+{
+  "act": 3,
+  "title": "Rivington & Baldur's Gate",
+  "routeAvailable": true,
+  "localMapAvailable": false,
+  "mapName": "Baldur's Gate",
+  "mapUrl": "https://mapgenie.io/baldurs-gate-3/maps/baldurs-gate",
+  "equipmentFile": "gear/act3.tsv",
+  "coordinateSystem": "BG3 in-game XY",
+  "coordinateNote": "The reviewed Act 3 route uses area-level public-map handoffs. BG3 XY values are not treated as MapGenie marker coordinates."
+}

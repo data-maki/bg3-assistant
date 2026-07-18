@@ -7,6 +7,9 @@ import {
   state, els, escapeHtml, persistLocal, syncRunState, restoreRunState,
   isItemEquipped, isResolved, toggleEquipped, toggleMemberEquipment,
   normalizeRoster, syncPartyProjection, updateRosterMember, toggleStoryOutcome, recomputeEquipped,
+  activateMember, recordRecruited, returnToCamp, addHireling, swapActiveMember,
+  dismissMember, renameMember, assignBuild, applyAbilitySetup, resetMemberPlan,
+  setIncludeCampPlans, toggleAbilitySource, sourceOwner, importBuild, canActivateRosterStatus,
 } from "./js/state.js";
 import { initMap, renderMarkers, pollPosition, setFollow } from "./js/map-layer.js";
 import { renderWalkthrough, setWalkthroughStatus, focusWalkthroughStep } from "./js/walkthrough.js";
@@ -51,11 +54,9 @@ function populateFilters() {
   els.mapgenie.href = state.data.mapgenieUrl;
 }
 
-function applyURLIntent() {
-  const params = new URLSearchParams(window.location.search);
-  const level = Number(params.get("level"));
-  if (Number.isInteger(level) && level >= 1 && level <= 12) els.level.value = String(level);
-
+// URL params import run state only when the backend has none (a fresh
+// browser); boot calls importRunStateParams under that guard.
+function importRunStateParams(params) {
   const build = params.get("build");
   const partyBuilds = (params.get("builds") || "").split(",").filter((id) => state.data.builds.some((entry) => entry.id === id));
   const completed = (params.get("done") || "").split(",").filter((id) => state.data.markers.some((entry) => entry.type === "fight" && entry.id === id));
@@ -106,10 +107,18 @@ function applyURLIntent() {
   if (focused && state.data.walkthrough.some((step) => step.id === focused)) state.focusedWalkthroughStepId = focused;
   if (params.has("builds")) state.activeBuilds = [...new Set(partyBuilds)];
   if (params.has("done")) state.done = new Set(completed);
-  if (build && state.data.builds.some((entry) => entry.id === build)) {
-    els.build.value = build;
-    if (!params.has("builds")) state.activeBuilds = [build];
-  }
+  if (build && !params.has("builds") && state.data.builds.some((entry) => entry.id === build)) state.activeBuilds = [build];
+  if (["party", "roster", "builds", "done", "walkthrough", "equipped", "storyOutcomes", "includeCamp"].some((key) => params.has(key))) syncRunState();
+}
+
+// View params (level, build filter, item search, tab) always apply. Returns
+// the marker matching an `item` deep link so boot can select it.
+function applyViewParams(params) {
+  const level = Number(params.get("level"));
+  if (Number.isInteger(level) && level >= 1 && level <= 12) els.level.value = String(level);
+
+  const build = params.get("build");
+  if (build && state.data.builds.some((entry) => entry.id === build)) els.build.value = build;
 
   const item = params.get("item");
   if (item) {
@@ -122,7 +131,6 @@ function applyURLIntent() {
   const requestedTab = params.get("tab");
   const tab = requestedTab === "loadout" ? "party" : requestedTab;
   if (["walkthrough", "route", "party", "equipment", "warnings"].includes(tab)) setTab(tab);
-  if (["party", "roster", "builds", "done", "walkthrough", "equipped", "storyOutcomes", "includeCamp"].some((key) => params.has(key))) syncRunState();
   return item ? state.data.markers.find((marker) => marker.type === "item" && marker.name === item) : null;
 }
 
@@ -203,6 +211,163 @@ function render({ fit = false } = {}) {
   if (state.tab === "party") renderParty();
   if (state.tab === "warnings") renderWarnings();
 }
+
+function focusPartyHeading() {
+  requestAnimationFrame(() => els.partyPanel.querySelector(".party-page-title")?.focus());
+}
+
+// Confirmation wrapper around the assignBuild mutator: replacing a build
+// clears transient state, so a build already carrying any asks first.
+function assignBrowserBuild(member, buildId) {
+  if ((member.buildId || null) === (buildId || null)) return true;
+  const hasTransientState = (member.abilityModifiers || []).some((modifier) => modifier.kind !== "permanent")
+    || (state.equippedByMember[member.id] || []).length || member.appliedAbilitySetupId;
+  if (member.buildId && hasTransientState && !window.confirm("Replace this build? Permanent rewards stay with the character; temporary effects and setup confirmation will be cleared.")) return false;
+  return assignBuild(member.id, buildId);
+}
+
+// ---------------------------------------------------------------------------
+// Party actions. Templates emit data-action/data-id; these tables map each
+// action to its state.js mutator. Handlers keep only confirm/alert prompts,
+// focus management, and rendering — every mutation ends in the full render().
+// ---------------------------------------------------------------------------
+
+const PARTY_CLICK_ACTIONS = {
+  "open-member": (el) => {
+    state.partyMemberReturnView = state.partyView === "setup" ? "setup" : "guidance";
+    state.selectedPartyMemberId = el.dataset.id;
+    state.partyView = "member";
+    render();
+    focusPartyHeading();
+  },
+  "show-setup": () => {
+    state.partyView = "setup";
+    render();
+    focusPartyHeading();
+  },
+  "show-guidance": () => {
+    state.partyView = "guidance";
+    state.selectedPartyMemberId = null;
+    render();
+    focusPartyHeading();
+  },
+  "activate-member": (el) => {
+    if (!activateMember(el.dataset.id)) window.alert("The active party already has four members. Use Swap on an active slot.");
+    render();
+  },
+  "record-recruited": (el) => {
+    recordRecruited(el.dataset.id);
+    render();
+  },
+  "return-camp": (el) => {
+    returnToCamp(el.dataset.id);
+    render();
+  },
+  "add-hireling": (el) => {
+    if (addHireling(el.dataset.id)) render();
+  },
+  "apply-setup": (el) => {
+    applyAbilitySetup(state.selectedPartyMemberId, el.dataset.id);
+    render();
+  },
+  "toggle-ability-source": (el) => {
+    const member = state.roster.find((entry) => entry.id === state.selectedPartyMemberId);
+    const build = state.data.builds.find((entry) => entry.id === member?.buildId);
+    const source = build?.abilitySources?.find((entry) => entry.id === el.dataset.id);
+    if (!member || !source) return;
+    const applied = el.dataset.sourceApplied === "true";
+    if (!applied && (state.data.act < (source.minimumAct || 1) || Number(member.level) < source.minimumLevel)) {
+      window.alert(`${source.label} is planned for Act ${source.minimumAct || 1}, level ${source.minimumLevel} or later.`);
+      return;
+    }
+    if (!applied && source.uniqueAcrossParty) {
+      const owner = sourceOwner(source);
+      if (owner && owner.id !== member.id && !window.confirm(`Move ${source.label} from ${owner.name} to ${member.name}?`)) return;
+    }
+    toggleAbilitySource(member.id, source.id, applied);
+    render();
+  },
+  "open-loadout": () => setTab("equipment"),
+  "reset-member": (el) => {
+    if (!state.roster.some((entry) => entry.id === el.dataset.id)) return;
+    if (!window.confirm("Reset this planner record? This is not a Withers respec. The assigned build, recorded ability sources, and equipment confirmations will be removed.")) return;
+    resetMemberPlan(el.dataset.id);
+    render();
+  },
+  "dismiss-hireling": (el) => {
+    const member = state.roster.find((entry) => entry.id === el.dataset.id);
+    if (!member?.isHireling || member.status === "active") return;
+    if (!window.confirm(`Dismiss ${member.name} and remove their equipment assignments?`)) return;
+    dismissMember(member.id);
+    state.partyView = "setup";
+    state.selectedPartyMemberId = null;
+    render();
+    focusPartyHeading();
+  },
+  "import-build": (el) => {
+    const input = els.partyPanel.querySelector("[data-build-import-url]");
+    const url = input?.value.trim();
+    if (!url) { input?.focus(); return; }
+    el.disabled = true;
+    importBuild(url)
+      .then((build) => {
+        const member = state.roster.find((entry) => entry.id === el.dataset.id);
+        if (member) assignBrowserBuild(member, build.id);
+        render();
+      })
+      .catch((error) => { window.alert(error.message); el.disabled = false; });
+  },
+  "toggle-story-outcome": (el) => {
+    toggleStoryOutcome(el.dataset.id);
+    render();
+  },
+};
+
+const PARTY_CHANGE_ACTIONS = {
+  "swap-member": (el) => {
+    if (!el.value) return;
+    swapActiveMember(el.dataset.id, el.value);
+    render();
+  },
+  "set-status": (el) => {
+    const member = state.roster.find((entry) => entry.id === el.dataset.id);
+    if (["dead", "departed"].includes(el.value) && member?.status !== el.value) {
+      const impact = member?.status === "active" ? "They will stop contributing to readiness. " : "";
+      const preserved = member?.buildId ? "Their saved build, level, and equipment plan will be preserved. " : "Their level and notes will be preserved. ";
+      if (!window.confirm(`${impact}${preserved}Story outcomes and rewards remain separate confirmations.`)) {
+        el.value = member?.status || "camp";
+        return;
+      }
+    }
+    if (!updateRosterMember(el.dataset.id, { status: el.value })) {
+      const reason = el.value === "active" && !canActivateRosterStatus(member?.status)
+        ? `Confirm that ${member?.name || "this companion"} is available again before activating them.`
+        : "Active party is full. Send someone to camp first.";
+      window.alert(reason);
+      el.value = state.roster.find((entry) => entry.id === el.dataset.id)?.status || "camp";
+    }
+    render();
+  },
+  "set-level": (el) => {
+    updateRosterMember(el.dataset.id, { level: Number(el.value) });
+    render();
+  },
+  "set-build": (el) => {
+    const member = state.roster.find((entry) => entry.id === el.dataset.id);
+    if (member && !assignBrowserBuild(member, el.value || null)) el.value = member.buildId || "";
+    render();
+  },
+  "toggle-include-camp": (el) => {
+    setIncludeCampPlans(el.checked);
+    render();
+  },
+};
+
+// The custom-character name field syncs on every keystroke without a
+// re-render: rebuilding the panel mid-typing would drop the caret.
+const PARTY_INPUT_ACTIONS = {
+  "rename-member": (el) => renameMember(el.dataset.id, el.value),
+};
 
 function setMissingOnly(enabled) {
   state.missingOnly = enabled;
@@ -292,62 +457,16 @@ function bindEvents() {
   });
 
   els.partyPanel.addEventListener("click", (event) => {
-    const outcome = event.target.closest("[data-story-outcome]");
-    if (outcome) {
-      toggleStoryOutcome(outcome.dataset.storyOutcome);
-      render();
-      return;
-    }
-    const pick = event.target.closest("[data-pick]");
-    if (pick) {
-      const id = pick.dataset.pick;
-      state.activeBuilds = state.activeBuilds.includes(id)
-        ? state.activeBuilds.filter((entry) => entry !== id)
-        : [...state.activeBuilds, id].slice(0, 4);
-      syncRunState();
-      render();
-    }
+    const el = event.target.closest("[data-action]");
+    PARTY_CLICK_ACTIONS[el?.dataset.action]?.(el);
   });
   els.partyPanel.addEventListener("change", (event) => {
-    const status = event.target.closest("[data-roster-status]");
-    if (status) {
-      const member = state.roster.find((entry) => entry.id === status.dataset.rosterStatus);
-      if (["dead", "departed"].includes(status.value) && member?.status !== status.value) {
-        const impact = member?.status === "active" ? "They will stop contributing to readiness. " : "";
-        const preserved = member?.buildId ? "Their saved build, level, and equipment plan will be preserved. " : "Their level and notes will be preserved. ";
-        if (!window.confirm(`${impact}${preserved}Story outcomes and rewards remain separate confirmations.`)) {
-          status.value = member?.status || "camp";
-          return;
-        }
-      }
-      if (!updateRosterMember(status.dataset.rosterStatus, { status: status.value })) {
-        const reason = status.value === "active" && !["active", "camp"].includes(member?.status)
-          ? `Confirm that ${member?.name || "this companion"} is available again before activating them.`
-          : "Active party is full. Send someone to camp first.";
-        window.alert(reason);
-        status.value = state.roster.find((member) => member.id === status.dataset.rosterStatus)?.status || "camp";
-      }
-      render();
-      return;
-    }
-    const level = event.target.closest("[data-roster-level]");
-    if (level) {
-      updateRosterMember(level.dataset.rosterLevel, { level: Number(level.value) });
-      render();
-      return;
-    }
-    const build = event.target.closest("[data-roster-build]");
-    if (build) {
-      updateRosterMember(build.dataset.rosterBuild, { buildId: build.value || null });
-      render();
-      return;
-    }
-    const includeCamp = event.target.closest("[data-include-camp]");
-    if (includeCamp) {
-      state.includeCampPlans = includeCamp.checked;
-      syncRunState();
-      render();
-    }
+    const el = event.target.closest("[data-action]");
+    PARTY_CHANGE_ACTIONS[el?.dataset.action]?.(el);
+  });
+  els.partyPanel.addEventListener("input", (event) => {
+    const el = event.target.closest("[data-action]");
+    PARTY_INPUT_ACTIONS[el?.dataset.action]?.(el);
   });
 
   els.equipmentPanel.addEventListener("click", (event) => {
@@ -366,8 +485,7 @@ function bindEvents() {
   els.equipmentPanel.addEventListener("change", (event) => {
     const includeCamp = event.target.closest("[data-include-camp]");
     if (!includeCamp) return;
-    state.includeCampPlans = includeCamp.checked;
-    syncRunState();
+    setIncludeCampPlans(includeCamp.checked);
     render();
   });
 
@@ -399,11 +517,13 @@ fetch("/api/act1/markers")
   .then((response) => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); })
   .then(async (data) => {
     state.data = data;
-    await restoreRunState();
+    const hasServerState = await restoreRunState();
     populateFilters();
     initMap({ onBackgroundClick: clearSelection });
     bindEvents();
-    const requestedMarker = applyURLIntent();
+    const params = new URLSearchParams(window.location.search);
+    if (!hasServerState) importRunStateParams(params);
+    const requestedMarker = applyViewParams(params);
     render({ fit: true });
     if (requestedMarker) selectMarker(requestedMarker, true);
     pollPosition();

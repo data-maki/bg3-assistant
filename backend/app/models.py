@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
 
@@ -15,9 +15,15 @@ class CamelModel(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
 
+class StrictCamelModel(CamelModel):
+    """Schema used for structured model output; unknown fields are rejected."""
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, extra="forbid")
+
+
 class GuideSource(BaseModel):
     sheet: str
-    row: int
+    row: int | None = None
     url: str
 
 
@@ -32,8 +38,8 @@ class RouteCheckpoint(CamelModel):
     name: str
     area: str
     region: str
-    x: int
-    y: int
+    x: int | None = None
+    y: int | None = None
     minimum_level: int
     importance: str
     danger: str
@@ -57,6 +63,7 @@ class BuildLevel(CamelModel):
     choices: str
     tactics: str
     confidence: str
+    ability_score_reset: "AbilityScores | None" = None
 
 
 class BuildGear(CamelModel):
@@ -78,6 +85,141 @@ class BuildGear(CamelModel):
     acquire: str = ""  # wiki "where to find" specifics
     wiki: str = ""  # canonical bg3.wiki page URL
     icon: str = ""  # servable URL under /map-assets/icons/
+    game_x: int | None = None
+    game_y: int | None = None
+
+
+class CatalogItem(CamelModel):
+    """One row of the items table: item facts only, no per-build opinions."""
+
+    item_key: str
+    name: str
+    slot: str
+    act: int
+    region: str = ""
+    acquisition: str = ""
+    game_x: int | None = None
+    game_y: int | None = None
+    map_objective: bool = True
+    effect: str = ""
+    acquire: str = ""
+    wiki: str = ""
+    icon: str = ""
+    source: str = ""
+
+
+class AbilityScores(StrictCamelModel):
+    strength: int = Field(ge=8, le=20)
+    dexterity: int = Field(ge=8, le=20)
+    constitution: int = Field(ge=8, le=20)
+    intelligence: int = Field(ge=8, le=20)
+    wisdom: int = Field(ge=8, le=20)
+    charisma: int = Field(ge=8, le=20)
+
+
+class AbilityTargetScores(StrictCamelModel):
+    strength: int = Field(ge=1, le=30)
+    dexterity: int = Field(ge=1, le=30)
+    constitution: int = Field(ge=1, le=30)
+    intelligence: int = Field(ge=1, le=30)
+    wisdom: int = Field(ge=1, le=30)
+    charisma: int = Field(ge=1, le=30)
+
+
+AbilityName = Literal["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
+
+ABILITY_NAMES: tuple[AbilityName, ...] = (
+    "strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"
+)
+
+# BG3 character creation: point cost of each purchasable score; 27 points total.
+POINT_BUY_COSTS = {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9}
+
+
+class PointBuyScores(StrictCamelModel):
+    strength: int = Field(ge=8, le=15)
+    dexterity: int = Field(ge=8, le=15)
+    constitution: int = Field(ge=8, le=15)
+    intelligence: int = Field(ge=8, le=15)
+    wisdom: int = Field(ge=8, le=15)
+    charisma: int = Field(ge=8, le=15)
+
+
+def check_point_buy(
+    point_buy_scores: PointBuyScores,
+    bonus_two: AbilityName,
+    bonus_one: AbilityName,
+    final_scores: AbilityScores,
+) -> str | None:
+    """Single authority on BG3 creation legality: the reason a plan is illegal, or None."""
+    if bonus_two == bonus_one:
+        return "BG3 +2 and +1 ability bonuses must use different abilities"
+    spent = sum(POINT_BUY_COSTS[getattr(point_buy_scores, ability)] for ability in ABILITY_NAMES)
+    if spent != 27:
+        return f"BG3 point buy must spend exactly 27 points, got {spent}"
+    for ability in ABILITY_NAMES:
+        expected = getattr(point_buy_scores, ability)
+        if ability == bonus_two:
+            expected += 2
+        elif ability == bonus_one:
+            expected += 1
+        if getattr(final_scores, ability) != expected:
+            return f"Final {ability} must equal point buy plus its assigned ability bonus"
+    return None
+
+
+class AbilitySetupPlan(StrictCamelModel):
+    id: str
+    level: int = Field(ge=1, le=12)
+    label: str
+    reason: str
+    point_buy_scores: PointBuyScores
+    bonus_two: AbilityName
+    bonus_one: AbilityName
+    final_scores: AbilityScores
+    first_class: str
+    class_order: str
+
+    @model_validator(mode="after")
+    def validate_bg3_point_buy(self):
+        reason = check_point_buy(self.point_buy_scores, self.bonus_two, self.bonus_one, self.final_scores)
+        if reason is not None:
+            raise ValueError(reason)
+        return self
+
+
+def derive_bg3_point_buy(scores: AbilityScores) -> tuple[PointBuyScores, AbilityName, AbilityName] | None:
+    """Return one deterministic legal +2/+1 decomposition for final scores."""
+    ordered = sorted(ABILITY_NAMES, key=lambda ability: (-getattr(scores, ability), ABILITY_NAMES.index(ability)))
+    for bonus_two in ordered:
+        for bonus_one in ordered:
+            if bonus_one == bonus_two:
+                continue
+            values = {
+                ability: getattr(scores, ability) - (2 if ability == bonus_two else 1 if ability == bonus_one else 0)
+                for ability in ABILITY_NAMES
+            }
+            if any(value not in POINT_BUY_COSTS for value in values.values()):
+                continue
+            point_buy = PointBuyScores(**values)
+            if check_point_buy(point_buy, bonus_two, bonus_one, scores) is None:
+                return point_buy, bonus_two, bonus_one
+    return None
+
+
+class AbilityPlanSource(StrictCamelModel):
+    id: str
+    ability: AbilityName
+    kind: Literal["asi", "feat", "permanent", "equipment", "consumable"]
+    mode: Literal["add", "minimum"]
+    value: int = Field(ge=1, le=30)
+    label: str
+    minimum_act: int = Field(default=1, ge=1, le=3)
+    minimum_level: int = Field(default=1, ge=1, le=12)
+    maximum_level: int | None = Field(default=None, ge=1, le=12)
+    item_key: str | None = None
+    unique_across_party: bool = False
+    note: str = ""
 
 
 class BuildSummary(CamelModel):
@@ -88,6 +230,11 @@ class BuildSummary(CamelModel):
     final_split: str
     class_progression: str
     starting_abilities: str
+    starting_ability_scores: AbilityScores | None = None
+    target_ability_scores: AbilityTargetScores | None = None
+    target_ability_note: str = ""
+    ability_setups: list[AbilitySetupPlan] = Field(default_factory=list)
+    ability_sources: list[AbilityPlanSource] = Field(default_factory=list)
     play_pattern: str
     caveat: str
     source: str
@@ -95,7 +242,127 @@ class BuildSummary(CamelModel):
     gear: list[BuildGear] = Field(default_factory=list)
 
 
-class PartyMember(BaseModel):
+class ActGuideSummary(CamelModel):
+    act: int = Field(ge=1, le=3)
+    title: str
+    route_available: bool
+    local_map_available: bool
+    map_name: str
+    map_url: str
+    equipment_file: str
+    coordinate_system: str
+    coordinate_note: str
+    equipment_count: int = 0
+
+
+class ActMapEquipment(CamelModel):
+    item: str
+    area: str
+    acquisition: str
+    source: str
+    build_ids: list[str] = Field(default_factory=list)
+    game_x: int | None = None
+    game_y: int | None = None
+
+
+class ActMapIndex(CamelModel):
+    act: int = Field(ge=1, le=3)
+    title: str
+    map_name: str
+    map_url: str
+    coordinate_system: str
+    coordinate_note: str
+    equipment: list[ActMapEquipment] = Field(default_factory=list)
+
+
+class ImportedBuildLevel(StrictCamelModel):
+    level: int = Field(ge=1, le=12)
+    take: str
+    subclass_choice: str
+    choices: str
+    tactics: str
+    confidence: str
+    ability_score_reset: AbilityScores | None = None
+
+
+class ImportedBuildGear(StrictCamelModel):
+    item: str
+    slot: str
+    priority: str
+    act: int = Field(ge=1, le=3)
+    region: str
+    acquisition: str
+    why: str
+    minimum_level: int = Field(ge=1, le=12)
+    maximum_level: int | None
+    requirement: str
+    alternative: str
+
+
+class ImportedBuildDraft(StrictCamelModel):
+    name: str
+    role: str
+    final_split: str
+    class_progression: str
+    starting_ability_scores: AbilityScores
+    play_pattern: str
+    caveat: str
+    levels: list[ImportedBuildLevel]
+    gear: list[ImportedBuildGear]
+
+
+class ImportedCharacterDraft(StrictCamelModel):
+    name: str
+    class_name: str
+    level: int = Field(ge=1, le=12)
+    is_custom: bool
+    ability_scores: AbilityScores
+    build: ImportedBuildDraft
+
+
+class ImportedPartyDraft(StrictCamelModel):
+    name: str
+    characters: list[ImportedCharacterDraft] = Field(min_length=1, max_length=12)
+
+
+class ImportedLoadoutCharacter(CamelModel):
+    name: str
+    class_name: str
+    level: int = Field(ge=1, le=12)
+    is_custom: bool
+    ability_scores: AbilityScores
+    build: BuildSummary
+
+
+class ImportedLoadout(CamelModel):
+    id: str
+    name: str
+    source_url: str
+    characters: list[ImportedLoadoutCharacter]
+
+
+class ImportedBuild(CamelModel):
+    id: str
+    name: str
+    source_url: str
+    build: BuildSummary
+
+
+class LoadoutImportRequest(CamelModel):
+    url: str
+
+
+class AbilityModifier(CamelModel):
+    id: str
+    ability: AbilityName
+    kind: Literal["permanent", "temporary", "equipment"]
+    mode: Literal["add", "minimum"]
+    value: int = Field(ge=1, le=30)
+    source: str
+    plan_source_id: str | None = None
+
+
+class PartyMember(CamelModel):
     id: str
     name: str
     level: int = Field(ge=1, le=12)
@@ -105,13 +372,22 @@ class PartyMember(BaseModel):
     status: Literal["active", "camp", "unrecruited", "unavailable", "dead", "departed"] | None = None
     role_override: str | None = None
     is_custom: bool | None = None
+    ability_scores: AbilityScores | None = None
+    is_hireling: bool | None = None
+    source_loadout_id: str | None = None
+    ability_modifiers: list[AbilityModifier] | None = None
+    uses_build_ability_scores: bool | None = None
+    applied_ability_setup_id: str | None = None
 
 
 class ReadinessRequest(BaseModel):
     checkpoint_id: str
     party: list[PartyMember] = Field(default_factory=list)
     completed_checkpoint_ids: list[str] = Field(default_factory=list)
+    skipped_checkpoint_ids: list[str] = Field(default_factory=list)
     checked_preparation: list[str] = Field(default_factory=list)
+    walkthrough_statuses: dict[str, str] = Field(default_factory=dict)
+    walkthrough_outcomes: dict[str, str] = Field(default_factory=dict)
 
 
 class ReadinessResponse(BaseModel):
@@ -158,9 +434,11 @@ class ChatSource(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
-    checkpoint_id: str
+    checkpoint_id: str | None = None
     party: list[PartyMember] = Field(default_factory=list)
     completed_checkpoint_ids: list[str] = Field(default_factory=list)
+    skipped_checkpoint_ids: list[str] = Field(default_factory=list)
+    checked_preparation: list[str] = Field(default_factory=list)
     walkthrough_step_id: str | None = None
     image_base64: str | None = None  # optional BG3 screenshot for the vision model
     context: ChatContextSnapshot | None = None
@@ -214,6 +492,12 @@ class MapPartyMember(CamelModel):
     status: Literal["active", "camp", "unrecruited", "unavailable", "dead", "departed"] = "active"
     role_override: str | None = None
     is_custom: bool = False
+    ability_scores: AbilityScores | None = None
+    is_hireling: bool = False
+    source_loadout_id: str | None = None
+    ability_modifiers: list[AbilityModifier] | None = None
+    uses_build_ability_scores: bool | None = None
+    applied_ability_setup_id: str | None = None
 
 
 class RunState(CamelModel):

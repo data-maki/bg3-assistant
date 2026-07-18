@@ -1,0 +1,11 @@
+{
+  "act": 1,
+  "title": "Wilderness, Underdark & Mountain Pass",
+  "routeAvailable": true,
+  "localMapAvailable": true,
+  "mapName": "Wilderness",
+  "mapUrl": "https://mapgenie.io/baldurs-gate-3/maps/wilderness",
+  "equipmentFile": "gear/act1.tsv",
+  "coordinateSystem": "BG3 in-game XY",
+  "coordinateNote": "Reviewed Act 1 equipment is mapped locally where a verified MapGenie coordinate or named-area anchor exists."
+}

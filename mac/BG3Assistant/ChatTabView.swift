@@ -69,7 +69,7 @@ struct ChatTabView: View {
                         .foregroundStyle(appState.chatDraft.trimmingCharacters(in: .whitespaces).isEmpty ? Color.secondary.opacity(0.5) : BG3Theme.control)
                 }
                 .buttonStyle(.plain)
-                .disabled(appState.chatDraft.trimmingCharacters(in: .whitespaces).isEmpty || appState.isPreparingChatScreenshot)
+                .disabled(appState.chatDraft.trimmingCharacters(in: .whitespaces).isEmpty || appState.isPreparingChatScreenshot || appState.isSendingChat)
             }
             .padding(.horizontal, 9).padding(.vertical, 6)
             .background(BG3Theme.ink.opacity(0.54))
@@ -118,11 +118,7 @@ struct ChatTabView: View {
     private var contextStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 5) {
-                Menu {
-                    ForEach(1...3, id: \.self) { act in
-                        Button("Act \(act)") { appState.setSelectedAct(act) }
-                    }
-                } label: {
+                Button { appState.plannerTab = .act } label: {
                     contextLabel("Act \(appState.selectedAct) · \(appState.run.mapRegion)", icon: "map")
                 }
                 Button { appState.plannerTab = .party } label: {
@@ -184,7 +180,7 @@ struct ChatTabView: View {
             .padding(.horizontal, 8).padding(.vertical, 4)
             .background(BG3Theme.ink.opacity(0.50)).clipShape(Capsule())
             .overlay(Capsule().stroke(BG3Theme.bronze.opacity(0.36), lineWidth: 0.7))
-            .disabled(appState.isPreparingChatScreenshot)
+            .disabled(appState.isPreparingChatScreenshot || appState.isSendingChat)
     }
 }
 

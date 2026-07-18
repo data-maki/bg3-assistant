@@ -1,88 +1,192 @@
 import SwiftUI
 
-/// The planner's Route tab: the full Act 1 route grouped by phase, with
-/// expandable step detail, decision outcomes, and the archive.
+/// The planner's Route tab: one flat, phase-grouped checklist of the active
+/// route with build-gear pickups woven in. Rows push a full-panel detail page
+/// instead of expanding inline, so the list stays scannable and every row is
+/// a single click target.
 struct RouteTabView: View {
     @EnvironmentObject private var appState: AppState
-    @State private var selectedStepId: String?
+    @State private var page = RoutePage.list
+    @State private var expandedPickupPhases: Set<Int> = []
+    @State private var showsDone = false
+    @State private var showsSkipped = false
+    @State private var showsOtherPickups = false
+    @State private var showsGateDetail = false
+    @State private var showsDeadlines = false
+
+    enum RoutePage: Equatable {
+        case list
+        case step(String)
+        case gear(memberId: String, itemKey: String)
+    }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(spacing: 3) {
-                    compactHeader
-
-                    if let selectedStep {
-                        VStack(alignment: .leading, spacing: 5) {
-                            HStack {
-                                Text("SELECTED · \(selectedStep.title)")
-                                    .font(.system(size: 9, weight: .heavy, design: .serif))
-                                    .foregroundStyle(BG3Theme.gold)
-                                Spacer()
-                                Button { selectedStepId = nil } label: {
-                                    Image(systemName: "xmark").frame(width: 24, height: 24)
-                                }
-                                .buttonStyle(.plain).help("Close route detail")
-                            }
-                            routeStepDetail(selectedStep)
-                        }
-                        .padding(8)
-                        .bg3InsetSurface(accent: appState.walkthroughBlockers(selectedStep).isEmpty ? BG3Theme.gold : .orange)
+        Group {
+            if !appState.activeGuideLoaded {
+                loadingCard
+            } else if !appState.activeRouteAvailable {
+                laterActCard
+            } else {
+                ZStack {
+                    switch page {
+                    case .list:
+                        stepList
+                            .transition(.move(edge: .leading).combined(with: .opacity))
+                    case .step(let stepId):
+                        StepDetailView(stepId: stepId) { page = .list }
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
+                    case .gear(let memberId, let itemKey):
+                        gearPage(memberId: memberId, itemKey: itemKey)
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
-
-                    ForEach(routePhases, id: \.order) { phase in
-                        HStack {
-                            Text(phase.name.uppercased())
-                            Spacer()
-                            Text("\(phase.steps.count) LEFT")
-                        }
-                        .font(.system(size: 9, weight: .heavy, design: .serif))
-                        .foregroundStyle(BG3Theme.gold)
-                        .padding(.top, 5).padding(.horizontal, 4)
-                        ForEach(phase.steps) { step in
-                            routeStepRow(step).id(step.id)
-                        }
-                    }
-                    if !appState.archivedWalkthroughSteps.isEmpty {
-                        DisclosureGroup("Archive · \(appState.archivedWalkthroughSteps.count)") {
-                            LazyVStack(spacing: 6) {
-                                ForEach(appState.archivedWalkthroughSteps.sorted { $0.order > $1.order }) { step in
-                                    archivedStepRow(step)
-                                }
-                            }.padding(.top, 6)
-                        }
-                        .font(.caption.bold())
-                        .padding(9)
-                        .bg3InsetSurface(accent: BG3Theme.bronze)
-                    }
-                }.padding(.trailing, 8)
+                }
+                .animation(.easeOut(duration: 0.18), value: page)
             }
-            .onAppear { focusRouteStep(proxy) }
-            .onChange(of: appState.focusedWalkthroughStepId) { _, _ in focusRouteStep(proxy) }
+        }
+        .onChange(of: appState.loadedGuideAct) { _, _ in resetNavigation() }
+        .onChange(of: appState.run.id) { _, _ in resetNavigation() }
+    }
+
+    private func resetNavigation() {
+        page = .list
+        expandedPickupPhases = []
+        showsDone = false
+        showsSkipped = false
+        showsOtherPickups = false
+        showsGateDetail = false
+        showsDeadlines = false
+    }
+
+    // MARK: - List
+
+    private var stepList: some View {
+        let pickups = GearLogic.pickupsByPhase(appState.routePickups, walkthrough: appState.walkthrough)
+        return ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 5, pinnedViews: [.sectionHeaders]) {
+                    progressHeader
+                    ForEach(routePhases, id: \.order) { phase in
+                        Section {
+                            ForEach(phase.steps) { step in
+                                stepRow(step).id(step.id)
+                            }
+                            pickupsRow(phase.order, pickups: pickups.byPhase[phase.order] ?? [])
+                        } header: {
+                            phaseHeader(phase.name, count: phase.steps.count)
+                        }
+                    }
+                    if appState.activeWalkthroughSteps.isEmpty { routeCompleteCard }
+                    bottomSummaries(otherPickups: pickups.other)
+                }
+                .padding(.trailing, 8)
+            }
+            .onAppear { scrollToCurrent(proxy) }
+            .onChange(of: appState.focusedWalkthroughStepId) { _, _ in scrollToCurrent(proxy) }
         }
     }
 
-    private var compactHeader: some View {
-        VStack(spacing: 5) {
-            HStack {
-                Text("ACT 1 ROUTE").font(.system(.caption, design: .serif).bold()).foregroundStyle(BG3Theme.gold)
+    private func scrollToCurrent(_ proxy: ScrollViewProxy) {
+        guard let id = appState.currentWalkthroughStep?.id else { return }
+        withAnimation(.easeOut(duration: 0.25)) { proxy.scrollTo(id, anchor: .center) }
+    }
+
+    private var progressHeader: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 7) {
+                Text("Route · Act \(appState.selectedAct)")
+                    .font(BG3Type.overline)
+                    .foregroundStyle(BG3Theme.gold)
+                    .textCase(.uppercase)
                 Spacer()
-                Text("\(appState.remainingCount) LEFT").font(.caption2.bold()).foregroundStyle(BG3Theme.mutedParchment)
-                Button { appState.followRecommendedRoute() } label: {
-                    Label("Recommended", systemImage: "location.fill").font(.caption2.bold())
+                Text("Party L\(appState.lowestPartyLevel)")
+                    .font(BG3Type.captionBold)
+                    .foregroundStyle(BG3Theme.mutedParchment)
+                Button {
+                    appState.followRecommendedRoute()
+                } label: {
+                    Image(systemName: "location.fill").frame(width: 16, height: 16)
                 }
-                .assistantActionButton().controlSize(.mini)
+                .assistantActionButton()
+                .controlSize(.mini)
+                .help("Jump back to the recommended route")
             }
-            HStack(spacing: 5) {
-                Image(systemName: appState.actTwoBlockers.isEmpty ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
-                Text(appState.actTwoBlockers.isEmpty ? "ACT 2 GATE · clear" : "ACT 2 GATE · \(appState.actTwoBlockers.count) blocker(s)")
-                Spacer()
-                if let blocker = appState.actTwoBlockers.first { Text(blocker).lineLimit(1) }
+            HStack(spacing: 7) {
+                ProgressView(value: Double(appState.archivedCount), total: Double(max(appState.walkthrough.count, 1)))
+                    .tint(BG3Theme.gold)
+                Text("\(appState.archivedCount)/\(appState.walkthrough.count) done")
+                    .font(BG3Type.captionBold)
+                    .foregroundStyle(BG3Theme.mutedParchment)
+                    .fixedSize()
             }
-            .font(.system(size: 9.5, weight: .semibold))
-            .foregroundStyle(appState.actTwoBlockers.isEmpty ? BG3Theme.success : .orange)
+            gateLine
+            deadlinesLine
         }
-        .padding(8).bg3InsetSurface(accent: BG3Theme.gold)
+        .padding(8)
+        .bg3InsetSurface(accent: BG3Theme.gold)
+    }
+
+    @ViewBuilder private var gateLine: some View {
+        if appState.selectedAct == 3 {
+            Label("Final act · no next-act gate", systemImage: "flag.checkered")
+                .font(BG3Type.captionBold)
+                .foregroundStyle(BG3Theme.mutedParchment)
+        } else if appState.currentActRouteConsequences.isEmpty {
+            Label("Act \(appState.selectedAct + 1) gate: ready", systemImage: "checkmark.seal.fill")
+                .font(BG3Type.captionBold)
+                .foregroundStyle(BG3Theme.success)
+        } else {
+            let blockers = appState.currentActRouteConsequences
+            BG3Disclosure(
+                title: blockers.count == 1
+                    ? "Act \(appState.selectedAct + 1) gate: 1 step remains"
+                    : "Act \(appState.selectedAct + 1) gate: \(blockers.count) steps remain",
+                systemImage: "exclamationmark.triangle.fill",
+                tint: BG3Theme.warning, titleTint: BG3Theme.warning,
+                isExpanded: $showsGateDetail
+            ) {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(blockers, id: \.self) { blocker in
+                        FactRow(glyph: "⚠", tint: BG3Theme.warning, text: blocker, secondary: true)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var deadlinesLine: some View {
+        if !appState.timedEvents.isEmpty {
+            BG3Disclosure(
+                title: "Deadlines & lockouts (\(appState.timedEvents.count))",
+                systemImage: "clock.badge.exclamationmark",
+                tint: BG3Theme.warning,
+                titleTint: BG3Theme.warning,
+                isExpanded: $showsDeadlines
+            ) {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(appState.timedEvents) { event in
+                        FactRow(
+                            glyph: event.severity == "critical" ? "!" : "◷",
+                            tint: event.severity == "critical" ? BG3Theme.danger : BG3Theme.warning,
+                            text: "\(event.name): \(event.deadline). \(event.consequence)",
+                            secondary: true
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private func phaseHeader(_ name: String, count: Int) -> some View {
+        HStack {
+            Text(name.uppercased())
+            Spacer()
+            Text(count == 1 ? "1 left" : "\(count) left")
+        }
+        .font(BG3Type.overline)
+        .foregroundStyle(BG3Theme.gold)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 5)
+        .background(BG3Theme.ink.opacity(0.94))
     }
 
     private var routePhases: [(order: Int, name: String, steps: [WalkthroughStep])] {
@@ -93,320 +197,264 @@ struct RouteTabView: View {
             }
     }
 
-    private func focusRouteStep(_ proxy: ScrollViewProxy) {
-        guard let id = appState.focusedWalkthroughStepId else { return }
-        withAnimation(.easeOut(duration: 0.25)) { proxy.scrollTo(id, anchor: .center) }
+    private func stepRow(_ step: WalkthroughStep) -> some View {
+        let encounter = StepEncounter.classify(step)
+        let isNow = step.id == appState.currentWalkthroughStep?.id
+        let presentation = appState.routeDependencyPresentation(for: step)
+        return Button {
+            page = .step(step.id)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: encounter.icon)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(encounter.tint)
+                    .frame(width: 20)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(step.title)
+                        .font(BG3Type.rowTitle)
+                        .foregroundStyle(BG3Theme.parchment)
+                        .lineLimit(1)
+                    Text(presentation.note ?? step.area)
+                        .font(BG3Type.caption)
+                        .foregroundStyle(presentation.requiresAttention ? BG3Theme.warning : BG3Theme.mutedParchment)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 4)
+                statusChip(for: step, isNow: isNow, presentation: presentation)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(BG3Theme.mutedParchment.opacity(0.7))
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .frame(minHeight: 42)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(RoundedRectangle(cornerRadius: 8).fill(isNow ? BG3Theme.bronze.opacity(0.2) : BG3Theme.ink.opacity(0.24)))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(isNow ? BG3Theme.gold.opacity(0.55) : BG3Theme.bronze.opacity(0.3), lineWidth: 0.7))
+        .accessibilityLabel("\(step.title), \(accessibilityStatus(for: step, isNow: isNow, presentation: presentation))")
     }
 
-    private var selectedStep: WalkthroughStep? {
-        guard let selectedStepId else { return nil }
-        return appState.walkthrough.first(where: { $0.id == selectedStepId })
+    private func statusChip(for step: WalkthroughStep, isNow: Bool, presentation: RouteDependencyPresentation) -> StatusChip {
+        if isNow { return StatusChip(text: "now", tint: BG3Theme.gold, filled: true) }
+        if presentation.requiresAttention { return StatusChip(text: "revisit", tint: BG3Theme.warning) }
+        if presentation.note != nil { return StatusChip(text: "later", tint: BG3Theme.mutedParchment) }
+        if step.minimumLevel > appState.lowestPartyLevel {
+            return StatusChip(text: "L\(step.minimumLevel)", tint: BG3Theme.caution)
+        }
+        return StatusChip(text: "ready", tint: BG3Theme.success)
     }
 
-    private func routeStepRow(_ step: WalkthroughStep) -> some View {
-        let isNext = step.id == appState.recommendedWalkthroughStep?.id
-        let isFocused = step.id == appState.focusedWalkthroughStep?.id
-        let isSelected = selectedStepId == step.id
-        return RouteRailRow(
-            step: step,
-            blockers: appState.walkthroughBlockers(step),
-            partyLevel: appState.lowestPartyLevel,
-            isNext: isNext,
-            isFocused: isFocused,
-            isSelected: isSelected,
-            onSelect: { selectedStepId = isSelected ? nil : step.id },
-            onFocus: { appState.focusWalkthroughStep(step) }
-        )
+    private func accessibilityStatus(for step: WalkthroughStep, isNow: Bool, presentation: RouteDependencyPresentation) -> String {
+        if isNow { return "current objective" }
+        if presentation.requiresAttention { return "needs a revisit" }
+        if let note = presentation.note { return note }
+        if step.minimumLevel > appState.lowestPartyLevel { return "preparation recommended, needs level \(step.minimumLevel)" }
+        return "ready"
     }
 
-    private func archivedStepRow(_ step: WalkthroughStep) -> some View {
-        let disposition = appState.walkthroughDisposition(step)
-        return HStack(spacing: 8) {
-            Image(systemName: disposition == .completed ? "checkmark.circle.fill" : "forward.circle.fill")
-                .foregroundStyle(disposition == .completed ? BG3Theme.success : .orange)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(step.title).font(.system(size: 11.5, weight: .semibold)).lineLimit(1)
-                Text("\(disposition == .completed ? "Done" : "Skipped") · \(step.area)")
-                    .font(.caption2).foregroundStyle(.secondary)
+    // MARK: - Pickups
+
+    @ViewBuilder private func pickupsRow(_ phaseOrder: Int, pickups: [GearLogic.Pickup]) -> some View {
+        if !pickups.isEmpty {
+            BG3Disclosure(
+                title: pickups.count == 1 ? "1 pickup here" : "\(pickups.count) pickups here",
+                glyph: "◈", tint: BG3Theme.gold, titleTint: BG3Theme.mutedParchment,
+                isExpanded: Binding(
+                    get: { expandedPickupPhases.contains(phaseOrder) },
+                    set: { expanded in
+                        if expanded { expandedPickupPhases.insert(phaseOrder) } else { expandedPickupPhases.remove(phaseOrder) }
+                    }
+                )
+            ) {
+                ForEach(pickups) { pickupRow($0) }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .accessibilityLabel("\(pickups.count) gear pickups in this phase")
+        }
+    }
+
+    private func pickupRow(_ pickup: GearLogic.Pickup) -> some View {
+        Button {
+            page = .gear(memberId: pickup.memberId, itemKey: pickup.gear.itemKey)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: appState.gearTargetContext?.matches(gearId: pickup.gear.id, memberId: pickup.memberId) == true ? "scope" : "circle")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(BG3Theme.gold)
+                    .frame(width: 20)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(pickup.gear.item)
+                        .font(BG3Type.body)
+                        .foregroundStyle(BG3Theme.parchment)
+                        .lineLimit(1)
+                    Text("for \(pickup.memberName) · \(pickup.gear.region)")
+                        .font(BG3Type.caption)
+                        .foregroundStyle(BG3Theme.mutedParchment)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(BG3Theme.mutedParchment.opacity(0.7))
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(RoundedRectangle(cornerRadius: 7).fill(BG3Theme.ink.opacity(0.18)))
+        .overlay(RoundedRectangle(cornerRadius: 7).stroke(BG3Theme.bronze.opacity(0.22), lineWidth: 0.7))
+    }
+
+    private func gearPage(memberId: String, itemKey: String) -> some View {
+        // Resolve member and item live so the page never shows a stale copy
+        // after a build or catalog refresh while pushed.
+        let member = appState.activeParty.first { $0.id == memberId }
+        let gear = member.flatMap { member in
+            appState.builds.first { $0.id == member.buildId }?.gear.first { $0.itemKey == itemKey }
+        }
+        return VStack(alignment: .leading, spacing: 8) {
+            Button {
+                page = .list
+            } label: {
+                Label("Route", systemImage: "chevron.left").font(BG3Type.captionBold)
+            }
+            .assistantActionButton()
+            .controlSize(.small)
+            if let member, let gear {
+                ScrollView {
+                    GearDetailView(gear: gear, member: member)
+                        .padding(9)
+                        .bg3InsetSurface(accent: BG3Theme.bronze)
+                        .padding(.trailing, 8)
+                }
+            } else {
+                Text("This pickup is no longer part of the active party's plan.")
+                    .font(BG3Type.caption)
+                    .foregroundStyle(BG3Theme.mutedParchment)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    // MARK: - Bottom summaries
+
+    @ViewBuilder private func bottomSummaries(otherPickups: [GearLogic.Pickup]) -> some View {
+        let done = appState.archivedWalkthroughSteps.filter { appState.walkthroughDisposition($0) == .completed }
+        let skipped = appState.archivedWalkthroughSteps.filter { appState.walkthroughDisposition($0) == .skipped }
+        VStack(spacing: 5) {
+            if !skipped.isEmpty {
+                BG3Disclosure(
+                    title: "Skipped (\(skipped.count))", systemImage: "forward.circle.fill",
+                    tint: BG3Theme.warning, inset: true, isExpanded: $showsSkipped
+                ) {
+                    ForEach(skipped.sorted { $0.order < $1.order }) { archivedRow($0) }
+                }
+            }
+            if !done.isEmpty {
+                BG3Disclosure(
+                    title: "Done (\(done.count))", systemImage: "checkmark.circle.fill",
+                    tint: BG3Theme.success, inset: true, isExpanded: $showsDone
+                ) {
+                    ForEach(done.sorted { $0.order > $1.order }) { archivedRow($0) }
+                }
+            }
+            if !otherPickups.isEmpty {
+                BG3Disclosure(
+                    title: "Other pickups (\(otherPickups.count))", systemImage: "bag.fill",
+                    tint: BG3Theme.gold, inset: true, isExpanded: $showsOtherPickups
+                ) {
+                    ForEach(otherPickups) { pickupRow($0) }
+                }
+            }
+        }
+        .padding(.top, 4)
+    }
+
+    private func archivedRow(_ step: WalkthroughStep) -> some View {
+        let completed = appState.walkthroughDisposition(step) == .completed
+        return HStack(spacing: 7) {
+            Image(systemName: completed ? "checkmark.circle.fill" : "forward.circle.fill")
+                .font(.system(size: 11))
+                .foregroundStyle(completed ? BG3Theme.success : BG3Theme.warning)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(step.title).font(BG3Type.body).foregroundStyle(BG3Theme.parchment).lineLimit(1)
+                Text(step.area).font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment).lineLimit(1)
             }
             Spacer()
             Button("Revisit") { appState.setWalkthroughDisposition(step, .pending) }
-                .assistantActionButton().controlSize(.mini)
-        }
-        .padding(7).bg3InsetSurface(accent: disposition == .completed ? BG3Theme.success : .orange)
-    }
-
-    private func encounterBadge(_ encounter: StepEncounter) -> some View {
-        let tint: Color = switch encounter {
-        case .fight: Color(red: 0.92, green: 0.42, blue: 0.34)
-        case .talk: Color(red: 0.55, green: 0.78, blue: 0.95)
-        case .fightAndTalk: .orange
-        case .explore, .pickup, .gate: BG3Theme.mutedParchment
-        }
-        return Label(encounter.label, systemImage: encounter.icon)
-            .font(.system(size: 8.5, weight: .heavy))
-            .foregroundStyle(tint)
-            .padding(.horizontal, 6).padding(.vertical, 3)
-            .background(tint.opacity(0.14), in: Capsule())
-            .overlay(Capsule().stroke(tint.opacity(0.45), lineWidth: 0.7))
-            .accessibilityLabel("Encounter type: \(encounter.label)")
-    }
-
-    @ViewBuilder
-    private func routeStepDetail(_ step: WalkthroughStep) -> some View {
-        let instructionLabel = step.decision == nil ? "DO" : "SAY"
-        let instruction = step.decision?.recommended.label ?? step.summary
-        let blockers = appState.walkthroughBlockers(step)
-        VStack(alignment: .leading, spacing: 8) {
-            Divider().overlay(BG3Theme.bronze.opacity(0.35))
-            HStack(alignment: .firstTextBaseline, spacing: 7) {
-                Text(instructionLabel)
-                    .font(.system(size: 9, weight: .heavy, design: .serif))
-                    .foregroundStyle(BG3Theme.success)
-                Text(instruction).font(.system(size: 12, weight: .semibold))
-                Spacer(minLength: 6)
-                Text(blockers.isEmpty ? "READY" : "BLOCKED")
-                    .font(.system(size: 8.5, weight: .heavy, design: .serif))
-                    .foregroundStyle(blockers.isEmpty ? BG3Theme.success : .orange)
-            }
-            if let blocker = blockers.first {
-                Text("NEEDS • \(blocker)").font(.caption.bold()).foregroundStyle(.orange)
-            }
-            if !step.avoid.isEmpty {
-                Text("AVOID • \(step.avoid)").font(.caption.bold()).foregroundStyle(.red)
-            }
-            if let outcome = appState.walkthroughOutcome(step) {
-                Text("OUTCOME • \(outcome)").font(.caption.bold()).foregroundStyle(BG3Theme.success)
-            }
-            if let decision = step.decision, appState.walkthroughDisposition(step) != .completed {
-                HStack(spacing: 6) {
-                    outcomeButton(decision.recommended.label, recommended: true, step: step)
-                    if !decision.alternatives.isEmpty {
-                        Menu("Other outcome") {
-                            ForEach(decision.alternatives, id: \.label) { option in
-                                Button(option.label) { appState.resolveWalkthroughStep(step, outcome: option.label) }
-                            }
-                        }
-                        .assistantActionButton().controlSize(.small)
-                    }
-                }
-            }
-            HStack(spacing: 7) {
-                if step.decision == nil {
-                    Button { appState.setWalkthroughDisposition(step, .completed) } label: {
-                        Label("Done", systemImage: "checkmark")
-                    }
-                    .assistantActionButton(accent: BG3Theme.success, prominent: true)
-                }
-                Button { appState.setWalkthroughDisposition(step, .skipped) } label: {
-                    Label("Skip", systemImage: "forward.end")
-                }
                 .assistantActionButton()
-                Button("Revisit") { appState.setWalkthroughDisposition(step, .pending) }
-                    .assistantActionButton()
-                Spacer()
+                .controlSize(.mini)
+        }
+        .padding(.vertical, 2)
+    }
+
+    // MARK: - States
+
+    private var routeCompleteCard: some View {
+        let hasSkips = appState.routeHasConsequentialSkips
+        return VStack(alignment: .leading, spacing: 5) {
+            Label(
+                hasSkips ? "Act \(appState.selectedAct) route resolved with skips" : "Act \(appState.selectedAct) route complete",
+                systemImage: hasSkips ? "exclamationmark.triangle.fill" : "checkmark.seal.fill"
+            )
+                .font(BG3Type.rowTitle)
+                .foregroundStyle(hasSkips ? BG3Theme.warning : BG3Theme.success)
+            Text(routeCompleteMessage)
+                .font(BG3Type.caption)
+                .foregroundStyle(BG3Theme.mutedParchment)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .bg3InsetSurface(accent: hasSkips ? BG3Theme.warning : BG3Theme.success)
+    }
+
+    private var routeCompleteMessage: String {
+        if appState.routeHasConsequentialSkips { return "Revisit required or recommended skipped steps before treating this route as complete." }
+        if appState.selectedAct == 3 { return "The final reviewed route is complete." }
+        return appState.currentActRouteConsequences.isEmpty
+            ? "No Act \(appState.selectedAct) requirements remain."
+            : "Review the remaining Act \(appState.selectedAct + 1) requirements before advancing."
+    }
+
+    private var loadingCard: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            ProgressView()
+            Text(appState.statusMessage)
+                .font(BG3Type.rowTitle)
+                .foregroundStyle(BG3Theme.parchment)
+            Text("The active route stays hidden until the matching act guide is loaded.")
+                .font(BG3Type.caption)
+                .foregroundStyle(BG3Theme.mutedParchment)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .bg3InsetSurface(accent: BG3Theme.gold)
+    }
+
+    private var laterActCard: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("Act \(appState.selectedAct) route")
+                .font(BG3Type.overline)
+                .textCase(.uppercase)
+                .foregroundStyle(BG3Theme.gold)
+            Label("Step-by-step route guidance is not available for this act yet.", systemImage: "clock")
+                .foregroundStyle(BG3Theme.warning)
+            Text(appState.selectedAct < 3
+                ? "Equipment and map references are available in Loadout. The next act gate stays locked until this route is ready."
+                : "Equipment and map references remain available in Loadout.")
+                .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
+            HStack(spacing: 6) {
+                Button("Open loadout") { appState.plannerTab = .loadout }
+                Button("Open map") { appState.openCurrentActMap() }
             }
-            .controlSize(.small)
-            DisclosureGroup("More context") {
-                VStack(alignment: .leading, spacing: 8) {
-                    if step.decision != nil {
-                        Text("DO • \(step.summary)").font(.caption)
-                    }
-                    if !step.rewards.isEmpty {
-                        Text("POWER • \(step.rewards.joined(separator: " · "))")
-                            .font(.caption.bold()).foregroundStyle(BG3Theme.gold)
-                    }
-                    if let decision = step.decision { decisionCard(decision) }
-                    if let incident = appState.incidentProtocol(for: step) {
-                        incidentProtocolCard(incident)
-                    }
-                    if let riskReward = step.riskReward { riskRewardCard(riskReward) }
-                    if let source = URL(string: step.sourceUrl) {
-                        Link("\(step.sourceLabel) ↗", destination: source).font(.caption2)
-                    }
-                }.padding(.top, 6)
-            }
-            .font(.caption)
+            .assistantActionButton()
         }
-        .padding(.horizontal, 8).padding(.bottom, 8)
+        .padding(10)
+        .bg3InsetSurface(accent: BG3Theme.gold)
     }
 
-    private func outcomeButton(_ label: String, recommended: Bool, step: WalkthroughStep) -> some View {
-        Button {
-            appState.resolveWalkthroughStep(step, outcome: label)
-        } label: {
-            HStack(spacing: 5) {
-                Image(systemName: recommended ? "checkmark.circle.fill" : "arrow.triangle.branch")
-                    .font(.system(size: 10))
-                Text(label).font(.system(size: 10.5, weight: .semibold)).multilineTextAlignment(.leading)
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 4).padding(.horizontal, 6)
-        }
-        .assistantActionButton(accent: recommended ? BG3Theme.success : BG3Theme.control, prominent: recommended)
-        .controlSize(.small)
-        .help(recommended ? "The guide's recommended outcome" : "The run went this way instead — later steps that assume the recommendation may not apply")
-    }
-
-    private func decisionCard(_ decision: WalkthroughDecision) -> some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Text("CHOOSE").font(.system(.caption, design: .serif).bold()).foregroundStyle(BG3Theme.gold)
-            Text(decision.prompt).font(.headline)
-            tradeoffOption(decision.recommended, recommended: true)
-            ForEach(decision.alternatives, id: \.label) { tradeoffOption($0, recommended: false) }
-            Text(decision.reversible ? "Reversible" : "Irreversible")
-                .font(.caption2.bold()).foregroundStyle(decision.reversible ? .green : .orange)
-        }.padding(10).frame(maxWidth: .infinity, alignment: .leading).bg3InsetSurface(accent: BG3Theme.gold)
-    }
-
-    private func tradeoffOption(_ option: DecisionOption, recommended: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text("\(recommended ? "RECOMMENDED" : "ALTERNATIVE") • \(option.label)")
-                .font(.caption.bold()).foregroundStyle(recommended ? BG3Theme.success : BG3Theme.mutedParchment)
-            if !option.benefits.isEmpty { Text("Preserves / gains • \(option.benefits.joined(separator: " · "))").font(.caption) }
-            if !option.costs.isEmpty { Text("Costs / risks • \(option.costs.joined(separator: " · "))").font(.caption).foregroundStyle(.orange) }
-        }
-    }
-}
-
-// MARK: - Shared step cards
-// Used by both RouteTabView (step detail) and OverlayView (current tab), so
-// they live at file scope and take appState explicitly.
-
-@MainActor
-func incidentProtocolCard(_ incident: IncidentProtocol) -> some View {
-    VStack(alignment: .leading, spacing: 6) {
-        Text("RUN-ENDER PROTOCOL").font(.system(.caption, design: .serif).bold()).foregroundStyle(.red)
-        Text("TRIGGER • \(incident.trigger)").font(.caption)
-        ForEach(incident.safeActions, id: \.self) { Text("DO • \($0)").font(.caption).foregroundStyle(BG3Theme.success) }
-        Text("NEVER • \(incident.never)").font(.caption.bold()).foregroundStyle(.red)
-        Text("IF IT GOES WRONG • \(incident.escape)").font(.caption).foregroundStyle(.orange)
-        if !incident.honorDelta.isEmpty {
-            Text("HONOR DELTA • \(incident.honorDelta)").font(.caption).foregroundStyle(BG3Theme.gold)
-        }
-        if let source = URL(string: incident.sourceUrl), !incident.sourceUrl.isEmpty {
-            Link("\(incident.authority == "guide_fact" ? "Guide fact" : "Reviewed incident protocol") ↗", destination: source)
-                .font(.caption2)
-        }
-    }.padding(10).frame(maxWidth: .infinity, alignment: .leading).bg3InsetSurface(accent: .red)
-}
-
-@MainActor
-func riskRewardCard(_ riskReward: RiskReward) -> some View {
-    VStack(alignment: .leading, spacing: 4) {
-        Text("REWARD • \(riskReward.reward)").foregroundStyle(BG3Theme.success)
-        Text("RISK • \(riskReward.risk)").foregroundStyle(.red)
-        Text("SKIP • \(riskReward.skipCost)")
-        Text("RETURN • \(riskReward.returnBy)").foregroundStyle(.secondary)
-    }.font(.caption).padding(9).frame(maxWidth: .infinity, alignment: .leading).bg3InsetSurface(accent: BG3Theme.bronze)
-}
-
-private struct RouteRailRow: View {
-    let step: WalkthroughStep
-    let blockers: [String]
-    let partyLevel: Int
-    let isNext: Bool
-    let isFocused: Bool
-    let isSelected: Bool
-    let onSelect: () -> Void
-    let onFocus: () -> Void
-    @State private var hovered = false
-
-    private var encounter: StepEncounter { StepEncounter.classify(step) }
-    private var isUnderLevel: Bool { partyLevel < step.minimumLevel }
-    private var detailLine: String {
-        if let blocker = blockers.first { return "Needs: \(blocker)" }
-        if let reward = step.rewards.first { return "\(reward) · \(step.area)" }
-        return step.area
-    }
-    private var statusLine: String {
-        if !blockers.isEmpty { return "BLOCKED" }
-        return isUnderLevel ? "WAIT L\(step.minimumLevel)" : "L\(step.minimumLevel)+"
-    }
-    private var tint: Color {
-        if !blockers.isEmpty { return .orange }
-        switch encounter {
-        case .fight: return Color(red: 0.92, green: 0.42, blue: 0.34)
-        case .talk: return Color(red: 0.55, green: 0.78, blue: 0.95)
-        case .fightAndTalk: return .orange
-        case .explore, .pickup, .gate: return BG3Theme.mutedParchment
-        }
-    }
-
-    var body: some View {
-        HStack(spacing: 5) {
-            Button(action: onSelect) {
-                HStack(spacing: 8) {
-                    Image(systemName: encounter.icon)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(tint)
-                        .frame(width: 24, height: 30)
-                    VStack(alignment: .leading, spacing: 1) {
-                        HStack(spacing: 5) {
-                            Text(step.title).font(.system(size: 12, weight: .semibold)).lineLimit(1)
-                            if isNext { Text("RECOMMENDED").railTag(BG3Theme.gold) }
-                            if isFocused { Text("YOUR FOCUS").railTag(BG3Theme.success) }
-                        }
-                        Text(detailLine)
-                            .font(.system(size: 9.5))
-                            .foregroundStyle(blockers.isEmpty ? Color.secondary : Color.orange)
-                            .lineLimit(1)
-                    }
-                    Spacer(minLength: 4)
-                    Text(statusLine)
-                        .font(.system(size: 9, weight: .heavy, design: .serif))
-                        .foregroundStyle(statusTint)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("\(step.title), \(accessibilityStatus)")
-
-            Button(action: onFocus) {
-                Image(systemName: isFocused ? "scope" : "circle.dotted")
-                    .font(.system(size: 12, weight: .bold)).frame(width: 30, height: 30)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(isFocused ? BG3Theme.success : BG3Theme.gold)
-            .help(isFocused ? "Current player focus" : "Focus \(step.title)")
-            .accessibilityLabel(isFocused ? "Focused: \(step.title)" : "Focus \(step.title)")
-        }
-        .padding(.horizontal, 7).padding(.vertical, 4)
-        .frame(minHeight: 46)
-        .background(RoundedRectangle(cornerRadius: 8).fill(surfaceFill))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(borderTint, lineWidth: 0.7))
-        .overlay(alignment: .leading) {
-            if isFocused || isNext {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(isFocused ? BG3Theme.success : BG3Theme.gold)
-                    .frame(width: 3).padding(.vertical, 5)
-            }
-        }
-        .onHover { hovered = $0 }
-    }
-
-    private var statusTint: Color {
-        if !blockers.isEmpty || isUnderLevel { return .orange }
-        return BG3Theme.mutedParchment
-    }
-    private var accessibilityStatus: String {
-        blockers.first ?? (isUnderLevel ? "under level" : "eligible")
-    }
-    private var surfaceFill: Color {
-        isSelected || hovered ? BG3Theme.bronze.opacity(0.24) : BG3Theme.ink.opacity(0.24)
-    }
-    private var borderTint: Color {
-        isSelected ? BG3Theme.gold.opacity(0.65) : BG3Theme.bronze.opacity(0.32)
-    }
-}
-
-private extension Text {
-    func railTag(_ color: Color) -> some View {
-        self
-            .font(.system(size: 7.5, weight: .heavy, design: .serif))
-            .foregroundStyle(color)
-            .padding(.horizontal, 4).padding(.vertical, 2)
-            .background(color.opacity(0.12), in: Capsule())
-    }
 }

@@ -16,9 +16,10 @@ import json
 import logging
 import re
 
-from .models import ActOneMap, BuildGear, Marker, MapTiles, TimedEvent
+from .models import ActMapEquipment, ActMapIndex, ActOneMap, BuildGear, Marker, MapTiles, TimedEvent
 from .paths import resource_root
-from .route_data import item_key, load_gear, load_builds, load_route
+from .catalog import catalog_builds, catalog_gear
+from .route_data import item_key, load_act_catalog, load_route
 from .walkthrough_data import load_walkthrough
 
 logger = logging.getLogger(__name__)
@@ -234,7 +235,7 @@ def _fight_markers() -> list[Marker]:
 
 def _item_markers() -> list[Marker]:
     markers: dict[tuple[str, str], Marker] = {}
-    for gear in (item for item in load_gear() if item.act == 1 and item.map_objective):
+    for gear in (item for item in catalog_gear() if item.act == 1 and item.map_objective):
         for area, region in _item_areas(gear.region):
             key = (gear.item, area)
             if existing := markers.get(key):
@@ -278,11 +279,12 @@ def _timed_events() -> list[TimedEvent]:
 
 def load_act_one_map() -> ActOneMap:
     markers = _fight_markers() + _item_markers()
+    builds = {build.id: build for build in catalog_builds()}
     return ActOneMap(
         act=1,
         markers=markers,
         regions=sorted({marker.region for marker in markers}),
-        builds=load_builds(),
+        builds=list(builds.values()),
         timed_events=_timed_events(),
         walkthrough=load_walkthrough(),
         mapgenie_url="https://mapgenie.io/baldurs-gate-3/maps/wilderness",
@@ -292,4 +294,36 @@ def load_act_one_map() -> ActOneMap:
             "matched location; area pins mark the correct named area (e.g. Crèche gear via the "
             "Mountain Pass) without claiming false precision."
         ),
+    )
+
+
+def load_act_map_index(act: int) -> ActMapIndex:
+    summary = next((entry for entry in load_act_catalog() if entry.act == act), None)
+    if summary is None:
+        raise KeyError(act)
+    equipment: dict[str, ActMapEquipment] = {}
+    for gear in catalog_gear(act):
+        if not gear.map_objective:
+            continue
+        key = item_key(gear.item)
+        if existing := equipment.get(key):
+            existing.build_ids = sorted(set(existing.build_ids) | set(gear.build_ids))
+            continue
+        equipment[key] = ActMapEquipment(
+            item=gear.item,
+            area=gear.region,
+            acquisition=gear.acquire or gear.acquisition,
+            source=gear.wiki or gear.source,
+            build_ids=sorted(gear.build_ids),
+            game_x=gear.game_x,
+            game_y=gear.game_y,
+        )
+    return ActMapIndex(
+        act=act,
+        title=summary.title,
+        map_name=summary.map_name,
+        map_url=summary.map_url,
+        coordinate_system=summary.coordinate_system,
+        coordinate_note=summary.coordinate_note,
+        equipment=sorted(equipment.values(), key=lambda item: (item.area, item.item)),
     )

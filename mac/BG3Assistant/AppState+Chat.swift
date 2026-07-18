@@ -29,10 +29,26 @@ extension AppState {
     }
 
     func sendChat(_ quickPrompt: String? = nil) async {
-        guard !isPreparingChatScreenshot else { return }
-        guard let checkpoint = currentCheckpoint ?? recommendedCheckpoint else { return }
+        guard !isPreparingChatScreenshot, !isSendingChat else { return }
+        guard activeRouteAvailable else {
+            chatLines.append(ChatLine(
+                role: .assistant,
+                text: activeGuideLoaded
+                    ? "Reviewed route chat is not available for Act \(selectedAct) yet."
+                    : "The Act \(selectedAct) guide is still loading.",
+                isError: true
+            ))
+            return
+        }
+        let step = currentWalkthroughStep
+        let checkpoint = currentCheckpoint
+        guard step != nil || checkpoint != nil else { return }
         let message = quickPrompt ?? chatDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !message.isEmpty else { return }
+        let requestedRunID = run.id
+        let requestedAct = selectedAct
+        isSendingChat = true
+        defer { isSendingChat = false }
         chatDraft = ""
 
         let history = chatLines.suffix(8)
@@ -45,16 +61,20 @@ extension AppState {
         do {
             let response = try await backendClient.chat(ChatRequest(
                 message: message,
-                checkpointId: checkpoint.id,
+                checkpointId: checkpoint?.id,
                 party: activeParty,
                 completedCheckpointIds: completedIds,
-                walkthroughStepId: currentWalkthroughStep?.id,
+                skippedCheckpointIds: skippedIds,
+                checkedPreparation: Array(currentProgress.checkedPreparation),
+                walkthroughStepId: step?.id,
                 imageBase64: screenshot?.data.base64EncodedString(),
                 context: chatContextSnapshot,
                 history: history
             ))
+            guard requestedRunID == run.id, requestedAct == selectedAct else { return }
             chatLines.append(ChatLine(role: .assistant, text: response.answer, sources: response.sources))
         } catch {
+            guard requestedRunID == run.id, requestedAct == selectedAct else { return }
             chatLines.append(ChatLine(role: .assistant, text: "Chat is offline right now (\(error.localizedDescription)).", isError: true))
         }
     }

@@ -25,26 +25,22 @@ struct PeekCardView: View {
         let size = collapsedContentSize
         return ZStack {
             WindowDragHandle()
-            Button(action: appState.showPlannerNow) {
-                VStack(spacing: 2) {
-                    ZStack {
-                        Circle().fill(BG3Theme.ink.opacity(0.82))
-                        Circle().stroke(BG3Theme.dangerColor(appState.currentActivityDanger), lineWidth: 2)
-                        PetSpriteView(size: 54)
-                    }
-                    .frame(width: 62, height: 62)
-                    Text(appState.assistantPhase.rawValue)
-                        .font(.system(size: 8, weight: .heavy, design: .serif))
-                        .foregroundStyle(BG3Theme.gold)
+            HStack(spacing: 2) {
+                PetSpriteView(size: 60)
+                    .frame(width: 62, height: size.height)
+                    .shadow(color: .black.opacity(0.5), radius: 7, y: 3)
+                Button(action: appState.showOverlayGoal) {
+                    Image(systemName: "chevron.right")
+                        .frame(width: 12, height: 18)
                 }
-                .frame(width: 78, height: size.height)
+                .assistantActionButton(accent: BG3Theme.bronzeBright)
+                .help("Show current goal")
+                .accessibilityLabel("Show current goal")
             }
-            .buttonStyle(.plain)
+            .frame(width: size.width, height: size.height)
         }
         .frame(width: size.width, height: size.height)
-        .assistantGlassSurface(cornerRadius: 18)
-        .contextMenu { densityMenu }
-        .help("Hold Option-Space to peek · click for planner")
+        .accessibilityElement(children: .contain)
     }
 
     private var focusPeekCard: some View {
@@ -55,53 +51,75 @@ struct PeekCardView: View {
                     Circle().fill(BG3Theme.ink.opacity(0.76))
                     Circle().stroke(BG3Theme.bronze, lineWidth: 2)
                     Circle().inset(by: 3).stroke(BG3Theme.gold.opacity(0.48), lineWidth: 0.7)
-                    PetSpriteView(size: 55)
+                    PetSpriteView(size: 74)
                 }
-                .frame(width: 64, height: 64)
+                .frame(width: 86, height: 86)
 
                 DraggableArea {
                     VStack(alignment: .leading, spacing: 2) {
                         HStack(spacing: 5) {
-                            Text(appState.assistantPhase.rawValue)
-                                .font(.system(size: 8.5, weight: .heavy, design: .serif))
+                            Text(appState.hasCurrentTask ? "CURRENT TASK · ACT \(appState.selectedAct)" : "ACT \(appState.selectedAct)")
+                                .font(BG3Type.overline)
                                 .foregroundStyle(BG3Theme.gold)
                             Spacer(minLength: 4)
-                            if appState.currentWalkthroughStep != nil || appState.currentCheckpoint != nil {
+                            if appState.hasGuidedGoal {
                                 Text("L\(appState.currentActivityMinimumLevel)+ · \(appState.currentActivityDanger.uppercased())")
-                                    .font(.system(size: 8.5, weight: .bold))
+                                    .font(.system(size: 9, weight: .bold))
                                     .foregroundStyle(BG3Theme.dangerColor(appState.currentActivityDanger))
                             }
                         }
-                    if appState.currentWalkthroughStep != nil || appState.currentCheckpoint != nil {
+                    switch appState.currentGoal {
+                    case .target(let context):
                         Text(appState.currentActivityTitle)
-                                .font(.system(size: 13, weight: .bold, design: .serif))
+                            .font(BG3Type.peekTitle)
+                            .foregroundStyle(BG3Theme.parchment)
+                            .lineLimit(2)
+                        Text(GearLogic.acquireText(context.gear))
+                            .font(BG3Type.caption)
+                            .foregroundStyle(BG3Theme.mutedParchment)
+                            .lineLimit(appState.effectiveOverlayDensity == .reference ? 3 : 2)
+                    case .step, .checkpoint:
+                        Text(appState.currentActivityTitle)
+                                .font(BG3Type.peekTitle)
                                 .foregroundStyle(BG3Theme.parchment)
-                                .lineLimit(1)
+                                .lineLimit(2)
                             if appState.combatCardPinned {
                                 ForEach(appState.combatPinLines.prefix(appState.effectiveOverlayDensity == .reference ? 3 : 2), id: \.self) { line in
-                                    Text(line).font(.system(size: 8.5, weight: .semibold)).foregroundStyle(BG3Theme.mutedParchment).lineLimit(1)
+                                    Text(line).font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment).lineLimit(1)
                                 }
                             } else {
                                 Text("\(appState.readinessHeadline) · AVOID \(appState.currentActivityAvoid)")
-                                    .font(.system(size: 9.2, weight: .semibold))
+                                    .font(BG3Type.caption)
                                     .foregroundStyle(BG3Theme.mutedParchment)
                                     .lineLimit(appState.effectiveOverlayDensity == .reference ? 3 : 2)
                             }
-                    } else {
-                        Text(appState.route.isEmpty ? "Guide offline — open the app" : "Act 1 complete")
-                                .font(.system(size: 13, weight: .bold, design: .serif))
+                    case .laterAct:
+                        Text(appState.actHeaderTitle)
+                                .font(BG3Type.peekTitle)
+                                .foregroundStyle(BG3Theme.parchment)
+                    case .routeComplete:
+                        Text(appState.currentActivityTitle)
+                                .font(BG3Type.peekTitle)
                                 .foregroundStyle(BG3Theme.parchment)
                     }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                Button(action: appState.collapseOverlayToPet) {
+                    Image(systemName: "chevron.left")
+                        .frame(width: 10, height: 10)
+                }
+                .assistantActionButton(accent: BG3Theme.bronzeBright)
+                .controlSize(.mini)
+                .frame(height: 86, alignment: .top)
+                .help("Collapse to companion")
+                .accessibilityLabel("Collapse to companion")
             }
             .frame(maxWidth: .infinity)
-            HStack(spacing: 5) {
-                shortcut("Plan", icon: "list.clipboard.fill", action: appState.showPlannerNow)
-                shortcut("Talk", icon: "quote.bubble.fill", disabled: appState.currentDialogueStep == nil, action: appState.openDialogue)
+            HStack(spacing: 4) {
+                shortcut("Route", icon: "map.fill", action: appState.showPlannerRoute)
                 shortcut("Ask", icon: "bubble.left.and.text.bubble.right.fill", action: appState.openChat)
-                shortcut("Done", icon: "checkmark.seal.fill", disabled: appState.currentWalkthroughStep == nil && appState.currentCheckpoint == nil, tint: BG3Theme.success, action: appState.completeCurrentActivity)
+                completionShortcut
             }
         }
         .padding(9).frame(width: size.width, height: size.height, alignment: .top)
@@ -133,21 +151,83 @@ struct PeekCardView: View {
         }
     }
 
-    private func shortcut(_ title: String, icon: String, disabled: Bool = false, tint: Color? = nil, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 2) {
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(title)
-                    .font(.system(size: 8.5, weight: .bold, design: .serif))
+    @ViewBuilder private var completionShortcut: some View {
+        if case .target = appState.currentGoal {
+            shortcut(
+                "Task done",
+                icon: "checkmark.seal.fill",
+                tint: BG3Theme.success,
+                help: "Complete the current task: \(appState.currentActivityTitle)",
+                action: appState.completeGearTarget
+            )
+        } else if case .step(let step) = appState.currentGoal,
+           let decision = step.decision {
+            Menu {
+                Button {
+                    appState.resolveWalkthroughStep(step, outcome: decision.recommended.label)
+                } label: {
+                    Label("Recommended · \(decision.recommended.label)", systemImage: "checkmark.circle.fill")
+                }
+                ForEach(decision.alternatives, id: \.label) { option in
+                    Button {
+                        appState.resolveWalkthroughStep(step, outcome: option.label)
+                    } label: {
+                        Label(option.label, systemImage: "arrow.triangle.branch")
+                    }
+                }
+                Divider()
+                Button {
+                    appState.skipCurrentActivity()
+                } label: {
+                    Label("Skip this step", systemImage: "forward.end")
+                }
+            } label: {
+                shortcutLabel("Task done", icon: "checkmark.seal.fill")
             }
-            .foregroundStyle(BG3Theme.parchment)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 4)
+            .menuIndicator(.hidden)
+            .assistantActionButton(accent: BG3Theme.success, prominent: true)
+            .controlSize(.mini)
+            .help("Complete the current task: \(appState.currentActivityTitle)")
+            .accessibilityLabel("Complete current task: \(appState.currentActivityTitle)")
+        } else {
+            shortcut(
+                "Task done",
+                icon: "checkmark.seal.fill",
+                disabled: !appState.hasGuidedGoal,
+                tint: BG3Theme.success,
+                help: "Complete the current task: \(appState.currentActivityTitle)",
+                action: appState.completeCurrentActivity
+            )
         }
-        .assistantActionButton(accent: tint ?? BG3Theme.control)
+    }
+
+    private func shortcut(
+        _ title: String,
+        icon: String,
+        disabled: Bool = false,
+        tint: Color? = nil,
+        help: String? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            shortcutLabel(title, icon: icon)
+        }
+        .assistantActionButton(accent: tint ?? BG3Theme.control, prominent: tint != nil)
         .controlSize(.mini)
         .disabled(disabled)
-        .accessibilityLabel(title)
+        .help(help ?? title)
+        .accessibilityLabel(help ?? title)
+    }
+
+    private func shortcutLabel(_ title: String, icon: String) -> some View {
+        VStack(spacing: 1) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold))
+            Text(title)
+                .font(BG3Type.overline)
+        }
+        .foregroundStyle(BG3Theme.parchment)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 1)
     }
 }

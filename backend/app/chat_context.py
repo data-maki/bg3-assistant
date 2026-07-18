@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from . import catalog
 from .models import BuildGear, BuildSummary, ChatRequest, PartyMember, RouteCheckpoint, WalkthroughStep
-from .route_data import GUIDE_VERSION, item_key, load_builds
+from .route_data import GUIDE_VERSION, item_key
 from .walkthrough_data import load_walkthrough, recommend_walkthrough_step, walkthrough_blockers
 
 
@@ -45,7 +46,7 @@ class ResolvedChatContext:
             if item_key(gear.item) not in owned and gear.item not in owned
         ]
 
-    def grounding_lines(self, checkpoint: RouteCheckpoint) -> list[str]:
+    def grounding_lines(self, checkpoint: RouteCheckpoint | None = None) -> list[str]:
         """Concise, authority-labelled state for deterministic or LLM chat."""
         lines = [
             f"[Guide fact] Guide version: {GUIDE_VERSION}.",
@@ -123,13 +124,14 @@ def _prerequisite_chain(step: WalkthroughStep | None, by_id: dict[str, Walkthrou
 
 
 def resolve_chat_context(
-    checkpoint: RouteCheckpoint,
+    checkpoint: RouteCheckpoint | None,
     request: ChatRequest,
     requested_step: WalkthroughStep | None = None,
 ) -> ResolvedChatContext:
     """Trust player state values, but re-resolve every guide identifier locally."""
     snapshot = request.context
-    steps = load_walkthrough()
+    selected_act = snapshot.selected_act if snapshot else 1
+    steps = load_walkthrough(selected_act)
     by_id = {step.id: step for step in steps}
     statuses = snapshot.walkthrough_statuses if snapshot else {}
     outcomes = snapshot.walkthrough_outcomes if snapshot else {}
@@ -140,7 +142,9 @@ def resolve_chat_context(
 
     recommended = recommend_walkthrough_step(steps, statuses, party_level, outcomes) if snapshot else None
     focused = _valid_step(snapshot.focused_step_id, by_id) if snapshot else requested_step
-    current = focused or requested_step or recommended
+    if focused and statuses.get(focused.id) in {"done", "completed", "skipped"}:
+        focused = None
+    current = requested_step or focused or recommended
     blockers = walkthrough_blockers(current, steps, statuses, outcomes) if current else []
     if current and current.minimum_level > party_level:
         blockers.append(f"Active party floor is L{party_level}; guide minimum for {current.title} is L{current.minimum_level}.")
@@ -150,10 +154,9 @@ def resolve_chat_context(
         for step in reversed(steps) if step.id in statuses
     ][:5]
 
-    builds = {build.id: build for build in load_builds()}
+    builds = {build.id: build for build in catalog.catalog_builds()}
     build_actions: dict[str, str] = {}
     relevant_gear: dict[str, list[BuildGear]] = {}
-    selected_act = snapshot.selected_act if snapshot else 1
     for member in active:
         if not member.build_id or member.build_id not in builds:
             continue
@@ -183,7 +186,7 @@ def resolve_chat_context(
     return ResolvedChatContext(
         scope=snapshot.scope if snapshot else "current",
         selected_act=selected_act,
-        map_region=snapshot.map_region if snapshot else checkpoint.region,
+        map_region=snapshot.map_region if snapshot else (checkpoint.region if checkpoint else "unknown"),
         route_phase=snapshot.route_phase if snapshot else (current.phase if current else "unknown"),
         party_level=party_level,
         active=active,

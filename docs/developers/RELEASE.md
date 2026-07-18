@@ -29,17 +29,27 @@ Open the generated `.pkg` in Transporter, deliver it to App Store Connect, wait 
 
 ## Product smoke test
 
-- [ ] First launch creates only a menu-bar item and native overlay, not a control window or Dock app.
+- [ ] First launch creates the menu-bar item and native overlay, and the HM app icon appears in the Dock while the app is running.
 - [ ] The menu-bar Settings command opens settings inside the native overlay.
 - [ ] BG3 detection, Launch BG3, Show Overlay, Open Planner, Open Map, Settings, and Quit work.
-- [ ] Now, Run, and Party remain usable without an OpenRouter key or Screen Recording permission.
-- [ ] Party presents one character at a time and persists level, build, status, and equipment changes.
+- [ ] Now, Run, Party, Loadout, and Act remain usable without an OpenRouter key or Screen Recording permission.
+- [ ] Party guidance fits all four active members at a glance, showing the current or latest reviewed step, choices, one-line tactics, and setup-due state without future-level clutter.
+- [ ] Manage party members moves known members between Active, Camp, and Unrecruited; moving into a full party asks which active member to replace.
+- [ ] Character detail shows the exact active point-buy, +2/+1, and final BG3 values inline, with later boosts and progression available as an expansion.
+- [ ] Every reviewed creation/respec recipe spends exactly 27 points, uses distinct +2/+1 bonuses, names the first class/order, and shows ASI, feat, permanent, equipment, and consumable sources.
+- [ ] Reset character plan is confirmed, clears build-specific ability/setup and gear-planning state, leaves permanent rewards only when replacing a build, and offers a one-step Undo.
 - [ ] Named Honor runs can be created, renamed, switched, and resumed with independent progress and party state.
 - [ ] Done archives immediately; Skip, Revisit, focus, decisions, and the resolved archive persist after restart.
 - [ ] Now shows Danger, Avoid, and Do without preparation or post-fight confirmation checklists.
-- [ ] The browser map starts from the app-owned local service and shares the same run state.
+- [ ] The browser map starts from the app-owned local service, uses the same Party hierarchy and recipes, preserves unknown/native member fields, and native reloads browser edits before its next write.
+- [ ] The Act 1 gate requires every relevant equipment item to be marked obtained or missed, records unresolved route consequences, and cannot return to Act 1 after confirmation.
+- [ ] Act 2 loads only `data/gear/act2.tsv` equipment, opens the Shadow-Cursed Lands map reference, and does not expose the Act 1 route or chat as Act 2 guidance.
+- [ ] The Act 2 to Act 3 gate remains locked while Act 2 route coverage is unavailable.
 - [ ] Guide-only chat and speech input work without an OpenRouter key.
 - [ ] An OpenRouter key saves to Keychain, restarts the local service, and enables AI chat.
+- [ ] Import without a key shows a focused inline key field; saving the key continues the URL import and preserves the target character assignment.
+- [ ] A public HTML/text/JSON/PDF build URL produces exactly one validated Gemini 3 Flash build with a legal derived creation recipe, persists it, and exposes it to native and browser Party without changing membership.
+- [ ] Loadout imports reject localhost/private-network, credential-bearing, oversized, nonstandard-port, and unsupported-file URLs.
 - [ ] Opening configured AI chat requests Screen Recording only when needed, attaches one BG3-window image, previews/removes it, and sends it only with the next message.
 - [ ] No periodic screenshot, recording, map-alignment, mod, telemetry, or game-memory process runs.
 - [ ] Launch at Login can be declined or disabled in Settings.
@@ -51,7 +61,7 @@ Open the generated `.pkg` in Transporter, deliver it to App Store Connect, wait 
 ```sh
 cd backend
 uv lock --check
-uv run --with pytest pytest
+uv run --extra dev pytest
 
 cd ../mac
 swift build

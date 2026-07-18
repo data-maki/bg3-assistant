@@ -194,7 +194,11 @@ def save_run_state(state: RunState) -> RunState:
     current = _run_state_from_snapshot(snapshot)
     for field_name in state.model_fields_set:
         setattr(current, field_name, getattr(state, field_name))
-    roster_source = current.party if "party" in state.model_fields_set and "roster" not in state.model_fields_set else (current.roster or current.party)
+    # `roster` is the sole write vocabulary; `party` is server-derived output.
+    if "roster" in state.model_fields_set:
+        roster_source = current.roster
+    else:
+        roster_source = current.roster or current.party
     roster = _normalize_roster(roster_source)
     active_party = [member for member in roster if member.status == "active"][:4]
     normalized = RunState(
@@ -272,9 +276,10 @@ def _merge_run_state_into_snapshot(snapshot: dict, state: RunState) -> None:
             progress[step_id] = "skipped"
         elif status == "revisit":
             focus = step_id
+    existing_roster = snapshot.get("roster") or snapshot.get("party") or []
     snapshot.update({
-        "party": [member.model_dump(by_alias=True, exclude_none=True) for member in state.party],
-        "roster": [member.model_dump(by_alias=True, exclude_none=True) for member in state.roster],
+        "party": _merge_member_snapshots(existing_roster, state.party),
+        "roster": _merge_member_snapshots(existing_roster, state.roster),
         "walkthroughProgress": progress,
         "walkthroughOutcomes": state.walkthrough_outcomes,
         "focusedWalkthroughStepId": focus,
@@ -285,6 +290,19 @@ def _merge_run_state_into_snapshot(snapshot: dict, state: RunState) -> None:
         "activeBuilds": state.builds,
         "doneFightIds": state.done,
     })
+
+
+def _merge_member_snapshots(existing: list[dict], members: list) -> list[dict]:
+    """Preserve fields a partial or older client does not know about."""
+    by_id = {member.get("id"): member for member in existing if isinstance(member, dict) and member.get("id")}
+    merged = []
+    for member in members:
+        # Omitted fields preserve the prior snapshot; explicit null/[]/false
+        # clear player-owned state. Pydantic retains this distinction in
+        # model_fields_set when parsing a partial web payload.
+        payload = member.model_dump(by_alias=True, exclude_unset=True)
+        merged.append({**by_id.get(member.id, {}), **payload})
+    return merged
 
 
 def _map_party_member(value: dict):
@@ -301,6 +319,11 @@ def _normalize_roster(members: list) -> list:
         ("gale", "Gale", "Wizard", False, "camp"),
         ("wyll", "Wyll", "Warlock", False, "camp"),
         ("karlach", "Karlach", "Barbarian", False, "camp"),
+        ("dark-urge", "Dark Urge", "Sorcerer", False, "camp"),
+        ("halsin", "Halsin", "Druid", False, "unrecruited"),
+        ("minthara", "Minthara", "Paladin", False, "unrecruited"),
+        ("jaheira", "Jaheira", "Druid", False, "unrecruited"),
+        ("minsc", "Minsc", "Ranger", False, "unrecruited"),
     ]
     roster = [member.model_copy(deep=True) for member in members]
     had_members = bool(roster)
@@ -318,7 +341,7 @@ def _normalize_roster(members: list) -> list:
             name=name,
             level=baseline_level,
             class_name=class_name,
-            status="camp" if had_members else status,
+            status="camp" if had_members and status == "active" else status,
             is_custom=is_custom,
         ))
     active_count = 0

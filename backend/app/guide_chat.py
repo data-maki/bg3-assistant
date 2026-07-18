@@ -14,23 +14,25 @@ def _alternative(option: DecisionOption) -> str:
     return f"Alternative: {option.label} — risks: {'; '.join(option.costs)}"
 
 
-def guide_facts(checkpoint: RouteCheckpoint, step: WalkthroughStep | None) -> list[str]:
+def guide_facts(checkpoint: RouteCheckpoint | None, step: WalkthroughStep | None) -> list[str]:
     """The complete reviewed fact set for a checkpoint (and current step), one line each."""
-    lines = [
-        f"Checkpoint: {checkpoint.name} ({checkpoint.area}, {checkpoint.region}).",
-        f"Minimum recommended level: {checkpoint.minimum_level}. Danger: {checkpoint.danger}.",
-        f"Advice: {checkpoint.advice}",
-    ]
-    if checkpoint.enemies:
-        lines.append(f"Enemies: {checkpoint.enemies}")
-    if checkpoint.legendary_action:
-        lines.append("Legendary action: " + checkpoint.legendary_action)
-    if checkpoint.failure_conditions:
-        lines.append("Failure conditions: " + "; ".join(checkpoint.failure_conditions))
-    if checkpoint.preparation:
-        lines.append("Preparation: " + "; ".join(checkpoint.preparation))
-    if checkpoint.irreversible_warnings:
-        lines.append("Time-sensitive/irreversible: " + "; ".join(checkpoint.irreversible_warnings))
+    lines: list[str] = []
+    if checkpoint:
+        lines.extend([
+            f"Checkpoint: {checkpoint.name} ({checkpoint.area}, {checkpoint.region}).",
+            f"Minimum recommended level: {checkpoint.minimum_level}. Danger: {checkpoint.danger}.",
+            f"Advice: {checkpoint.advice}",
+        ])
+        if checkpoint.enemies:
+            lines.append(f"Enemies: {checkpoint.enemies}")
+        if checkpoint.legendary_action:
+            lines.append("Legendary action: " + checkpoint.legendary_action)
+        if checkpoint.failure_conditions:
+            lines.append("Failure conditions: " + "; ".join(checkpoint.failure_conditions))
+        if checkpoint.preparation:
+            lines.append("Preparation: " + "; ".join(checkpoint.preparation))
+        if checkpoint.irreversible_warnings:
+            lines.append("Time-sensitive/irreversible: " + "; ".join(checkpoint.irreversible_warnings))
     if step:
         lines.append(f"Walkthrough step: {step.title} — {step.summary}")
         if step.rewards:
@@ -43,18 +45,25 @@ def guide_facts(checkpoint: RouteCheckpoint, step: WalkthroughStep | None) -> li
                 f"(benefits: {'; '.join(step.decision.recommended.benefits)})."
             )
             lines.extend(_alternative(option) for option in step.decision.alternatives)
-            if step.incident:
-                lines.append("Never: " + step.incident.never)
+        if step.incident:
+            lines.extend([
+                "Trigger: " + step.incident.trigger,
+                "Safe actions: " + "; ".join(step.incident.safe_actions),
+                "Never: " + step.incident.never,
+                "Escape: " + step.incident.escape,
+            ])
+            if step.incident.honor_delta:
+                lines.append("Honor delta: " + step.incident.honor_delta)
     return lines
 
 
-def grounding_facts(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughStep | None) -> list[str]:
+def grounding_facts(checkpoint: RouteCheckpoint | None, request: ChatRequest, step: WalkthroughStep | None) -> list[str]:
     """Trusted guide facts plus a server-resolved, authority-labelled run snapshot."""
     context = resolve_chat_context(checkpoint, request, step)
     return [*guide_facts(checkpoint, context.current or step), *context.grounding_lines(checkpoint)]
 
 
-def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughStep | None = None) -> ChatResponse:
+def answer(checkpoint: RouteCheckpoint | None, request: ChatRequest, step: WalkthroughStep | None = None) -> ChatResponse:
     message = request.message.lower()
     context = resolve_chat_context(checkpoint, request, step)
     step = context.current or step
@@ -67,17 +76,19 @@ def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughS
         if context.recommended:
             action = f"Do {context.recommended.title} first; {step.title if step else 'your focus'} is blocked."
         else:
-            action = f"Resolve the named prerequisite before attempting {step.title if step else checkpoint.name}."
+            action = f"Resolve the named prerequisite before attempting {step.title if step else checkpoint.name if checkpoint else 'this objective'}."
     elif step:
         action = f"Do {step.title} in {step.area}."
-    else:
+    elif checkpoint:
         action = f"Go to {checkpoint.area} for {checkpoint.name}."
+    else:
+        action = "Resolve the current reviewed walkthrough objective."
 
     risk = (
         (step.incident.never if step and step.incident else None)
         or (step.avoid if step else None)
-        or (checkpoint.failure_conditions[0] if checkpoint.failure_conditions else None)
-        or checkpoint.advice
+        or (checkpoint.failure_conditions[0] if checkpoint and checkpoint.failure_conditions else None)
+        or (checkpoint.advice if checkpoint else "No checkpoint-specific run-ending risk is recorded for this step.")
     )
 
     if any(word in message for word in ("dialogue", "dialog", "decision", "choice", "choose", "talk")):
@@ -89,22 +100,31 @@ def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughS
             if step.incident:
                 incident_facts = facts if step.incident.authority == "guide_fact" else suggestions
                 incident_facts.append("Never: " + step.incident.never)
-        else:
+        elif checkpoint:
             facts.extend(item.text for item in checkpoint.honor_decisions if item.kind == "guide_fact")
             suggestions.extend(item.text for item in checkpoint.honor_decisions if item.kind != "guide_fact")
         if not facts and not suggestions:
             unknowns.append("The reviewed guide does not record a checkpoint-specific dialogue decision here.")
     elif any(word in message for word in ("ready", "level", "prepare")):
-        assessment = assess_readiness(
-            ReadinessRequest(
-                checkpoint_id=checkpoint.id,
-                party=context.active,
-                completed_checkpoint_ids=request.completed_checkpoint_ids,
+        if checkpoint:
+            assessment = assess_readiness(
+                ReadinessRequest(
+                    checkpoint_id=checkpoint.id,
+                    party=context.active,
+                    completed_checkpoint_ids=request.completed_checkpoint_ids,
+                    skipped_checkpoint_ids=request.skipped_checkpoint_ids,
+                    checked_preparation=request.checked_preparation,
+                    walkthrough_statuses=request.context.walkthrough_statuses if request.context else {},
+                    walkthrough_outcomes=request.context.walkthrough_outcomes if request.context else {},
+                ),
+                context.selected_act,
             )
-        )
-        facts.append(f"Guide minimum: level {checkpoint.minimum_level}.")
-        facts.extend(checkpoint.preparation[:3])
-        suggestions.extend(assessment.blockers + assessment.warnings[:3] + assessment.next_actions[:6])
+            facts.append(f"Guide minimum: level {checkpoint.minimum_level}.")
+            facts.extend(checkpoint.preparation[:3])
+            suggestions.extend(assessment.blockers + assessment.warnings[:3] + assessment.next_actions[:6])
+        elif step:
+            facts.append(f"Guide minimum: level {step.minimum_level}.")
+            suggestions.append(step.summary)
         suggestions.extend(f"{member.name} {context.build_actions[member.id]}" for member in context.active if member.id in context.build_actions)
     elif any(word in message for word in ("die", "danger", "end my run", "legendary")):
         if step and step.incident:
@@ -114,22 +134,26 @@ def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughS
                 incident_facts.append("Honor delta: " + step.incident.honor_delta)
             suggestions.extend(step.incident.safe_actions)
             suggestions.append("If it goes wrong: " + step.incident.escape)
-        else:
+        elif checkpoint:
             facts.extend(checkpoint.failure_conditions[:3])
             if checkpoint.legendary_action:
                 facts.insert(0, "Legendary action: " + checkpoint.legendary_action)
             suggestions.append(checkpoint.advice)
+        else:
+            unknowns.append("The guide does not record a checkpoint-specific combat danger for this step.")
     elif any(word in message for word in ("where", "next", "go")):
         if step:
             facts.append(f"Next step: {step.title} in {step.area}, {step.region}.")
             suggestions.append(step.summary)
-        else:
+        elif checkpoint:
             facts.append(f"Next destination: {checkpoint.area} in {checkpoint.region}.")
-            facts.append(f"Guide coordinates: X {checkpoint.x}, Y {checkpoint.y}.")
+            if checkpoint.x is not None and checkpoint.y is not None:
+                facts.append(f"Guide coordinates: X {checkpoint.x}, Y {checkpoint.y}.")
             suggestions.append(checkpoint.advice)
     elif any(word in message for word in ("long rest", "rest")):
-        facts.extend(checkpoint.irreversible_warnings)
-        if not checkpoint.irreversible_warnings:
+        warnings = checkpoint.irreversible_warnings if checkpoint else []
+        facts.extend(warnings)
+        if not warnings:
             unknowns.append("The guide does not mark a checkpoint-specific long-rest failure here.")
         suggestions.append("Confirm any active timed quest in the journal before resting.")
     elif any(word in message for word in ("reward", "equipment", "item", "loot", "gear", "power")):
@@ -151,7 +175,7 @@ def answer(checkpoint: RouteCheckpoint, request: ChatRequest, step: WalkthroughS
         if step:
             step_facts = facts if step.authority == "guide_fact" else suggestions
             step_facts.extend([step.summary, "Avoid: " + step.avoid])
-        else:
+        elif checkpoint:
             facts.extend([checkpoint.advice, *checkpoint.preparation[:3]])
         unknowns.append("Ask about readiness, danger, destination, preparation, or long rests for a narrower answer.")
 

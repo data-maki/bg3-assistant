@@ -15,6 +15,9 @@ export const state = {
   walkthroughOutcomes: JSON.parse(localStorage.getItem("bg3-act1-walk-outcomes") || "{}"),
   focusedWalkthroughStepId: localStorage.getItem("bg3-act1-walk-focus") || null,
   selectedWalkthroughStepId: null,
+  partyView: "guidance",
+  selectedPartyMemberId: null,
+  partyMemberReturnView: "guidance",
   ackTimed: new Set(JSON.parse(localStorage.getItem("bg3-act1-timed-ack") || "[]")),
   missingOnly: false,
   tab: "walkthrough",
@@ -37,19 +40,66 @@ const DEFAULT_ROSTER = [
   { id: "gale", name: "Gale", className: "Wizard", isCustom: false, status: "camp" },
   { id: "wyll", name: "Wyll", className: "Warlock", isCustom: false, status: "camp" },
   { id: "karlach", name: "Karlach", className: "Barbarian", isCustom: false, status: "camp" },
+  { id: "dark-urge", name: "Dark Urge", className: "Sorcerer", isCustom: false, status: "camp" },
+  { id: "halsin", name: "Halsin", className: "Druid", isCustom: false, status: "unrecruited" },
+  { id: "minthara", name: "Minthara", className: "Paladin", isCustom: false, status: "unrecruited" },
+  { id: "jaheira", name: "Jaheira", className: "Druid", isCustom: false, status: "unrecruited" },
+  { id: "minsc", name: "Minsc", className: "Ranger", isCustom: false, status: "unrecruited" },
 ];
 
+export const WITHERS_HIRELINGS = [
+  { id: "hireling-eldra-luthrinn", name: "Eldra Luthrinn", race: "Gold Dwarf", className: "Barbarian" },
+  { id: "hireling-brinna-brightsong", name: "Brinna Brightsong", race: "Lightfoot Halfling", className: "Bard" },
+  { id: "hireling-zenith-feur-sel", name: "Zenith Feur'sel", race: "High Elf", className: "Cleric" },
+  { id: "hireling-danton", name: "Danton", race: "Mephistopheles Tiefling", className: "Druid" },
+  { id: "hireling-varanna-sunblossom", name: "Varanna Sunblossom", race: "Wood Half-Elf", className: "Fighter" },
+  { id: "hireling-sina-zith", name: "Sina'zith", race: "Githyanki", className: "Monk" },
+  { id: "hireling-kerz", name: "Kerz", race: "Half-Orc", className: "Paladin" },
+  { id: "hireling-ver-yll-wenkiir", name: "Ver'yll Wenkiir", race: "Seldarine Drow", className: "Ranger" },
+  { id: "hireling-maddala-deadeye", name: "Maddala Deadeye", race: "Human", className: "Rogue" },
+  { id: "hireling-jacelyn", name: "Jacelyn", race: "High Half-Elf", className: "Sorcerer" },
+  { id: "hireling-kree-derryck", name: "Kree Derryck", race: "Duergar", className: "Warlock" },
+  { id: "hireling-sir-fuzzalump", name: "Sir Fuzzalump", race: "Rock Gnome", className: "Wizard" },
+];
+
+// Saved rosters created before hirelings carried ids identify them only by
+// name, so id match comes first with a name fallback for legacy members.
+export function hirelingProfile(member) {
+  return WITHERS_HIRELINGS.find((entry) => entry.id === member.hirelingId)
+    || WITHERS_HIRELINGS.find((entry) => entry.name === member.name)
+    || null;
+}
+
+// The reviewed build step that applies at a level: the exact row when one
+// exists, otherwise the latest earlier row, otherwise the plan's first row.
+export function currentBuildStep(build, level) {
+  const plan = build?.levels || [];
+  return plan.find((row) => row.level === level)
+    || [...plan].reverse().find((row) => row.level <= level)
+    || plan[0];
+}
+
+function buildFor(buildId) {
+  return buildId ? state.data?.builds?.find((entry) => entry.id === buildId) : null;
+}
+
 export function normalizeRoster(roster = state.roster, legacyParty = state.party) {
-  const source = roster.length ? roster : legacyParty.map((member, index) => ({
+  const source = roster.length ? roster : legacyParty.length ? legacyParty.map((member, index) => ({
     ...member, status: "active", isCustom: member.isCustom ?? index === 0,
-  }));
-  if (!source.length) return [];
-  const members = source.map((member, index) => ({
-    ...member,
-    level: Math.min(12, Math.max(1, Number(member.level) || 1)),
-    status: member.status || "active",
-    isCustom: member.isCustom ?? index === 0,
-  }));
+  })) : DEFAULT_ROSTER.map((member) => ({ ...member, level: 1, buildId: null, preparedTags: [] }));
+  const members = source.map((member, index) => {
+    const normalized = {
+      ...member,
+      level: Math.min(12, Math.max(1, Number(member.level) || 1)),
+      status: member.status || "active",
+      isCustom: member.isCustom ?? index === 0,
+    };
+    // className is derived state: whenever a build resolves it follows the
+    // reviewed step at the member's level.
+    const step = currentBuildStep(buildFor(normalized.buildId), normalized.level);
+    if (step) normalized.className = step.take;
+    return normalized;
+  });
   const names = new Set(members.map((member) => member.name.toLowerCase()));
   const level = Math.max(1, ...members.map((member) => member.level));
   DEFAULT_ROSTER.forEach((candidate) => {
@@ -67,7 +117,7 @@ export function normalizeRoster(roster = state.roster, legacyParty = state.party
 export function syncPartyProjection() {
   state.roster = normalizeRoster();
   state.party = state.roster.filter((member) => member.status === "active").slice(0, 4);
-  if (state.party.length) state.activeBuilds = [...new Set(state.party.map((member) => member.buildId).filter(Boolean))];
+  state.activeBuilds = [...new Set(state.party.map((member) => member.buildId).filter(Boolean))];
 }
 
 export function plannedRosterMembers() {
@@ -75,17 +125,187 @@ export function plannedRosterMembers() {
   return state.roster.filter((member) => statuses.has(member.status));
 }
 
+export function canActivateRosterStatus(status) {
+  return ["active", "camp", "unrecruited"].includes(status);
+}
+
 export function updateRosterMember(memberId, changes) {
   const index = state.roster.findIndex((member) => member.id === memberId);
   if (index < 0) return false;
   const currentStatus = state.roster[index].status;
   const nextStatus = changes.status || state.roster[index].status;
-  if (nextStatus === "active" && !["active", "camp"].includes(currentStatus)) return false;
+  if (nextStatus === "active" && !canActivateRosterStatus(currentStatus)) return false;
   if (nextStatus === "active" && state.roster[index].status !== "active" && state.party.length >= 4) return false;
-  state.roster[index] = { ...state.roster[index], ...changes };
+  const merged = { ...state.roster[index], ...changes };
+  // className is derived: recompute it from the build step whenever a build
+  // resolves so level and build changes never leave it stale.
+  const step = currentBuildStep(buildFor(merged.buildId), Number(merged.level) || 1);
+  if (step) merged.className = step.take;
+  state.roster[index] = merged;
   syncPartyProjection();
   syncRunState();
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// Party mutators. Each one owns its domain mutation plus the
+// syncPartyProjection/syncRunState pair; app.js only prompts and renders.
+// ---------------------------------------------------------------------------
+
+export function activateMember(memberId) {
+  return updateRosterMember(memberId, { status: "active" });
+}
+
+export function recordRecruited(memberId) {
+  return updateRosterMember(memberId, { status: "camp" });
+}
+
+export function returnToCamp(memberId) {
+  return updateRosterMember(memberId, { status: "camp" });
+}
+
+export function addHireling(hirelingId) {
+  const selected = state.roster.filter((member) => member.isHireling);
+  const hireling = WITHERS_HIRELINGS.find((entry) => entry.id === hirelingId);
+  if (!hireling || selected.length >= 3) return false;
+  const level = Math.max(3, ...state.party.map((member) => Number(member.level) || 1));
+  state.roster.push({
+    id: hireling.id, hirelingId: hireling.id, name: hireling.name, level, buildId: null,
+    preparedTags: [], className: hireling.className, status: "camp", isCustom: false,
+    isHireling: true, abilityModifiers: [], usesBuildAbilityScores: false,
+  });
+  syncPartyProjection();
+  syncRunState();
+  return true;
+}
+
+export function swapActiveMember(outgoingId, incomingId) {
+  const outgoingIndex = state.roster.findIndex((entry) => entry.id === outgoingId);
+  const incomingIndex = state.roster.findIndex((entry) => entry.id === incomingId);
+  const outgoing = state.roster[outgoingIndex];
+  const incoming = state.roster[incomingIndex];
+  if (outgoing?.status !== "active" || incoming?.status === "active" || !canActivateRosterStatus(incoming?.status)) return false;
+  outgoing.status = "camp";
+  incoming.status = "active";
+  state.roster[outgoingIndex] = incoming;
+  state.roster[incomingIndex] = outgoing;
+  syncPartyProjection();
+  syncRunState();
+  return true;
+}
+
+export function dismissMember(memberId) {
+  state.roster = state.roster.filter((entry) => entry.id !== memberId);
+  delete state.equippedByMember[memberId];
+  recomputeEquipped();
+  syncPartyProjection();
+  syncRunState();
+}
+
+export function renameMember(memberId, name) {
+  const member = state.roster.find((entry) => entry.id === memberId);
+  if (!member?.isCustom) return false;
+  member.name = name;
+  syncPartyProjection();
+  syncRunState();
+  return true;
+}
+
+// Core build assignment; the replace-build confirmation lives in app.js.
+// Permanent rewards stay with the character; transient state is cleared.
+export function assignBuild(memberId, buildId) {
+  const member = state.roster.find((entry) => entry.id === memberId);
+  if (!member) return false;
+  const permanent = (member.abilityModifiers || []).filter((modifier) => modifier.kind === "permanent");
+  if (!buildId) return updateRosterMember(member.id, {
+    buildId: null, abilityModifiers: permanent,
+    usesBuildAbilityScores: false, appliedAbilitySetupId: null,
+  });
+  if (!buildFor(buildId)) return false;
+  return updateRosterMember(member.id, {
+    buildId, abilityModifiers: permanent, usesBuildAbilityScores: true,
+    appliedAbilitySetupId: null,
+  });
+}
+
+export function applyAbilitySetup(memberId, setupId) {
+  const member = state.roster.find((entry) => entry.id === memberId);
+  const setup = buildFor(member?.buildId)?.abilitySetups?.find((entry) => entry.id === setupId);
+  if (!member || !setup) return false;
+  return updateRosterMember(member.id, {
+    abilityScores: setup.finalScores, usesBuildAbilityScores: true, appliedAbilitySetupId: setup.id,
+  });
+}
+
+export function resetMemberPlan(memberId) {
+  if (!state.roster.some((member) => member.id === memberId)) return false;
+  delete state.equippedByMember[memberId];
+  recomputeEquipped();
+  return updateRosterMember(memberId, {
+    buildId: null, abilityModifiers: [], usesBuildAbilityScores: false, appliedAbilitySetupId: null,
+  });
+}
+
+export function setIncludeCampPlans(enabled) {
+  state.includeCampPlans = enabled;
+  syncRunState();
+}
+
+// ---------------------------------------------------------------------------
+// Ability-source predicates: a recorded modifier is tied to its plan source by
+// planSourceId, with a label fallback for modifiers saved before ids existed.
+// ---------------------------------------------------------------------------
+
+export function modifierMatchesSource(modifier, source) {
+  return modifier.planSourceId === source.id || (!modifier.planSourceId && modifier.source === source.label);
+}
+
+export function sourceRecorded(member, source) {
+  return (member.abilityModifiers || []).some((modifier) => modifierMatchesSource(modifier, source));
+}
+
+export function sourceEquipped(member, source) {
+  return source.kind === "equipment" && Boolean(source.itemKey) && memberEquipment(member.id).has(source.itemKey);
+}
+
+// Who currently holds a unique-across-party source. Labels (not plan-source
+// ids) identify uniques across members because ids are build-scoped.
+export function sourceOwner(source) {
+  return state.roster.find((candidate) => source.kind === "equipment"
+    ? Boolean(source.itemKey) && memberEquipment(candidate.id).has(source.itemKey)
+    : (candidate.abilityModifiers || []).some((modifier) => modifier.source === source.label)) || null;
+}
+
+export function toggleAbilitySource(memberId, sourceId, applied) {
+  const member = state.roster.find((entry) => entry.id === memberId);
+  const source = buildFor(member?.buildId)?.abilitySources?.find((entry) => entry.id === sourceId);
+  if (!member || !source) return false;
+  if (!applied && source.uniqueAcrossParty) {
+    state.roster.forEach((candidate) => {
+      candidate.abilityModifiers = (candidate.abilityModifiers || []).filter((modifier) => modifier.source !== source.label);
+    });
+  }
+  let modifiers = (member.abilityModifiers || []).filter((modifier) => !modifierMatchesSource(modifier, source));
+  if (!applied && source.kind === "consumable") modifiers = modifiers.filter((modifier) => modifier.kind !== "temporary");
+  if (!applied) modifiers.push({
+    id: crypto.randomUUID(), ability: source.ability,
+    kind: source.kind === "permanent" ? "permanent" : "temporary",
+    mode: source.mode, value: source.value, source: source.label, planSourceId: source.id,
+  });
+  member.abilityModifiers = modifiers;
+  syncPartyProjection();
+  syncRunState();
+  return true;
+}
+
+export async function importBuild(url) {
+  const response = await fetch("/api/builds/import", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }),
+  });
+  if (!response.ok) throw new Error((await response.json()).detail || "Import failed");
+  const payload = await response.json();
+  state.data.builds = [...state.data.builds.filter((entry) => entry.id !== payload.build.id), payload.build];
+  return payload.build;
 }
 
 export function toggleStoryOutcome(outcome) {
@@ -296,8 +516,10 @@ export async function restoreRunState() {
       syncPartyProjection();
       state.activeBuilds = payload.builds || [];
       persistLocal();
+      return true;
     } else if (equippedItems.size || state.activeBuilds.length || state.done.size || Object.keys(state.walkthroughStatuses).length || state.focusedWalkthroughStepId) {
       syncRunState(); // seed the backend from this browser's saved state
     }
   } catch { /* backend offline: localStorage still applies */ }
+  return false;
 }
