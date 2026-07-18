@@ -19,7 +19,7 @@ extension AppState {
             chatScreenshot = nil
             resetGuideContext()
         } else {
-            Task { await refreshReadiness() }
+            refreshReadiness()
         }
     }
 

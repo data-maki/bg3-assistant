@@ -291,22 +291,6 @@ class ImportedBuildDraft(StrictCamelModel):
     gear: list[ImportedBuildGear]
 
 
-class ImportedLoadoutCharacter(CamelModel):
-    name: str
-    class_name: str
-    level: int = Field(ge=1, le=12)
-    is_custom: bool
-    ability_scores: AbilityScores
-    build: BuildSummary
-
-
-class ImportedLoadout(CamelModel):
-    id: str
-    name: str
-    source_url: str
-    characters: list[ImportedLoadoutCharacter]
-
-
 class ImportedBuild(CamelModel):
     id: str
     name: str

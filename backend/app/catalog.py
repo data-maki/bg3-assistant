@@ -21,7 +21,6 @@ from .models import (
     BuildSummary,
     CatalogItem,
     ImportedBuild,
-    ImportedLoadout,
 )
 from .route_data import GUIDE_VERSION, item_key
 
@@ -147,7 +146,6 @@ def ensure_seeded() -> None:
                 """,
                 (GUIDE_VERSION, time.time()),
             )
-        _migrate_custom_loadouts(connection)
     _seeded_path = path
 
 
@@ -451,33 +449,3 @@ def imported_builds() -> list[ImportedBuild]:
         )
         for row in rows
     ]
-
-
-def _migrate_custom_loadouts(connection: sqlite3.Connection) -> None:
-    exists = connection.execute(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'custom_loadouts'"
-    ).fetchone()
-    if not exists:
-        return
-    rows = connection.execute("SELECT payload_json FROM custom_loadouts").fetchall()
-    for row in rows:
-        try:
-            imported = ImportedBuild.model_validate_json(row["payload_json"])
-            _insert_build(
-                connection, imported.build, origin="import",
-                source_url=imported.source_url, import_id=imported.id,
-                overwrite_items=False,
-            )
-        except Exception:
-            try:
-                legacy = ImportedLoadout.model_validate_json(row["payload_json"])
-                for character in legacy.characters:
-                    _insert_build(
-                        connection, character.build, origin="import",
-                        source_url=legacy.source_url,
-                        import_id=f"{legacy.id}-{character.build.id}",
-                        overwrite_items=False,
-                    )
-            except Exception:
-                continue
-    connection.execute("DROP TABLE custom_loadouts")

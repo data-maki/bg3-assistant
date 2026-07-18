@@ -355,22 +355,6 @@ struct AbilityScores: Codable, Hashable {
     }
 }
 
-struct ImportedLoadoutCharacter: Codable, Hashable {
-    let name: String
-    let className: String
-    let level: Int
-    let isCustom: Bool
-    let abilityScores: AbilityScores
-    let build: BuildSummary
-}
-
-struct ImportedLoadout: Codable, Identifiable, Hashable {
-    let id: String
-    let name: String
-    let sourceUrl: String
-    let characters: [ImportedLoadoutCharacter]
-}
-
 struct ImportedBuild: Codable, Identifiable, Hashable {
     let id: String
     let name: String
@@ -855,16 +839,6 @@ struct BackendHealth: Codable, Equatable {
     /// Server-side AI features (chat, build import) are usable. The key is
     /// backend-held; older backends omit the field.
     let aiAvailable: Bool?
-}
-
-struct ReadinessRequest: Codable {
-    let checkpointId: String
-    let party: [PartyMember]
-    let completedCheckpointIds: [String]
-    let skippedCheckpointIds: [String]
-    let checkedPreparation: [String]
-    let walkthroughStatuses: [String: String]
-    let walkthroughOutcomes: [String: String]
 }
 
 struct ReadinessResponse: Codable {

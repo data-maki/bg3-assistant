@@ -112,7 +112,6 @@ final class AppState: ObservableObject {
     private var pollTask: Task<Void, Never>?
     private var loadingGuideAct: Int?
     private var guideLoadGeneration = 0
-    private var readinessGeneration = 0
     var chatGeneration = 0
     @Published private(set) var gameWindowFrame: CGRect?
 
@@ -472,7 +471,7 @@ final class AppState: ObservableObject {
         skipNoteDraft = run.progress[checkpoint.id]?.skipNote ?? ""
         combatCardPinned = false
         plannerTab = .current
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     func followRecommendedRoute() {
@@ -480,7 +479,7 @@ final class AppState: ObservableObject {
         run.selectedCheckpointId = nil
         syncRegionToRecommendation()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     func setDisposition(_ disposition: CheckpointDisposition, note: String = "") {
@@ -536,7 +535,7 @@ final class AppState: ObservableObject {
         }
         syncRegionToRecommendation()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     func focusWalkthroughStep(_ step: WalkthroughStep) {
@@ -547,7 +546,7 @@ final class AppState: ObservableObject {
         combatCardPinned = false
         persistRun()
         plannerTab = .current
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     func completeCurrentActivity() {
@@ -658,7 +657,6 @@ final class AppState: ObservableObject {
 
     func resetGuideContext(load: Bool = true) {
         guideLoadGeneration &+= 1
-        readinessGeneration &+= 1
         invalidateChatRequests()
         loadingGuideAct = nil
         loadedGuideAct = nil
@@ -733,7 +731,7 @@ final class AppState: ObservableObject {
                requestedAct == selectedAct {
                 itemCatalog = items
             }
-            await refreshReadiness()
+            refreshReadiness()
         } catch {
             guard generation == guideLoadGeneration,
                   requestedRunID == run.id,
@@ -743,39 +741,24 @@ final class AppState: ObservableObject {
         }
     }
 
-    func refreshReadiness() async {
-        readinessGeneration &+= 1
-        let generation = readinessGeneration
-        let requestedAct = selectedAct
-        let requestedRunID = run.id
-        guard activeRouteAvailable, backendHealthy, let checkpoint = currentCheckpoint else {
+    /// Local, synchronous derivation from loaded guide + run state; there is
+    /// nothing to await, cancel, or fail.
+    func refreshReadiness() {
+        guard activeRouteAvailable, let checkpoint = currentCheckpoint else {
             readiness = nil
             return
         }
-        readiness = nil
-        do {
-            let response = try await backendClient.readiness(ReadinessRequest(
-                checkpointId: checkpoint.id,
-                party: activeParty,
-                completedCheckpointIds: completedIds,
-                skippedCheckpointIds: skippedIds,
-                checkedPreparation: Array(currentProgress.checkedPreparation),
-                walkthroughStatuses: (run.walkthroughProgress ?? [:]).mapValues(\.rawValue),
-                walkthroughOutcomes: run.walkthroughOutcomes ?? [:]
-            ), act: requestedAct)
-            guard generation == readinessGeneration,
-                  requestedRunID == run.id,
-                  requestedAct == selectedAct,
-                  loadedGuideAct == requestedAct,
-                  currentCheckpoint?.id == checkpoint.id else { return }
-            readiness = response
-        } catch {
-            guard generation == readinessGeneration,
-                  requestedRunID == run.id,
-                  requestedAct == selectedAct else { return }
-            readiness = nil
-            errorMessage = "Readiness check failed: \(error.localizedDescription)"
-        }
+        readiness = RunSafety.assessReadiness(
+            checkpoint: checkpoint,
+            route: route,
+            walkthrough: walkthrough,
+            activeParty: activeParty,
+            completedIds: Set(completedIds),
+            checkedPreparation: currentProgress.checkedPreparation,
+            walkthroughProgress: run.walkthroughProgress ?? [:],
+            walkthroughOutcomes: run.walkthroughOutcomes ?? [:],
+            builds: builds
+        )
     }
 
     private func refreshStatuses() async {

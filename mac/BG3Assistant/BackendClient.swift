@@ -26,7 +26,6 @@ struct BackendClient {
     }
 
     static func guidePath(for act: Int) -> String { "api/acts/\(act)/guide" }
-    static func readinessPath(for act: Int) -> String { "api/acts/\(act)/readiness" }
 
     func route(act: Int) async throws -> RoutePayload {
         let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: Self.guidePath(for: act)))
@@ -38,10 +37,6 @@ struct BackendClient {
         let (data, response) = try await URLSession.shared.data(from: baseURL.appending(path: "api/items"))
         try validate(response, data: data)
         return try decoder.decode([ItemSummary].self, from: data)
-    }
-
-    func readiness(_ requestBody: ReadinessRequest, act: Int) async throws -> ReadinessResponse {
-        try await postJSON(path: Self.readinessPath(for: act), body: requestBody, response: ReadinessResponse.self)
     }
 
     func chat(_ requestBody: ChatRequest) async throws -> ChatResponse {

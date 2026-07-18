@@ -54,7 +54,7 @@ extension AppState {
         run.selectedCheckpointId = nil
         syncRegionToRecommendation()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     /// Finishing and skipping share one path so the wizard never re-nags.

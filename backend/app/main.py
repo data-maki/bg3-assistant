@@ -19,13 +19,11 @@ from .models import (
     LoadoutImportRequest,
     PositionResponse,
     PositionUpdateRequest,
-    ReadinessRequest,
-    ReadinessResponse,
     RunState,
     RunStateResponse,
 )
 from .paths import resource_root
-from .route_data import GUIDE_VERSION, assess_readiness, checkpoint_by_id, load_act_catalog, load_route, load_timed_events
+from .route_data import GUIDE_VERSION, checkpoint_by_id, load_act_catalog, load_route, load_timed_events
 from .walkthrough_data import load_walkthrough, walkthrough_by_id
 
 
@@ -137,14 +135,6 @@ def import_custom_build(request: LoadoutImportRequest) -> ImportedBuild:
         raise HTTPException(status_code=502, detail="The build could not be processed. Try another public URL.") from exc
     catalog.save_imported_build(imported)
     return imported
-
-
-@app.post("/api/acts/{act}/readiness", response_model=ReadinessResponse)
-def act_readiness(act: int, request: ReadinessRequest) -> ReadinessResponse:
-    try:
-        return assess_readiness(request, act)
-    except KeyError as exc:
-        raise HTTPException(status_code=404, detail=f"Unknown checkpoint: {exc.args[0]}") from exc
 
 
 @app.post("/api/chat", response_model=ChatResponse)

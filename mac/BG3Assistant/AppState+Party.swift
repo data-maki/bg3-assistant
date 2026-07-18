@@ -23,7 +23,7 @@ extension AppState {
         run.partyPlan = undo.plan
         partyUndoState = nil
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     @discardableResult
@@ -82,7 +82,7 @@ extension AppState {
         run.syncActivePartyProjection()
         validateGearTarget()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     @discardableResult
@@ -139,7 +139,7 @@ extension AppState {
         run.syncActivePartyProjection()
         validateGearTarget()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
         return true
     }
 
@@ -179,7 +179,7 @@ extension AppState {
             syncRegionToRecommendation()
         }
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     func updatePartyLevel(_ level: Int, for member: PartyMember) {
@@ -300,7 +300,7 @@ extension AppState {
         run.roster = members
         run.syncActivePartyProjection()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     @discardableResult
@@ -323,7 +323,7 @@ extension AppState {
         run.roster = members
         run.syncActivePartyProjection()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
         return true
     }
 
@@ -357,7 +357,7 @@ extension AppState {
         }
         partyUndoState = undo
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
         return true
     }
 
@@ -589,6 +589,6 @@ extension AppState {
             syncRegionToRecommendation()
         }
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 }
