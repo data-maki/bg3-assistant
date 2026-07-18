@@ -60,7 +60,7 @@ final class OverlayPanelController {
             expanded: appState.overlayExpanded,
             reference: reference,
             tab: appState.plannerTab,
-            density: appState.effectiveOverlayDensity,
+            density: appState.overlayDensity,
             moreContextExpanded: appState.moreContextExpanded,
             onboarding: appState.onboardingStep != nil,
             hint: appState.onboardingStep == nil && appState.activeHint != nil

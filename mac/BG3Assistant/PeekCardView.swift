@@ -5,7 +5,7 @@ struct PeekCardView: View {
     @EnvironmentObject private var appState: AppState
 
     var body: some View {
-        if appState.effectiveOverlayDensity == .minimal {
+        if appState.overlayDensity == .minimal {
             minimalPeekCard
         } else {
             focusPeekCard
@@ -17,7 +17,7 @@ struct PeekCardView: View {
     }
 
     private var collapsedContentSize: CGSize {
-        let panel = OverlayMetrics.collapsedSize(for: referenceFrame, density: appState.effectiveOverlayDensity)
+        let panel = OverlayMetrics.collapsedSize(for: referenceFrame, density: appState.overlayDensity)
         return CGSize(width: panel.width - 16, height: panel.height - 16)
     }
 
@@ -77,21 +77,21 @@ struct PeekCardView: View {
                         Text(GearLogic.acquireText(context.gear))
                             .font(BG3Type.caption)
                             .foregroundStyle(BG3Theme.mutedParchment)
-                            .lineLimit(appState.effectiveOverlayDensity == .reference ? 3 : 2)
+                            .lineLimit(appState.overlayDensity == .reference ? 3 : 2)
                     case .step, .checkpoint:
                         Text(appState.currentActivityTitle)
                                 .font(BG3Type.peekTitle)
                                 .foregroundStyle(BG3Theme.parchment)
                                 .lineLimit(2)
                             if appState.combatCardPinned {
-                                ForEach(appState.combatPinLines.prefix(appState.effectiveOverlayDensity == .reference ? 3 : 2), id: \.self) { line in
+                                ForEach(appState.combatPinLines.prefix(appState.overlayDensity == .reference ? 3 : 2), id: \.self) { line in
                                     Text(line).font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment).lineLimit(1)
                                 }
                             } else {
                                 Text("\(appState.readinessHeadline) · AVOID \(appState.currentActivityAvoid)")
                                     .font(BG3Type.caption)
                                     .foregroundStyle(BG3Theme.mutedParchment)
-                                    .lineLimit(appState.effectiveOverlayDensity == .reference ? 3 : 2)
+                                    .lineLimit(appState.overlayDensity == .reference ? 3 : 2)
                             }
                     case .laterAct:
                         Text(appState.actHeaderTitle)

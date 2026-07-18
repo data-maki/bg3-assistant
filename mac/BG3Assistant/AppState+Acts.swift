@@ -218,7 +218,7 @@ extension AppState {
         case .external(let url):
             NSWorkspace.shared.open(url)
         case .local:
-            openActOneMap(act: act, buildId: buildId, item: item, level: level)
+            openLocalMap(buildId: buildId, item: item, level: level)
         }
     }
 }

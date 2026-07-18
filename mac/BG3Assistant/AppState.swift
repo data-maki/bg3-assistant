@@ -22,11 +22,8 @@ final class AppState: ObservableObject {
     private static let storedSettings = RunStore().loadSettings()
 
     @Published var gameDetected = false
-    @Published var gameName = "Not detected"
-    @Published var gameDetectionDetail = "Not checked yet"
     @Published var backendHealthy = false
     @Published var backendAIAvailable = false
-    @Published var backendStatus = "Not checked yet"
     @Published var showOverlay = true { didSet { syncOverlay() } }
     @Published var forceOverlay = false { didSet { syncOverlay() } }
     @Published var overlayExpanded = false {
@@ -45,7 +42,6 @@ final class AppState: ObservableObject {
             syncOverlay()
         }
     }
-    @Published var hotkeyPeekActive = false { didSet { syncOverlay() } }
     // The active one-time coach mark; at most one per session (see
     // maybeShowHint in AppState+Overlay).
     @Published var activeHint: HintID? { didSet { syncOverlay() } }
@@ -77,7 +73,6 @@ final class AppState: ObservableObject {
     @Published var acts: [ActGuideSummary] = []
     @Published var run: HonorRun
     @Published var readiness: ReadinessResponse?
-    @Published var isLoading = false
     @Published var statusMessage = "Loading Act 1 guide…"
     @Published var errorMessage: String?
     @Published var chatDraft = ""
@@ -112,7 +107,6 @@ final class AppState: ObservableObject {
     private let backendProcess = BackendProcessManager()
     let captureService = ScreenCaptureService()
     let runStore = RunStore()
-    private let globalPeekHotKey = GlobalPeekHotKey()
     let overlayController = OverlayPanelController()
     private var isStarting = false
     private var pollTask: Task<Void, Never>?
@@ -253,23 +247,6 @@ final class AppState: ObservableObject {
         }
     }
 
-    var effectiveOverlayDensity: OverlayDensity {
-        hotkeyPeekActive ? .focus : overlayDensity
-    }
-
-    var currentDialogueStep: WalkthroughStep? {
-        if let focusedWalkthroughStep,
-           focusedWalkthroughStep.kind == "dialogue" || focusedWalkthroughStep.kind == "decision" {
-            return focusedWalkthroughStep
-        }
-        return RunSafety.nextDialogueStep(
-            walkthrough: walkthrough,
-            walkthroughProgress: run.walkthroughProgress ?? [:],
-            selectedCheckpointId: run.selectedCheckpointId,
-            partyLevel: lowestPartyLevel
-        )
-    }
-
     var archivedCount: Int { archivedWalkthroughSteps.count }
     var remainingCount: Int { activeWalkthroughSteps.count }
     var routeHasConsequentialSkips: Bool {
@@ -384,9 +361,6 @@ final class AppState: ObservableObject {
         if let runningHealth = await backendClient.healthDetails() {
             await backendProcess.retireUnownedBackend(runningHealth)
         }
-        globalPeekHotKey.start { [weak self] pressed in
-            Task { @MainActor in self?.hotkeyPeekActive = pressed }
-        }
         // The user typically grants access in System Settings and then returns
         // to BG3 (not this window), so app-activation alone is not enough — but
         // it is the fastest signal when they do come back here.
@@ -438,7 +412,6 @@ final class AppState: ObservableObject {
         if let plannerRequestObserver { NotificationCenter.default.removeObserver(plannerRequestObserver) }
         plannerRequestObserver = nil
         overlayController.hide()
-        globalPeekHotKey.stop()
         backendProcess.stop()
     }
 
@@ -447,45 +420,16 @@ final class AppState: ObservableObject {
         NSWorkspace.shared.open(url)
     }
 
-    func openActOneMap(act: Int? = nil, buildId: String? = nil, item: String? = nil, level: Int? = nil) {
+    /// Opens the local map with view intent only. The run itself travels via
+    /// the shared SQLite RunStore, which the app persists on every mutation —
+    /// the URL never carries run state.
+    func openLocalMap(buildId: String? = nil, item: String? = nil, level: Int? = nil) {
         Task {
             if !backendHealthy { await startBackend() }
             var components = URLComponents(string: "http://127.0.0.1:8787/map")
-            let partyBuilds = activeParty.compactMap(\.buildId)
             var query: [URLQueryItem] = [
-                URLQueryItem(name: "act", value: String(act ?? selectedAct)),
                 URLQueryItem(name: "level", value: String(level ?? lowestPartyLevel)),
-                URLQueryItem(name: "builds", value: partyBuilds.joined(separator: ",")),
-                URLQueryItem(name: "done", value: completedIds.joined(separator: ",")),
             ]
-            if let partyData = try? JSONEncoder().encode(activeParty),
-               let partyJSON = String(data: partyData, encoding: .utf8) {
-                query.append(URLQueryItem(name: "party", value: partyJSON))
-            }
-            if let rosterData = try? JSONEncoder().encode(roster),
-               let rosterJSON = String(data: rosterData, encoding: .utf8) {
-                query.append(URLQueryItem(name: "roster", value: rosterJSON))
-            }
-            // The map's status vocabulary has no caught-up notion; project it
-            // to completed for display (the run store keeps the distinction).
-            let mapProgress = (run.walkthroughProgress ?? [:])
-                .mapValues { $0 == .caughtUp ? CheckpointDisposition.completed : $0 }
-            if let walkthroughData = try? JSONEncoder().encode(mapProgress),
-               let walkthroughJSON = String(data: walkthroughData, encoding: .utf8) {
-                query.append(URLQueryItem(name: "walkthrough", value: walkthroughJSON))
-            }
-            if let equipmentData = try? JSONEncoder().encode(run.equippedByMember ?? [:]),
-               let equipmentJSON = String(data: equipmentData, encoding: .utf8) {
-                query.append(URLQueryItem(name: "equipped", value: equipmentJSON))
-            }
-            if let outcomeData = try? JSONEncoder().encode(Array(run.storyOutcomes ?? []).sorted()),
-               let outcomeJSON = String(data: outcomeData, encoding: .utf8) {
-                query.append(URLQueryItem(name: "storyOutcomes", value: outcomeJSON))
-            }
-            query.append(URLQueryItem(name: "includeCamp", value: (run.includeCampPlans ?? false) ? "true" : "false"))
-            if let focus = run.focusedWalkthroughStepId {
-                query.append(URLQueryItem(name: "focus", value: focus))
-            }
             if let buildId { query.append(URLQueryItem(name: "build", value: buildId)) }
             if let item {
                 query.append(URLQueryItem(name: "item", value: item))
@@ -495,7 +439,7 @@ final class AppState: ObservableObject {
             } else {
                 query.append(URLQueryItem(name: "tab", value: "walkthrough"))
             }
-            components?.queryItems = query.isEmpty ? nil : query
+            components?.queryItems = query
             guard backendHealthy, let url = components?.url else {
                 errorMessage = "The local backend is unavailable."
                 return
@@ -505,21 +449,17 @@ final class AppState: ObservableObject {
     }
 
     func startBackend() async {
-        backendStatus = "Starting backend…"
         do {
-            try backendProcess.startIfNeeded(openRouterAPIKey: OpenRouterKeyStore.load())
+            try backendProcess.startIfNeeded()
             for _ in 0..<20 {
                 if await backendClient.health() {
                     backendHealthy = true
-                    backendStatus = "OK"
                     await loadRouteIfNeeded(force: true)
                     return
                 }
                 try await Task.sleep(for: .milliseconds(350))
             }
-            backendStatus = "Process started; /health not ready"
         } catch {
-            backendStatus = "Start failed"
             errorMessage = error.localizedDescription
         }
     }
@@ -727,7 +667,6 @@ final class AppState: ObservableObject {
         walkthrough = []
         timedEvents = []
         readiness = nil
-        isLoading = false
         statusMessage = "Loading Act \(selectedAct) guide…"
         syncOverlay()
         if load { Task { await loadRouteIfNeeded() } }
@@ -742,7 +681,6 @@ final class AppState: ObservableObject {
         guideLoadGeneration &+= 1
         let generation = guideLoadGeneration
         loadingGuideAct = requestedAct
-        isLoading = true
         if force || loadedGuideAct != requestedAct {
             loadedGuideAct = nil
             loadedRouteAvailable = false
@@ -755,7 +693,6 @@ final class AppState: ObservableObject {
         defer {
             if generation == guideLoadGeneration {
                 loadingGuideAct = nil
-                isLoading = false
             }
         }
         do {
@@ -845,13 +782,10 @@ final class AppState: ObservableObject {
         reloadSharedRunIfNeeded()
         let detection = detector.detect()
         gameDetected = detection.isRunning
-        gameName = detection.displayName
-        gameDetectionDetail = detection.detail
         if gameWindowFrame != detection.windowFrame { gameWindowFrame = detection.windowFrame }
         let health = await backendClient.healthDetails()
         backendHealthy = health?.ok == true
         backendAIAvailable = health?.aiAvailable == true
-        backendStatus = backendHealthy ? "OK" : (backendProcess.isRunning ? "Process running, /health offline" : "Offline")
         if !backendHealthy { await startBackend() }
         await loadRouteIfNeeded()
         // One-time hints fire at the moment of relevance: basics the first

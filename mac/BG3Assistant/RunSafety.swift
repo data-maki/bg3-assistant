@@ -68,34 +68,6 @@ enum RunSafety {
         }
     }
 
-    static func nextDialogueStep(
-        walkthrough: [WalkthroughStep],
-        walkthroughProgress: [String: CheckpointDisposition],
-        selectedCheckpointId: String?,
-        partyLevel: Int
-    ) -> WalkthroughStep? {
-        let current = nextWalkthroughStep(
-            walkthrough: walkthrough,
-            walkthroughProgress: walkthroughProgress,
-            selectedCheckpointId: selectedCheckpointId,
-            walkthroughOutcomes: [:],
-            partyLevel: partyLevel
-        )
-        if let current, current.kind == "dialogue" || current.kind == "decision" { return current }
-        let currentOrder = current?.order ?? 0
-        let disposition: (WalkthroughStep) -> CheckpointDisposition = { step in
-            walkthroughDisposition(step, walkthroughProgress: walkthroughProgress)
-        }
-        return walkthrough
-            .filter {
-                ($0.kind == "dialogue" || $0.kind == "decision")
-                    && disposition($0) == .pending
-                    && $0.order >= currentOrder
-            }
-            .sorted { $0.order < $1.order }
-            .first
-    }
-
     static func nextCheckpoint(
         route: [RouteCheckpoint],
         dispositions: [String: CheckpointDisposition],
