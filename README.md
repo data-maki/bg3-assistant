@@ -47,7 +47,7 @@ Invited TestFlight testers can skip the build: install [TestFlight from the Mac 
 
 1. Open **BG3 Honor Mode Assistant** from Applications. The HM shield appears in the macOS menu bar.
 2. Open **Settings** from the shield menu and keep or decline **Launch at Login**.
-3. Optional: add your own [OpenRouter](https://openrouter.ai/) key under **Settings → AI Features** to enable AI chat and build imports. The key is stored in macOS Keychain, and everything except AI features works without one.
+3. AI chat, screenshot questions, and build imports work out of the box — the released app ships with its own AI access. The guide itself is fully local and works without any network account.
 4. Optional: allow microphone access for speech input and Screen Recording for the one-shot chat screenshot. Both can be declined and chat keeps working.
 
 ## Launch and play
@@ -62,7 +62,7 @@ Name and save multiple attempts, including solo and co-op campaigns. Each run ke
 
 ## Import a reusable build
 
-Paste one public build URL from a character's **Party → Build** section. If an OpenRouter key is not configured, the focused import panel asks for it and saves it to macOS Keychain without leaving the character. Gemini 3 Flash converts the guide into one validated reusable build, derives a legal 27-point creation recipe, assigns it after confirmation, and adds it to every character's build picker. Importing never changes party membership.
+Paste one public build URL from a character's **Party → Build** section. Gemini 3 Flash converts the guide into one validated reusable build, derives a legal 27-point creation recipe, assigns it after confirmation, and adds it to every character's build picker. Importing never changes party membership.
 
 Reviewed builds show an exact BG3 table for character creation and every Withers respec: point-buy values, the distinct +2/+1 bonuses, final values to enter, first class, and class order. A source ledger explains later ASIs, feats, unique permanent rewards, equipment setters, and consumables. Equipment follows confirmed Loadout ownership; one-time rewards and elixirs enforce their party and timing rules. **Reset character plan** is separate from respec guidance, states everything it removes, requires confirmation, and can be undone. The Withers roster includes all 12 predefined hirelings with legal class spreads.
 
@@ -70,14 +70,14 @@ Reviewed builds show an exact BG3 table for character creation and every Withers
 
 Chat has two modes:
 
-- **Guide-only:** works without an API key and returns deterministic answers from the reviewed route and current player-confirmed state.
-- **OpenRouter AI:** add your own [OpenRouter](https://openrouter.ai/) key in the overlay's **Settings → AI Features** section for chat and build imports.
+- **Guide-only:** returns deterministic answers from the reviewed route and current player-confirmed state, with no network dependency.
+- **OpenRouter AI:** chat and build imports use the app's bundled [OpenRouter](https://openrouter.ai/) access; there is nothing to configure.
 
 When OpenRouter AI is configured, opening chat prepares one current BG3-window screenshot for the next message. The attachment is visible in chat, opens as a preview, and can be removed before sending. It is sent to OpenRouter only with that message. The overlay is excluded because the app captures the BG3 window directly.
 
 There is no periodic capture, background vision loop, video recording, or silent upload. Chat and speech input continue to work if you remove the screenshot or decline Screen Recording permission.
 
-The OpenRouter key is stored in macOS Keychain. Run state stays in your Application Support directory, and the bundled service listens only on `127.0.0.1`.
+Run state stays in your Application Support directory, and the bundled service listens only on `127.0.0.1`. The app's OpenRouter credential lives inside the bundled backend and is never written to user settings or the run database.
 
 For a build import, the local service downloads the public URL and sends the extracted page text to OpenRouter. Private-network URLs, credential-bearing URLs, oversized pages, and unsupported file types are rejected. No API key is stored in the custom-build database or sent to the source website.
 
