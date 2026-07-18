@@ -19,11 +19,17 @@ struct SettingsView: View {
                 Picker("Collapsed overlay", selection: $appState.overlayDensity) {
                     ForEach(OverlayDensity.allCases) { density in Text(density.rawValue).tag(density) }
                 }
+                Button {
+                    appState.replayOnboarding()
+                } label: {
+                    Label("Replay Welcome Tour", systemImage: "sparkles")
+                }
+                .buttonStyle(.bordered)
             }
 
-            Section("AI Chat") {
+            Section("AI Features") {
                 SecureField("OpenRouter API key", text: $appState.openRouterKeyDraft)
-                Text("Optional. Enables AI answers and a removable one-shot BG3 screenshot when chat opens.")
+                Text("Optional. Enables AI chat, screenshot questions, and Gemini-powered build imports. Saved only in macOS Keychain.")
                     .font(.caption).foregroundStyle(.secondary)
                 HStack {
                     Button { Task { await appState.saveOpenRouterKey() } } label: {
@@ -37,7 +43,7 @@ struct SettingsView: View {
                         }
                     }
                     Spacer()
-                    Text(appState.hasOpenRouterKey ? "Ready" : "Guide-only without a key")
+                    Text(appState.hasOpenRouterKey ? "AI features ready" : "Guide-only without a key")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -83,8 +89,11 @@ struct SettingsView: View {
             "Create a new Honor run? \(appState.currentRunName) stays saved and can be resumed anytime.",
             isPresented: $appState.newRunConfirmation
         ) {
-            Button("Create Run", action: appState.startNewRun)
+            Button("Use Current Characters & Builds", action: appState.startNewRunWithCurrentPartyPreset)
+            Button("Start With Default Party", action: appState.startNewRun)
             Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Both options reset levels, route progress, story outcomes, equipment, and act state. Presets keep the current roster and valid build selections.")
         }
     }
 }

@@ -61,7 +61,8 @@ final class OverlayPanelController {
             reference: reference,
             tab: appState.plannerTab,
             density: appState.effectiveOverlayDensity,
-            moreContextExpanded: appState.moreContextExpanded
+            moreContextExpanded: appState.moreContextExpanded,
+            onboarding: appState.onboardingStep != nil
         )
         let persistedAnchor = savedAnchor()
 
