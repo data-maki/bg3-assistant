@@ -84,10 +84,6 @@ enum AbilityProgression {
         build?.abilitySetups?.filter { $0.level <= level }.max { $0.level < $1.level }
     }
 
-    static func nextSetup(in build: BuildSummary?, after level: Int) -> AbilitySetupPlan? {
-        build?.abilitySetups?.filter { $0.level > level }.min { $0.level < $1.level }
-    }
-
     static func pointBuyCost(_ scores: AbilityScores) -> Int {
         let costs = [8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9]
         let values = Ability.allCases.map { $0.value(in: scores) }
