@@ -26,4 +26,4 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - name: Test
         working-directory: backend
-        run: uv run pytest -q
+        run: uv run --extra dev pytest -q
