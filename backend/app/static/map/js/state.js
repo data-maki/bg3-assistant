@@ -298,19 +298,6 @@ export function toggleAbilitySource(memberId, sourceId, applied) {
   return true;
 }
 
-export async function importBuild(url) {
-  const response = await fetch("/api/builds/import", {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }),
-  });
-  if (response.status === 428) {
-    throw new Error("AI build import is unavailable in this build (no AI access configured).");
-  }
-  if (!response.ok) throw new Error((await response.json()).detail || "Import failed");
-  const payload = await response.json();
-  state.data.builds = [...state.data.builds.filter((entry) => entry.id !== payload.build.id), payload.build];
-  return payload.build;
-}
-
 export function toggleStoryOutcome(outcome) {
   const outcomes = new Set(state.storyOutcomes);
   if (outcomes.has(outcome)) outcomes.delete(outcome); else outcomes.add(outcome);

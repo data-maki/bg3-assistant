@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -52,10 +53,45 @@ struct SettingsView: View {
                 .buttonStyle(.bordered)
             }
 
+            Section("Support") {
+                Button {
+                    var message = URLComponents()
+                    message.scheme = "mailto"
+                    message.path = "jcllobet@gmail.com"
+                    message.queryItems = [
+                        URLQueryItem(name: "subject", value: "BG3 Honor Mode Assistant bug report"),
+                    ]
+                    if let url = message.url, !NSWorkspace.shared.open(url) {
+                        appState.errorMessage = "Could not open an email app. Report bugs to jcllobet@gmail.com."
+                    }
+                } label: {
+                    Label("Report a Bug", systemImage: "ladybug")
+                }
+                Text("Opens your email app with the developer address filled in.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             DisclosureGroup("Diagnostics") {
                 LabeledContent("Baldur's Gate 3", value: appState.gameDetected ? "Running" : "Not running")
-                LabeledContent("Local service", value: appState.backendHealthy ? "Ready" : "Unavailable")
+                LabeledContent("Backend service", value: appState.backendHealthy ? "Ready" : "Unavailable")
+                LabeledContent("AI backend endpoint", value: appState.upstreamBackendEndpoint.baseURL.absoluteString)
                 LabeledContent("AI features", value: appState.backendAIAvailable ? "Available" : "Unavailable")
+                if !appState.upstreamBackendEndpoint.managesLocalBackend {
+                    LabeledContent("TestFlight authentication", value: appState.backendAuthenticated ? "Verified" : "Unavailable")
+                    if !appState.backendAuthenticated {
+                        Button("Retry App Store Verification") {
+                            appState.retryBackendAuthentication()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+                if let quota = appState.buildImportQuota {
+                    LabeledContent("Build-import attempts", value: "\(quota.remaining) of \(quota.limit) remaining")
+                }
+                if let message = appState.backendAuthenticationMessage {
+                    Text(message).font(.caption).foregroundStyle(.orange).textSelection(.enabled)
+                }
                 if let error = appState.errorMessage {
                     Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled)
                 }

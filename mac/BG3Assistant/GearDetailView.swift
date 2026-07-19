@@ -124,13 +124,15 @@ struct GearDetailView: View {
 /// Item icon with a visible fallback — a failed or missing icon renders the
 /// shield glyph instead of an empty box.
 struct GearItemIcon: View {
+    @EnvironmentObject private var appState: AppState
     let gear: BuildGear
     var size: CGFloat = 26
     var borderColor: Color = BG3Theme.bronze
 
     var body: some View {
         Group {
-            if let icon = gear.icon, !icon.isEmpty, let url = URL(string: "http://127.0.0.1:8787\(icon)") {
+            if let icon = gear.icon, !icon.isEmpty {
+                let url = appState.backendEndpoint.url(path: icon)
                 AsyncImage(url: url) { phase in
                     if case .success(let image) = phase {
                         image.resizable().interpolation(.high).scaledToFill()

@@ -256,7 +256,7 @@ struct BuildGear: Codable, Hashable, Identifiable {
     var effect: String? = nil
     var acquire: String? = nil
     var wiki: String? = nil
-    var icon: String? = nil  // path under the local backend, e.g. /map-assets/icons/x.webp
+    var icon: String? = nil  // path under the configured backend, e.g. /map-assets/icons/x.webp
     var gameX: Int? = nil
     var gameY: Int? = nil
 
@@ -362,8 +362,25 @@ struct ImportedBuild: Codable, Identifiable, Hashable {
     let build: BuildSummary
 }
 
-struct LoadoutImportRequest: Codable {
+struct LoadoutImportRequest: Encodable {
     let url: String
+    let persist = true
+}
+
+struct AppTransactionAuthRequest: Encodable {
+    let signedAppTransaction: String
+}
+
+struct BuildImportQuota: Codable, Equatable {
+    let limit: Int
+    let used: Int
+    let remaining: Int
+}
+
+struct CompanionAuthResponse: Decodable {
+    let authenticated: Bool
+    let expiresAt: Int
+    let buildImports: BuildImportQuota
 }
 
 struct StoryCompanion: Identifiable, Hashable {
@@ -814,9 +831,12 @@ struct BackendHealth: Codable, Equatable {
     let parentPid: Int32?
     let packaged: Bool?
     let walkthroughCount: Int?
-    /// Server-side AI features (chat, build import) are usable. The key is
-    /// backend-held; older backends omit the field.
+    /// Server-side AI features (chat, build import) are usable. The provider
+    /// key remains on that server; older backends omit the field.
     let aiAvailable: Bool?
+    let authenticated: Bool?
+    let buildImports: BuildImportQuota?
+    let backendMode: String?
 }
 
 struct ReadinessResponse: Codable {

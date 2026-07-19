@@ -14,12 +14,15 @@ Bundled guide data
 Native SwiftUI overlay <-> SQLite run + loadout state
        |                       |
        +---- localhost API ----+
-                    |
-    Browser map + optional OpenRouter chat/import
+                    |              Apple-signed AppTransaction
+            Browser map                         |
+                    +---- scoped token/TLS -----+---- Hosted backend
+                                                       |
+                                                OpenRouter / Exa
 ```
 
 - `mac/BG3Assistant`: menu-bar lifecycle, in-game overlay, party/loadout UI, chat, and native persistence.
-- `backend/app`: guide parsing, readiness/chat grounding, reusable public-URL build import, localhost state bridge, and browser-map server.
+- `backend/app`: guide parsing, readiness/chat grounding, reusable public-URL build import, localhost state bridge, browser-map server, and the hosted AI request boundary.
 - `data`: reviewed route, walkthrough, build, equipment, and marker inputs.
 - `backend/app/static/map`: browser map and walkthrough implementation.
 
@@ -39,7 +42,13 @@ Builds and items live in relational tables inside the shared SQLite database (`b
 
 Every act has a `data/acts/act{1,2,3}.json` contract. `GET /api/acts/{act}/guide` returns the requested act and route-availability flag, act-scoped checkpoints, walkthrough, and timed events, the shared build catalog, and metadata for all acts; an unavailable route returns empty act-scoped guide data rather than another act's guidance. Acts 1 and 3 have reviewed routes. Act 1 also has the local browser map; Act 3 uses a public Baldur's Gate map handoff because its route records are area-level rather than local-map coordinates. Act 2 currently has sourced equipment coordinates and a public Shadow-Cursed Lands map handoff. Its route is intentionally marked unavailable, which keeps the Act 2 to Act 3 gate locked.
 
-The native app starts and owns the packaged backend; the browser map is a client of that local service and has no independent persistence authority. The browser map and native overlay share run state and validated imported builds through the same SQLite database. Browser member updates merge by ID so partial or older clients cannot erase fields they do not understand; native polls the shared snapshot and rejects a stale write if the map changed it first. When the installed guide version changes, the native app archives the active run and creates a clean run against the new guide while retaining valid character and build presets.
+The native app starts and owns a keyless packaged backend; the browser map is a client of that local service and has no independent persistence authority. The browser map and native overlay share run state and validated imported builds through the same SQLite database. Browser member updates merge by ID so partial or older clients cannot erase fields they do not understand; native polls the shared snapshot and rejects a stale write if the map changed it first. When the installed guide version changes, the native app archives the active run and creates a clean run against the new guide while retaining valid character and build presets.
+
+`BG3_BACKEND_URL` is a build-time, non-secret upstream setting. The packaging script reads it from the process environment or repository-root `.env` and writes it to `BG3BackendURL` in the app plist. At runtime the native app passes a remote HTTPS value to the local companion as `BG3_UPSTREAM_BACKEND_URL`. Chat and URL-import processing are proxied to that hosted backend; provider credentials remain in the hosted server environment. The hosted import response is persisted only by the local companion, so TestFlight users do not share run or imported-build state. The canonical localhost value keeps direct provider calls available for development only.
+
+Remote builds obtain `AppTransaction.shared` from StoreKit and send its verified JWS through a control-token-protected localhost endpoint. The hosted service verifies the JWS with Apple's App Store Server Library and pinned Apple roots, hashes `appTransactionId` into a private subject, and returns a one-hour bearer token. The companion holds the bearer only in memory and injects it into `/v1/chat` and `/v1/builds/import`; browser JavaScript receives neither the JWS nor the bearer. Hosted mode exposes only `/health` and `/v1/*`, while local mode hides every `/v1/*` route.
+
+Build-import quota uses a dedicated hosted SQLite ledger, separate from the local run/catalog database. A UUID idempotency key and atomic `BEGIN IMMEDIATE` admission ensure the same operation is charged once and no more than 30 lifetime attempts are admitted per Apple subject, including concurrent requests for the final slot. Processing reservations use leased execution IDs so an interrupted request can resume without another charge and a late worker cannot overwrite the retry. Build imports start only in the native overlay; the browser map receives locally persisted results without access to the companion control token. Sandbox and production identities and databases remain separate.
 
 A build import never changes party membership; assigning the imported build remains an explicit player action for the initiating member. Import fetching rejects non-public destinations and sends only extracted public-page text to the configured OpenRouter structured-output model (Gemini 3 Flash by default).
 

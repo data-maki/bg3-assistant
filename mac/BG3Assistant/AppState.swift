@@ -98,17 +98,28 @@ final class AppState: ObservableObject {
     @Published var isImportingLoadout = false
     @Published var loadoutImportStatus: String?
     @Published var loadoutImportJSON: String?
+    @Published var backendAuthenticated = false
+    @Published var buildImportQuota: BuildImportQuota?
+    @Published private(set) var backendAuthenticationMessage: String?
     @Published private(set) var loadedGuideAct: Int?
     @Published private(set) var loadedRouteAvailable = false
 
     private let detector = BG3Detector()
-    let backendClient = BackendClient()
-    private let backendProcess = BackendProcessManager()
+    let backendEndpoint = BackendEndpoint.managedLocal
+    let upstreamBackendEndpoint: BackendEndpoint
+    let backendClient: BackendClient
+    private let backendProcess: BackendProcessManager
+    private let appTransactionAuthenticator = AppTransactionAuthenticator()
+    private let companionControlToken: String
     let captureService = ScreenCaptureService()
     let runStore = RunStore()
     let overlayController = OverlayPanelController()
     private var isStarting = false
     private var pollTask: Task<Void, Never>?
+    private var authenticationTask: Task<Void, Never>?
+    private var lastAuthenticationAttempt = Date.distantPast
+    var pendingBuildImportURL: String?
+    var pendingBuildImportKey: UUID?
     private var loadingGuideAct: Int?
     private var guideLoadGeneration = 0
     var chatGeneration = 0
@@ -126,7 +137,18 @@ final class AppState: ObservableObject {
     private var plannerRequestObserver: Any?
     var sharedRunToken: RunStore.ChangeToken?
 
-    init() {
+    init(upstreamBackendEndpoint: BackendEndpoint = .configured) {
+        let companionControlToken = "\(UUID().uuidString)\(UUID().uuidString)"
+        self.upstreamBackendEndpoint = upstreamBackendEndpoint
+        self.companionControlToken = companionControlToken
+        backendClient = BackendClient(
+            endpoint: .managedLocal,
+            companionControlToken: companionControlToken
+        )
+        backendProcess = BackendProcessManager(
+            upstreamBackendEndpoint: upstreamBackendEndpoint,
+            companionControlToken: companionControlToken
+        )
         var loaded = runStore.load()
         loaded.normalizeRoster()
         if loaded.name?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
@@ -298,6 +320,9 @@ final class AppState: ObservableObject {
     var roster: [PartyMember] { run.roster ?? run.party }
     var lowestPartyLevel: Int { activeParty.map(\.level).min() ?? 1 }
     var selectedAct: Int { run.selectedAct ?? 1 }
+    var buildImportAvailable: Bool {
+        backendAIAvailable && (buildImportQuota?.remaining ?? 1) > 0
+    }
     var activeGuideLoaded: Bool { loadedGuideAct == selectedAct }
     var activeRouteAvailable: Bool { activeGuideLoaded && loadedRouteAvailable }
     var chatContextSnapshot: ChatContextSnapshot {
@@ -405,6 +430,8 @@ final class AppState: ObservableObject {
     func stop() {
         pollTask?.cancel()
         pollTask = nil
+        authenticationTask?.cancel()
+        authenticationTask = nil
         if let activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(activationObserver) }
         activationObserver = nil
         if let plannerRequestObserver { NotificationCenter.default.removeObserver(plannerRequestObserver) }
@@ -418,13 +445,12 @@ final class AppState: ObservableObject {
         NSWorkspace.shared.open(url)
     }
 
-    /// Opens the local map with view intent only. The run itself travels via
-    /// the shared SQLite RunStore, which the app persists on every mutation —
-    /// the URL never carries run state.
+    /// Opens the configured backend map with view intent only. The URL never
+    /// carries run state.
     func openLocalMap(buildId: String? = nil, item: String? = nil, level: Int? = nil) {
         Task {
             if !backendHealthy { await startBackend() }
-            var components = URLComponents(string: "http://127.0.0.1:8787/map")
+            var components = URLComponents(url: backendEndpoint.url(path: "map"), resolvingAgainstBaseURL: false)
             var query: [URLQueryItem] = [
                 URLQueryItem(name: "level", value: String(level ?? lowestPartyLevel)),
             ]
@@ -439,7 +465,7 @@ final class AppState: ObservableObject {
             }
             components?.queryItems = query
             guard backendHealthy, let url = components?.url else {
-                errorMessage = "The local backend is unavailable."
+                errorMessage = "The configured backend is unavailable."
                 return
             }
             NSWorkspace.shared.open(url)
@@ -767,7 +793,12 @@ final class AppState: ObservableObject {
         let health = await backendClient.healthDetails()
         backendHealthy = health?.ok == true
         backendAIAvailable = health?.aiAvailable == true
+        backendAuthenticated = health?.authenticated == true
+        buildImportQuota = health?.buildImports
         if !backendHealthy { await startBackend() }
+        if backendHealthy, !upstreamBackendEndpoint.managesLocalBackend, !backendAuthenticated {
+            scheduleBackendAuthentication()
+        }
         await loadRouteIfNeeded()
         // One-time hints fire at the moment of relevance: basics the first
         // time the game is seen, fight tools the first pre-fight moment.
@@ -776,6 +807,39 @@ final class AppState: ObservableObject {
             if assistantPhase == .preflight { maybeShowHint(.fightTools) }
         }
         syncOverlay()
+    }
+
+    func retryBackendAuthentication() {
+        backendAuthenticationMessage = nil
+        scheduleBackendAuthentication(force: true, refresh: true)
+    }
+
+    private func scheduleBackendAuthentication(force: Bool = false, refresh: Bool = false) {
+        guard authenticationTask == nil,
+              force || Date().timeIntervalSince(lastAuthenticationAttempt) >= 60 else { return }
+        lastAuthenticationAttempt = .now
+        authenticationTask = Task { [weak self] in
+            await self?.authenticateHostedBackend(refresh: refresh)
+        }
+    }
+
+    private func authenticateHostedBackend(refresh: Bool) async {
+        defer { authenticationTask = nil }
+        do {
+            let signedTransaction = try await appTransactionAuthenticator.signedAppTransaction(refresh: refresh)
+            try Task.checkCancellation()
+            let response = try await backendClient.authenticateAppTransaction(signedTransaction)
+            backendAuthenticated = response.authenticated
+            backendAIAvailable = response.authenticated
+            buildImportQuota = response.buildImports
+            backendAuthenticationMessage = nil
+        } catch is CancellationError {
+            return
+        } catch {
+            backendAuthenticated = false
+            backendAIAvailable = false
+            backendAuthenticationMessage = error.localizedDescription
+        }
     }
 
 }

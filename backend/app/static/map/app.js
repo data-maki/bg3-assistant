@@ -9,7 +9,7 @@ import {
   updateRosterMember, toggleStoryOutcome,
   activateMember, recordRecruited, returnToCamp, addHireling, swapActiveMember,
   dismissMember, renameMember, assignBuild, applyAbilitySetup, resetMemberPlan,
-  setIncludeCampPlans, toggleAbilitySource, sourceOwner, importBuild, canActivateRosterStatus,
+  setIncludeCampPlans, toggleAbilitySource, sourceOwner, canActivateRosterStatus,
 } from "./js/state.js";
 import { initMap, renderMarkers, pollPosition, setFollow } from "./js/map-layer.js";
 import { renderWalkthrough, setWalkthroughStatus, focusWalkthroughStep } from "./js/walkthrough.js";
@@ -246,19 +246,6 @@ const PARTY_CLICK_ACTIONS = {
     state.selectedPartyMemberId = null;
     render();
     focusPartyHeading();
-  },
-  "import-build": (el) => {
-    const input = els.partyPanel.querySelector("[data-build-import-url]");
-    const url = input?.value.trim();
-    if (!url) { input?.focus(); return; }
-    el.disabled = true;
-    importBuild(url)
-      .then((build) => {
-        const member = state.roster.find((entry) => entry.id === el.dataset.id);
-        if (member) assignBrowserBuild(member, build.id);
-        render();
-      })
-      .catch((error) => { window.alert(error.message); el.disabled = false; });
   },
   "toggle-story-outcome": (el) => {
     toggleStoryOutcome(el.dataset.id);

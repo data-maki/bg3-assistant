@@ -37,7 +37,7 @@ cd bg3-assistant/mac
 mv "BG3 Honor Mode Assistant.app" /Applications/
 ```
 
-The script packages the Python service into a standalone backend, builds the Swift overlay in release mode, and assembles a codesigned **BG3 Honor Mode Assistant.app** (using your Developer ID or Apple Development identity when available, ad-hoc otherwise). The first build takes a few minutes; the script prints the finished bundle path when done.
+The script packages a keyless Python companion service, builds the Swift overlay in release mode, and assembles a codesigned **BG3 Honor Mode Assistant.app** (using your Developer ID or Apple Development identity when available, ad-hoc otherwise). The first build takes a few minutes; the script prints the finished bundle path when done.
 
 Once installed, the app is self-contained: the bundled local service starts and stops with it, and playing needs no terminal, Python installation, mod manager, or Script Extender.
 
@@ -47,8 +47,9 @@ Invited TestFlight testers can skip the build: install [TestFlight from the Mac 
 
 1. Open **BG3 Honor Mode Assistant** from Applications. The HM shield appears in the macOS menu bar.
 2. Open **Settings** from the shield menu and keep or decline **Launch at Login**.
-3. AI chat, screenshot questions, and build imports work out of the box — the released app ships with its own AI access. The guide itself is fully local and works without any network account.
+3. AI chat, screenshot questions, and build imports work when the release is configured for the hosted AI backend. TestFlight verifies the installation with Apple automatically; testers never create an account or enter an OpenRouter key. The guide itself is fully local.
 4. Optional: allow microphone access for speech input and Screen Recording for the one-shot chat screenshot. Both can be declined and chat keeps working.
+5. Use **Settings → Report a Bug** to open an email to `jcllobet@gmail.com`.
 
 ## Launch and play
 
@@ -62,7 +63,7 @@ Name and save multiple attempts, including solo and co-op campaigns. Each run ke
 
 ## Import a reusable build
 
-Paste one public build URL from a character's **Party → Build** section. Gemini 3 Flash converts the guide into one validated reusable build, derives a legal 27-point creation recipe, assigns it after confirmation, and adds it to every character's build picker. Importing never changes party membership.
+Paste one public build URL from a character's **Party → Build** section. Gemini 3 Flash converts the guide into one validated reusable build, derives a legal 27-point creation recipe, assigns it after confirmation, and adds it to every character's build picker. Importing never changes party membership. Each Apple-verified user can make up to 30 lifetime build-import attempts; the remaining quota is shown before import.
 
 Reviewed builds show an exact BG3 table for character creation and every Withers respec: point-buy values, the distinct +2/+1 bonuses, final values to enter, first class, and class order. A source ledger explains later ASIs, feats, unique permanent rewards, equipment setters, and consumables. Equipment follows confirmed Loadout ownership; one-time rewards and elixirs enforce their party and timing rules. **Reset character plan** is separate from respec guidance, states everything it removes, requires confirmation, and can be undone. The Withers roster includes all 12 predefined hirelings with legal class spreads.
 
@@ -71,15 +72,15 @@ Reviewed builds show an exact BG3 table for character creation and every Withers
 Chat has two modes:
 
 - **Guide-only:** returns deterministic answers from the reviewed route and current player-confirmed state, with no network dependency.
-- **OpenRouter AI:** chat and build imports use the app's bundled [OpenRouter](https://openrouter.ai/) access; there is nothing to configure.
+- **OpenRouter AI:** chat and build imports use the release's hosted backend; testers do not configure or receive the provider key.
 
-When OpenRouter AI is configured, opening chat prepares one current BG3-window screenshot for the next message. The attachment is visible in chat, opens as a preview, and can be removed before sending. It is sent to OpenRouter only with that message. The overlay is excluded because the app captures the BG3 window directly.
+When OpenRouter AI is configured, opening chat prepares one current BG3-window screenshot for the next message. The attachment is visible in chat, opens as a preview, and can be removed before sending. It is sent through the configured hosted backend to OpenRouter only with that message. The overlay is excluded because the app captures the BG3 window directly.
 
 There is no periodic capture, background vision loop, video recording, or silent upload. Chat and speech input continue to work if you remove the screenshot or decline Screen Recording permission.
 
-Run state stays in your Application Support directory, and the bundled service listens only on `127.0.0.1`. The app's OpenRouter credential lives inside the bundled backend and is never written to user settings or the run database.
+Run state stays in your Application Support directory, and the keyless bundled service listens only on `127.0.0.1`. The app bundle contains the hosted backend URL, not an OpenRouter or Exa credential. Provider credentials stay in the hosted backend's environment. The Apple-signed AppTransaction is exchanged for a short-lived hosted token; that token remains in the local companion's memory and is not exposed to the browser map or persisted run data.
 
-For a build import, the local service downloads the public URL and sends the extracted page text to OpenRouter. Private-network URLs, credential-bearing URLs, oversized pages, and unsupported file types are rejected. No API key is stored in the custom-build database or sent to the source website.
+For a build import, the local service asks the hosted backend to download the public URL and process its extracted text with OpenRouter, then saves the validated result locally. Private-network URLs, credential-bearing URLs, oversized pages, and unsupported file types are rejected. No API key is stored in the custom-build database or sent to the source website.
 
 ## Act 1 map
 

@@ -300,6 +300,30 @@ class ImportedBuild(CamelModel):
 
 class LoadoutImportRequest(CamelModel):
     url: str
+    persist: bool = False
+
+
+class AppTransactionAuthRequest(CamelModel):
+    signed_app_transaction: str = Field(min_length=100, max_length=65_536)
+
+
+class BuildImportQuota(CamelModel):
+    limit: int
+    used: int
+    remaining: int
+
+
+class HostedAuthResponse(CamelModel):
+    access_token: str
+    token_type: Literal["Bearer"] = "Bearer"
+    expires_in: int
+    build_imports: BuildImportQuota
+
+
+class CompanionAuthResponse(CamelModel):
+    authenticated: bool
+    expires_at: int
+    build_imports: BuildImportQuota
 
 
 class AbilityModifier(CamelModel):
@@ -414,6 +438,9 @@ class HealthResponse(BaseModel):
     # lives with the backend; clients gate AI UI on this instead of holding
     # their own credentials.
     ai_available: bool = False
+    authenticated: bool = False
+    build_imports: BuildImportQuota | None = None
+    backend_mode: str = "local"
 
 
 class PlayerPosition(BaseModel):

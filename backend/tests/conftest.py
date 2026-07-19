@@ -8,11 +8,28 @@ from pathlib import Path
 # LLM and make assertions network-dependent. Set before any app import so the
 # cached Settings never sees the real key.
 os.environ["OPENROUTER_API_KEY"] = ""
+os.environ["EXA_API_KEY"] = ""
+os.environ["BG3_UPSTREAM_BACKEND_URL"] = ""
+os.environ["BG3_BACKEND_MODE"] = "local"
 
 import pytest
 
-from app import catalog, stores
+from app import auth, catalog, stores
+from app.config import get_settings
 from app.models import ImportedBuildDraft
+
+
+@pytest.fixture(autouse=True)
+def reset_auth_state():
+    get_settings.cache_clear()
+    auth.get_usage_store.cache_clear()
+    auth.get_hosted_auth_service.cache_clear()
+    auth.companion_session.clear()
+    yield
+    auth.companion_session.clear()
+    auth.get_hosted_auth_service.cache_clear()
+    auth.get_usage_store.cache_clear()
+    get_settings.cache_clear()
 
 
 @pytest.fixture

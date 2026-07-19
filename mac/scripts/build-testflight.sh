@@ -8,6 +8,10 @@ fail() {
   exit 1
 }
 
+for secret_name in RELEASE_OPENROUTER_API_KEY OPENROUTER_API_KEY EXA_API_KEY; do
+  [[ -z "${!secret_name:-}" ]] || fail "unset $secret_name; provider credentials must exist only on the hosted backend."
+done
+
 DEVELOPER_DIR="$(xcode-select -p 2>/dev/null || true)"
 [[ "$DEVELOPER_DIR" == *"Xcode.app/Contents/Developer" ]] || fail "install full Xcode 16 or later and select it with xcode-select."
 command -v xcodebuild >/dev/null || fail "xcodebuild is unavailable."
@@ -55,22 +59,30 @@ set_entitlement com.apple.security.network.client
 set_entitlement com.apple.security.network.server
 
 BUNDLE_ID="$BUNDLE_ID" ./scripts/build-app.sh
+BACKEND_URL="$(/usr/libexec/PlistBuddy -c 'Print :BG3BackendURL' "$APP/Contents/Info.plist")"
+[[ "$BACKEND_URL" == https://* ]] || fail "BG3_BACKEND_URL must be a remote HTTPS origin for TestFlight."
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $MARKETING_VERSION" "$APP/Contents/Info.plist"
 cp "$PROFILE" "$APP/Contents/embedded.provisionprofile"
 
 BACKEND="$APP/Contents/Resources/backend"
-while IFS= read -r -d '' file; do
-  if /usr/bin/file -b "$file" | grep -q 'Mach-O'; then
-    /usr/bin/codesign --force --timestamp --options runtime --sign "$APP_IDENTITY" "$file"
-  fi
-done < <(find "$BACKEND" -type f -print0)
+if /usr/bin/find "$APP" -name '.env' -print -quit | /usr/bin/grep -q .; then
+  fail "the app bundle contains a .env file."
+fi
 
-/usr/bin/codesign \
-  --force --timestamp --options runtime \
-  --entitlements "$HELPER_ENTITLEMENTS" \
-  --sign "$APP_IDENTITY" \
-  "$BACKEND/bg3-honor-backend"
+if [[ -d "$BACKEND" ]]; then
+  while IFS= read -r -d '' file; do
+    if /usr/bin/file -b "$file" | grep -q 'Mach-O'; then
+      /usr/bin/codesign --force --timestamp --options runtime --sign "$APP_IDENTITY" "$file"
+    fi
+  done < <(find "$BACKEND" -type f -print0)
+
+  /usr/bin/codesign \
+    --force --timestamp --options runtime \
+    --entitlements "$HELPER_ENTITLEMENTS" \
+    --sign "$APP_IDENTITY" \
+    "$BACKEND/bg3-honor-backend"
+fi
 
 /usr/bin/codesign \
   --force --timestamp --options runtime \
@@ -82,5 +94,10 @@ done < <(find "$BACKEND" -type f -print0)
 /bin/rm -f "$PKG"
 /usr/bin/productbuild --component "$APP" /Applications --sign "$INSTALLER_IDENTITY" "$PKG"
 /usr/sbin/pkgutil --check-signature "$PKG"
+PACKAGE_INSPECTION="$TEMP_DIR/package"
+/usr/sbin/pkgutil --expand-full "$PKG" "$PACKAGE_INSPECTION"
+if /usr/bin/find "$PACKAGE_INSPECTION" -name '.env' -print -quit | /usr/bin/grep -q .; then
+  fail "the final TestFlight package contains a .env file."
+fi
 
 echo "$PWD/$PKG"

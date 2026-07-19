@@ -33,17 +33,36 @@ extension AppState {
             loadoutImportStatus = "Paste a public build URL first."
             return nil
         }
-        guard backendAIAvailable else {
-            loadoutImportStatus = "AI build import is not available right now. Check that the assistant is up to date."
+        guard buildImportAvailable else {
+            if buildImportQuota?.remaining == 0 {
+                loadoutImportStatus = "The lifetime build-import limit has been reached."
+            } else {
+                loadoutImportStatus = backendAuthenticationMessage
+                    ?? "AI build import is not available right now."
+            }
             return nil
         }
         guard !isImportingLoadout else { return nil }
         isImportingLoadout = true
         loadoutImportStatus = "Reading and processing the build…"
         defer { isImportingLoadout = false }
+        let operationKey: UUID
+        if pendingBuildImportURL == url, let pendingBuildImportKey {
+            operationKey = pendingBuildImportKey
+        } else {
+            operationKey = UUID()
+            pendingBuildImportURL = url
+            pendingBuildImportKey = operationKey
+        }
         do {
-            let imported = try await backendClient.importBuild(LoadoutImportRequest(url: url))
+            let imported = try await backendClient.importBuild(
+                LoadoutImportRequest(url: url),
+                idempotencyKey: operationKey
+            )
             applyImportedBuild(imported)
+            pendingBuildImportURL = nil
+            pendingBuildImportKey = nil
+            await refreshBuildImportQuota()
             loadoutURLDraft = ""
             loadoutImportStatus = "Imported \(imported.name). Assign it to any character from Party."
             let encoder = JSONEncoder()
@@ -53,9 +72,21 @@ extension AppState {
             }
             return imported.build
         } catch {
+            await refreshBuildImportQuota()
+            if let backendError = error as? BackendClientError, backendError.statusCode != 409 {
+                pendingBuildImportURL = nil
+                pendingBuildImportKey = nil
+            }
             loadoutImportStatus = error.localizedDescription
             return nil
         }
+    }
+
+    private func refreshBuildImportQuota() async {
+        guard let health = await backendClient.healthDetails() else { return }
+        backendAIAvailable = health.aiAvailable == true
+        backendAuthenticated = health.authenticated == true
+        buildImportQuota = health.buildImports
     }
 
     func respec(_ member: PartyMember) {

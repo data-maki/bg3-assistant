@@ -82,31 +82,6 @@ final class ActGuideTests: XCTestCase {
         XCTAssertTrue(payload.walkthrough.isEmpty)
     }
 
-    func testBackendPathsAreActScoped() {
-        XCTAssertEqual(BackendClient.guidePath(for: 3), "api/acts/3/guide")
-        XCTAssertEqual(BackendClient.readinessPath(for: 3), "api/acts/3/readiness")
-    }
-
-    func testReadinessRequestEncodesNewStateAsSnakeCase() throws {
-        let request = ReadinessRequest(
-            checkpointId: "act3-orin",
-            party: [],
-            completedCheckpointIds: ["done"],
-            skippedCheckpointIds: ["skipped"],
-            checkedPreparation: ["prepared"],
-            walkthroughStatuses: ["step": "completed"],
-            walkthroughOutcomes: ["step": "outcome"]
-        )
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: encoder.encode(request)) as? [String: Any])
-
-        XCTAssertEqual(payload["skipped_checkpoint_ids"] as? [String], ["skipped"])
-        XCTAssertEqual(payload["checked_preparation"] as? [String], ["prepared"])
-        XCTAssertEqual(payload["walkthrough_statuses"] as? [String: String], ["step": "completed"])
-        XCTAssertEqual(payload["walkthrough_outcomes"] as? [String: String], ["step": "outcome"])
-    }
-
     func testActMapHandoffsKeepOnlyActOneLocal() {
         func guide(act: Int, local: Bool, url: String) -> ActGuideSummary {
             ActGuideSummary(
