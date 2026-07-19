@@ -66,7 +66,7 @@ extension AppState {
             return locked
         }
         if gearOwner(gear) != nil { return .obtained }
-        return run.actGearReview?[act]?[gear.itemKey]
+        return run.actGearReview[act]?[gear.itemKey]
     }
 
     func actGearReviewStatus(for gear: BuildGear) -> ActGearReviewStatus? {
@@ -75,7 +75,7 @@ extension AppState {
 
     func setActGearReview(_ status: ActGearReviewStatus, for gear: BuildGear, in act: Int) {
         guard !run.actLedgerIsLocked(act) else { return }
-        var reviews = run.actGearReview ?? [:]
+        var reviews = run.actGearReview
         var actReview = reviews[act] ?? [:]
         actReview[gear.itemKey] = status
         reviews[act] = actReview
@@ -109,7 +109,7 @@ extension AppState {
                 ? actTwoBlockers
                 : RunSafety.routeConsequences(route: route, dispositions: checkpointDispositions)
         }
-        guard let count = run.actTransitions?.first(where: { $0.fromAct == act })?.unresolvedRouteCount,
+        guard let count = run.actTransitions.first(where: { $0.fromAct == act })?.unresolvedRouteCount,
               count > 0 else { return [] }
         return ["Advanced with \(count) unresolved route consequence\(count == 1 ? "" : "s")."]
     }
@@ -165,7 +165,7 @@ extension AppState {
         let toAct = fromAct + 1
         let destination = nextActGuide
         let gear = currentActGear
-        var transitions = run.actTransitions ?? []
+        var transitions = run.actTransitions
         transitions.removeAll { $0.fromAct == fromAct }
         transitions.append(ActTransitionRecord(
             fromAct: fromAct,

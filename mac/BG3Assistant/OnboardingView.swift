@@ -261,7 +261,7 @@ struct OnboardingCardView: View {
         let count = CatchUp.markedCount(
             markingThrough: checkpointId,
             walkthrough: appState.walkthrough,
-            existing: appState.run.walkthroughProgress ?? [:]
+            existing: appState.run.walkthroughProgress
         )
         return "\(count) earlier step\(count == 1 ? "" : "s") will be marked caught up — kept distinct from steps you complete with the assistant."
     }

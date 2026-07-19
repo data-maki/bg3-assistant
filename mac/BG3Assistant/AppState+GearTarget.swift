@@ -33,7 +33,7 @@ extension AppState {
             gear: context.gear,
             memberLevel: context.member.level,
             walkthrough: walkthrough,
-            dispositions: run.walkthroughProgress ?? [:]
+            dispositions: run.walkthroughProgress
         )
     }
 

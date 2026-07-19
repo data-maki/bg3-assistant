@@ -165,7 +165,7 @@ final class AppState: ObservableObject {
     /// Checkpoint id → disposition, projected from the single walkthrough
     /// ledger. Steps without a ledger entry are pending.
     var checkpointDispositions: [String: CheckpointDisposition] {
-        let ledger = run.walkthroughProgress ?? [:]
+        let ledger = run.walkthroughProgress
         var dispositions: [String: CheckpointDisposition] = [:]
         for step in walkthrough {
             guard let checkpointId = step.checkpointId else { continue }
@@ -191,9 +191,9 @@ final class AppState: ObservableObject {
     var recommendedWalkthroughStep: WalkthroughStep? {
         RunSafety.nextWalkthroughStep(
             walkthrough: walkthrough,
-            walkthroughProgress: run.walkthroughProgress ?? [:],
+            walkthroughProgress: run.walkthroughProgress,
             selectedCheckpointId: nil,
-            walkthroughOutcomes: run.walkthroughOutcomes ?? [:],
+            walkthroughOutcomes: run.walkthroughOutcomes,
             partyLevel: lowestPartyLevel
         )
     }
@@ -202,8 +202,8 @@ final class AppState: ObservableObject {
         RunSafety.dependencyBlockers(
             for: step,
             walkthrough: walkthrough,
-            walkthroughProgress: run.walkthroughProgress ?? [:],
-            walkthroughOutcomes: run.walkthroughOutcomes ?? [:]
+            walkthroughProgress: run.walkthroughProgress,
+            walkthroughOutcomes: run.walkthroughOutcomes
         )
     }
 
@@ -292,7 +292,7 @@ final class AppState: ObservableObject {
     }
 
     func walkthroughDisposition(_ step: WalkthroughStep) -> CheckpointDisposition {
-        RunSafety.walkthroughDisposition(step, walkthroughProgress: run.walkthroughProgress ?? [:])
+        RunSafety.walkthroughDisposition(step, walkthroughProgress: run.walkthroughProgress)
     }
 
     func incidentProtocol(for step: WalkthroughStep) -> IncidentProtocol? {
@@ -319,7 +319,7 @@ final class AppState: ObservableObject {
     var activeParty: [PartyMember] { run.activeParty }
     var roster: [PartyMember] { run.roster ?? run.party }
     var lowestPartyLevel: Int { activeParty.map(\.level).min() ?? 1 }
-    var selectedAct: Int { run.selectedAct ?? 1 }
+    var selectedAct: Int { run.selectedAct }
     var buildImportAvailable: Bool {
         backendAIAvailable && (buildImportQuota?.remaining ?? 1) > 0
     }
@@ -335,12 +335,12 @@ final class AppState: ObservableObject {
             routePhase: currentWalkthroughStep?.phase ?? recommendedWalkthroughStep?.phase ?? "unknown",
             recommendedStepId: recommendedWalkthroughStep?.id,
             focusedStepId: run.focusedWalkthroughStepId,
-            walkthroughStatuses: (run.walkthroughProgress ?? [:]).mapValues(\.rawValue),
-            walkthroughOutcomes: run.walkthroughOutcomes ?? [:],
+            walkthroughStatuses: (run.walkthroughProgress).mapValues(\.rawValue),
+            walkthroughOutcomes: run.walkthroughOutcomes,
             roster: roster,
-            storyOutcomes: Array(run.storyOutcomes ?? []).sorted(),
-            equippedByMember: (run.equippedByMember ?? [:]).mapValues { Array($0).sorted() },
-            equipmentOwnershipKnown: run.equipmentOwnershipKnown ?? false
+            storyOutcomes: Array(run.storyOutcomes).sorted(),
+            equippedByMember: (run.equippedByMember).mapValues { Array($0).sorted() },
+            equipmentOwnershipKnown: run.equipmentOwnershipKnown
         )
     }
     var levelActivityPlan: LevelActivityPlan? {
@@ -362,12 +362,12 @@ final class AppState: ObservableObject {
     var warningsSuppressed: Bool {
         if let snoozedUntil, snoozedUntil > .now { return true }
         guard let id = currentCheckpoint?.id else { return false }
-        return run.mutedCheckpointIds?.contains(id) == true
+        return run.mutedCheckpointIds.contains(id) == true
     }
 
     var isCurrentCheckpointMuted: Bool {
         guard let id = currentCheckpoint?.id else { return false }
-        return run.mutedCheckpointIds?.contains(id) == true
+        return run.mutedCheckpointIds.contains(id) == true
     }
 
     var actTwoBlockers: [String] {
@@ -527,7 +527,7 @@ final class AppState: ObservableObject {
     }
 
     func walkthroughOutcome(_ step: WalkthroughStep) -> String? {
-        run.walkthroughOutcomes?[step.id]
+        run.walkthroughOutcomes[step.id]
     }
 
     /// Resolve a decision step by recording which option actually happened.
@@ -535,7 +535,7 @@ final class AppState: ObservableObject {
     /// records reality, not the recommendation.
     func resolveWalkthroughStep(_ step: WalkthroughStep, outcome: String) {
         guard !run.actLedgerIsLocked(selectedAct) else { return }
-        var outcomes = run.walkthroughOutcomes ?? [:]
+        var outcomes = run.walkthroughOutcomes
         outcomes[step.id] = outcome
         run.walkthroughOutcomes = outcomes
         setWalkthroughDisposition(step, .completed)
@@ -543,10 +543,10 @@ final class AppState: ObservableObject {
 
     func setWalkthroughDisposition(_ step: WalkthroughStep, _ disposition: CheckpointDisposition) {
         guard !run.actLedgerIsLocked(selectedAct) else { return }
-        var progress = run.walkthroughProgress ?? [:]
+        var progress = run.walkthroughProgress
         if disposition == .pending {
             progress.removeValue(forKey: step.id)
-            run.walkthroughOutcomes?.removeValue(forKey: step.id)
+            run.walkthroughOutcomes.removeValue(forKey: step.id)
         }
         else { progress[step.id] = disposition }
         run.walkthroughProgress = progress
@@ -655,7 +655,7 @@ final class AppState: ObservableObject {
 
     func toggleMuteCurrentCheckpoint() {
         guard let id = currentCheckpoint?.id else { return }
-        var muted = run.mutedCheckpointIds ?? []
+        var muted = run.mutedCheckpointIds
         if muted.contains(id) { muted.remove(id) } else { muted.insert(id) }
         run.mutedCheckpointIds = muted
         persistRun()
@@ -664,7 +664,7 @@ final class AppState: ObservableObject {
     func syncRegionToRecommendation() {
         if let step = RunSafety.nextWalkthroughStep(
             walkthrough: walkthrough,
-            walkthroughProgress: run.walkthroughProgress ?? [:],
+            walkthroughProgress: run.walkthroughProgress,
             selectedCheckpointId: nil,
             partyLevel: lowestPartyLevel
         ) {
@@ -779,8 +779,8 @@ final class AppState: ObservableObject {
             activeParty: activeParty,
             completedIds: Set(completedIds),
             checkedPreparation: currentProgress.checkedPreparation,
-            walkthroughProgress: run.walkthroughProgress ?? [:],
-            walkthroughOutcomes: run.walkthroughOutcomes ?? [:],
+            walkthroughProgress: run.walkthroughProgress,
+            walkthroughOutcomes: run.walkthroughOutcomes,
             builds: builds
         )
     }

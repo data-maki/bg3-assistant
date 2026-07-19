@@ -47,7 +47,7 @@ extension AppState {
               let ledger = CatchUp.ledger(
                   markingThrough: checkpointId,
                   walkthrough: walkthrough,
-                  existing: run.walkthroughProgress ?? [:]
+                  existing: run.walkthroughProgress
               ) else { return }
         run.walkthroughProgress = ledger
         run.focusedWalkthroughStepId = nil
