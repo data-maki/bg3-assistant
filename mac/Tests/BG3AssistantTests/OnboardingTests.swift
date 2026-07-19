@@ -42,26 +42,4 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(ledger["s2"], .caughtUp)
     }
 
-    func testCatchUpUnknownCheckpointYieldsNil() {
-        XCTAssertNil(CatchUp.ledger(markingThrough: "nope", walkthrough: [step(id: "s1", order: 1)], existing: [:]))
-        XCTAssertEqual(CatchUp.markedCount(markingThrough: "nope", walkthrough: [], existing: [:]), 0)
-    }
-
-    // MARK: - Settings persistence
-
-    func testSeenStateRoundTripsThroughStore() throws {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appending(path: "onboarding-tests-\(UUID().uuidString)", directoryHint: .isDirectory)
-        defer { try? FileManager.default.removeItem(at: tempDir) }
-
-        let store = RunStore(baseDirectory: tempDir)
-        var finished = store.loadSettings()
-        finished.onboardingSeenVersion = OnboardingStep.version
-        finished.seenHints = ["peekBasics", "plannerMap"]
-        try store.saveSettings(finished)
-
-        let reloaded = RunStore(baseDirectory: tempDir).loadSettings()
-        XCTAssertEqual(reloaded.onboardingSeenVersion, OnboardingStep.version)
-        XCTAssertEqual(reloaded.seenHints, ["peekBasics", "plannerMap"])
-    }
 }

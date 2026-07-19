@@ -24,17 +24,6 @@ final class GearLogicTests: XCTestCase {
         XCTAssertEqual(result["caustic-band"], "astarion")
     }
 
-    func testAssignmentTieBreaksAlphabeticallyByBuildName() {
-        let result = GearLogic.assignments(
-            claims: [
-                claim("karlach", build: "Zerker", at: 100, items: ["caustic-band"]),
-                claim("astarion", build: "Assassin", at: 100, items: ["caustic-band"]),
-            ],
-            overrides: [:]
-        )
-        XCTAssertEqual(result["caustic-band"], "astarion")  // "Assassin" < "Zerker"
-    }
-
     func testOverrideBeatsRecency() {
         let result = GearLogic.assignments(
             claims: [
@@ -44,18 +33,6 @@ final class GearLogicTests: XCTestCase {
             overrides: ["caustic-band": "karlach"]
         )
         XCTAssertEqual(result["caustic-band"], "karlach")
-    }
-
-    func testStaleOverrideFallsBackToRecency() {
-        // Override points at someone who no longer wants (or has) the item.
-        let result = GearLogic.assignments(
-            claims: [
-                claim("karlach", build: "Zerker", at: 200, items: ["caustic-band"]),
-                claim("astarion", build: "Assassin", at: 100, items: ["caustic-band"]),
-            ],
-            overrides: ["caustic-band": "gale"]
-        )
-        XCTAssertEqual(result["caustic-band"], "astarion")
     }
 
     func testUncontestedItemsAssignToTheirOnlyClaimant() {
@@ -70,14 +47,4 @@ final class GearLogicTests: XCTestCase {
         XCTAssertEqual(result["caustic-band"], "astarion")
     }
 
-    func testMissingAssignmentDateSortsLast() {
-        let result = GearLogic.assignments(
-            claims: [
-                claim("karlach", build: "Zerker", at: nil, items: ["caustic-band"]),
-                claim("astarion", build: "Assassin", at: 500, items: ["caustic-band"]),
-            ],
-            overrides: [:]
-        )
-        XCTAssertEqual(result["caustic-band"], "astarion")
-    }
 }

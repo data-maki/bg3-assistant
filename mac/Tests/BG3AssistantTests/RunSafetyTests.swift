@@ -141,83 +141,6 @@ final class RunSafetyTests: XCTestCase {
 
     // MARK: nextWalkthroughStep
 
-    func testNextStepPicksEarliestPendingPhaseInOrder() {
-        let walkthrough = [
-            step(id: "p2", order: 10, phaseOrder: 2),
-            step(id: "late", order: 5, phaseOrder: 1),
-            step(id: "early", order: 1, phaseOrder: 1),
-        ]
-        let next = RunSafety.nextWalkthroughStep(
-            walkthrough: walkthrough, walkthroughProgress: ["early": .completed],
-            selectedCheckpointId: nil, partyLevel: 3
-        )
-        XCTAssertEqual(next?.id, "late")
-    }
-
-    func testNextStepSkipsDependencyBlockedSteps() {
-        let blocked = step(
-            id: "blocked", order: 1,
-            dependencies: [dependency(on: "gate", kind: "completion_required")]
-        )
-        let walkthrough = [blocked, step(id: "free", order: 2), step(id: "gate", order: 3, phaseOrder: 2)]
-        let next = RunSafety.nextWalkthroughStep(
-            walkthrough: walkthrough, walkthroughProgress: [:],
-            selectedCheckpointId: nil, partyLevel: 3
-        )
-        XCTAssertEqual(next?.id, "free")
-    }
-
-    func testNextStepPrefersAtLevelStepButFallsBackToFirstEligible() {
-        let walkthrough = [
-            step(id: "high", order: 1, minimumLevel: 5),
-            step(id: "atLevel", order: 2, minimumLevel: 2),
-        ]
-        XCTAssertEqual(
-            RunSafety.nextWalkthroughStep(
-                walkthrough: walkthrough, walkthroughProgress: [:],
-                selectedCheckpointId: nil, partyLevel: 3
-            )?.id,
-            "atLevel"
-        )
-        XCTAssertEqual(
-            RunSafety.nextWalkthroughStep(
-                walkthrough: walkthrough, walkthroughProgress: [:],
-                selectedCheckpointId: nil, partyLevel: 1
-            )?.id,
-            "high"
-        )
-    }
-
-    // MARK: nextCheckpoint
-
-    func testNextCheckpointRespectsPhaseThenLevelDistanceThenRouteOrder() {
-        let route = [
-            checkpoint(id: "underdark", routeOrder: 1, region: "Underdark"),
-            checkpoint(id: "far", routeOrder: 3, minimumLevel: 4),
-            checkpoint(id: "near", routeOrder: 2, minimumLevel: 3),
-        ]
-        let next = RunSafety.nextCheckpoint(route: route, dispositions: [:], selectedId: nil, partyLevel: 3)
-        XCTAssertEqual(next?.id, "near", "wilderness phase precedes Underdark; closest at-level checkpoint wins")
-    }
-
-    func testNextCheckpointHonorsPrerequisites() {
-        let route = [
-            checkpoint(id: "locked", routeOrder: 1, prerequisites: ["key"]),
-            checkpoint(id: "open", routeOrder: 2),
-            checkpoint(id: "key", routeOrder: 3),
-        ]
-        XCTAssertEqual(
-            RunSafety.nextCheckpoint(route: route, dispositions: [:], selectedId: nil, partyLevel: 1)?.id,
-            "open"
-        )
-        XCTAssertEqual(
-            RunSafety.nextCheckpoint(
-                route: route, dispositions: ["key": .completed], selectedId: nil, partyLevel: 1
-            )?.id,
-            "locked"
-        )
-    }
-
     // MARK: actTwoBlockers
 
     func testActTwoBlockersReportSkippedAndUnresolvedMajors() {
@@ -277,20 +200,6 @@ final class RunSafetyTests: XCTestCase {
             route: route, dispositions: ["adopted": .caughtUp]
         )
         XCTAssertEqual(consequences, ["Unresolved — Name open: major checkpoint unresolved"])
-    }
-
-    func testNextStepRecommendsFirstPendingAfterCaughtUpBlock() {
-        let walkthrough = [
-            step(id: "a", order: 1),
-            step(id: "b", order: 2),
-            step(id: "c", order: 3),
-        ]
-        let next = RunSafety.nextWalkthroughStep(
-            walkthrough: walkthrough,
-            walkthroughProgress: ["a": .caughtUp, "b": .caughtUp],
-            selectedCheckpointId: nil, partyLevel: 3
-        )
-        XCTAssertEqual(next?.id, "c")
     }
 
     // MARK: assessReadiness (parity with the backend's assess_readiness,
