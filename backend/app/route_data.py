@@ -233,37 +233,6 @@ def checkpoint_by_id(checkpoint_id: str, act: int = 1) -> RouteCheckpoint:
     raise KeyError(checkpoint_id)
 
 
-def _route_phase(checkpoint: RouteCheckpoint) -> int:
-    return {
-        "Nautiloid": 0,
-        "Underdark": 2,
-        "Grymforge": 3,
-        "Crèche Y'llek": 4,
-    }.get(checkpoint.region, 1)
-
-
-def next_checkpoint(
-    completed: set[str], skipped: set[str] | None = None, party_level: int = 1, act: int = 1
-) -> RouteCheckpoint | None:
-    skipped = skipped or set()
-    resolved = completed | skipped
-    pending = [checkpoint for checkpoint in load_route(act) if checkpoint.id not in resolved]
-    if not pending:
-        return None
-    current_phase = min(_route_phase(checkpoint) for checkpoint in pending)
-    phase_pending = [checkpoint for checkpoint in pending if _route_phase(checkpoint) == current_phase]
-    eligible = [
-        checkpoint
-        for checkpoint in phase_pending
-        if all(prerequisite in resolved for prerequisite in checkpoint.prerequisites)
-    ] or phase_pending
-    safe = [checkpoint for checkpoint in eligible if checkpoint.minimum_level <= party_level]
-    return min(
-        safe or eligible,
-        key=lambda checkpoint: (abs(checkpoint.minimum_level - party_level), checkpoint.route_order),
-    )
-
-
 def assess_readiness(request: ReadinessRequest, act: int = 1) -> ReadinessResponse:
     checkpoint = checkpoint_by_id(request.checkpoint_id, act)
     active_party = [member for member in request.party if member.status in {None, "active"}]

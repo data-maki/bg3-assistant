@@ -48,16 +48,6 @@ extension AppState {
         syncOverlay()
     }
 
-    func openDialogue() {
-        // Dialogue lives inside the route now: jump to the route with the
-        // current conversation step focused and expanded.
-        plannerTab = .route
-        focusedWalkthroughStepId = currentDialogueStep?.id ?? currentWalkthroughStep?.id
-        overlayExpanded = true
-        showOverlay = true
-        syncOverlay()
-    }
-
     func hideAssistantOverlay() {
         forceOverlay = false
         showOverlay = false

@@ -6,10 +6,10 @@
 import {
   state, els, escapeHtml, persistLocal, syncRunState, restoreRunState,
   isItemEquipped, isResolved, toggleEquipped, toggleMemberEquipment,
-  normalizeRoster, syncPartyProjection, updateRosterMember, toggleStoryOutcome, recomputeEquipped,
+  updateRosterMember, toggleStoryOutcome,
   activateMember, recordRecruited, returnToCamp, addHireling, swapActiveMember,
   dismissMember, renameMember, assignBuild, applyAbilitySetup, resetMemberPlan,
-  setIncludeCampPlans, toggleAbilitySource, sourceOwner, importBuild, canActivateRosterStatus,
+  setIncludeCampPlans, toggleAbilitySource, sourceOwner, canActivateRosterStatus,
 } from "./js/state.js";
 import { initMap, renderMarkers, pollPosition, setFollow } from "./js/map-layer.js";
 import { renderWalkthrough, setWalkthroughStatus, focusWalkthroughStep } from "./js/walkthrough.js";
@@ -52,63 +52,6 @@ function populateFilters() {
   els.build.innerHTML = `<option value="all">All build items</option>${state.data.builds
     .map((build) => `<option value="${escapeHtml(build.id)}">${escapeHtml(build.name)}</option>`).join("")}`;
   els.mapgenie.href = state.data.mapgenieUrl;
-}
-
-// URL params import run state only when the backend has none (a fresh
-// browser); boot calls importRunStateParams under that guard.
-function importRunStateParams(params) {
-  const build = params.get("build");
-  const partyBuilds = (params.get("builds") || "").split(",").filter((id) => state.data.builds.some((entry) => entry.id === id));
-  const completed = (params.get("done") || "").split(",").filter((id) => state.data.markers.some((entry) => entry.type === "fight" && entry.id === id));
-  if (params.has("party")) {
-    try {
-      const party = JSON.parse(params.get("party") || "[]");
-      state.party = Array.isArray(party) ? party.filter((member) => member?.id && member?.name && Number.isInteger(member.level)) : [];
-      state.roster = normalizeRoster([], state.party);
-      syncPartyProjection();
-    } catch { state.party = []; }
-  }
-  if (params.has("roster")) {
-    try {
-      const roster = JSON.parse(params.get("roster") || "[]");
-      state.roster = Array.isArray(roster)
-        ? roster.filter((member) => member?.id && member?.name && Number.isInteger(member.level))
-        : state.roster;
-      syncPartyProjection();
-    } catch { /* retain migrated roster */ }
-  }
-  if (params.has("walkthrough")) {
-    try {
-      const nativeProgress = JSON.parse(params.get("walkthrough") || "{}");
-      Object.entries(nativeProgress).forEach(([stepId, status]) => {
-        if (status === "completed") state.walkthroughStatuses[stepId] = "done";
-        else if (status === "skipped") state.walkthroughStatuses[stepId] = "skipped";
-        else if (status === "pending") state.walkthroughStatuses[stepId] = "revisit";
-      });
-    } catch { /* retain local walkthrough progress */ }
-  }
-  if (params.has("equipped")) {
-    try {
-      const equipped = JSON.parse(params.get("equipped") || "{}");
-      if (equipped && typeof equipped === "object" && !Array.isArray(equipped)) {
-        state.equippedByMember = equipped;
-        recomputeEquipped();
-      }
-    } catch { /* retain local equipment ownership */ }
-  }
-  if (params.has("storyOutcomes")) {
-    try {
-      const outcomes = JSON.parse(params.get("storyOutcomes") || "[]");
-      if (Array.isArray(outcomes)) state.storyOutcomes = [...new Set(outcomes.filter((value) => typeof value === "string"))];
-    } catch { /* retain local story outcomes */ }
-  }
-  if (params.has("includeCamp")) state.includeCampPlans = params.get("includeCamp") === "true";
-  const focused = params.get("focus");
-  if (focused && state.data.walkthrough.some((step) => step.id === focused)) state.focusedWalkthroughStepId = focused;
-  if (params.has("builds")) state.activeBuilds = [...new Set(partyBuilds)];
-  if (params.has("done")) state.done = new Set(completed);
-  if (build && !params.has("builds") && state.data.builds.some((entry) => entry.id === build)) state.activeBuilds = [build];
-  if (["party", "roster", "builds", "done", "walkthrough", "equipped", "storyOutcomes", "includeCamp"].some((key) => params.has(key))) syncRunState();
 }
 
 // View params (level, build filter, item search, tab) always apply. Returns
@@ -303,19 +246,6 @@ const PARTY_CLICK_ACTIONS = {
     state.selectedPartyMemberId = null;
     render();
     focusPartyHeading();
-  },
-  "import-build": (el) => {
-    const input = els.partyPanel.querySelector("[data-build-import-url]");
-    const url = input?.value.trim();
-    if (!url) { input?.focus(); return; }
-    el.disabled = true;
-    importBuild(url)
-      .then((build) => {
-        const member = state.roster.find((entry) => entry.id === el.dataset.id);
-        if (member) assignBrowserBuild(member, build.id);
-        render();
-      })
-      .catch((error) => { window.alert(error.message); el.disabled = false; });
   },
   "toggle-story-outcome": (el) => {
     toggleStoryOutcome(el.dataset.id);
@@ -517,12 +447,13 @@ fetch("/api/act1/markers")
   .then((response) => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); })
   .then(async (data) => {
     state.data = data;
-    const hasServerState = await restoreRunState();
+    // Run state comes exclusively from the shared store (the native app
+    // writes it before opening the map); the URL carries view intent only.
+    await restoreRunState();
     populateFilters();
     initMap({ onBackgroundClick: clearSelection });
     bindEvents();
     const params = new URLSearchParams(window.location.search);
-    if (!hasServerState) importRunStateParams(params);
     const requestedMarker = applyViewParams(params);
     render({ fit: true });
     if (requestedMarker) selectMarker(requestedMarker, true);

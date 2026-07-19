@@ -1,9 +1,8 @@
 import sqlite3
-import time
 
 from fastapi.testclient import TestClient
 
-from app import catalog, main, stores
+from app import catalog, main
 from app.loadout_import import _normalize
 from app.route_data import GUIDE_VERSION, item_key, load_builds as tsv_builds, load_gear as tsv_gear
 from conftest import sample_draft
@@ -136,34 +135,7 @@ def test_route_payload_builds_come_from_catalog(db_path, monkeypatch):
     imported = _normalize(sample_draft(), "https://example.com/payload")
     catalog.save_imported_build(imported)
     client = TestClient(main.app)
-    payload = client.get("/api/act1/route").json()
+    payload = client.get("/api/acts/1/guide").json()
     ids = {build["id"] for build in payload["builds"]}
     assert imported.build.id in ids
     assert any(build["id"] == "SB-1011" for build in payload["builds"])
-
-
-def test_custom_loadouts_migration(db_path, monkeypatch):
-    monkeypatch.setattr(catalog, "_enrich", lambda name: {})
-    imported = _normalize(sample_draft(), "https://example.com/legacy")
-    # write a legacy JSON row the old way, then let ensure_seeded migrate it
-    with stores.RunDatabase().connect() as connection:
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS custom_loadouts(
-                loadout_id TEXT PRIMARY KEY,
-                source_url TEXT NOT NULL,
-                payload_json TEXT NOT NULL,
-                updated_at REAL NOT NULL
-            )
-            """
-        )
-        connection.execute(
-            "INSERT INTO custom_loadouts(loadout_id, source_url, payload_json, updated_at) VALUES(?, ?, ?, ?)",
-            (imported.id, imported.source_url, imported.model_dump_json(by_alias=True), time.time()),
-        )
-    catalog.ensure_seeded()
-    assert [b.id for b in catalog.imported_builds()] == [imported.id]
-    with sqlite3.connect(db_path) as connection:
-        assert connection.execute(
-            "SELECT name FROM sqlite_master WHERE name = 'custom_loadouts'"
-        ).fetchone() is None

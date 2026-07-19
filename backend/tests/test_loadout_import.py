@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from app import catalog, loadout_import, main, stores
 from app.config import Settings
-from app.models import ImportedBuild, ImportedBuildDraft
+from app.models import HostedAuthResponse, ImportedBuild, ImportedBuildDraft
 from conftest import sample_draft
 
 
@@ -128,9 +128,61 @@ def test_import_endpoint_saves_validated_build(monkeypatch):
     monkeypatch.setattr(main, "get_settings", lambda: Settings(OPENROUTER_API_KEY="test-key"))
     monkeypatch.setattr(main.loadout_import, "import_build", lambda url, settings: imported)
     monkeypatch.setattr(main.catalog, "save_imported_build", saved.append)
-    response = TestClient(main.app).post("/api/builds/import", json={"url": "https://example.com/build"})
+    response = TestClient(main.app).post(
+        "/api/builds/import", json={"url": "https://example.com/build", "persist": True}
+    )
     assert response.status_code == 200
     assert response.json()["build"]["id"].startswith(imported.id)
+    assert saved == [imported]
+
+
+def test_import_endpoint_uses_hosted_backend_then_saves_locally(monkeypatch):
+    imported = loadout_import._normalize(sample_draft(), "https://example.com/build")
+    proxied = []
+    saved = []
+    monkeypatch.setattr(
+        main,
+        "get_settings",
+        lambda: Settings(
+            BG3_UPSTREAM_BACKEND_URL="https://assistant.example.com",
+            BG3_COMPANION_CONTROL_TOKEN="companion-control",
+        ),
+    )
+    monkeypatch.setattr(
+        main.upstream,
+        "import_build",
+        lambda base_url, request, token, key: proxied.append((base_url, request.url, token, key))
+        or main.upstream.UpstreamImportResult(imported=imported, quota=None),
+    )
+    monkeypatch.setattr(main.catalog, "save_imported_build", saved.append)
+    main.companion_session.set(
+        HostedAuthResponse(
+            accessToken="hosted-token",
+            expiresIn=3600,
+            buildImports={"limit": 30, "used": 0, "remaining": 30},
+        )
+    )
+    operation_id = "8a3bb450-0e51-4d60-9bf7-5bdb1052f7c0"
+
+    unauthorized = TestClient(main.app).post(
+        "/api/builds/import",
+        json={"url": "https://example.com/build", "persist": True},
+        headers={"Idempotency-Key": operation_id},
+    )
+    response = TestClient(main.app).post(
+        "/api/builds/import",
+        json={"url": "https://example.com/build", "persist": True},
+        headers={
+            "Idempotency-Key": operation_id,
+            "X-BG3-Companion-Control": "companion-control",
+        },
+    )
+
+    assert unauthorized.status_code == 404
+    assert response.status_code == 200
+    assert proxied == [
+        ("https://assistant.example.com", "https://example.com/build", "hosted-token", operation_id)
+    ]
     assert saved == [imported]
 
 
@@ -172,7 +224,7 @@ def test_imported_builds_are_available_to_native_and_map_clients(tmp_path: Path,
         imported = loadout_import._normalize(sample_draft(), "https://example.com/build")
         catalog.save_imported_build(imported)
         client = TestClient(main.app)
-        native = client.get("/api/act1/route").json()
+        native = client.get("/api/acts/1/guide").json()
         web_map = client.get("/api/act1/markers").json()
         build_id = imported.build.id
         assert build_id in {build["id"] for build in native["builds"]}

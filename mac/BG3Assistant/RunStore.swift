@@ -6,17 +6,8 @@ struct AssistantSettings: Codable, Equatable {
     /// Tour version last finished or skipped; nil shows the welcome tour.
     /// Optional so settings rows written before the tour existed still decode.
     var onboardingSeenVersion: Int? = nil
-    /// True only when the intake wizard was finished (not skipped). Gates
-    /// side effects that need informed consent, like the login item.
-    var onboardingCompleted: Bool? = nil
     /// One-time hint bubbles already shown (HintID raw values).
     var seenHints: [String]? = nil
-
-    static func migrating(_ defaults: UserDefaults = .standard) -> AssistantSettings {
-        AssistantSettings(
-            overlayDensity: defaults.string(forKey: "BG3OverlayDensity") ?? OverlayDensity.focus.rawValue
-        )
-    }
 }
 
 enum RunStoreError: LocalizedError {
@@ -40,7 +31,7 @@ struct SavedRunSummary: Identifiable, Equatable {
 
 /// One cross-process SQLite authority for the native overlay and localhost map.
 /// The full Codable snapshot keeps schema evolution small; revisions prevent a
-/// bad write from silently erasing a run. Legacy run.json is migration-only.
+/// bad write from silently erasing a run.
 struct RunStore {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
@@ -63,15 +54,7 @@ struct RunStore {
             for data in try revisionSnapshots() {
                 if let run = try? decoder.decode(HonorRun.self, from: data) { return run }
             }
-            if let data = try? Data(contentsOf: runURL), let run = try? decoder.decode(HonorRun.self, from: data) {
-                try save(run)
-                return run
-            }
-        } catch {
-            if let data = try? Data(contentsOf: runURL), let run = try? decoder.decode(HonorRun.self, from: data) {
-                return run
-            }
-        }
+        } catch {}
         return HonorRun()
     }
 
@@ -152,11 +135,11 @@ struct RunStore {
                let settings = try? decoder.decode(AssistantSettings.self, from: data) {
                 return settings
             }
-            let settings = AssistantSettings.migrating()
+            let settings = AssistantSettings()
             try saveSettings(settings)
             return settings
         } catch {
-            return AssistantSettings.migrating()
+            return AssistantSettings()
         }
     }
 
@@ -175,7 +158,6 @@ struct RunStore {
     }
 
     var databaseURL: URL { baseDirectory.appending(path: "state.sqlite3") }
-    var runURL: URL { baseDirectory.appending(path: "run.json") }
 
     // MARK: - Cross-process change detection
 
@@ -206,7 +188,7 @@ struct RunStore {
               let raw = String(data: data, encoding: .utf8) else { return .unchanged }
         if raw == token?.rawSnapshot { return .unchanged }
         guard var shared = try? decoder.decode(HonorRun.self, from: Data(raw.utf8)) else { return .unchanged }
-        shared.migrateLegacyPartySlots()
+        shared.normalizeRoster()
         let fingerprint = Self.fingerprint(shared)
         let newToken = ChangeToken(rawSnapshot: raw, fingerprint: fingerprint)
         if let token, let fingerprint, fingerprint == token.fingerprint {

@@ -35,16 +35,40 @@ final class RunSafetyTests: XCTestCase {
         region: String = "Wilderness",
         minimumLevel: Int = 1,
         importance: String = "minor",
+        danger: String = "medium",
+        advice: String = "",
+        preparation: [String] = [],
         irreversibleWarnings: [String] = [],
         prerequisites: [String] = []
     ) -> RouteCheckpoint {
         RouteCheckpoint(
             id: id, routeOrder: routeOrder, name: "Name \(id)", area: "Area", region: region,
-            x: 0, y: 0, minimumLevel: minimumLevel, importance: importance, danger: "medium",
-            enemies: "", advice: "", legendaryAction: nil, failureConditions: [],
-            preparation: [], completionChecks: [], irreversibleWarnings: irreversibleWarnings,
+            x: 0, y: 0, minimumLevel: minimumLevel, importance: importance, danger: danger,
+            enemies: "", advice: advice, legendaryAction: nil, failureConditions: [],
+            preparation: preparation, completionChecks: [], irreversibleWarnings: irreversibleWarnings,
             prerequisites: prerequisites, notes: [], honorDecisions: [],
             source: GuideSource(sheet: "Route", row: 1, url: "")
+        )
+    }
+
+    private func member(id: String, level: Int, buildId: String? = nil, preparedTags: [String] = []) -> PartyMember {
+        PartyMember(id: id, name: "Name \(id)", level: level, buildId: buildId, preparedTags: preparedTags, className: nil)
+    }
+
+    private func assess(
+        checkpoint target: RouteCheckpoint,
+        route: [RouteCheckpoint] = [],
+        walkthrough: [WalkthroughStep] = [],
+        activeParty: [PartyMember],
+        completedIds: Set<String> = [],
+        checkedPreparation: Set<String> = [],
+        walkthroughProgress: [String: CheckpointDisposition] = [:],
+        walkthroughOutcomes: [String: String] = [:]
+    ) -> ReadinessResponse {
+        RunSafety.assessReadiness(
+            checkpoint: target, route: route.isEmpty ? [target] : route, walkthrough: walkthrough,
+            activeParty: activeParty, completedIds: completedIds, checkedPreparation: checkedPreparation,
+            walkthroughProgress: walkthroughProgress, walkthroughOutcomes: walkthroughOutcomes, builds: []
         )
     }
 
@@ -281,5 +305,100 @@ final class RunSafetyTests: XCTestCase {
             selectedCheckpointId: nil, partyLevel: 3
         )
         XCTAssertEqual(next?.id, "c")
+    }
+
+    // MARK: assessReadiness (parity with the backend's assess_readiness,
+    // which stays alive for chat grounding — these cases mirror its pytest
+    // scenarios so the two copies cannot drift silently)
+
+    func testReadinessBlocksWhenNoActivePartyIsRecorded() {
+        let fight = checkpoint(id: "boss", routeOrder: 1, minimumLevel: 10)
+        let readiness = assess(checkpoint: fight, activeParty: [])
+        XCTAssertEqual(readiness.status, "blocked")
+        XCTAssertEqual(readiness.minimumLevel, 10)
+        XCTAssertTrue(readiness.blockers.contains { $0.contains("No active party") })
+        XCTAssertFalse(readiness.blockers.contains { $0.contains("Lowest party member") })
+    }
+
+    func testReadinessUsesLowestPartyLevelAndCheckedPreparation() {
+        let fight = checkpoint(id: "boss", routeOrder: 1, minimumLevel: 10, preparation: ["Buy potions"])
+        let ready = assess(
+            checkpoint: fight,
+            activeParty: [member(id: "tav", level: 10)],
+            checkedPreparation: ["Buy potions"]
+        )
+        XCTAssertEqual(ready.partyLevel, 10)
+        XCTAssertEqual(ready.status, "ready")
+        XCTAssertTrue(ready.blockers.isEmpty)
+        XCTAssertTrue(ready.warnings.isEmpty)
+
+        let underleveled = assess(checkpoint: fight, activeParty: [member(id: "tav", level: 8)])
+        XCTAssertEqual(underleveled.status, "blocked")
+        XCTAssertTrue(underleveled.blockers.contains {
+            $0.contains("Lowest party member is level 8; guide minimum is level 10.")
+        })
+    }
+
+    func testReadinessBlocksSkippedRequiredRoutePrerequisite() {
+        let gate = checkpoint(id: "gate", routeOrder: 1)
+        let fight = checkpoint(id: "boss", routeOrder: 2, prerequisites: ["gate"])
+        let owner = step(
+            id: "walk-boss", order: 2,
+            dependencies: [dependency(on: "walk-gate", kind: "completion_required")]
+        )
+        let readiness = RunSafety.assessReadiness(
+            checkpoint: fight, route: [gate, fight],
+            walkthrough: [step(id: "walk-gate", order: 1), stepOwning(owner, checkpointId: "boss")],
+            activeParty: [member(id: "tav", level: 12)], completedIds: [],
+            checkedPreparation: [], walkthroughProgress: ["walk-gate": .skipped],
+            walkthroughOutcomes: [:], builds: []
+        )
+        XCTAssertEqual(readiness.status, "blocked")
+        XCTAssertTrue(readiness.blockers.contains { $0.contains("Unresolved reviewed route sequence: Name gate") })
+        XCTAssertTrue(readiness.blockers.contains { $0.contains("Revisit") })
+    }
+
+    func testReadinessWarnsOnUncheckedPreparationAndUnrecordedCapability() {
+        let fight = checkpoint(
+            id: "boss", routeOrder: 1,
+            advice: "Open with silence to shut down casters.",
+            preparation: ["Prepare Silence"]
+        )
+        let readiness = assess(checkpoint: fight, activeParty: [member(id: "tav", level: 5)])
+        XCTAssertEqual(readiness.status, "caution")
+        XCTAssertTrue(readiness.warnings.contains { $0.contains("Preparation not confirmed: Prepare Silence") })
+        XCTAssertTrue(readiness.warnings.contains { $0.contains("Party capability not recorded: silence") })
+        XCTAssertTrue(readiness.nextActions.contains("Prepare Silence"))
+
+        let covered = assess(
+            checkpoint: fight,
+            activeParty: [member(id: "tav", level: 5, preparedTags: ["Silence ritual"])],
+            checkedPreparation: ["Prepare Silence"]
+        )
+        XCTAssertFalse(covered.warnings.contains { $0.contains("capability") })
+    }
+
+    func testReadinessDangerStatusFromExtremeDangerOrIrreversibleWarnings() {
+        let extreme = checkpoint(id: "boss", routeOrder: 1, danger: "extreme")
+        XCTAssertEqual(assess(checkpoint: extreme, activeParty: [member(id: "tav", level: 5)]).status, "danger")
+
+        let irreversible = checkpoint(id: "gate", routeOrder: 1, irreversibleWarnings: ["Point of no return"])
+        let readiness = assess(checkpoint: irreversible, activeParty: [member(id: "tav", level: 5)])
+        XCTAssertEqual(readiness.status, "danger")
+        XCTAssertTrue(readiness.warnings.contains("Point of no return"))
+    }
+
+    /// Rebinds a fixture step to a checkpoint id (the shared helper pins it to nil).
+    private func stepOwning(_ template: WalkthroughStep, checkpointId: String) -> WalkthroughStep {
+        WalkthroughStep(
+            id: template.id, order: template.order, phase: template.phase, phaseOrder: template.phaseOrder,
+            title: template.title, kind: template.kind, importance: template.importance, region: template.region,
+            area: template.area, minimumLevel: template.minimumLevel, summary: template.summary,
+            avoid: template.avoid, why: template.why, rewards: template.rewards,
+            completionChecks: template.completionChecks, prerequisites: template.prerequisites,
+            dependencies: template.dependencies, checkpointId: checkpointId, markerId: template.markerId,
+            decision: template.decision, incident: template.incident, riskReward: template.riskReward,
+            authority: template.authority, sourceLabel: template.sourceLabel, sourceUrl: template.sourceUrl
+        )
     }
 }

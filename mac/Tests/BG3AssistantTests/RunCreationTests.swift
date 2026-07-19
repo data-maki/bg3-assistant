@@ -32,7 +32,7 @@ final class RunCreationTests: XCTestCase {
 
     func testFreshRunKeepsCharacterAndLatestBuildPresetsOnly() throws {
         var source = HonorRun()
-        source.migrateLegacyPartySlots()
+        source.normalizeRoster()
         source.name = "Old Run"
         source.guideVersion = "old-guide"
         source.selectedAct = 3

@@ -46,7 +46,6 @@ class JsonStore:
 
 
 _position = JsonStore("position.json")
-_legacy_run_state = JsonStore("run_state.json")
 
 
 class RunDatabase:
@@ -170,16 +169,9 @@ def publish_position(
 
 def current_run_state() -> RunState:
     snapshot = _run_database.load_snapshot()
-    if snapshot is not None:
-        return _run_state_from_snapshot(snapshot)
-    state = _legacy_run_state.get()
-    if state is None:
+    if snapshot is None:
         return RunState()
-    try:
-        parsed = RunState(**state)
-        return save_run_state(parsed)
-    except Exception:
-        return RunState()
+    return _run_state_from_snapshot(snapshot)
 
 
 def save_run_state(state: RunState) -> RunState:

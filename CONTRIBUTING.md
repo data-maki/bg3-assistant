@@ -28,9 +28,17 @@ cd mac
 swift run BG3HonorAssistant
 ```
 
+`BG3_BACKEND_URL` defaults to `http://127.0.0.1:8787`, so local development uses the provider settings in `backend/.env`. To exercise the keyless proxy path, set it to an HTTPS hosted backend before launching the app:
+
+```sh
+BG3_BACKEND_URL=https://assistant.example.com swift run BG3HonorAssistant
+```
+
+Hosted mode requires an Apple-signed AppTransaction and the server variables documented in `docs/developers/RELEASE.md`. Direct `swift run` builds may not have an App Store transaction, so guide-only behavior is the expected fallback unless StoreKit sandbox is configured.
+
 ## Verification
 
-Run `swift build` from `mac/` and exercise the changed player flow locally. Keep test sources, screenshots, workbooks, and reports in ignored internal folders.
+Run `swift build` from `mac/` and `uv run --extra dev pytest` from `backend/`, then exercise the changed player flow locally. Keep screenshots, workbooks, and reports in ignored internal folders.
 
 For packaging and signing, see [`docs/developers/RELEASE.md`](docs/developers/RELEASE.md).
 

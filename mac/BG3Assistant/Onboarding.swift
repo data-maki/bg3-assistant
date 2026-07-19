@@ -91,8 +91,7 @@ enum OnboardingStep: Int, CaseIterable {
     var facts: [OnboardingFact] {
         switch self {
         case .ready: [
-            .action("Hold Option-Space to peek at the current task while playing."),
-            .action("The chevron on the card — or the menu-bar shield — opens the full planner."),
+            .action("Click the chevron on the card — or the menu-bar shield — to open the full planner."),
             .insight("The map button opens an interactive act map in your browser, synced to this run."),
             .reward("Ask anything in CHAT; answers cite the guide they came from."),
         ]

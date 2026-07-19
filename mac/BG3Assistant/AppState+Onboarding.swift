@@ -54,7 +54,7 @@ extension AppState {
         run.selectedCheckpointId = nil
         syncRegionToRecommendation()
         persistRun()
-        Task { await refreshReadiness() }
+        refreshReadiness()
     }
 
     /// Finishing and skipping share one path so the wizard never re-nags.
@@ -62,11 +62,8 @@ extension AppState {
     /// login item, which earlier builds enabled silently on first launch.
     func finishOnboarding(completed: Bool) {
         onboardingSeenVersion = OnboardingStep.version
-        if completed {
-            onboardingCompleted = true
-            if onboardingEnableLoginItem, !LoginItem.isEnabled {
-                if let error = LoginItem.setEnabled(true) { errorMessage = error }
-            }
+        if completed, onboardingEnableLoginItem, !LoginItem.isEnabled {
+            if let error = LoginItem.setEnabled(true) { errorMessage = error }
         }
         persistSettings()
         onboardingStep = nil

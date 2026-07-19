@@ -247,6 +247,7 @@ private struct AssistantGlassSurface: ViewModifier {
     @ViewBuilder
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        #if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             content
                 .background { shape.fill(BG3Theme.panelTint) }
@@ -258,6 +259,12 @@ private struct AssistantGlassSurface: ViewModifier {
                 .background { shape.fill(BG3Theme.panelTint) }
                 .overlay { BG3FrameOverlay(cornerRadius: cornerRadius) }
         }
+        #else
+        content
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background { shape.fill(BG3Theme.panelTint) }
+            .overlay { BG3FrameOverlay(cornerRadius: cornerRadius) }
+        #endif
     }
 }
 

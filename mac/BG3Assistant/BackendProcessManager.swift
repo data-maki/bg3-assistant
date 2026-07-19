@@ -4,6 +4,16 @@ import Foundation
 @MainActor
 final class BackendProcessManager {
     private var process: Process?
+    private let upstreamBackendEndpoint: BackendEndpoint
+    private let companionControlToken: String
+
+    init(
+        upstreamBackendEndpoint: BackendEndpoint = .managedLocal,
+        companionControlToken: String = ""
+    ) {
+        self.upstreamBackendEndpoint = upstreamBackendEndpoint
+        self.companionControlToken = companionControlToken
+    }
 
     var isRunning: Bool {
         process?.isRunning == true
@@ -15,10 +25,12 @@ final class BackendProcessManager {
     func retireUnownedBackend(_ health: BackendHealth) async {
         guard process?.isRunning != true else { return }
         let currentPID = ProcessInfo.processInfo.processIdentifier
+        let listenerPIDs = listenerProcessIDs()
         guard health.ok,
               health.service == "bg3-honor-assistant",
               health.parentPid != currentPID,
-              let candidate = health.pid ?? listenerProcessIDs().first,
+              let candidate = health.pid,
+              listenerPIDs.contains(candidate),
               candidate > 1,
               candidate != currentPID else { return }
         try? appendLog("Retiring unowned backend pid=\(candidate) parent=\(health.parentPid.map(String.init) ?? "legacy") packaged=\(health.packaged.map(String.init) ?? "legacy")")
@@ -42,7 +54,7 @@ final class BackendProcessManager {
         self.process = nil
     }
 
-    func startIfNeeded(openRouterAPIKey: String? = nil) throws {
+    func startIfNeeded() throws {
         if process?.isRunning == true {
             try appendLog("Backend process already running")
             return
@@ -78,17 +90,12 @@ final class BackendProcessManager {
         let logDirectory = try logDirectory()
         let stdout = try writableLogHandle(at: logDirectory.appending(path: "backend.stdout.log"))
         let stderr = try writableLogHandle(at: logDirectory.appending(path: "backend.stderr.log"))
-        var environment = ProcessInfo.processInfo.environment
-        if let openRouterAPIKey, !openRouterAPIKey.isEmpty {
-            environment["OPENROUTER_API_KEY"] = openRouterAPIKey
-        }
-        environment["BG3_STATE_DB_PATH"] = RunStore().databaseURL.path
-        if let stateRoot = environment["BG3_ASSISTANT_STATE_DIR"], !stateRoot.isEmpty {
-            environment["RUNS_DIR"] = URL(fileURLWithPath: stateRoot)
-                .appending(path: "backend-runs", directoryHint: .isDirectory)
-                .path
-        }
-        newProcess.environment = environment
+        newProcess.environment = Self.childEnvironment(
+            from: ProcessInfo.processInfo.environment,
+            stateDatabasePath: RunStore().databaseURL.path,
+            upstreamBackendEndpoint: upstreamBackendEndpoint,
+            companionControlToken: companionControlToken
+        )
         newProcess.standardOutput = stdout
         newProcess.standardError = stderr
         try newProcess.run()
@@ -118,6 +125,38 @@ final class BackendProcessManager {
             try? appendLog("Could not inspect port 8787 listener: \(error.localizedDescription)")
             return []
         }
+    }
+
+    nonisolated static func childEnvironment(
+        from base: [String: String],
+        stateDatabasePath: String,
+        upstreamBackendEndpoint: BackendEndpoint,
+        companionControlToken: String = ""
+    ) -> [String: String] {
+        let allowedKeys = [
+            "HOME", "LANG", "LC_ALL", "LOGNAME", "PATH", "SSL_CERT_DIR",
+            "SSL_CERT_FILE", "TMPDIR", "USER", "BG3_ASSISTANT_STATE_DIR",
+        ]
+        var environment = base.filter { allowedKeys.contains($0.key) }
+        environment["BG3_BACKEND_MODE"] = "local"
+        environment["BG3_STATE_DB_PATH"] = stateDatabasePath
+        environment["BG3_COMPANION_CONTROL_TOKEN"] = companionControlToken
+        if upstreamBackendEndpoint.managesLocalBackend {
+            environment.removeValue(forKey: "BG3_UPSTREAM_BACKEND_URL")
+            for key in ["OPENROUTER_API_KEY", "OPENROUTER_MODEL", "EXA_API_KEY"] {
+                environment[key] = base[key]
+            }
+        } else {
+            environment["BG3_UPSTREAM_BACKEND_URL"] = upstreamBackendEndpoint.baseURL.absoluteString
+            environment.removeValue(forKey: "OPENROUTER_API_KEY")
+            environment.removeValue(forKey: "EXA_API_KEY")
+        }
+        if let stateRoot = environment["BG3_ASSISTANT_STATE_DIR"], !stateRoot.isEmpty {
+            environment["RUNS_DIR"] = URL(fileURLWithPath: stateRoot)
+                .appending(path: "backend-runs", directoryHint: .isDirectory)
+                .path
+        }
+        return environment
     }
 
     private func findBackendDirectory() -> URL? {

@@ -109,34 +109,29 @@ final class OnboardingTests: XCTestCase {
 
     // MARK: - Settings persistence
 
-    func testSettingsRowsWithoutNewFlagsStillDecode() throws {
+    func testSettingsRowsWithRetiredKeysStillDecode() throws {
         let legacy = try JSONDecoder().decode(
             AssistantSettings.self,
-            from: Data(#"{"overlayDensity":"Reference","onboardingSeenVersion":1}"#.utf8)
+            from: Data(#"{"overlayDensity":"Reference","onboardingSeenVersion":1,"onboardingCompleted":true}"#.utf8)
         )
         XCTAssertEqual(legacy.overlayDensity, OverlayDensity.reference.rawValue)
         XCTAssertEqual(legacy.onboardingSeenVersion, 1)
-        XCTAssertNil(legacy.onboardingCompleted)
         XCTAssertNil(legacy.seenHints)
     }
 
-    func testCompletionAndHintsRoundTripThroughStore() throws {
+    func testSeenStateRoundTripsThroughStore() throws {
         let tempDir = FileManager.default.temporaryDirectory
             .appending(path: "onboarding-tests-\(UUID().uuidString)", directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: tempDir) }
 
         let store = RunStore(baseDirectory: tempDir)
-        XCTAssertNil(store.loadSettings().onboardingCompleted)
-
         var finished = store.loadSettings()
         finished.onboardingSeenVersion = OnboardingStep.version
-        finished.onboardingCompleted = true
         finished.seenHints = ["peekBasics", "plannerMap"]
         try store.saveSettings(finished)
 
         let reloaded = RunStore(baseDirectory: tempDir).loadSettings()
         XCTAssertEqual(reloaded.onboardingSeenVersion, OnboardingStep.version)
-        XCTAssertEqual(reloaded.onboardingCompleted, true)
         XCTAssertEqual(reloaded.seenHints, ["peekBasics", "plannerMap"])
     }
 

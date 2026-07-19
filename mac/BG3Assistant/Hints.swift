@@ -16,7 +16,7 @@ enum HintID: String, CaseIterable {
     var text: String {
         switch self {
         case .peekBasics:
-            "Hold Option-Space to peek while playing. Drag the card anywhere — it remembers its spot."
+            "Drag the card anywhere — it remembers its spot. Click the chevron to open the full planner."
         case .plannerMap:
             "The map button opens an interactive act map in your browser, synced to this run."
         case .fightTools:

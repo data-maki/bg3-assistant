@@ -298,16 +298,6 @@ export function toggleAbilitySource(memberId, sourceId, applied) {
   return true;
 }
 
-export async function importBuild(url) {
-  const response = await fetch("/api/builds/import", {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }),
-  });
-  if (!response.ok) throw new Error((await response.json()).detail || "Import failed");
-  const payload = await response.json();
-  state.data.builds = [...state.data.builds.filter((entry) => entry.id !== payload.build.id), payload.build];
-  return payload.build;
-}
-
 export function toggleStoryOutcome(outcome) {
   const outcomes = new Set(state.storyOutcomes);
   if (outcomes.has(outcome)) outcomes.delete(outcome); else outcomes.add(outcome);
@@ -316,17 +306,6 @@ export function toggleStoryOutcome(outcome) {
 }
 
 syncPartyProjection();
-
-// One-time migration from the retired flat "bg3-act1-equipped" set: attribute
-// every legacy item to the first party member ("tav" when no party is saved).
-// This attribution is an approximation — the flat set never recorded who
-// actually wears each item. The legacy key is no longer written.
-const legacyEquipped = JSON.parse(localStorage.getItem("bg3-act1-equipped") || "[]");
-if (!Object.keys(state.equippedByMember).length && legacyEquipped.length) {
-  state.equippedByMember[state.party[0]?.id || "tav"] = legacyEquipped;
-  localStorage.setItem("bg3-act1-equipped-by-member", JSON.stringify(state.equippedByMember));
-}
-localStorage.removeItem("bg3-act1-equipped");
 
 export const els = {
   region: document.querySelector("#regionFilter"),
@@ -470,7 +449,6 @@ export function persistLocal() {
   localStorage.setItem("bg3-act1-walk-outcomes", JSON.stringify(state.walkthroughOutcomes));
   if (state.focusedWalkthroughStepId) localStorage.setItem("bg3-act1-walk-focus", state.focusedWalkthroughStepId);
   else localStorage.removeItem("bg3-act1-walk-focus");
-  localStorage.removeItem("bg3-act1-walk-recovery"); // migrate the retired routine-recovery gate
   localStorage.setItem("bg3-act1-timed-ack", JSON.stringify([...state.ackTimed]));
 }
 

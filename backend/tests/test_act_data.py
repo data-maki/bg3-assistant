@@ -1,9 +1,10 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.guide_chat import guide_facts
 from app.main import app
 from app.models import PartyMember, ReadinessRequest
-from app.route_data import checkpoint_by_id, item_key, load_gear
+from app.route_data import assess_readiness, checkpoint_by_id, item_key, load_gear
 from app.walkthrough_data import walkthrough_by_id
 
 
@@ -11,10 +12,10 @@ client = TestClient(app)
 
 
 def test_act_catalog_uses_separate_equipment_databases():
-    response = client.get("/api/acts")
+    response = client.get("/api/acts/1/guide")
     assert response.status_code == 200
-    acts = response.json()
-    assert [entry["equipmentFile"] for entry in acts] == [
+    acts = response.json()["acts"]
+    assert [entry["equipment_file"] for entry in acts] == [
         "gear/act1.tsv",
         "gear/act2.tsv",
         "gear/act3.tsv",
@@ -25,9 +26,9 @@ def test_act_catalog_uses_separate_equipment_databases():
         len({item_key(item.item) for item in load_gear(act)})
         for act in (1, 2, 3)
     ]
-    assert [entry["equipmentCount"] for entry in acts] == expected
-    assert acts[0]["routeAvailable"] is True
-    assert acts[1]["routeAvailable"] is False
+    assert [entry["equipment_count"] for entry in acts] == expected
+    assert acts[0]["route_available"] is True
+    assert acts[1]["route_available"] is False
 
 
 def test_act_two_equipment_is_isolated_and_coordinate_backed():
@@ -38,28 +39,17 @@ def test_act_two_equipment_is_isolated_and_coordinate_backed():
     helmet = next(item for item in act_two if item.item == "Helmet of Arcane Acuity")
     assert (helmet.game_x, helmet.game_y) == (107, -758)
 
-    response = client.get("/api/acts/2/map")
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["mapName"] == "Shadow-Cursed Lands"
-    assert payload["mapUrl"].endswith("/shadow-cursed-lands")
-    assert len(payload["equipment"]) == len({item_key(item.item) for item in act_two if item.map_objective})
-
 
 def test_unknown_act_is_not_exposed():
-    assert client.get("/api/acts/4/equipment").status_code == 404
-    assert client.get("/api/acts/4/map").status_code == 404
     assert client.get("/api/acts/4/guide").status_code == 404
 
 
 def test_act_guides_are_isolated_and_act_three_is_app_ready():
-    act_one = client.get("/api/act1/route")
-    generic_act_one = client.get("/api/acts/1/guide")
+    act_one = client.get("/api/acts/1/guide")
     act_two = client.get("/api/acts/2/guide")
     act_three = client.get("/api/acts/3/guide")
 
-    assert act_one.status_code == generic_act_one.status_code == 200
-    assert act_one.json() == generic_act_one.json()
+    assert act_one.status_code == 200
     assert act_two.status_code == 200
     assert act_two.json()["act"] == 2
     assert act_two.json()["routeAvailable"] is False
@@ -87,14 +77,13 @@ def test_act_guides_are_isolated_and_act_three_is_app_ready():
 
 def test_act_three_readiness_is_scoped_to_act_three():
     request = ReadinessRequest(checkpoint_id="act3-coronation", party=[])
-    payload = request.model_dump(mode="json")
 
-    response = client.post("/api/acts/3/readiness", json=payload)
-    assert response.status_code == 200
-    assert response.json()["minimum_level"] == 10
-    assert any("No active party" in blocker for blocker in response.json()["blockers"])
-    assert not any("Lowest party member" in blocker for blocker in response.json()["blockers"])
-    assert client.post("/api/acts/1/readiness", json=payload).status_code == 404
+    assessment = assess_readiness(request, 3)
+    assert assessment.minimum_level == 10
+    assert any("No active party" in blocker for blocker in assessment.blockers)
+    assert not any("Lowest party member" in blocker for blocker in assessment.blockers)
+    with pytest.raises(KeyError):
+        assess_readiness(request, 1)
 
 
 def test_readiness_uses_active_party_walkthrough_state_and_checked_preparation():
@@ -113,11 +102,11 @@ def test_readiness_uses_active_party_walkthrough_state_and_checked_preparation()
         walkthrough_statuses=statuses,
     )
 
-    payload = client.post("/api/acts/3/readiness", json=request.model_dump(mode="json")).json()
+    assessment = assess_readiness(request, 3)
 
-    assert payload["party_level"] == 10
-    assert not any("Lowest party member" in blocker for blocker in payload["blockers"])
-    assert not any("Preparation not confirmed" in warning for warning in payload["warnings"])
+    assert assessment.party_level == 10
+    assert not any("Lowest party member" in blocker for blocker in assessment.blockers)
+    assert not any("Preparation not confirmed" in warning for warning in assessment.warnings)
 
 
 def test_readiness_blocks_skipped_required_route_prerequisite():
@@ -128,10 +117,10 @@ def test_readiness_blocks_skipped_required_route_prerequisite():
         walkthrough_statuses={"walk-act3-sarevok": "skipped"},
     )
 
-    payload = client.post("/api/acts/3/readiness", json=request.model_dump(mode="json")).json()
+    assessment = assess_readiness(request, 3)
 
-    assert any("Unresolved reviewed route sequence" in blocker for blocker in payload["blockers"])
-    assert any("Revisit" in blocker for blocker in payload["blockers"])
+    assert any("Unresolved reviewed route sequence" in blocker for blocker in assessment.blockers)
+    assert any("Revisit" in blocker for blocker in assessment.blockers)
 
 
 def test_chat_accepts_reviewed_walkthrough_step_without_checkpoint():
