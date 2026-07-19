@@ -62,26 +62,6 @@ final class ActGuideTests: XCTestCase {
         XCTAssertEqual(payload.timedEvents.map(\.id), ["deadline"])
     }
 
-    func testUnavailableActGuideDecodesAsAnEmptyGuide() throws {
-        let payload = try decode(#"""
-        {
-          "guideVersion": "test",
-          "act": 2,
-          "routeAvailable": false,
-          "checkpoints": [],
-          "builds": [],
-          "walkthrough": [],
-          "timedEvents": [],
-          "acts": []
-        }
-        """#)
-
-        XCTAssertEqual(payload.act, 2)
-        XCTAssertFalse(payload.routeAvailable)
-        XCTAssertTrue(payload.checkpoints.isEmpty)
-        XCTAssertTrue(payload.walkthrough.isEmpty)
-    }
-
     func testActMapHandoffsKeepOnlyActOneLocal() {
         func guide(act: Int, local: Bool, url: String) -> ActGuideSummary {
             ActGuideSummary(

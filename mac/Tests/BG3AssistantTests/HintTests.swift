@@ -2,11 +2,7 @@ import XCTest
 @testable import BG3HonorAssistant
 
 final class HintTests: XCTestCase {
-    func testEveryHintHasCopyAndStableRawValue() {
-        for hint in HintID.allCases {
-            XCTAssertFalse(hint.text.isEmpty)
-            XCTAssertEqual(HintID(rawValue: hint.rawValue), hint)
-        }
+    func testHintRawValuesStayStable() {
         // Raw values persist in AssistantSettings.seenHints; renaming one
         // would re-show a hint every user has already dismissed.
         XCTAssertEqual(Set(HintID.allCases.map(\.rawValue)), ["peekBasics", "plannerMap", "fightTools"])

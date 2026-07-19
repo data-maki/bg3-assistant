@@ -60,9 +60,11 @@ def test_act_guides_are_isolated_and_act_three_is_app_ready():
     assert act_three.status_code == 200
     assert payload["act"] == 3
     assert payload["routeAvailable"] is True
-    assert len(payload["checkpoints"]) == 13
-    assert len(payload["walkthrough"]) == 19
-    assert len(payload["timedEvents"]) == 9
+    # App-ready means a populated guide with unique ids, not any exact count;
+    # content edits must not break this test.
+    assert payload["checkpoints"] and payload["walkthrough"] and payload["timedEvents"]
+    assert len({item["id"] for item in payload["checkpoints"]}) == len(payload["checkpoints"])
+    assert len({item["id"] for item in payload["walkthrough"]}) == len(payload["walkthrough"])
     assert payload["checkpoints"][0]["x"] is None
     assert payload["checkpoints"][0]["y"] is None
     assert payload["checkpoints"][0]["source"]["row"] is None

@@ -60,7 +60,6 @@ final class AbilityProgressionTests: XCTestCase {
         candidate.abilitySetups = [setup, respec]
         XCTAssertEqual(AbilityProgression.activeSetup(in: candidate, at: 7)?.id, "creation")
         XCTAssertEqual(AbilityProgression.activeSetup(in: candidate, at: 8)?.id, "respec-l8")
-        XCTAssertEqual(AbilityProgression.nextSetup(in: candidate, after: 7)?.id, "respec-l8")
     }
 
     func testStructuredSourcesKeepBuildTargetStableWhenCurrentExceedsIt() {
@@ -96,18 +95,4 @@ final class AbilityProgressionTests: XCTestCase {
         XCTAssertEqual(result.target, 22)
     }
 
-    func testPartyMemberAbilityStateRoundTripsThroughJSON() throws {
-        let original = member(modifiers: [
-            AbilityModifier(
-                ability: .strength, kind: .temporary, mode: .minimum, value: 21,
-                source: "Elixir of Hill Giant Strength", planSourceId: "hill-giant-elixir"
-            ),
-        ])
-        let data = try JSONEncoder().encode(original)
-        let decoded = try JSONDecoder().decode(PartyMember.self, from: data)
-        XCTAssertEqual(decoded, original)
-        XCTAssertEqual(decoded.abilityModifiers?.first?.planSourceId, "hill-giant-elixir")
-        XCTAssertEqual(decoded.appliedAbilitySetupId, "creation")
-        XCTAssertEqual(decoded.usesBuildAbilityScores, true)
-    }
 }

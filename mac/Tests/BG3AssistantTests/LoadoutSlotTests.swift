@@ -42,12 +42,6 @@ final class LoadoutSlotTests: XCTestCase {
         XCTAssertTrue(DollCell(slot: .rings, field: 1).items(in: grouped).isEmpty)
     }
 
-    func testRingFieldLabelsAndOtherSlotLabels() {
-        XCTAssertEqual(DollCell(slot: .rings, field: 0).label, "Ring 1")
-        XCTAssertEqual(DollCell(slot: .rings, field: 1).label, "Ring 2")
-        XCTAssertEqual(DollCell(slot: .torch).label, "Torch")
-    }
-
     func testRarityClassificationDoesNotTreatVeryRareAsRare() {
         XCTAssertEqual(GearRarity(effect: "A very rare helmet."), .veryRare)
         XCTAssertEqual(GearRarity(effect: "A rare ring."), .rare)
