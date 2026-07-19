@@ -163,19 +163,18 @@ enum GearLogic {
         return (byPhase, other)
     }
 
-    /// One active member's claim on gear: identity, tie-break names, when
-    /// their build was assigned, and the item keys their plan currently wants.
+    /// One active member's claim on gear: identity and the item keys their
+    /// plan currently wants.
     struct GearClaim: Equatable {
         let memberId: String
         let memberName: String
-        let buildName: String
-        let buildAssignedAt: Date?
         let itemKeys: Set<String>
     }
 
-    /// Deterministic item → member assignment. Manual override wins when its
-    /// target still claims the item; otherwise the earliest build assignment
-    /// ("first to request"), then alphabetical build name, member name, id.
+    /// Deterministic item → member assignment: a manual override wins when its
+    /// target still claims the item; otherwise the alphabetically first
+    /// claimant. One rule plus one legible default — recency tracking was
+    /// deliberately removed.
     static func assignments(
         claims: [GearClaim],
         overrides: [String: String]
@@ -189,12 +188,6 @@ enum GearLogic {
                 continue
             }
             result[key] = claimants.min { lhs, rhs in
-                let lhsDate = lhs.buildAssignedAt ?? .distantFuture
-                let rhsDate = rhs.buildAssignedAt ?? .distantFuture
-                if lhsDate != rhsDate { return lhsDate < rhsDate }
-                if lhs.buildName.lowercased() != rhs.buildName.lowercased() {
-                    return lhs.buildName.lowercased() < rhs.buildName.lowercased()
-                }
                 if lhs.memberName.lowercased() != rhs.memberName.lowercased() {
                     return lhs.memberName.lowercased() < rhs.memberName.lowercased()
                 }

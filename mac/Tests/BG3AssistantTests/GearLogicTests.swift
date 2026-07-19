@@ -2,49 +2,35 @@ import XCTest
 @testable import BG3HonorAssistant
 
 final class GearLogicTests: XCTestCase {
-    // MARK: assignments
+    private func claim(_ memberId: String, name: String? = nil, items: Set<String>) -> GearLogic.GearClaim {
+        GearLogic.GearClaim(memberId: memberId, memberName: name ?? memberId.capitalized, itemKeys: items)
+    }
 
-    private func claim(
-        _ memberId: String, build: String, at seconds: TimeInterval?, items: Set<String>
-    ) -> GearLogic.GearClaim {
-        GearLogic.GearClaim(
-            memberId: memberId, memberName: memberId.capitalized, buildName: build,
-            buildAssignedAt: seconds.map { Date(timeIntervalSince1970: $0) }, itemKeys: items
+    func testOverrideWinsWhileItsTargetStillClaimsTheItem() {
+        let claims = [
+            claim("astarion", items: ["caustic-band"]),
+            claim("karlach", items: ["caustic-band"]),
+        ]
+        XCTAssertEqual(
+            GearLogic.assignments(claims: claims, overrides: ["caustic-band": "karlach"])["caustic-band"],
+            "karlach"
+        )
+        // A stale override (target no longer claims) falls back to the default.
+        XCTAssertEqual(
+            GearLogic.assignments(claims: claims, overrides: ["caustic-band": "gale"])["caustic-band"],
+            "astarion"
         )
     }
 
-    func testAssignmentPrefersEarliestBuildAssignment() {
+    func testContestedItemsDefaultToAlphabeticallyFirstClaimant() {
         let result = GearLogic.assignments(
             claims: [
-                claim("karlach", build: "Zerker", at: 200, items: ["caustic-band"]),
-                claim("astarion", build: "Assassin", at: 100, items: ["caustic-band"]),
+                claim("karlach", items: ["caustic-band", "haste-helm"]),
+                claim("astarion", items: ["caustic-band"]),
             ],
             overrides: [:]
         )
         XCTAssertEqual(result["caustic-band"], "astarion")
+        XCTAssertEqual(result["haste-helm"], "karlach", "uncontested items go to their only claimant")
     }
-
-    func testOverrideBeatsRecency() {
-        let result = GearLogic.assignments(
-            claims: [
-                claim("karlach", build: "Zerker", at: 200, items: ["caustic-band"]),
-                claim("astarion", build: "Assassin", at: 100, items: ["caustic-band"]),
-            ],
-            overrides: ["caustic-band": "karlach"]
-        )
-        XCTAssertEqual(result["caustic-band"], "karlach")
-    }
-
-    func testUncontestedItemsAssignToTheirOnlyClaimant() {
-        let result = GearLogic.assignments(
-            claims: [
-                claim("karlach", build: "Zerker", at: 200, items: ["haste-helm"]),
-                claim("astarion", build: "Assassin", at: 100, items: ["caustic-band"]),
-            ],
-            overrides: [:]
-        )
-        XCTAssertEqual(result["haste-helm"], "karlach")
-        XCTAssertEqual(result["caustic-band"], "astarion")
-    }
-
 }

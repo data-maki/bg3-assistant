@@ -107,7 +107,6 @@ extension AppState {
         reset.sourceLoadoutId = nil
         run.roster?[index] = reset
         run.equippedByMember?[member.id] = nil
-        run.buildAssignedAt?.removeValue(forKey: member.id)
         run.plannedSlotOverrides?.removeValue(forKey: member.id)
         run.gearAssignmentOverrides = run.gearAssignmentOverrides?.filter { $0.value != member.id }
         run.syncActivePartyProjection()
@@ -164,7 +163,6 @@ extension AppState {
         members.remove(at: index)
         run.roster = members
         run.equippedByMember?.removeValue(forKey: member.id)
-        run.buildAssignedAt?.removeValue(forKey: member.id)
         run.plannedSlotOverrides?.removeValue(forKey: member.id)
         run.gearAssignmentOverrides = run.gearAssignmentOverrides?.filter { $0.value != member.id }
         run.syncActivePartyProjection()
@@ -238,14 +236,8 @@ extension AppState {
         var copy = member
         copy.buildId = buildID
         copy.appliedAbilitySetupId = nil
-        // "First to request" recency: stamp when a (different) build lands;
-        // clearing the build also clears the stamp and any slot swaps.
-        if buildID == nil {
-            run.buildAssignedAt?.removeValue(forKey: member.id)
-            run.plannedSlotOverrides?.removeValue(forKey: member.id)
-        } else if buildID != member.buildId {
-            run.buildAssignedAt = run.buildAssignedAt ?? [:]
-            run.buildAssignedAt?[member.id] = Date()
+        // A build change invalidates that member's per-slot catalog swaps.
+        if buildID != member.buildId {
             run.plannedSlotOverrides?.removeValue(forKey: member.id)
         }
         guard let buildID,
@@ -466,10 +458,9 @@ extension AppState {
     private var assignmentClaims: [GearLogic.GearClaim] {
         activeParty.compactMap { member in
             guard let buildId = member.buildId,
-                  let build = builds.first(where: { $0.id == buildId }) else { return nil }
+                  builds.contains(where: { $0.id == buildId }) else { return nil }
             return GearLogic.GearClaim(
-                memberId: member.id, memberName: member.name, buildName: build.name,
-                buildAssignedAt: run.buildAssignedAt?[member.id],
+                memberId: member.id, memberName: member.name,
                 itemKeys: Set(wantedGear(for: member).map(\.itemKey))
             )
         }

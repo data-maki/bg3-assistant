@@ -477,7 +477,6 @@ struct PartyMember: Codable, Identifiable, Hashable {
 struct PartyPlan {
     var roster: [PartyMember]
     var equippedByMember: [String: Set<String>]
-    var buildAssignedAt: [String: Date]
     var gearAssignmentOverrides: [String: String]
     var plannedSlotOverrides: [String: [String: String]]
     var gearTarget: GearTarget?
@@ -489,7 +488,6 @@ extension HonorRun {
             PartyPlan(
                 roster: roster ?? party,
                 equippedByMember: equippedByMember ?? [:],
-                buildAssignedAt: buildAssignedAt ?? [:],
                 gearAssignmentOverrides: gearAssignmentOverrides ?? [:],
                 plannedSlotOverrides: plannedSlotOverrides ?? [:],
                 gearTarget: gearTarget
@@ -498,7 +496,6 @@ extension HonorRun {
         set {
             roster = newValue.roster
             equippedByMember = newValue.equippedByMember
-            buildAssignedAt = newValue.buildAssignedAt
             gearAssignmentOverrides = newValue.gearAssignmentOverrides
             plannedSlotOverrides = newValue.plannedSlotOverrides
             gearTarget = newValue.gearTarget
@@ -560,9 +557,6 @@ extension HonorRun {
                 appliedAbilitySetupId: nil
             )
         }
-        fresh.buildAssignedAt = Dictionary(uniqueKeysWithValues: (fresh.roster ?? []).compactMap { member in
-            member.buildId == nil ? nil : (member.id, createdAt)
-        })
         fresh.syncActivePartyProjection()
         return fresh
     }
@@ -614,11 +608,9 @@ struct HonorRun: Codable {
     var includeCampPlans: Bool?
     var equippedByMember: [String: Set<String>]?
     var equipmentOwnershipKnown: Bool?
-    // Deterministic gear assignment: when each member's current build was
-    // assigned ("first to request" recency), the player's manual item →
-    // member overrides, and per-slot catalog swaps replacing a build's pick.
+    // Deterministic gear assignment: the player's manual item → member
+    // overrides, and per-slot catalog swaps replacing a build's pick.
     // Optional so old snapshots decode.
-    var buildAssignedAt: [String: Date]?
     var gearAssignmentOverrides: [String: String]?
     var plannedSlotOverrides: [String: [String: String]]?
     var progress: [String: CheckpointProgress] = [:]
@@ -687,15 +679,6 @@ struct HonorRun: Codable {
         if storyOutcomes == nil { storyOutcomes = [] }
         if includeCampPlans == nil { includeCampPlans = false }
         if equippedByMember == nil { equippedByMember = [:] }
-        if buildAssignedAt == nil {
-            // Legacy runs: every existing build assignment gets the same epoch
-            // stamp so recency ties resolve alphabetically (deterministic).
-            var stamps: [String: Date] = [:]
-            for member in members where member.buildId != nil {
-                stamps[member.id] = Date(timeIntervalSince1970: 0)
-            }
-            buildAssignedAt = stamps
-        }
         if gearAssignmentOverrides == nil { gearAssignmentOverrides = [:] }
         if plannedSlotOverrides == nil { plannedSlotOverrides = [:] }
         if equipmentOwnershipKnown == nil { equipmentOwnershipKnown = false }
