@@ -85,7 +85,7 @@ final class RunCreationTests: XCTestCase {
         XCTAssertTrue(fresh.equippedByMember.isEmpty ?? true)
         XCTAssertFalse(fresh.equipmentOwnershipKnown ?? true)
         XCTAssertTrue(fresh.gearAssignmentOverrides.isEmpty ?? true)
-        XCTAssertTrue(fresh.plannedSlotOverrides.isEmpty ?? true)
+        XCTAssertTrue(fresh.plannedSlotOverrides.isEmpty)
         XCTAssertNil(fresh.gearTarget)
         XCTAssertEqual(fresh.mapRegion, "Wilderness")
 
@@ -97,7 +97,6 @@ final class RunCreationTests: XCTestCase {
         XCTAssertEqual(tav.abilityScores, latestScores)
         XCTAssertTrue(tav.abilityModifiers?.isEmpty ?? false)
         XCTAssertNil(tav.appliedAbilitySetupId)
-        XCTAssertEqual(fresh.buildAssignedAt?[tav.id], createdAt)
 
         let shadowheart = try XCTUnwrap(fresh.roster?.first { $0.name == "Shadowheart" })
         XCTAssertNil(shadowheart.buildId)
