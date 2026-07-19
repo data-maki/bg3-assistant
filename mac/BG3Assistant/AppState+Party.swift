@@ -106,9 +106,9 @@ extension AppState {
         reset.appliedAbilitySetupId = nil
         reset.sourceLoadoutId = nil
         run.roster?[index] = reset
-        run.equippedByMember?[member.id] = nil
-        run.plannedSlotOverrides?.removeValue(forKey: member.id)
-        run.gearAssignmentOverrides = run.gearAssignmentOverrides?.filter { $0.value != member.id }
+        run.equippedByMember[member.id] = nil
+        run.plannedSlotOverrides.removeValue(forKey: member.id)
+        run.gearAssignmentOverrides = run.gearAssignmentOverrides.filter { $0.value != member.id }
         run.syncActivePartyProjection()
         validateGearTarget()
         persistRun()
@@ -162,9 +162,9 @@ extension AppState {
         recordPartyUndo("Dismissed \(member.name)")
         members.remove(at: index)
         run.roster = members
-        run.equippedByMember?.removeValue(forKey: member.id)
-        run.plannedSlotOverrides?.removeValue(forKey: member.id)
-        run.gearAssignmentOverrides = run.gearAssignmentOverrides?.filter { $0.value != member.id }
+        run.equippedByMember.removeValue(forKey: member.id)
+        run.plannedSlotOverrides.removeValue(forKey: member.id)
+        run.gearAssignmentOverrides = run.gearAssignmentOverrides.filter { $0.value != member.id }
         run.syncActivePartyProjection()
         validateGearTarget()
         persistRun()
@@ -238,7 +238,7 @@ extension AppState {
         copy.appliedAbilitySetupId = nil
         // A build change invalidates that member's per-slot catalog swaps.
         if buildID != member.buildId {
-            run.plannedSlotOverrides?.removeValue(forKey: member.id)
+            run.plannedSlotOverrides.removeValue(forKey: member.id)
         }
         guard let buildID,
               let build = builds.first(where: { $0.id == buildID }) else {
@@ -268,7 +268,7 @@ extension AppState {
     }
 
     func equippedItemKeys(for member: PartyMember) -> Set<String> {
-        Set(run.equippedByMember?[member.id] ?? [])
+        Set(run.equippedByMember[member.id] ?? [])
     }
 
     func abilitySourceIsApplied(_ source: AbilityPlanSource, to member: PartyMember) -> Bool {
@@ -283,7 +283,7 @@ extension AppState {
     func abilitySourceOwner(_ source: AbilityPlanSource) -> PartyMember? {
         guard source.uniqueAcrossParty else { return nil }
         if source.kind == .equipment, let itemKey = source.itemKey,
-           let memberID = run.equippedByMember?.first(where: { $0.value.contains(itemKey) })?.key {
+           let memberID = run.equippedByMember.first(where: { $0.value.contains(itemKey) })?.key {
             return roster.first { $0.id == memberID }
         }
         return roster.first { member in
@@ -399,7 +399,7 @@ extension AppState {
     }
 
     func gearIsEquipped(_ gear: BuildGear, by member: PartyMember) -> Bool {
-        run.equippedByMember?[member.id]?.contains(gear.itemKey) == true
+        run.equippedByMember[member.id]?.contains(gear.itemKey) == true
     }
 
     /// The member's current plan for this act: build picks filtered by act and
@@ -412,7 +412,7 @@ extension AppState {
         guard let buildId = member.buildId,
               let build = builds.first(where: { $0.id == buildId }) else { return [] }
         var gear = build.gear.filter { $0.act == act && $0.isAvailable(at: member.level) }
-        let replacements = (run.plannedSlotOverrides?[member.id] ?? [:]).compactMap { storedKey, itemKey -> (String, ItemSummary)? in
+        let replacements = (run.plannedSlotOverrides[member.id] ?? [:]).compactMap { storedKey, itemKey -> (String, ItemSummary)? in
             guard let item = itemCatalog.first(where: { $0.itemKey == itemKey }), item.act <= act else { return nil }
             let slot = LoadoutSlot.classify(item.slot, item: item.name)
             let effectiveKey = slot == .rings && storedKey.hasPrefix("\(slot.id)#")
@@ -470,7 +470,7 @@ extension AppState {
     /// wins; otherwise the build assigned earliest ("first to request"),
     /// ties broken alphabetically.
     var plannedAssignments: [String: String] {
-        GearLogic.assignments(claims: assignmentClaims, overrides: run.gearAssignmentOverrides ?? [:])
+        GearLogic.assignments(claims: assignmentClaims, overrides: run.gearAssignmentOverrides)
     }
 
     func plannedOwner(ofItemKey key: String) -> PartyMember? {
@@ -480,8 +480,8 @@ extension AppState {
 
     func setGearAssignmentOverride(_ gear: BuildGear, to member: PartyMember) {
         partyUndoState = nil
-        run.gearAssignmentOverrides = run.gearAssignmentOverrides ?? [:]
-        run.gearAssignmentOverrides?[gear.itemKey] = member.id
+        run.gearAssignmentOverrides = run.gearAssignmentOverrides
+        run.gearAssignmentOverrides[gear.itemKey] = member.id
         persistRun()
     }
 
@@ -499,7 +499,7 @@ extension AppState {
 
     func setSlotOverride(_ cell: DollCell, itemKey: String?, for member: PartyMember) {
         partyUndoState = nil
-        var all = run.plannedSlotOverrides ?? [:]
+        var all = run.plannedSlotOverrides
         var mine = all[member.id] ?? [:]
         if let existing = resolvedSlotOverride(for: member, cell: cell) {
             mine.removeValue(forKey: existing.key)
@@ -512,7 +512,7 @@ extension AppState {
     }
 
     private func resolvedSlotOverride(for member: PartyMember, cell: DollCell) -> (key: String, itemKey: String)? {
-        for (key, itemKey) in run.plannedSlotOverrides?[member.id] ?? [:] {
+        for (key, itemKey) in run.plannedSlotOverrides[member.id] ?? [:] {
             guard let item = itemCatalog.first(where: { $0.itemKey == itemKey }) else { continue }
             let slot = LoadoutSlot.classify(item.slot, item: item.name)
             let effectiveID: String

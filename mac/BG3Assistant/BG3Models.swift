@@ -482,14 +482,56 @@ struct PartyPlan {
     var gearTarget: GearTarget?
 }
 
+/// Tolerant decoding: every field falls back to its default when absent, so
+/// tightening a field to non-optional can never brick an existing run
+/// snapshot. Lives in an extension so the synthesized memberwise/default
+/// initializers and encoder survive.
 extension HonorRun {
+    private enum CodingKeys: String, CodingKey {
+        case id, name, createdAt, guideVersion, party, roster, storyOutcomes,
+             includeCampPlans, equippedByMember, equipmentOwnershipKnown,
+             gearAssignmentOverrides, plannedSlotOverrides, progress,
+             walkthroughProgress, walkthroughOutcomes, focusedWalkthroughStepId,
+             gearTarget, selectedCheckpointId, selectedAct, actGearReview,
+             actTransitions, finalActRecord, mapRegion, mutedCheckpointIds
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let defaults = HonorRun()
+        id = try container.decodeIfPresent(String.self, forKey: .id) ?? defaults.id
+        name = try container.decodeIfPresent(String.self, forKey: .name)
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt)
+        guideVersion = try container.decodeIfPresent(String.self, forKey: .guideVersion) ?? ""
+        party = try container.decodeIfPresent([PartyMember].self, forKey: .party) ?? defaults.party
+        roster = try container.decodeIfPresent([PartyMember].self, forKey: .roster)
+        storyOutcomes = try container.decodeIfPresent(Set<String>.self, forKey: .storyOutcomes) ?? []
+        includeCampPlans = try container.decodeIfPresent(Bool.self, forKey: .includeCampPlans) ?? false
+        equippedByMember = try container.decodeIfPresent([String: Set<String>].self, forKey: .equippedByMember) ?? [:]
+        equipmentOwnershipKnown = try container.decodeIfPresent(Bool.self, forKey: .equipmentOwnershipKnown) ?? false
+        gearAssignmentOverrides = try container.decodeIfPresent([String: String].self, forKey: .gearAssignmentOverrides) ?? [:]
+        plannedSlotOverrides = try container.decodeIfPresent([String: [String: String]].self, forKey: .plannedSlotOverrides) ?? [:]
+        progress = try container.decodeIfPresent([String: CheckpointProgress].self, forKey: .progress) ?? [:]
+        walkthroughProgress = try container.decodeIfPresent([String: CheckpointDisposition].self, forKey: .walkthroughProgress) ?? [:]
+        walkthroughOutcomes = try container.decodeIfPresent([String: String].self, forKey: .walkthroughOutcomes) ?? [:]
+        focusedWalkthroughStepId = try container.decodeIfPresent(String.self, forKey: .focusedWalkthroughStepId)
+        gearTarget = try container.decodeIfPresent(GearTarget.self, forKey: .gearTarget)
+        selectedCheckpointId = try container.decodeIfPresent(String.self, forKey: .selectedCheckpointId)
+        selectedAct = try container.decodeIfPresent(Int.self, forKey: .selectedAct) ?? 1
+        actGearReview = try container.decodeIfPresent([Int: [String: ActGearReviewStatus]].self, forKey: .actGearReview) ?? [:]
+        actTransitions = try container.decodeIfPresent([ActTransitionRecord].self, forKey: .actTransitions) ?? []
+        finalActRecord = try container.decodeIfPresent(ActTransitionRecord.self, forKey: .finalActRecord)
+        mapRegion = try container.decodeIfPresent(String.self, forKey: .mapRegion) ?? "Wilderness"
+        mutedCheckpointIds = try container.decodeIfPresent(Set<String>.self, forKey: .mutedCheckpointIds) ?? []
+    }
+
     var partyPlan: PartyPlan {
         get {
             PartyPlan(
                 roster: roster ?? party,
-                equippedByMember: equippedByMember ?? [:],
-                gearAssignmentOverrides: gearAssignmentOverrides ?? [:],
-                plannedSlotOverrides: plannedSlotOverrides ?? [:],
+                equippedByMember: equippedByMember,
+                gearAssignmentOverrides: gearAssignmentOverrides,
+                plannedSlotOverrides: plannedSlotOverrides,
                 gearTarget: gearTarget
             )
         }
@@ -604,19 +646,18 @@ struct HonorRun: Codable {
         PartyMember(id: "companion-3", name: "Astarion", level: 1, buildId: nil, preparedTags: [], className: "Rogue"),
     ]
     var roster: [PartyMember]?
-    var storyOutcomes: Set<String>?
-    var includeCampPlans: Bool?
-    var equippedByMember: [String: Set<String>]?
-    var equipmentOwnershipKnown: Bool?
+    var storyOutcomes: Set<String> = []
+    var includeCampPlans = false
+    var equippedByMember: [String: Set<String>] = [:]
+    var equipmentOwnershipKnown = false
     // Deterministic gear assignment: the player's manual item → member
     // overrides, and per-slot catalog swaps replacing a build's pick.
-    // Optional so old snapshots decode.
-    var gearAssignmentOverrides: [String: String]?
-    var plannedSlotOverrides: [String: [String: String]]?
+    var gearAssignmentOverrides: [String: String] = [:]
+    var plannedSlotOverrides: [String: [String: String]] = [:]
     var progress: [String: CheckpointProgress] = [:]
-    var walkthroughProgress: [String: CheckpointDisposition]?
+    var walkthroughProgress: [String: CheckpointDisposition] = [:]
     // step id → the decision option that actually happened in this run
-    var walkthroughOutcomes: [String: String]?
+    var walkthroughOutcomes: [String: String] = [:]
     // Player-owned focus is deliberately separate from the assistant's route
     // recommendation. Open-world runs are allowed to diverge without losing
     // the recommended sequence.
@@ -625,19 +666,19 @@ struct HonorRun: Codable {
     // route goal until acquired or cleared. Optional so old snapshots decode.
     var gearTarget: GearTarget?
     var selectedCheckpointId: String?
-    var selectedAct: Int? = 1
-    var actGearReview: [Int: [String: ActGearReviewStatus]]?
-    var actTransitions: [ActTransitionRecord]?
+    var selectedAct = 1
+    var actGearReview: [Int: [String: ActGearReviewStatus]] = [:]
+    var actTransitions: [ActTransitionRecord] = []
     var finalActRecord: ActTransitionRecord?
     var mapRegion = "Wilderness"
-    var mutedCheckpointIds: Set<String>?
+    var mutedCheckpointIds: Set<String> = []
 
     /// Roster invariant enforcement and seeding: a fresh run (roster nil)
     /// gets its full roster built from the default party plus every story
     /// companion; existing rosters get nil fields seeded and the 4-active
     /// cap enforced. Idempotent — safe to call on every load.
     mutating func normalizeRoster() {
-        if !(1...3).contains(selectedAct ?? 0) { selectedAct = 1 }
+        if !(1...3).contains(selectedAct) { selectedAct = 1 }
         var members = roster ?? party
         for index in members.indices {
             if roster == nil { members[index].status = .active }
@@ -709,18 +750,18 @@ struct HonorRun: Codable {
     }
 
     func equipmentOwnerID(for itemKey: String) -> String? {
-        equippedByMember?.first(where: { $0.value.contains(itemKey) })?.key
+        equippedByMember.first(where: { $0.value.contains(itemKey) })?.key
     }
 
     func actLedgerIsLocked(_ act: Int) -> Bool {
-        act < (selectedAct ?? 1) || (act == 3 && finalActRecord != nil)
+        act < selectedAct || (act == 3 && finalActRecord != nil)
     }
 
     func lockedActRecord(for act: Int) -> ActTransitionRecord? {
         guard actLedgerIsLocked(act) else { return nil }
         return act == 3
             ? finalActRecord
-            : actTransitions?.first(where: { $0.fromAct == act })
+            : actTransitions.first(where: { $0.fromAct == act })
     }
 
     func lockedActGearReviewStatus(for itemKey: String, in act: Int) -> ActGearReviewStatus? {
@@ -730,7 +771,7 @@ struct HonorRun: Codable {
     @discardableResult
     mutating func toggleEquipment(itemKey: String, for memberID: String) -> Bool {
         guard (roster ?? party).contains(where: { $0.id == memberID }) else { return false }
-        var assignments = equippedByMember ?? [:]
+        var assignments = equippedByMember
         let alreadyAssigned = assignments[memberID]?.contains(itemKey) == true
         for ownerID in Array(assignments.keys) {
             assignments[ownerID]?.remove(itemKey)
@@ -743,7 +784,7 @@ struct HonorRun: Codable {
     }
 
     mutating func setStoryOutcome(_ outcome: String, confirmed: Bool) {
-        var outcomes = storyOutcomes ?? []
+        var outcomes = storyOutcomes
         if confirmed { outcomes.insert(outcome) }
         else { outcomes.remove(outcome) }
         storyOutcomes = outcomes

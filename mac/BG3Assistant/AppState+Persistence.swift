@@ -8,7 +8,7 @@ extension AppState {
     /// background poll), resetting the per-run transients that must not
     /// outlive the snapshot they were captured against.
     func adoptRun(_ shared: HonorRun, token: RunStore.ChangeToken?) {
-        let guideContextChanged = run.id != shared.id || selectedAct != (shared.selectedAct ?? 1)
+        let guideContextChanged = run.id != shared.id || selectedAct != (shared.selectedAct)
         run = shared
         runNameDraft = shared.name ?? "Honor Run"
         partyUndoState = nil
@@ -138,7 +138,7 @@ extension AppState {
             SavedRunSummary(
                 id: saved.id,
                 name: saved.name ?? "Honor Run",
-                completedSteps: saved.walkthroughProgress?.values.filter(\.countsAsCompleted).count ?? 0,
+                completedSteps: saved.walkthroughProgress.values.filter(\.countsAsCompleted).count,
                 partyLevel: saved.activeParty.map(\.level).min() ?? 1
             )
         }
