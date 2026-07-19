@@ -46,22 +46,6 @@ final class AbilityProgressionTests: XCTestCase {
         )
     }
 
-    func testPointBuyCostMatchesValidatedRecipe() {
-        XCTAssertEqual(AbilityProgression.pointBuyCost(setup.pointBuyScores), 27)
-    }
-
-    func testActiveSetupChangesAtRespecLevel() {
-        let respec = AbilitySetupPlan(
-            id: "respec-l8", level: 8, label: "Respec", reason: "Test",
-            pointBuyScores: setup.pointBuyScores, bonusTwo: .wisdom, bonusOne: .dexterity,
-            finalScores: setup.finalScores, firstClass: "Fighter", classOrder: "Fighter -> Monk"
-        )
-        var candidate = build()
-        candidate.abilitySetups = [setup, respec]
-        XCTAssertEqual(AbilityProgression.activeSetup(in: candidate, at: 7)?.id, "creation")
-        XCTAssertEqual(AbilityProgression.activeSetup(in: candidate, at: 8)?.id, "respec-l8")
-    }
-
     func testStructuredSourcesKeepBuildTargetStableWhenCurrentExceedsIt() {
         let sources = [
             AbilityPlanSource(

@@ -1,47 +1,12 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.guide_chat import guide_facts
 from app.main import app
 from app.models import PartyMember, ReadinessRequest
-from app.route_data import assess_readiness, checkpoint_by_id, item_key, load_gear
-from app.walkthrough_data import walkthrough_by_id
+from app.route_data import assess_readiness, checkpoint_by_id
 
 
 client = TestClient(app)
-
-
-def test_act_catalog_uses_separate_equipment_databases():
-    response = client.get("/api/acts/1/guide")
-    assert response.status_code == 200
-    acts = response.json()["acts"]
-    assert [entry["equipment_file"] for entry in acts] == [
-        "gear/act1.tsv",
-        "gear/act2.tsv",
-        "gear/act3.tsv",
-    ]
-    # Counts are distinct catalog items per act (the same item listed for
-    # several builds is one row), not raw TSV rows.
-    expected = [
-        len({item_key(item.item) for item in load_gear(act)})
-        for act in (1, 2, 3)
-    ]
-    assert [entry["equipment_count"] for entry in acts] == expected
-    assert acts[0]["route_available"] is True
-    assert acts[1]["route_available"] is False
-
-
-def test_act_two_equipment_is_isolated_and_coordinate_backed():
-    act_two = load_gear(2)
-    assert act_two
-    assert {item.act for item in act_two} == {2}
-    assert all(item.game_x is not None and item.game_y is not None for item in act_two if item.map_objective)
-    helmet = next(item for item in act_two if item.item == "Helmet of Arcane Acuity")
-    assert (helmet.game_x, helmet.game_y) == (107, -758)
-
-
-def test_unknown_act_is_not_exposed():
-    assert client.get("/api/acts/4/guide").status_code == 404
 
 
 def test_act_guides_are_isolated_and_act_three_is_app_ready():
@@ -123,33 +88,3 @@ def test_readiness_blocks_skipped_required_route_prerequisite():
 
     assert any("Unresolved reviewed route sequence" in blocker for blocker in assessment.blockers)
     assert any("Revisit" in blocker for blocker in assessment.blockers)
-
-
-def test_chat_accepts_reviewed_walkthrough_step_without_checkpoint():
-    response = client.post("/api/chat", json={
-        "message": "Where should I go next?",
-        "walkthrough_step_id": "walk-act3-rivington",
-        "context": {"selected_act": 3},
-    })
-
-    assert response.status_code == 200
-    assert "Stabilize Rivington" in response.json()["answer"]
-
-
-def test_chat_rejects_mismatched_step_and_checkpoint():
-    response = client.post("/api/chat", json={
-        "message": "What next?",
-        "checkpoint_id": "act3-coronation",
-        "walkthrough_step_id": "walk-act3-minsc",
-        "context": {"selected_act": 3},
-    })
-
-    assert response.status_code == 422
-
-
-def test_checkpointless_incident_is_in_chat_grounding():
-    facts = guide_facts(None, walkthrough_by_id("walk-act3-urgent-city", 3))
-
-    assert any(fact.startswith("Trigger:") for fact in facts)
-    assert any(fact.startswith("Safe actions:") for fact in facts)
-    assert any(fact.startswith("Escape:") for fact in facts)

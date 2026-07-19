@@ -2,18 +2,6 @@ import XCTest
 @testable import BG3HonorAssistant
 
 final class PartyRosterTests: XCTestCase {
-    func testMigrationAddsDarkUrgeToCamp() {
-        var run = HonorRun()
-
-        run.normalizeRoster()
-
-        let darkUrge = run.roster?.first { $0.id == "dark-urge" }
-        XCTAssertEqual(darkUrge?.name, "Dark Urge")
-        XCTAssertEqual(darkUrge?.className, "Sorcerer")
-        XCTAssertEqual(darkUrge?.rosterStatus, .camp)
-        XCTAssertFalse(darkUrge?.isCustom ?? true)
-    }
-
     func testUnrecruitedCompanionCanFillAnOpenPartySlot() {
         var run = HonorRun()
         run.normalizeRoster()

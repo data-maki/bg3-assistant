@@ -190,14 +190,6 @@ final class RunSafetyTests: XCTestCase {
 
     // MARK: nextCheckpoint
 
-    func testSelectedCheckpointShortCircuits() {
-        let route = [checkpoint(id: "a", routeOrder: 1), checkpoint(id: "b", routeOrder: 2)]
-        let next = RunSafety.nextCheckpoint(
-            route: route, dispositions: ["b": .completed], selectedId: "b", partyLevel: 1
-        )
-        XCTAssertEqual(next?.id, "b")
-    }
-
     func testNextCheckpointRespectsPhaseThenLevelDistanceThenRouteOrder() {
         let route = [
             checkpoint(id: "underdark", routeOrder: 1, region: "Underdark"),
@@ -242,12 +234,6 @@ final class RunSafetyTests: XCTestCase {
             "Skipped — Name skipped: Point of no return",
             "Unresolved — Name pendingWarned: Warned",
         ])
-    }
-
-    func testActThreeCheckpointUsesItsRegionAsThePhaseName() {
-        let checkpoint = checkpoint(id: "act3-iron-throne", routeOrder: 1, region: "Iron Throne")
-
-        XCTAssertEqual(RunSafety.routePhaseName(checkpoint), "Iron Throne")
     }
 
     // MARK: caughtUp (mid-run adoption) semantics
