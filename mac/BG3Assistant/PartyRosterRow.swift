@@ -13,13 +13,7 @@ struct PartyRosterRow: View {
 
     var body: some View {
         HStack(spacing: 9) {
-            Text(member.monogramInitials)
-                .font(.system(size: 10, weight: .heavy, design: .serif))
-                .foregroundStyle(BG3Theme.parchment)
-                .frame(width: 27, height: 27)
-                .background(member.rosterStatus.tint.opacity(0.22), in: RoundedRectangle(cornerRadius: 7))
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(member.rosterStatus.tint.opacity(0.55), lineWidth: 0.7))
-                .accessibilityHidden(true)
+            PartyMemberAvatar(member: member, size: 27, accent: member.rosterStatus.tint)
             VStack(alignment: .leading, spacing: 1) {
                 Text(member.name)
                     .font(BG3Type.rowTitle)
@@ -109,4 +103,57 @@ struct PartyRosterRow: View {
         }
         return member.className ?? "Party member"
     }
+}
+
+struct PartyMemberAvatar: View {
+    let member: PartyMember
+    let size: CGFloat
+    let accent: Color
+
+    var body: some View {
+        Group {
+            if let portrait {
+                Image(nsImage: portrait)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Text(member.monogramInitials)
+                    .font(.system(size: size * 0.37, weight: .heavy, design: .serif))
+                    .foregroundStyle(BG3Theme.parchment)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(accent.opacity(0.22))
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.25))
+        .overlay(
+            RoundedRectangle(cornerRadius: size * 0.25)
+                .stroke(accent.opacity(0.55), lineWidth: 0.7)
+        )
+        .accessibilityHidden(true)
+    }
+
+    private var portrait: NSImage? {
+        guard let filename = Self.filenames[member.name.lowercased()],
+              let url = Bundle.main.url(
+                  forResource: filename,
+                  withExtension: "png",
+                  subdirectory: "CompanionPortraits"
+              ) else { return nil }
+        return NSImage(contentsOf: url)
+    }
+
+    private static let filenames = [
+        "shadowheart": "shadowheart",
+        "lae'zel": "laezel",
+        "astarion": "astarion",
+        "gale": "gale",
+        "wyll": "wyll",
+        "karlach": "karlach",
+        "dark urge": "dark-urge",
+        "halsin": "halsin",
+        "minthara": "minthara",
+        "jaheira": "jaheira",
+        "minsc": "minsc",
+    ]
 }

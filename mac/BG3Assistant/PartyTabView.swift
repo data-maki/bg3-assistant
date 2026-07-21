@@ -198,7 +198,7 @@ private struct PartyGuidanceView: View {
         return Button { onMember(member.id) } label: {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 8) {
-                    memberMonogram(member)
+                    PartyMemberAvatar(member: member, size: 30, accent: BG3Theme.bronze)
                     VStack(alignment: .leading, spacing: 1) {
                         HStack(spacing: 6) {
                             Text(member.name)
@@ -255,13 +255,4 @@ private struct PartyGuidanceView: View {
         .accessibilityHint("Open \(member.name) details")
     }
 
-    private func memberMonogram(_ member: PartyMember) -> some View {
-        Text(member.monogramInitials)
-            .font(.system(size: 11, weight: .heavy, design: .serif))
-            .foregroundStyle(BG3Theme.parchment)
-            .frame(width: 30, height: 30)
-            .background(BG3Theme.bronze.opacity(0.28), in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(BG3Theme.gold.opacity(0.42), lineWidth: 0.7))
-            .accessibilityHidden(true)
-    }
 }

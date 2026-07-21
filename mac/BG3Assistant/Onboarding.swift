@@ -26,20 +26,21 @@ enum OnboardingMode {
 
 /// The first-run intake wizard, shown by the overlay in place of the planner
 /// or peek card until finished or skipped. Unlike the old fact tour, every
-/// step captures run state; teaching moved to one-time hints. Pure model
+/// step captures run state without front-loading product instructions. Pure model
 /// (Foundation only) so the flow is verifiable without XCTest.
 enum OnboardingStep: Int, CaseIterable {
     case welcome
+    case ai
     case party
     case catchUp
     case ready
 
     /// Bump after a UX overhaul to re-show the wizard once. Finishing or
     /// skipping records this in `AssistantSettings.onboardingSeenVersion`.
-    static let version = 2
+    static let version = 3
 
     static func steps(for mode: OnboardingMode) -> [OnboardingStep] {
-        mode == .midRun ? [.welcome, .party, .catchUp, .ready] : [.welcome, .party, .ready]
+        mode == .midRun ? [.welcome, .ai, .party, .catchUp, .ready] : [.welcome, .ai, .party, .ready]
     }
 
     static func stepCount(for mode: OnboardingMode) -> Int { steps(for: mode).count }
@@ -67,6 +68,7 @@ enum OnboardingStep: Int, CaseIterable {
     var title: String {
         switch self {
         case .welcome: "Well Met, Adventurer"
+        case .ai: "Choose Your Oracle"
         case .party: "Who Is at Your Table?"
         case .catchUp: "Where Are You?"
         case .ready: "Ready to Adventure"
@@ -76,7 +78,9 @@ enum OnboardingStep: Int, CaseIterable {
     var intro: String {
         switch self {
         case .welcome:
-            "Your Honor Mode companion floats above Baldur's Gate 3. Two quick questions and its advice matches your run — not a default one."
+            "Your Honor Mode companion floats above Baldur's Gate 3. A short setup makes its advice match your run — not a default one."
+        case .ai:
+            "Choose private local AI or connect your own OpenRouter account. You can change this later in Settings."
         case .party:
             "Set who is actually in the party and their level. Fight readiness and danger warnings key off your lowest active level."
         case .catchUp:
@@ -103,6 +107,7 @@ enum OnboardingStep: Int, CaseIterable {
     func primaryActionTitle(for mode: OnboardingMode) -> String? {
         switch self {
         case .welcome: nil
+        case .ai: "Continue"
         case .party: "Continue"
         case .catchUp: "Catch Up & Continue"
         case .ready: "Start Adventuring"

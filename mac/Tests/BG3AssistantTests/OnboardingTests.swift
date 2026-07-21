@@ -13,7 +13,10 @@ final class OnboardingTests: XCTestCase {
         )
     }
 
-    // MARK: - Catch-up ledger
+    func testProviderSetupIsRequiredForBothOnboardingPaths() {
+        XCTAssertEqual(OnboardingStep.steps(for: .fresh), [.welcome, .ai, .party, .ready])
+        XCTAssertEqual(OnboardingStep.steps(for: .midRun), [.welcome, .ai, .party, .catchUp, .ready])
+    }
 
     func testCatchUpMarksThroughLandmarkInclusive() throws {
         let walkthrough = [
@@ -41,5 +44,4 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(ledger["s1"], .skipped)
         XCTAssertEqual(ledger["s2"], .caughtUp)
     }
-
 }

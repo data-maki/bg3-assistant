@@ -4,6 +4,7 @@ import SwiftUI
 /// the planner or peek card until the wizard is finished or skipped.
 struct OnboardingCardView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var openRouterKey = ""
     let step: OnboardingStep
 
     var body: some View {
@@ -29,6 +30,7 @@ struct OnboardingCardView: View {
         .assistantGlassSurface(cornerRadius: 16)
         .shadow(color: .black.opacity(0.46), radius: 20, y: 8)
         .accessibilityElement(children: .contain)
+        .task { await appState.refreshAIProviderStatus() }
     }
 
     private var mode: OnboardingMode { appState.onboardingMode }
@@ -38,7 +40,7 @@ struct OnboardingCardView: View {
     }
 
     private var contentSize: CGSize {
-        let panel = OverlayMetrics.onboardingSize(for: referenceFrame)
+        let panel = OverlayMetrics.onboardingSize(for: referenceFrame, step: step)
         return CGSize(width: panel.width - 16, height: panel.height - 16)
     }
 
@@ -58,22 +60,92 @@ struct OnboardingCardView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Button(action: appState.skipOnboarding) {
-                Image(systemName: "xmark").frame(width: 18, height: 18)
-            }
-            .assistantActionButton()
-            .help("Skip setup")
-            .accessibilityLabel("Skip setup")
         }
     }
 
     @ViewBuilder private var stepContent: some View {
         switch step {
         case .welcome: welcomeContent
+        case .ai: aiContent
         case .party: partyContent
         case .catchUp: catchUpContent
         case .ready: readyContent
         }
+    }
+
+    // MARK: - AI provider
+
+    private var aiContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            providerButton(.localQwen)
+            if appState.aiProvider == .localQwen {
+                if appState.localAIInstalled {
+                    Label("Qwen3 4B is installed", systemImage: "checkmark.circle.fill")
+                        .font(BG3Type.caption)
+                        .foregroundStyle(BG3Theme.success)
+                } else if appState.isInstallingLocalAI {
+                    ProgressView(value: appState.localAIInstallProgress)
+                    Text("Downloading Qwen3 4B. Keep the assistant open.")
+                        .font(BG3Type.caption)
+                        .foregroundStyle(BG3Theme.mutedParchment)
+                } else {
+                    Button("Download 2.5 GB Model", action: appState.installLocalAI)
+                        .assistantActionButton(accent: BG3Theme.gold, prominent: true)
+                }
+            }
+            providerButton(.openRouter)
+            if appState.aiProvider == .openRouter {
+                if appState.hasOpenRouterKey {
+                    HStack {
+                        Label("API key saved in Keychain", systemImage: "key.fill")
+                            .font(BG3Type.caption)
+                            .foregroundStyle(BG3Theme.success)
+                        Spacer()
+                        Button("Replace") { appState.deleteOpenRouterKey() }
+                            .buttonStyle(.plain)
+                            .font(BG3Type.caption)
+                    }
+                } else {
+                    HStack {
+                        SecureField("OpenRouter API key", text: $openRouterKey)
+                            .textFieldStyle(.roundedBorder)
+                        Button("Save") {
+                            if appState.saveOpenRouterKey(openRouterKey) {
+                                openRouterKey = ""
+                            }
+                        }
+                        .assistantActionButton(accent: BG3Theme.gold, prominent: true)
+                        .disabled(openRouterKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+            }
+            FactRow(
+                glyph: "◆",
+                tint: BG3Theme.gold,
+                text: "Local Qwen never sends prompts off this Mac. OpenRouter sends prompts to \(AssistantAIClient.openRouterModel)."
+            )
+        }
+    }
+
+    private func providerButton(_ provider: AIProvider) -> some View {
+        let selected = appState.aiProvider == provider
+        return Button { appState.chooseAIProvider(provider) } label: {
+            HStack(spacing: 9) {
+                Image(systemName: selected ? "largecircle.fill.circle" : "circle")
+                    .foregroundStyle(selected ? BG3Theme.gold : BG3Theme.mutedParchment)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(provider.title).font(BG3Type.rowTitle)
+                    Text(provider.detail)
+                        .font(BG3Type.caption)
+                        .foregroundStyle(BG3Theme.mutedParchment)
+                }
+                Spacer()
+            }
+            .padding(9)
+            .contentShape(RoundedRectangle(cornerRadius: 9))
+        }
+        .buttonStyle(.plain)
+        .bg3InsetSurface(accent: selected ? BG3Theme.gold : BG3Theme.bronzeBright)
     }
 
     // MARK: - Welcome (the fork)
@@ -321,12 +393,6 @@ struct OnboardingCardView: View {
                 }
                 .assistantActionButton()
                 .accessibilityLabel("Back to previous step")
-            } else {
-                Button("Skip — explore with defaults", action: appState.skipOnboarding)
-                    .buttonStyle(.plain)
-                    .font(BG3Type.caption)
-                    .foregroundStyle(BG3Theme.mutedParchment)
-                    .accessibilityLabel("Skip setup and explore with defaults")
             }
             Spacer(minLength: 0)
             if let title = step.primaryActionTitle(for: mode) {
@@ -340,9 +406,17 @@ struct OnboardingCardView: View {
                     }
                 }
                 .assistantActionButton(accent: BG3Theme.success, prominent: true)
-                .disabled(step == .catchUp && guideStillLoading)
+                .disabled((step == .catchUp && guideStillLoading) || (step == .ai && !selectedProviderReady))
                 .accessibilityLabel(title)
             }
+        }
+    }
+
+    private var selectedProviderReady: Bool {
+        switch appState.aiProvider {
+        case .localQwen: appState.localAIInstalled
+        case .openRouter: appState.hasOpenRouterKey
+        case nil: false
         }
     }
 

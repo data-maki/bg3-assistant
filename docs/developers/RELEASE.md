@@ -1,117 +1,192 @@
 # Release Checklist
 
-TestFlight is the primary beta distribution path. The app remains a Swift package with a keyless bundled Python companion; release packaging does not require a checked-in Xcode project.
+The current macOS artifact is a native Swift app with a generated guide JSON and a pinned Ollama runtime. It has no Python/FastAPI companion, hosted authentication, import quota, or configured backend URL. Users explicitly choose Local Qwen or OpenRouter.
 
-## TestFlight requirements
+## Artifact contract
 
-- Full Xcode 16 or later selected with `xcode-select`
-- Apple Distribution certificate
-- Mac Installer Distribution certificate
-- Mac App Store provisioning profile for `com.datamaki.BG3HonorAssistant`
-- App record and tester group in App Store Connect
-- Transporter installed from the Mac App Store
-- An HTTPS hosted backend with `OPENROUTER_API_KEY` set only in its server environment
-- Apple root certificates downloaded from the Apple PKI site
-- A durable hosted volume for the authentication quota database
+A releasable `BG3 Honor Mode Assistant.app` contains:
 
-The app uses standard HTTPS/TLS and does not implement proprietary encryption. `ITSAppUsesNonExemptEncryption` is set to `false`; the release owner must confirm the export-compliance answers in App Store Connect for every release.
+- `Contents/MacOS/BG3HonorAssistant`
+- `Contents/Resources/Data/guide-bundle.json`
+- Ollama v0.30.10 under `Contents/Resources/ollama`
+- The app icon and other native resources
 
-## Hosted backend
+It must not contain:
 
-Deploy `backend/app` behind an HTTPS ingress. On that server, create `backend/.env` with at least:
+- `Contents/Resources/backend`
+- Python executables, environments, source, or packages
+- A bundled `qwen3:4b` model
+- An OpenRouter key or `.env` file
+- A backend endpoint plist setting
 
-```dotenv
-BG3_BACKEND_MODE=hosted
-OPENROUTER_API_KEY=...
-OPENROUTER_MODEL=google/gemini-3-flash-preview
-EXA_API_KEY=...
-BG3_APPSTORE_BUNDLE_ID=com.datamaki.BG3HonorAssistant
-BG3_APPSTORE_ENVIRONMENT=Sandbox
-BG3_APPLE_ROOT_CA_DIR=/run/bg3/apple-roots
-BG3_APPLE_ONLINE_CHECKS=true
-BG3_AUTH_TOKEN_SECRET=<at-least-32-random-bytes>
-BG3_SUBJECT_HMAC_SECRET=<different-stable-32-byte-secret>
-BG3_AUTH_TOKEN_TTL_SECONDS=3600
-BG3_USAGE_DB_PATH=/var/lib/bg3/usage.sqlite3
-BG3_BUILD_IMPORT_LIFETIME_LIMIT=30
-BG3_IMPORT_PROCESSING_LEASE_SECONDS=600
+The bundled Ollama archive is pinned in `scripts/macos/build-app.sh`:
+
+```text
+version: v0.30.10
+sha256: ad8a4d2918ed09480b8160419570602b4f49e48c9e3792efb601c0f54619e48e
 ```
 
-Download and store the DER certificates from Apple's [PKI page](https://www.apple.com/certificateauthority/), including Apple Inc. Root, Apple Root CA - G2, and Apple Root CA - G3. Do not set `BG3_UPSTREAM_BACKEND_URL` on the hosted server; that variable is injected only into the packaged local companion. TestFlight requires `Sandbox`. A later App Store production deployment must use `Production`, set the numeric `BG3_APPSTORE_APPLE_ID`, and use a separate origin, secrets, and usage database. Keep the processing lease longer than the hosted import timeout so only interrupted jobs are reclaimed.
+The user downloads only the `qwen3:4b` model through Settings. Its files live under `~/Library/Application Support/BG3HonorAssistant/OllamaModels`, outside the signed app. OpenRouter always uses `google/gemini-3-flash-preview`; the user's key is stored only in macOS Keychain.
 
-The hosted process exposes authenticated `/v1/*` routes and hides map, catalog, and run-state routes. A local development server can be started with `BG3_BACKEND_MODE=local uv run uvicorn app.main:app --host 127.0.0.1 --port 8787`. Production needs the platform bind address expected by its HTTPS ingress. Keep `BG3_SUBJECT_HMAC_SECRET` stable or existing users will receive new quota identities.
+## Release requirements
 
-## Build and upload
+- macOS 14 or later build host with Swift 6
+- Full Xcode 16 or later for distribution workflows
+- Developer ID Application certificate for a direct public release
+- A `notarytool` Keychain profile for notarization
+- Internet access on a clean build to download the pinned Ollama archive
+- Up-to-date generated `mac/BG3Assistant/Resources/Data/guide-bundle.json`
 
-```sh
-cd mac
-BG3_BACKEND_URL=https://assistant.example.com \
-APP_STORE_PROFILE="$HOME/Downloads/BG3_Honor_Assistant.provisionprofile" \
-APP_STORE_INSTALLER_IDENTITY="Mac Installer Distribution: Example (TEAMID)" \
-BUILD_NUMBER=2 \
-./scripts/build-testflight.sh
-```
+The app uses standard HTTPS/TLS and does not implement proprietary encryption. `ITSAppUsesNonExemptEncryption` is `false`; the release owner must still confirm export-compliance answers for the distribution channel.
 
-`BG3_BACKEND_URL` can instead be set in the repository-root `.env`; an exported build variable takes precedence. Remote values must be an HTTPS origin without credentials, a path, query, or fragment. `BUILD_NUMBER` must increase for every App Store Connect upload. The script defaults to a UTC timestamp when it is omitted. It derives the main app's App Sandbox entitlements from the provisioning profile, adds microphone and networking access, and signs the keyless bundled companion as an inheriting child process.
+## Preflight
 
-The TestFlight script fails if `RELEASE_OPENROUTER_API_KEY`, `OPENROUTER_API_KEY`, or `EXA_API_KEY` is exported, or if any `.env` file appears in the app bundle. The provider keys belong only in the hosted backend's deployment environment.
-
-Open the generated `.pkg` in Transporter, deliver it to App Store Connect, wait for processing, and add the build to the internal TestFlight group. Complete beta app review before inviting external testers when App Store Connect requires it.
-
-## Product smoke test
-
-- [ ] First launch creates the menu-bar item and native overlay, and the HM app icon appears in the Dock while the app is running.
-- [ ] The menu-bar Settings command opens settings inside the native overlay.
-- [ ] BG3 detection, Launch BG3, Show Overlay, Open Planner, Open Map, Settings, and Quit work.
-- [ ] Now, Run, Party, Loadout, and Act remain usable without an OpenRouter key or Screen Recording permission.
-- [ ] Party guidance fits all four active members at a glance, showing the current or latest reviewed step, choices, one-line tactics, and setup-due state without future-level clutter.
-- [ ] Manage party members moves known members between Active, Camp, and Unrecruited; moving into a full party asks which active member to replace.
-- [ ] Character detail shows the exact active point-buy, +2/+1, and final BG3 values inline, with later boosts and progression available as an expansion.
-- [ ] Every reviewed creation/respec recipe spends exactly 27 points, uses distinct +2/+1 bonuses, names the first class/order, and shows ASI, feat, permanent, equipment, and consumable sources.
-- [ ] Reset character plan is confirmed, clears build-specific ability/setup and gear-planning state, leaves permanent rewards only when replacing a build, and offers a one-step Undo.
-- [ ] Named Honor runs can be created, renamed, switched, and resumed with independent progress and party state.
-- [ ] Done archives immediately; Skip, Revisit, focus, decisions, and the resolved archive persist after restart.
-- [ ] Now shows Danger, Avoid, and Do without preparation or post-fight confirmation checklists.
-- [ ] The browser map starts from the app-owned local companion, uses the same Party hierarchy and recipes, preserves unknown/native member fields, and native reloads browser edits before its next write.
-- [ ] The Act 1 gate requires every relevant equipment item to be marked obtained or missed, records unresolved route consequences, and cannot return to Act 1 after confirmation.
-- [ ] Act 2 loads only `data/gear/act2.tsv` equipment, opens the Shadow-Cursed Lands map reference, and does not expose the Act 1 route or chat as Act 2 guidance.
-- [ ] The Act 2 to Act 3 gate remains locked while Act 2 route coverage is unavailable.
-- [ ] Guide-only chat and speech input work when the hosted backend is unavailable.
-- [ ] No provider-key field is shown anywhere in the app.
-- [ ] The hosted backend enables AI chat and build import without putting a provider key in the app bundle.
-- [ ] TestFlight AppTransaction verification authenticates without account or key-entry UI.
-- [ ] Build import shows the remaining lifetime quota; attempts 1-30 work and attempt 31 returns the quota message.
-- [ ] Retrying one idempotency key does not consume another import slot.
-- [ ] A public HTML/text/JSON/PDF build URL produces exactly one validated Gemini 3 Flash build with a legal derived creation recipe, persists it, and exposes it to native and browser Party without changing membership.
-- [ ] Loadout imports reject localhost/private-network, credential-bearing, oversized, nonstandard-port, and unsupported-file URLs.
-- [ ] Opening configured AI chat requests Screen Recording only when needed, attaches one BG3-window image, previews/removes it, and sends it only with the next message.
-- [ ] No periodic screenshot, recording, map-alignment, mod, telemetry, or game-memory process runs.
-- [ ] Launch at Login can be declined or disabled in Settings.
-- [ ] A second launch leaves one app owner, one packaged backend, and one listener on port 8787.
-- [ ] Quit releases the owned local backend and port 8787.
-- [ ] The packaged `BG3BackendURL` exactly matches the intended HTTPS backend.
-- [ ] The final app and `.pkg` contain no `.env`, OpenRouter key, or Exa key.
-- [ ] Settings → Report a Bug opens a message addressed to `jcllobet@gmail.com`.
-
-## Automated verification
+- [ ] Review and commit all intended `data` changes.
+- [ ] Regenerate `guide-bundle.json` after any data or Python loader/catalog change.
+- [ ] Confirm the generated guide version and act payloads are the intended release snapshot.
+- [ ] Run Swift and backend test suites.
+- [ ] Confirm no release credential is exported or stored in repository files.
+- [ ] Confirm the build script still pins Ollama exactly to v0.30.10 and the expected SHA-256.
+- [ ] Confirm provider model constants remain `qwen3:4b` and `google/gemini-3-flash-preview`.
 
 ```sh
+./scripts/macos/validate.sh
+bash -n scripts/macos/build-app.sh
+bash -n scripts/macos/build-release.sh
+bash -n scripts/macos/build-testflight.sh
+
 cd backend
 uv lock --check
 uv run --extra dev pytest
+uv run python scripts/export-swift-resources.py
 
-cd ../mac
-swift build
-BG3_BACKEND_URL=https://assistant.example.com BUILD_BACKEND=0 ./scripts/build-app.sh
-codesign --verify --deep --strict "BG3 Honor Mode Assistant.app"
-/usr/libexec/PlistBuddy -c 'Print :BG3BackendURL' "BG3 Honor Mode Assistant.app/Contents/Info.plist"
-bash -n scripts/build-testflight.sh
+cd ..
+git diff --check
+git diff --exit-code -- mac/BG3Assistant/Resources/Data/guide-bundle.json
 ```
 
-`BUILD_BACKEND=0` requires a freshly built `backend/dist/bg3-honor-backend`; omit it on a clean checkout. Before public beta access, add ingress IP throttling and request-size limits, verify authorization and AppTransaction bodies are redacted from logs, and enforce egress denial for private, link-local, and cloud-metadata networks.
+The final command intentionally fails when the generated guide was stale before regeneration. Review and commit a legitimate generated diff rather than discarding it.
 
-Run `git diff --check` from the repository root. Keep screenshots and QA evidence in ignored `outputs/`, `qa/`, or `artifacts/` directories.
+Backend tests remain part of repository verification because the Python loaders generate the Swift guide resource and the standalone server still exists. They do not imply that Python belongs in the macOS release runtime.
 
-## Direct-download fallback
+## Build and signing
 
-`scripts/build-release.sh` still creates a Developer ID-signed, notarized ZIP for local or direct-download testing. It is not the primary beta channel while TestFlight distribution is active.
+Build the canonical app bundle:
+
+```sh
+./scripts/macos/build-app.sh
+```
+
+`build-app.sh` uses a Developer ID Application identity when available, then Apple Development, and otherwise ad-hoc signing. Ad-hoc or development signing is suitable for local verification only.
+
+Create a Developer ID-signed and notarized direct-download ZIP:
+
+```sh
+REQUIRE_RELEASE_SIGNING=1 \
+NOTARY_PROFILE="BG3 Assistant Notary" \
+./scripts/macos/build-release.sh
+```
+
+`build-release.sh` verifies that the app has a Developer ID Application authority when `REQUIRE_RELEASE_SIGNING=1`, submits the ZIP with `notarytool`, staples the app, recreates the ZIP, runs Gatekeeper assessment, and prints its SHA-256.
+
+`build-testflight.sh` builds the same artifact, adds the App Store profile and versions, signs executable files in the bundled Ollama runtime with sandbox inheritance, re-signs its Mach-O and Metal libraries with the distribution identity, signs the outer app with sandbox network client/server and audio-input entitlements, and creates the installer package. It rejects exported provider secrets, `.env` files, a missing guide/runtime, or a retired backend directory. The app bundle also includes fan-content attribution and open-source runtime notices. Verify the resulting package with the provider and sandbox smoke tests before upload.
+
+The TestFlight build uploads to App Store Connect by default:
+
+```sh
+./scripts/macos/build-testflight.sh
+```
+
+Set `UPLOAD_TO_APP_STORE=0` only when an export-only package is intentionally required.
+
+Xcode may finish the upload with `Upload Symbols Failed` warnings for Ollama, ggml, llama.cpp, and MLX binaries. The pinned upstream Ollama archive does not include matching dSYMs for those prebuilt files. These warnings do not reject the build or prevent TestFlight processing; keep uploading the app's own dSYM for symbolicated Swift crash reports.
+
+## Artifact verification
+
+Run these checks against the app produced by `build-app.sh` or extracted from the final ZIP:
+
+```sh
+APP="artifacts/macos/app/BG3 Honor Mode Assistant.app"
+
+test -x "$APP/Contents/MacOS/BG3HonorAssistant"
+test -f "$APP/Contents/Resources/Data/guide-bundle.json"
+cmp mac/BG3Assistant/Resources/Data/guide-bundle.json \
+  "$APP/Contents/Resources/Data/guide-bundle.json"
+
+test -x "$APP/Contents/Resources/ollama/ollama" || \
+  test -x "$APP/Contents/Resources/ollama/bin/ollama"
+test ! -e "$APP/Contents/Resources/backend"
+test -z "$(/usr/bin/find "$APP" -name '*.py' -print -quit)"
+test -z "$(/usr/bin/find "$APP" -name '.env' -print -quit)"
+
+printf '%s  %s\n' \
+  'ad8a4d2918ed09480b8160419570602b4f49e48c9e3792efb601c0f54619e48e' \
+  'artifacts/macos/build/swift/ollama-darwin-v0.30.10.tgz' | shasum -a 256 -c -
+
+codesign --verify --deep --strict --verbose=2 "$APP"
+codesign -dv --verbose=4 "$APP"
+```
+
+For a public direct release, inspect `Info.plist` to confirm it has no backend endpoint setting. Inspect `codesign` output for the expected Developer ID Application authority and successful hardened-runtime signing, then run Gatekeeper against the notarized app:
+
+```sh
+spctl --assess --type execute --verbose=2 "artifacts/macos/app/BG3 Honor Mode Assistant.app"
+```
+
+This assessment is expected to fail for an ad-hoc local build. Verify the notarization result and stapled ticket on the exact artifact being distributed.
+
+Inspect the final app contents manually as well. The runtime archive checksum proves which Ollama distribution was used; the bundle inspection proves no separate model or backend directory was accidentally added.
+
+## Provider smoke test
+
+- [ ] A fresh install shows no configured provider and does not send an AI request until the user chooses one.
+- [ ] Selecting Local Qwen starts only the bundled Ollama runtime on `127.0.0.1:11435` when status, download, chat, or import needs it.
+- [ ] The app does not start a listener for a Python/backend companion.
+- [ ] Download Qwen3 4B stores model data under Application Support, not inside the app bundle.
+- [ ] On a clean model directory, Ollama's model list contains `qwen3:4b` after the download.
+- [ ] Local chat and URL import use `qwen3:4b`; local chat does not offer or send a screenshot.
+- [ ] Quitting the app stops the Ollama process it started and releases port 11435.
+- [ ] Selecting OpenRouter without a key reports setup required and does not switch to Local Qwen.
+- [ ] Saving an OpenRouter key creates the channel-specific Keychain item (`com.datamaki.BG3HonorAssistant.openrouter.direct` or `.appstore`) with account `api-key`, then verifies it can be read back.
+- [ ] The key does not appear in `state.sqlite3`, `imported-builds.json`, logs, app resources, process arguments, or environment-based build settings.
+- [ ] Removing the key deletes the Keychain item and leaves OpenRouter unavailable until another key is saved.
+- [ ] OpenRouter chat and import call `google/gemini-3-flash-preview` directly from Swift.
+- [ ] A failed provider request is visible. Chat may show clearly labelled bundled-guide advice, but neither chat nor import silently calls the other provider.
+- [ ] There is no hosted account or usage-limit UI in the release flow.
+
+For a clean local-model check, use a disposable macOS account or back up and remove the app's Application Support directory before launch. Do not delete a tester's existing runs or models during routine upgrade testing.
+
+## Import smoke test
+
+- [ ] A supported public HTML, plain-text, or PDF guide is downloaded by Swift and sent only to the selected provider.
+- [ ] Credential-bearing, localhost, `.local`, loopback, private IPv4 literal, oversized, failed, and unreadable sources are rejected.
+- [ ] The structured result contains explicit `pointBuyScores`, `bonusTwo`, and `bonusOne`.
+- [ ] The importer rejects duplicate bonuses, a non-27-point base spread, duplicate/out-of-range character levels, and an invalid level-12 class total that cannot be normalized from level rows.
+- [ ] Final starting scores equal point buy plus the selected +2 and +1.
+- [ ] A recoverable final split is deterministically reconstructed from exact class-level maxima rather than accepted as model prose.
+- [ ] The imported build is marked for player verification, saved to `imported-builds.json`, and remains available after relaunch.
+- [ ] Member-specific import asks for replacement confirmation when required and never changes roster membership.
+- [ ] Import failure does not persist a partial build or switch providers.
+
+## Product smoke test
+
+- [ ] First launch creates the menu-bar item and native overlay.
+- [ ] BG3 detection, Launch BG3, Show Overlay, Open Planner, Settings, and Quit work.
+- [ ] Now, Route, Party, Loadout, and Act load from the bundled guide without an AI provider or network request.
+- [ ] Named Honor runs can be created, renamed, switched, and resumed with independent progress and party state.
+- [ ] Done, Skip, Revisit, focus, decisions, and resolved history persist after restart.
+- [ ] Party guidance shows the current/latest reviewed step, choices, tactics, and setup-due state without future-level clutter.
+- [ ] Character detail shows point buy, +2/+1, final values, and later ability sources distinctly.
+- [ ] Every reviewed setup recipe spends exactly 27 points, uses distinct bonuses, and derives matching final values.
+- [ ] Loadout contention, manual assignment, confirmed ownership, and act-scoped equipment remain deterministic after restart.
+- [ ] Act transition requires equipment review and records accepted route consequences in the locked ledger.
+- [ ] Act 2 route guidance remains unavailable and normal advancement stays locked while its route coverage is unavailable.
+- [ ] Map opens the selected act's external generated `mapUrl` in the default browser; no local map service is started.
+- [ ] OpenRouter screenshot capture requests permission only when needed, previews/removes one attachment, and sends it only with the next message.
+- [ ] Local Qwen never receives an image.
+- [ ] Speech input works with the documented microphone and Speech Recognition permissions.
+- [ ] No periodic screenshot, recording, map alignment, mod, telemetry, game-memory reader, or save reader runs.
+- [ ] Launch at Login can be declined or disabled.
+- [ ] Settings -> Report a Bug opens a message addressed to `jcllobet@gmail.com`.
+
+Keep screenshots and QA evidence in ignored `outputs/`, `qa/`, or `artifacts/` directories.

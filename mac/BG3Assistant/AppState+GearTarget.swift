@@ -10,6 +10,20 @@ struct GearTargetContext {
     }
 }
 
+extension HonorRun {
+    mutating func focusRoute(stepId: String?, checkpointId: String?) {
+        gearTarget = nil
+        focusedWalkthroughStepId = stepId
+        selectedCheckpointId = checkpointId
+    }
+
+    mutating func focusGear(_ target: GearTarget) {
+        gearTarget = target
+        focusedWalkthroughStepId = nil
+        selectedCheckpointId = nil
+    }
+}
+
 /// Player-chosen equipment goal. The target replaces the Now-page goal and
 /// the peek headline until the item is acquired or the target is cleared;
 /// route recommendation logic underneath is untouched.
@@ -39,7 +53,7 @@ extension AppState {
 
     func setGearTarget(_ gear: BuildGear, for member: PartyMember) {
         guard gear.act == selectedAct, let buildId = member.buildId else { return }
-        run.gearTarget = GearTarget(memberId: member.id, buildId: buildId, gearId: gear.id)
+        run.focusGear(GearTarget(memberId: member.id, buildId: buildId, gearId: gear.id))
         persistRun()
     }
 

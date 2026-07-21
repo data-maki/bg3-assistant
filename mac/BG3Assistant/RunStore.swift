@@ -6,8 +6,7 @@ struct AssistantSettings: Codable, Equatable {
     /// Tour version last finished or skipped; nil shows the welcome tour.
     /// Optional so settings rows written before the tour existed still decode.
     var onboardingSeenVersion: Int? = nil
-    /// One-time hint bubbles already shown (HintID raw values).
-    var seenHints: [String]? = nil
+    var aiProvider: String? = nil
 }
 
 enum RunStoreError: LocalizedError {

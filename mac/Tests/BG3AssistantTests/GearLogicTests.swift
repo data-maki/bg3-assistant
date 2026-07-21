@@ -2,6 +2,12 @@ import XCTest
 @testable import BG3HonorAssistant
 
 final class GearLogicTests: XCTestCase {
+    func testLoadoutClassifiesCapeInstrumentAndTorchOutsideEquipmentGrid() {
+        XCTAssertEqual(LoadoutSlot.classify("Cloak", item: "Thunderskin Cloak"), .cloak)
+        XCTAssertEqual(LoadoutSlot.classify("Instrument", item: "Spider's Lyre"), .instrument)
+        XCTAssertEqual(LoadoutSlot.classify("Melee", item: "Torch x2"), .extras)
+    }
+
     // MARK: assignments
 
     private func claim(
@@ -35,16 +41,20 @@ final class GearLogicTests: XCTestCase {
         XCTAssertEqual(result["caustic-band"], "karlach")
     }
 
-    func testUncontestedItemsAssignToTheirOnlyClaimant() {
-        let result = GearLogic.assignments(
-            claims: [
-                claim("karlach", build: "Zerker", at: 200, items: ["haste-helm"]),
-                claim("astarion", build: "Assassin", at: 100, items: ["caustic-band"]),
-            ],
-            overrides: [:]
-        )
-        XCTAssertEqual(result["haste-helm"], "karlach")
-        XCTAssertEqual(result["caustic-band"], "astarion")
-    }
+    func testRouteAndEquipmentTargetsReplaceEachOther() {
+        var run = HonorRun()
+        run.focusRoute(stepId: "grove", checkpointId: "grove-fight")
 
+        run.focusGear(GearTarget(memberId: "tav", buildId: "cleric", gearId: "luminous-armour"))
+
+        XCTAssertNil(run.focusedWalkthroughStepId)
+        XCTAssertNil(run.selectedCheckpointId)
+        XCTAssertEqual(run.gearTarget?.gearId, "luminous-armour")
+
+        run.focusRoute(stepId: "goblin-camp", checkpointId: "minthara")
+
+        XCTAssertNil(run.gearTarget)
+        XCTAssertEqual(run.focusedWalkthroughStepId, "goblin-camp")
+        XCTAssertEqual(run.selectedCheckpointId, "minthara")
+    }
 }

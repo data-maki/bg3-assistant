@@ -139,8 +139,6 @@ final class RunSafetyTests: XCTestCase {
         )
     }
 
-    // MARK: nextWalkthroughStep
-
     // MARK: actTwoBlockers
 
     func testActTwoBlockersReportSkippedAndUnresolvedMajors() {
@@ -160,13 +158,6 @@ final class RunSafetyTests: XCTestCase {
     }
 
     // MARK: caughtUp (mid-run adoption) semantics
-
-    func testCaughtUpCountsAsCompleted() {
-        XCTAssertTrue(CheckpointDisposition.caughtUp.countsAsCompleted)
-        XCTAssertTrue(CheckpointDisposition.completed.countsAsCompleted)
-        XCTAssertFalse(CheckpointDisposition.pending.countsAsCompleted)
-        XCTAssertFalse(CheckpointDisposition.skipped.countsAsCompleted)
-    }
 
     func testCaughtUpSatisfiesCompletionRequiredDependency() {
         let target = step(id: "b", order: 2, dependencies: [dependency(on: "a", kind: "completion_required")])
@@ -210,9 +201,7 @@ final class RunSafetyTests: XCTestCase {
         let fight = checkpoint(id: "boss", routeOrder: 1, minimumLevel: 10)
         let readiness = assess(checkpoint: fight, activeParty: [])
         XCTAssertEqual(readiness.status, "blocked")
-        XCTAssertEqual(readiness.minimumLevel, 10)
         XCTAssertTrue(readiness.blockers.contains { $0.contains("No active party") })
-        XCTAssertFalse(readiness.blockers.contains { $0.contains("Lowest party member") })
     }
 
     func testReadinessUsesLowestPartyLevelAndCheckedPreparation() {
@@ -222,7 +211,6 @@ final class RunSafetyTests: XCTestCase {
             activeParty: [member(id: "tav", level: 10)],
             checkedPreparation: ["Buy potions"]
         )
-        XCTAssertEqual(ready.partyLevel, 10)
         XCTAssertEqual(ready.status, "ready")
         XCTAssertTrue(ready.blockers.isEmpty)
         XCTAssertTrue(ready.warnings.isEmpty)

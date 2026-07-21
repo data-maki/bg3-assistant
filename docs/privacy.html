@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Privacy policy for BG3 Honor Mode Assistant.">
+  <title>Privacy | BG3 Honor Mode Assistant</title>
+  <link rel="stylesheet" href="app-store.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./">
+      <img src="images/app-logo.png" width="44" height="44" alt="">
+      <span>BG3 Honor Mode Assistant</span>
+    </a>
+    <nav aria-label="Main navigation"><a href="./">Home</a><a href="support.html">Support</a></nav>
+  </header>
+
+  <main class="document">
+    <p class="eyebrow">Effective July 18, 2026</p>
+    <h1>Privacy policy</h1>
+    <p class="lede">BG3 Honor Mode Assistant has no ads, analytics, tracking SDKs, developer account system, or developer-operated server. Your run data is stored on your Mac.</p>
+
+    <section>
+      <h2>Data stored on your Mac</h2>
+      <p>The app saves run names, party choices, builds, route progress, outcomes, equipment state, imported builds, and settings in your Application Support directory. An OpenRouter API key, if you add one, is stored in macOS Keychain. The developer does not receive these files or the key.</p>
+    </section>
+
+    <section>
+      <h2>Local Qwen</h2>
+      <p>If you choose Local Qwen, the app downloads the <code>qwen3:4b</code> model and runs it through the bundled Ollama runtime on this Mac. Chat prompts and imported build text stay local after the model download.</p>
+    </section>
+
+    <section>
+      <h2>OpenRouter</h2>
+      <p>If you choose OpenRouter, the app sends your question and the selected guide and run context needed to answer it to OpenRouter for processing by <code>google/gemini-3-flash-preview</code>. A build import also sends the public URL and readable text extracted from that page. OpenRouter can associate requests with the API key and account you provide. Its handling and retention are governed by <a href="https://openrouter.ai/privacy">OpenRouter's privacy policy</a> and the selected model provider's terms.</p>
+    </section>
+
+    <section>
+      <h2>Optional screenshot</h2>
+      <p>With Screen Recording permission, OpenRouter chat can prepare one screenshot of a running Baldur's Gate 3 window. You see the screenshot first and can remove it. It is sent only when you send that message. Local Qwen does not accept screenshots. The app does not capture or record the screen in the background.</p>
+    </section>
+
+    <section>
+      <h2>Speech input</h2>
+      <p>Dictation uses Apple's Speech framework. The app requests Microphone and Speech Recognition permission only when needed. macOS may send audio to Apple's speech service when on-device recognition is unavailable. Apple's processing is governed by <a href="https://www.apple.com/legal/privacy/">Apple's privacy policy</a>.</p>
+    </section>
+
+    <section>
+      <h2>Other network requests</h2>
+      <p>The app uses the network to download the optional Qwen model, fetch a public build page you ask it to import, call OpenRouter when selected, and open public map handoffs. The bundled Ollama helper listens only on <code>127.0.0.1:11435</code> for requests from this app.</p>
+    </section>
+
+    <section>
+      <h2>Deletion and retention</h2>
+      <p>Delete individual runs and provider credentials from the app where those controls are available. Removing the app does not automatically remove its Application Support data or downloaded model. Email support for help removing all local app data. Data sent to OpenRouter, a model provider, or Apple is subject to that provider's retention policy.</p>
+    </section>
+
+    <section>
+      <h2>Changes and contact</h2>
+      <p>This page will be updated when the app's data practices change. Questions can be sent to <a href="mailto:jcllobet@gmail.com?subject=BG3%20Honor%20Mode%20Assistant%20privacy">jcllobet@gmail.com</a>.</p>
+    </section>
+  </main>
+
+  <footer><p>BG3 Honor Mode Assistant does not sell personal data or track users across apps or websites.</p><div><a href="./">Home</a><a href="support.html">Support</a></div></footer>
+</body>
+</html>

@@ -121,18 +121,21 @@ struct GearDetailView: View {
     }
 }
 
-/// Item icon with a visible fallback — a failed or missing icon renders the
-/// shield glyph instead of an empty box.
+/// Item icon with a visible fallback. Bundled guide icons use backend-relative
+/// paths, while imported builds may provide an absolute remote URL.
 struct GearItemIcon: View {
-    @EnvironmentObject private var appState: AppState
     let gear: BuildGear
     var size: CGFloat = 26
     var borderColor: Color = BG3Theme.bronze
 
     var body: some View {
         Group {
-            if let icon = gear.icon, !icon.isEmpty {
-                let url = appState.backendEndpoint.url(path: icon)
+            if let image = bundledImage {
+                Image(nsImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFill()
+            } else if let url = remoteURL {
                 AsyncImage(url: url) { phase in
                     if case .success(let image) = phase {
                         image.resizable().interpolation(.high).scaledToFill()
@@ -151,8 +154,32 @@ struct GearItemIcon: View {
         .accessibilityHidden(true)
     }
 
+    private var remoteURL: URL? {
+        guard let icon = gear.icon,
+              let url = URL(string: icon),
+              ["http", "https"].contains(url.scheme?.lowercased() ?? "") else { return nil }
+        return url
+    }
+
+    private var bundledImage: NSImage? {
+        guard let icon = gear.icon, remoteURL == nil else { return nil }
+        let filename = URL(fileURLWithPath: icon).lastPathComponent
+        guard !filename.isEmpty else { return nil }
+        let sourceDirectory = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .appending(path: "Resources/ItemIcons", directoryHint: .isDirectory)
+        let candidates = [
+            Bundle.main.resourceURL?.appending(path: "ItemIcons/\(filename)"),
+            sourceDirectory.appending(path: filename),
+        ].compactMap { $0 }
+        return candidates.lazy
+            .filter { FileManager.default.fileExists(atPath: $0.path) }
+            .compactMap(NSImage.init(contentsOf:))
+            .first
+    }
+
     private var fallback: some View {
-        Image(systemName: "shield.lefthalf.filled")
+        Image(systemName: LoadoutSlot.classify(gear.slot, item: gear.item).icon)
             .font(.system(size: size * 0.42))
             .foregroundStyle(BG3Theme.bronzeBright)
     }

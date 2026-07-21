@@ -3,9 +3,56 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var openRouterKey = ""
 
     var body: some View {
         Form {
+            Section("AI Provider") {
+                Picker("Provider", selection: $appState.aiProvider) {
+                    Text("Choose a provider").tag(AIProvider?.none)
+                    ForEach(AIProvider.allCases) { provider in
+                        Text(provider.title).tag(Optional(provider))
+                    }
+                }
+                if appState.aiProvider == .localQwen {
+                    LabeledContent("Model", value: OllamaRuntime.model)
+                    if appState.localAIInstalled {
+                        Label("Installed and ready", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else if appState.isInstallingLocalAI {
+                        ProgressView(value: appState.localAIInstallProgress)
+                        Text("Downloading approximately 2.5 GB. Keep the assistant open.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Button("Download Qwen3 4B", action: appState.installLocalAI)
+                            .buttonStyle(.borderedProminent)
+                    }
+                } else if appState.aiProvider == .openRouter {
+                    LabeledContent("Model", value: AssistantAIClient.openRouterModel)
+                    if appState.hasOpenRouterKey {
+                        HStack {
+                            Label("API key saved in Keychain", systemImage: "key.fill")
+                            Spacer()
+                            Button("Remove", role: .destructive, action: appState.deleteOpenRouterKey)
+                        }
+                    } else {
+                        HStack {
+                            SecureField("OpenRouter API key", text: $openRouterKey)
+                            Button("Save") {
+                                if appState.saveOpenRouterKey(openRouterKey) {
+                                    openRouterKey = ""
+                                }
+                            }
+                            .disabled(openRouterKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
+                    }
+                }
+                Text("OpenRouter keys are stored only in macOS Keychain.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("General") {
                 Toggle("Show overlay while BG3 is running", isOn: $appState.showOverlay)
                 Toggle(
@@ -23,7 +70,7 @@ struct SettingsView: View {
                 Button {
                     appState.replayOnboarding()
                 } label: {
-                    Label("Replay Tour & Hints", systemImage: "sparkles")
+                    Label("Replay Tour", systemImage: "sparkles")
                 }
                 .buttonStyle(.bordered)
             }
@@ -72,26 +119,38 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            DisclosureGroup("Diagnostics") {
-                LabeledContent("Baldur's Gate 3", value: appState.gameDetected ? "Running" : "Not running")
-                LabeledContent("Backend service", value: appState.backendHealthy ? "Ready" : "Unavailable")
-                LabeledContent("AI backend endpoint", value: appState.upstreamBackendEndpoint.baseURL.absoluteString)
-                LabeledContent("AI features", value: appState.backendAIAvailable ? "Available" : "Unavailable")
-                if !appState.upstreamBackendEndpoint.managesLocalBackend {
-                    LabeledContent("TestFlight authentication", value: appState.backendAuthenticated ? "Verified" : "Unavailable")
-                    if !appState.backendAuthenticated {
-                        Button("Retry App Store Verification") {
-                            appState.retryBackendAuthentication()
+            DisclosureGroup("Legal & Credits") {
+                Text("BG3 Honor Mode Assistant is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.")
+                    .font(.caption)
+                Text("This app is not commissioned, sponsored, endorsed, or approved by Larian Studios.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Link(
+                    "Baldur's Gate 3 Fan Content Terms",
+                    destination: URL(string: "https://baldursgate3.game/bg3-fan-content-terms/")!
+                )
+                Link(
+                    "Wizards Fan Content Policy",
+                    destination: URL(string: "https://company.wizards.com/en/legal/fancontentpolicy")!
+                )
+                Link(
+                    "Bg3.wiki Copyrights",
+                    destination: URL(string: "https://bg3.wiki/wiki/bg3wiki:Copyrights")!
+                )
+                if let notices = Bundle.main.url(forResource: "THIRD_PARTY_NOTICES", withExtension: "md") {
+                    Button("Open Third-Party Notices") {
+                        if !NSWorkspace.shared.open(notices) {
+                            appState.errorMessage = "Could not open the bundled third-party notices."
                         }
-                        .buttonStyle(.bordered)
                     }
                 }
-                if let quota = appState.buildImportQuota {
-                    LabeledContent("Build-import attempts", value: "\(quota.remaining) of \(quota.limit) remaining")
-                }
-                if let message = appState.backendAuthenticationMessage {
-                    Text(message).font(.caption).foregroundStyle(.orange).textSelection(.enabled)
-                }
+            }
+
+            DisclosureGroup("Diagnostics") {
+                LabeledContent("Baldur's Gate 3", value: appState.gameDetected ? "Running" : "Not running")
+                LabeledContent("Bundled guide", value: appState.activeGuideLoaded ? "Ready" : "Unavailable")
+                LabeledContent("AI provider", value: appState.aiProvider?.title ?? "Not configured")
+                LabeledContent("AI features", value: appState.buildImportAvailable ? "Available" : "Setup required")
                 if let error = appState.errorMessage {
                     Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled)
                 }
@@ -101,6 +160,7 @@ struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .tint(BG3Theme.control)
         .padding(.vertical, 8)
+        .task { await appState.refreshAIProviderStatus() }
         .confirmationDialog(
             "Create a new Honor run? \(appState.currentRunName) stays saved and can be resumed anytime.",
             isPresented: $appState.newRunConfirmation

@@ -1,5 +1,13 @@
 import SwiftUI
 
+private enum RouteContentFilter: String, CaseIterable, Identifiable {
+    case all = "All"
+    case core = "Core"
+    case equipment = "Equipment"
+
+    var id: String { rawValue }
+}
+
 /// The planner's Route tab: one flat, phase-grouped checklist of the active
 /// route with build-gear pickups woven in. Rows push a full-panel detail page
 /// instead of expanding inline, so the list stays scannable and every row is
@@ -7,7 +15,7 @@ import SwiftUI
 struct RouteTabView: View {
     @EnvironmentObject private var appState: AppState
     @State private var page = RoutePage.list
-    @State private var expandedPickupPhases: Set<Int> = []
+    @State private var contentFilter = RouteContentFilter.all
     @State private var showsDone = false
     @State private var showsSkipped = false
     @State private var showsCaughtUp = false
@@ -50,7 +58,7 @@ struct RouteTabView: View {
 
     private func resetNavigation() {
         page = .list
-        expandedPickupPhases = []
+        contentFilter = .all
         showsDone = false
         showsSkipped = false
         showsCaughtUp = false
@@ -63,21 +71,30 @@ struct RouteTabView: View {
 
     private var stepList: some View {
         let pickups = GearLogic.pickupsByPhase(appState.routePickups, walkthrough: appState.walkthrough)
+        let phases = routePhases(pickups: pickups.byPhase)
         return ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 5, pinnedViews: [.sectionHeaders]) {
                     progressHeader
-                    ForEach(routePhases, id: \.order) { phase in
+                    ForEach(phases, id: \.order) { phase in
                         Section {
                             ForEach(phase.steps) { step in
                                 stepRow(step).id(step.id)
                             }
-                            pickupsRow(phase.order, pickups: pickups.byPhase[phase.order] ?? [])
+                            if contentFilter != .core {
+                                ForEach(pickups.byPhase[phase.order] ?? []) { pickupRow($0) }
+                            }
                         } header: {
-                            phaseHeader(phase.name, count: phase.steps.count)
+                            phaseHeader(
+                                phase.name,
+                                stepCount: phase.steps.count,
+                                pickupCount: pickups.byPhase[phase.order]?.count ?? 0
+                            )
                         }
                     }
-                    if appState.activeWalkthroughSteps.isEmpty { routeCompleteCard }
+                    if contentFilter == .all, appState.activeWalkthroughSteps.isEmpty { routeCompleteCard }
+                    if contentFilter == .core, filteredRouteSteps.isEmpty { filteredEmptyCard }
+                    if contentFilter == .equipment, appState.routePickups.isEmpty { filteredEmptyCard }
                     bottomSummaries(otherPickups: pickups.other)
                 }
                 .padding(.trailing, 8)
@@ -122,6 +139,14 @@ struct RouteTabView: View {
             }
             gateLine
             deadlinesLine
+            Picker("Route contents", selection: $contentFilter) {
+                ForEach(RouteContentFilter.allCases) { filter in
+                    Text(filter.rawValue).tag(filter)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.segmented)
+            .controlSize(.small)
         }
         .padding(8)
         .bg3InsetSurface(accent: BG3Theme.gold)
@@ -178,11 +203,11 @@ struct RouteTabView: View {
         }
     }
 
-    private func phaseHeader(_ name: String, count: Int) -> some View {
+    private func phaseHeader(_ name: String, stepCount: Int, pickupCount: Int) -> some View {
         HStack {
             Text(name.uppercased())
             Spacer()
-            Text(count == 1 ? "1 left" : "\(count) left")
+            Text(phaseCount(stepCount: stepCount, pickupCount: pickupCount))
         }
         .font(BG3Type.overline)
         .foregroundStyle(BG3Theme.gold)
@@ -191,12 +216,34 @@ struct RouteTabView: View {
         .background(BG3Theme.ink.opacity(0.94))
     }
 
-    private var routePhases: [(order: Int, name: String, steps: [WalkthroughStep])] {
-        Dictionary(grouping: appState.activeWalkthroughSteps, by: \.phaseOrder)
-            .sorted { $0.key < $1.key }
-            .map { order, steps in
-                (order, steps.first?.phase ?? "", steps.sorted { $0.order < $1.order })
-            }
+    private func phaseCount(stepCount: Int, pickupCount: Int) -> String {
+        switch contentFilter {
+        case .all: "\(stepCount) route · \(pickupCount) gear"
+        case .core: stepCount == 1 ? "1 core" : "\(stepCount) core"
+        case .equipment: pickupCount == 1 ? "1 item" : "\(pickupCount) items"
+        }
+    }
+
+    private var filteredRouteSteps: [WalkthroughStep] {
+        switch contentFilter {
+        case .all: appState.activeWalkthroughSteps
+        case .core: appState.activeWalkthroughSteps.filter { $0.importance != "optional" }
+        case .equipment: []
+        }
+    }
+
+    private func routePhases(
+        pickups: [Int: [GearLogic.Pickup]]
+    ) -> [(order: Int, name: String, steps: [WalkthroughStep])] {
+        let stepsByPhase = Dictionary(grouping: filteredRouteSteps, by: \.phaseOrder)
+        let pickupPhases = contentFilter == .core ? Set<Int>() : Set(pickups.keys)
+        return Set(stepsByPhase.keys).union(pickupPhases).sorted().map { order in
+            let steps = (stepsByPhase[order] ?? []).sorted { $0.order < $1.order }
+            let name = steps.first?.phase
+                ?? appState.walkthrough.first(where: { $0.phaseOrder == order })?.phase
+                ?? "Other"
+            return (order, name, steps)
+        }
     }
 
     private func stepRow(_ step: WalkthroughStep) -> some View {
@@ -257,26 +304,6 @@ struct RouteTabView: View {
     }
 
     // MARK: - Pickups
-
-    @ViewBuilder private func pickupsRow(_ phaseOrder: Int, pickups: [GearLogic.Pickup]) -> some View {
-        if !pickups.isEmpty {
-            BG3Disclosure(
-                title: pickups.count == 1 ? "1 pickup here" : "\(pickups.count) pickups here",
-                glyph: "◈", tint: BG3Theme.gold, titleTint: BG3Theme.mutedParchment,
-                isExpanded: Binding(
-                    get: { expandedPickupPhases.contains(phaseOrder) },
-                    set: { expanded in
-                        if expanded { expandedPickupPhases.insert(phaseOrder) } else { expandedPickupPhases.remove(phaseOrder) }
-                    }
-                )
-            ) {
-                ForEach(pickups) { pickupRow($0) }
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .accessibilityLabel("\(pickups.count) gear pickups in this phase")
-        }
-    }
 
     private func pickupRow(_ pickup: GearLogic.Pickup) -> some View {
         Button {
@@ -349,7 +376,7 @@ struct RouteTabView: View {
         let skipped = appState.archivedWalkthroughSteps.filter { appState.walkthroughDisposition($0) == .skipped }
         let caughtUp = appState.archivedWalkthroughSteps.filter { appState.walkthroughDisposition($0) == .caughtUp }
         VStack(spacing: 5) {
-            if !skipped.isEmpty {
+            if contentFilter != .equipment, !skipped.isEmpty {
                 BG3Disclosure(
                     title: "Skipped (\(skipped.count))", systemImage: "forward.circle.fill",
                     tint: BG3Theme.warning, inset: true, isExpanded: $showsSkipped
@@ -357,7 +384,7 @@ struct RouteTabView: View {
                     ForEach(skipped.sorted { $0.order < $1.order }) { archivedRow($0) }
                 }
             }
-            if !done.isEmpty {
+            if contentFilter != .equipment, !done.isEmpty {
                 BG3Disclosure(
                     title: "Done (\(done.count))", systemImage: "checkmark.circle.fill",
                     tint: BG3Theme.success, inset: true, isExpanded: $showsDone
@@ -365,7 +392,7 @@ struct RouteTabView: View {
                     ForEach(done.sorted { $0.order > $1.order }) { archivedRow($0) }
                 }
             }
-            if !caughtUp.isEmpty {
+            if contentFilter != .equipment, !caughtUp.isEmpty {
                 BG3Disclosure(
                     title: "Caught up (\(caughtUp.count))", systemImage: "clock.arrow.circlepath",
                     tint: BG3Theme.bronzeBright, inset: true, isExpanded: $showsCaughtUp
@@ -373,7 +400,7 @@ struct RouteTabView: View {
                     ForEach(caughtUp.sorted { $0.order > $1.order }) { archivedRow($0) }
                 }
             }
-            if !otherPickups.isEmpty {
+            if contentFilter != .core, !otherPickups.isEmpty {
                 BG3Disclosure(
                     title: "Other pickups (\(otherPickups.count))", systemImage: "bag.fill",
                     tint: BG3Theme.gold, inset: true, isExpanded: $showsOtherPickups
@@ -414,6 +441,18 @@ struct RouteTabView: View {
     }
 
     // MARK: - States
+
+    private var filteredEmptyCard: some View {
+        Label(
+            contentFilter == .equipment ? "No remaining equipment pickups in this act" : "Core route complete",
+            systemImage: "checkmark.seal.fill"
+        )
+        .font(BG3Type.rowTitle)
+        .foregroundStyle(BG3Theme.success)
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .bg3InsetSurface(accent: BG3Theme.success)
+    }
 
     private var routeCompleteCard: some View {
         let hasSkips = appState.routeHasConsequentialSkips

@@ -3,6 +3,12 @@ import SwiftUI
 /// The collapsed overlay card shown when the planner is closed.
 struct PeekCardView: View {
     @EnvironmentObject private var appState: AppState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var petAttentionTrigger = 0
+    @State private var petAttentionOffset = CGSize.zero
+    @State private var petAttentionRotation = 0.0
+    @State private var petAttentionScale = 1.0
+    @State private var pointerOverMinimalPet = false
 
     var body: some View {
         if appState.overlayDensity == .minimal {
@@ -26,9 +32,13 @@ struct PeekCardView: View {
         return ZStack {
             WindowDragHandle()
             HStack(spacing: 2) {
-                PetSpriteView(size: 60)
-                    .frame(width: 62, height: size.height)
+                PetSpriteView(size: 70, attentionTrigger: petAttentionTrigger)
+                    .scaleEffect(petAttentionScale)
+                    .rotationEffect(.degrees(petAttentionRotation))
+                    .offset(petAttentionOffset)
+                    .frame(width: 74, height: size.height)
                     .shadow(color: .black.opacity(0.5), radius: 7, y: 3)
+                    .onHover { pointerOverMinimalPet = $0 }
                 Button(action: appState.showOverlayGoal) {
                     Image(systemName: "chevron.right")
                         .frame(width: 12, height: 18)
@@ -40,6 +50,43 @@ struct PeekCardView: View {
             .frame(width: size.width, height: size.height)
         }
         .frame(width: size.width, height: size.height)
+        .task {
+            while !Task.isCancelled {
+                do { try await Task.sleep(for: .seconds(180)) }
+                catch { return }
+                guard !reduceMotion, !pointerOverMinimalPet else { continue }
+                petAttentionTrigger &+= 1
+            }
+        }
+        .task(id: petAttentionTrigger) {
+            guard petAttentionTrigger > 0, !reduceMotion else { return }
+            defer {
+                if Task.isCancelled {
+                    petAttentionOffset = .zero
+                    petAttentionRotation = 0
+                    petAttentionScale = 1
+                }
+            }
+            withAnimation(.spring(duration: 0.38, bounce: 0.38)) {
+                petAttentionOffset = CGSize(width: 7, height: -6)
+                petAttentionRotation = 3
+                petAttentionScale = 1.07
+            }
+            do { try await Task.sleep(for: .milliseconds(560)) }
+            catch { return }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                petAttentionOffset = CGSize(width: -2, height: -8)
+                petAttentionRotation = -2
+                petAttentionScale = 1.03
+            }
+            do { try await Task.sleep(for: .milliseconds(420)) }
+            catch { return }
+            withAnimation(.spring(duration: 0.62, bounce: 0.32)) {
+                petAttentionOffset = .zero
+                petAttentionRotation = 0
+                petAttentionScale = 1
+            }
+        }
         .accessibilityElement(children: .contain)
     }
 

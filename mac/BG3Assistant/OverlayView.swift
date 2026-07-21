@@ -1,37 +1,5 @@
 import SwiftUI
 
-/// A one-time coach mark docked above the card. Fixed height so the panel's
-/// `OverlayMetrics.hintBand` allotment always fits it exactly.
-struct HintBubbleView: View {
-    @EnvironmentObject private var appState: AppState
-    let hint: HintID
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(BG3Theme.gold)
-            Text(hint.text)
-                .font(BG3Type.caption)
-                .foregroundStyle(BG3Theme.parchment)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 4)
-            Button("Got it", action: appState.dismissActiveHint)
-                .assistantActionButton(accent: BG3Theme.bronzeBright)
-                .controlSize(.mini)
-                .accessibilityLabel("Dismiss hint")
-        }
-        .padding(.horizontal, 10)
-        .frame(height: 46)
-        .frame(maxWidth: .infinity)
-        .colorScheme(.dark)
-        .assistantGlassSurface(cornerRadius: 12)
-        .shadow(color: .black.opacity(0.4), radius: 10, y: 4)
-        .accessibilityElement(children: .contain)
-    }
-}
-
 struct OverlayView: View {
     @EnvironmentObject private var appState: AppState
 
@@ -40,7 +8,6 @@ struct OverlayView: View {
             if let onboardingStep = appState.onboardingStep {
                 OnboardingCardView(step: onboardingStep)
             } else {
-                if let hint = appState.activeHint { HintBubbleView(hint: hint) }
                 if appState.overlayExpanded { planner } else { PeekCardView() }
             }
         }
@@ -141,10 +108,11 @@ struct OverlayView: View {
                 .assistantActionButton(accent: appState.plannerTab == .settings ? BG3Theme.bronzeBright : BG3Theme.control)
                 .help("Settings")
                 Button(action: appState.togglePlanner) {
-                    Image(systemName: "xmark").frame(width: 18, height: 18)
+                    Image(systemName: "chevron.down").frame(width: 18, height: 18)
                 }
                 .assistantActionButton()
-                .help("Close planner")
+                .help("Collapse to companion")
+                .accessibilityLabel("Collapse to companion")
             }
             .fixedSize(horizontal: false, vertical: true)
             plannerNavigation

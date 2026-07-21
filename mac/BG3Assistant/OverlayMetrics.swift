@@ -21,7 +21,7 @@ enum OverlayMetrics {
         let s = scale(for: reference)
         if density == .minimal {
             // The passive companion plus its separate reveal control.
-            return CGSize(width: 112, height: 86)
+            return CGSize(width: 126, height: 98)
         }
         // A BG3-style horizontal tooltip: wide enough for the checkpoint and
         // one warning, short enough to stay between minimap and hotbar. Leave
@@ -48,17 +48,16 @@ enum OverlayMetrics {
         return CGSize(width: width.rounded(), height: height.rounded())
     }
 
-    /// One welcome-tour page: wider than the peek card, shorter than the
-    /// planner, and independent of tab and density so hotkey peeks or menu
-    /// actions cannot resize the card mid-tour.
-    static func onboardingSize(for reference: CGRect) -> CGSize {
+    /// The welcome page has only two choices, while later pages need room for
+    /// scrollable setup controls. Keep each page only as tall as its content.
+    static func onboardingSize(for reference: CGRect, step: OnboardingStep) -> CGSize {
         let width = min(max(reference.width * 0.22, 430), 520)
-        let height = min(max(reference.height * 0.46, 470), 540)
+        let height = switch step {
+        case .welcome: min(max(reference.height * 0.34, 350), 390)
+        case .ai, .party, .catchUp, .ready: min(max(reference.height * 0.46, 470), 540)
+        }
         return CGSize(width: width.rounded(), height: height.rounded())
     }
-
-    /// Extra panel height for a one-time hint bubble above the card.
-    static let hintBand: CGFloat = 52
 
     static func panelSize(
         expanded: Bool,
@@ -66,15 +65,12 @@ enum OverlayMetrics {
         tab: PlannerTab = .current,
         density: OverlayDensity = .focus,
         moreContextExpanded: Bool = false,
-        onboarding: Bool = false,
-        hint: Bool = false
+        onboardingStep: OnboardingStep? = nil
     ) -> CGSize {
-        if onboarding { return onboardingSize(for: reference) }
-        var size = expanded
+        if let onboardingStep { return onboardingSize(for: reference, step: onboardingStep) }
+        return expanded
             ? expandedSize(for: reference, tab: tab, moreContextExpanded: moreContextExpanded)
             : collapsedSize(for: reference, density: density)
-        if hint { size.height += hintBand }
-        return size
     }
 
     static func origin(fromNormalizedAnchor anchor: CGPoint, panelSize: CGSize, reference: CGRect) -> CGPoint {

@@ -1,14 +1,13 @@
 import SwiftUI
 
 /// The planner's Loadout tab as a paper doll: a visible party strip, uniform
-/// slot cells in BG3 inventory order, and a bottom drawer that previews an
-/// item on hover and pins it on click for actions (target / equip / map).
+/// slot cells in BG3 inventory order, and inline item details within the same
+/// scroll region. The fixed footer shows only the active item's name.
 struct LoadoutTabView: View {
     @EnvironmentObject private var appState: AppState
     @State private var selectedMemberId: String?
     @State private var pinnedCell: DollCell?
     @State private var hoveredCell: DollCell?
-    @State private var showsLater = false
 
     private var party: [PartyMember] { appState.activeParty }
 
@@ -26,16 +25,15 @@ struct LoadoutTabView: View {
             header
             partyStrip
             memberSummary
-            if let member, let build {
+            if let member, build != nil {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 7) {
-                        dollGrid(build: build, member: member)
-                        laterSection(build: build, member: member)
-                        mapFooter(build: build, member: member)
+                        dollGrid(member: member)
+                        activeEquipmentDetails(member: member)
                     }
                     .padding(.trailing, 6)
                 }
-                drawer(build: build, member: member)
+                activeItemNameFooter
             } else {
                 emptyState
             }
@@ -50,7 +48,9 @@ struct LoadoutTabView: View {
 
     private var availableGear: [BuildGear] {
         guard let member else { return [] }
-        return appState.wantedGear(for: member)
+        return appState.wantedGear(for: member).filter {
+            LoadoutSlot.classify($0.slot, item: $0.item) != .extras
+        }
     }
 
     private var header: some View {
@@ -136,40 +136,25 @@ struct LoadoutTabView: View {
 
     // MARK: - Doll grid
 
-    /// Grid rows in BG3 inventory order; `nil` leaves a cell blank so the two
-    /// ring fields stack in the right column. Weapon and off-hand sit on the
-    /// left, torch and bow on the right.
-    private static let dollRows: [[DollCell?]] = [
-        [DollCell(slot: .helmet), DollCell(slot: .armour)],
-        [DollCell(slot: .gloves), DollCell(slot: .boots)],
-        [DollCell(slot: .amulet), DollCell(slot: .rings, field: 0)],
-        [nil, DollCell(slot: .rings, field: 1)],
-        [DollCell(slot: .mainHand), DollCell(slot: .torch)],
-        [DollCell(slot: .offHand), DollCell(slot: .ranged)],
-    ]
-
     private var groupedGear: [LoadoutSlot: [BuildGear]] {
         Dictionary(grouping: availableGear) { LoadoutSlot.classify($0.slot, item: $0.item) }
     }
 
-    private func dollGrid(build: BuildSummary, member: PartyMember) -> some View {
+    private var activeCell: DollCell? { pinnedCell ?? hoveredCell }
+
+    private var activeCellItems: [BuildGear] {
+        activeCell.map { $0.items(in: groupedGear) } ?? []
+    }
+
+    private func dollGrid(member: PartyMember) -> some View {
         let grouped = groupedGear
         return VStack(alignment: .leading, spacing: 6) {
-            ForEach(Self.dollRows.indices, id: \.self) { rowIndex in
+            ForEach(DollCell.paperDollRows.indices, id: \.self) { rowIndex in
                 HStack(spacing: 6) {
-                    ForEach(Self.dollRows[rowIndex], id: \.self) { cell in
-                        if let cell {
-                            slotCell(cell, items: cell.items(in: grouped), member: member)
-                        } else {
-                            Color.clear
-                                .frame(height: 42)
-                                .frame(maxWidth: .infinity)
-                        }
+                    ForEach(DollCell.paperDollRows[rowIndex]) { cell in
+                        slotCell(cell, items: cell.items(in: grouped), member: member)
                     }
                 }
-            }
-            if let extras = grouped[.extras], !extras.isEmpty {
-                slotCell(DollCell(slot: .extras), items: extras, member: member)
             }
         }
     }
@@ -185,15 +170,16 @@ struct LoadoutTabView: View {
             pinnedCell = pinned ? nil : cell
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: cell.slot.icon)
-                    .font(.system(size: 10))
-                    .foregroundStyle(first == nil ? BG3Theme.bronze.opacity(0.7) : BG3Theme.gold)
-                    .frame(width: 15)
                 if let first {
                     GearItemIcon(gear: first, size: 28, borderColor: first.rarityTint)
+                } else {
+                    Image(systemName: cell.slot.icon)
+                        .font(.system(size: 14))
+                        .foregroundStyle(BG3Theme.bronze.opacity(0.7))
+                        .frame(width: 28, height: 28)
                 }
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(first.map { items.count > 1 ? "\($0.item) +\(items.count - 1)" : $0.item } ?? "no pick")
+                    Text(first.map { items.count > 1 ? "\($0.item) +\(items.count - 1)" : $0.item } ?? cell.emptyLabel)
                         .font(BG3Type.captionBold)
                         .foregroundStyle(first?.rarityTint ?? BG3Theme.mutedParchment.opacity(0.7))
                         .lineLimit(1)
@@ -217,7 +203,7 @@ struct LoadoutTabView: View {
         .background(RoundedRectangle(cornerRadius: 8).fill(pinned ? BG3Theme.bronze.opacity(0.26) : BG3Theme.ink.opacity(0.3)))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(pinned ? BG3Theme.gold.opacity(0.7) : BG3Theme.bronze.opacity(items.isEmpty ? 0.18 : 0.35), lineWidth: pinned ? 1 : 0.7))
         .onHover { inside in
-            if inside { hoveredCell = cell } else if hoveredCell == cell { hoveredCell = nil }
+            if inside { hoveredCell = cell }
         }
         .accessibilityLabel(accessibilityText)
     }
@@ -253,38 +239,42 @@ struct LoadoutTabView: View {
         }
     }
 
-    // MARK: - Drawer
+    // MARK: - Active item
 
-    private func drawer(build: BuildSummary, member: PartyMember) -> some View {
-        let grouped = groupedGear
-        let cell = pinnedCell ?? hoveredCell
-        let cellItems = cell.map { $0.items(in: grouped) } ?? []
-        return Group {
-            if let cell, !cellItems.isEmpty {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 9) {
-                        ForEach(cellItems) { gear in
-                            GearDetailView(gear: gear, member: member, showsActions: pinnedCell != nil)
-                        }
-                        if pinnedCell == cell {
-                            changePickSection(cell, items: grouped[cell.slot] ?? [], member: member)
-                        }
-                        if pinnedCell == nil {
-                            Text("Click the slot to pin it and act on the item.")
-                                .font(BG3Type.caption)
-                                .foregroundStyle(BG3Theme.mutedParchment.opacity(0.8))
-                        }
-                    }
-                    .padding(9)
+    @ViewBuilder private func activeEquipmentDetails(member: PartyMember) -> some View {
+        if let cell = activeCell, !activeCellItems.isEmpty {
+            VStack(alignment: .leading, spacing: 9) {
+                ForEach(activeCellItems) { gear in
+                    GearDetailView(gear: gear, member: member, showsActions: pinnedCell != nil)
                 }
-                .frame(maxHeight: 172)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .bg3InsetSurface(accent: pinnedCell == cell ? BG3Theme.gold : BG3Theme.bronze)
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel("\(cell.label) details")
-            } else {
-                idleDrawerSummary(member: member)
+                if pinnedCell == cell {
+                    changePickSection(cell, items: groupedGear[cell.slot] ?? [], member: member)
+                }
+                if pinnedCell == nil {
+                    Text("Click the slot to pin it and act on the item.")
+                        .font(BG3Type.caption)
+                        .foregroundStyle(BG3Theme.mutedParchment.opacity(0.8))
+                }
             }
+            .padding(9)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .bg3InsetSurface(accent: pinnedCell == cell ? BG3Theme.gold : BG3Theme.bronze)
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("\(cell.label) details")
+        }
+    }
+
+    @ViewBuilder private var activeItemNameFooter: some View {
+        if let gear = activeCellItems.first {
+            Text(gear.item)
+                .font(BG3Type.captionBold)
+                .foregroundStyle(gear.rarityTint)
+                .lineLimit(1)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .bg3InsetSurface(accent: pinnedCell == activeCell ? BG3Theme.gold : BG3Theme.bronze)
+                .accessibilityLabel("Selected equipment: \(gear.item)")
         }
     }
 
@@ -339,75 +329,4 @@ struct LoadoutTabView: View {
         }
     }
 
-    private func idleDrawerSummary(member: PartyMember) -> some View {
-        let confirmable = availableGear.filter(\.isMapObjective)
-        let confirmed = confirmable.filter { appState.gearIsEquipped($0, by: member) }
-        let contested = availableGear.filter { appState.gearConflict(for: $0, member: member) != nil }
-        var line = confirmable.isEmpty
-            ? "No obtainable picks for this act yet."
-            : "\(confirmed.count) of \(confirmable.count) picks confirmed"
-        if !contested.isEmpty { line += " · \(contested.count) contested" }
-        return HStack(spacing: 6) {
-            Image(systemName: "hand.point.up.left")
-                .font(.system(size: 11))
-                .foregroundStyle(BG3Theme.mutedParchment)
-            Text("\(line) — hover a slot for details.")
-                .font(BG3Type.caption)
-                .foregroundStyle(BG3Theme.mutedParchment)
-            Spacer(minLength: 0)
-        }
-        .padding(9)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .bg3InsetSurface(accent: BG3Theme.bronze.opacity(0.6))
-    }
-
-    // MARK: - Later + footer
-
-    @ViewBuilder private func laterSection(build: BuildSummary, member: PartyMember) -> some View {
-        let later = build.gear
-            .filter { $0.act > appState.selectedAct || !$0.isAvailable(at: member.level) }
-            .sorted {
-                ($0.act, $0.minimumLevel ?? 1, GearLogic.priorityRank($0.priority))
-                    < ($1.act, $1.minimumLevel ?? 1, GearLogic.priorityRank($1.priority))
-            }
-        if !later.isEmpty {
-            BG3Disclosure(
-                title: later.count == 1 ? "Later · 1 item" : "Later · \(later.count) items",
-                systemImage: "lock.fill", tint: BG3Theme.bronzeBright,
-                inset: true, isExpanded: $showsLater
-            ) {
-                ForEach(later) { gear in
-                    HStack(alignment: .top, spacing: 6) {
-                        Image(systemName: "lock.fill").font(.system(size: 9)).foregroundStyle(BG3Theme.bronzeBright)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(gear.item).font(BG3Type.captionBold).foregroundStyle(BG3Theme.parchment)
-                            Text(laterReason(gear, member: member))
-                                .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
-                        }
-                        Spacer()
-                    }
-                }
-            }
-        }
-    }
-
-    private func laterReason(_ gear: BuildGear, member: PartyMember) -> String {
-        if gear.act > appState.selectedAct { return "Act \(gear.act) · \(gear.region)" }
-        if let minimum = gear.minimumLevel, minimum > member.level {
-            let requirement = gear.requirement?.isEmpty == false ? " · \(gear.requirement!)" : ""
-            return "Unlocks at L\(minimum)\(requirement)"
-        }
-        return gear.requirement?.isEmpty == false ? gear.requirement! : gear.region
-    }
-
-    private func mapFooter(build: BuildSummary, member: PartyMember) -> some View {
-        Button {
-            appState.openCurrentActMap(buildId: build.id, item: nil, level: member.level)
-        } label: {
-            Label("Show all Act \(appState.selectedAct) pickups on the map", systemImage: "map.fill")
-                .font(BG3Type.captionBold)
-                .frame(maxWidth: .infinity)
-        }
-        .assistantActionButton()
-    }
 }

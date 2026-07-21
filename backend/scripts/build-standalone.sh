@@ -3,8 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 rm -rf build dist/bg3-honor-backend
+export UV_PYTHON="${UV_PYTHON:-3.11}"
 uv sync --locked
-uv run --with pyinstaller pyinstaller \
+uv run --with pyinstaller==6.21.0 pyinstaller \
   --noconfirm \
   --clean \
   --onedir \

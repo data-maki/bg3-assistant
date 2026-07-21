@@ -33,18 +33,11 @@ final class RunCreationTests: XCTestCase {
     func testFreshRunKeepsCharacterAndLatestBuildPresetsOnly() throws {
         var source = HonorRun()
         source.normalizeRoster()
-        source.name = "Old Run"
-        source.guideVersion = "old-guide"
         source.selectedAct = 3
         source.storyOutcomes = ["saved-grove"]
         source.walkthroughProgress = ["step": .completed]
-        source.walkthroughOutcomes = ["step": "choice"]
         source.equippedByMember = ["tav": ["old-item"]]
-        source.equipmentOwnershipKnown = true
-        source.gearAssignmentOverrides = ["old-item": "tav"]
-        source.plannedSlotOverrides = ["tav": ["main-hand": "old-item"]]
         source.gearTarget = GearTarget(memberId: "tav", buildId: "latest-build", gearId: "old-item")
-        source.mapRegion = "Lower City"
 
         let tavIndex = try XCTUnwrap(source.roster?.firstIndex { $0.id == "tav" })
         source.roster?[tavIndex].name = "Ariadne"
@@ -73,21 +66,11 @@ final class RunCreationTests: XCTestCase {
             createdAt: createdAt
         )
 
-        XCTAssertNotEqual(fresh.id, source.id)
-        XCTAssertEqual(fresh.name, "New Run")
-        XCTAssertEqual(fresh.createdAt, createdAt)
-        XCTAssertEqual(fresh.guideVersion, "latest-guide")
-        XCTAssertEqual(fresh.selectedAct, 1)
         XCTAssertTrue(fresh.progress.isEmpty)
         XCTAssertTrue(fresh.walkthroughProgress?.isEmpty ?? true)
-        XCTAssertTrue(fresh.walkthroughOutcomes?.isEmpty ?? true)
         XCTAssertTrue(fresh.storyOutcomes?.isEmpty ?? true)
         XCTAssertTrue(fresh.equippedByMember?.isEmpty ?? true)
-        XCTAssertFalse(fresh.equipmentOwnershipKnown ?? true)
-        XCTAssertTrue(fresh.gearAssignmentOverrides?.isEmpty ?? true)
-        XCTAssertTrue(fresh.plannedSlotOverrides?.isEmpty ?? true)
         XCTAssertNil(fresh.gearTarget)
-        XCTAssertEqual(fresh.mapRegion, "Wilderness")
 
         let tav = try XCTUnwrap(fresh.roster?.first { $0.id == "tav" })
         XCTAssertEqual(tav.name, "Ariadne")

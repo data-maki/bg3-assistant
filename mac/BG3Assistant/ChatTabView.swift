@@ -83,10 +83,13 @@ struct ChatTabView: View {
         .onChange(of: speech.transcript) { _, transcript in
             if !transcript.isEmpty { appState.chatDraft = transcript }
         }
+        .task { await appState.prepareChatScreenshot() }
     }
 
     @ViewBuilder private var attachment: some View {
-        if appState.isPreparingChatScreenshot {
+        if appState.aiProvider?.supportsImages != true {
+            EmptyView()
+        } else if appState.isPreparingChatScreenshot {
             HStack(spacing: 7) {
                 ProgressView().controlSize(.small)
                 Text("Capturing current BG3 window…")
@@ -100,9 +103,18 @@ struct ChatTabView: View {
                 ScreenshotThumbnail(image: image, compact: true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Current BG3 view").font(.caption.bold())
-                    Text("Attached to your next message").font(.caption2).foregroundStyle(.secondary)
+                    Text(appState.chatScreenshotError ?? "Attached to your next message")
+                        .font(.caption2)
+                        .foregroundStyle(appState.chatScreenshotError == nil ? AnyShapeStyle(.secondary) : AnyShapeStyle(.orange))
                 }
                 Spacer()
+                Button {
+                    Task { await appState.retakeChatScreenshot() }
+                } label: {
+                    Label("Retake", systemImage: "camera.fill")
+                }
+                .controlSize(.mini)
+                .help("Take a new BG3 screenshot")
                 Button(action: appState.removeChatScreenshot) {
                     Image(systemName: "xmark.circle.fill")
                 }
@@ -112,6 +124,32 @@ struct ChatTabView: View {
             .padding(6)
             .background(BG3Theme.ink.opacity(0.48), in: RoundedRectangle(cornerRadius: 8))
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(BG3Theme.bronze.opacity(0.35)))
+        } else if let error = appState.chatScreenshotError {
+            HStack(spacing: 7) {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                Text(error).font(.caption2).foregroundStyle(.secondary).lineLimit(2)
+                Spacer()
+                Button("Retry") { Task { await appState.prepareChatScreenshot() } }
+                    .controlSize(.mini)
+            }
+            .padding(6)
+            .background(BG3Theme.ink.opacity(0.48), in: RoundedRectangle(cornerRadius: 8))
+        } else {
+            HStack(spacing: 7) {
+                Button {
+                    Task { await appState.prepareChatScreenshot() }
+                } label: {
+                    Label("Attach BG3 screenshot", systemImage: "camera.fill")
+                }
+                .controlSize(.small)
+                Spacer()
+                Text("Adds it to your next message")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(6)
+            .background(BG3Theme.ink.opacity(0.48), in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(BG3Theme.bronze.opacity(0.28)))
         }
     }
 

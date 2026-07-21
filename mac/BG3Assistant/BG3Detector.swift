@@ -29,6 +29,27 @@ struct BG3Detector {
         (max(1, Int(frame.width)), max(1, Int(frame.height)))
     }
 
+    static func largestIntersectionIndex(of frame: CGRect, in candidates: [CGRect]) -> Int? {
+        candidates.indices
+            .filter { !frame.intersection(candidates[$0]).isNull }
+            .max { lhs, rhs in
+                let lhsIntersection = frame.intersection(candidates[lhs])
+                let rhsIntersection = frame.intersection(candidates[rhs])
+                return lhsIntersection.width * lhsIntersection.height < rhsIntersection.width * rhsIntersection.height
+            }
+    }
+
+    static func displaySourceRect(windowFrame: CGRect, displayFrame: CGRect) -> CGRect? {
+        let intersection = windowFrame.intersection(displayFrame)
+        guard !intersection.isNull, !intersection.isEmpty else { return nil }
+        return CGRect(
+            x: intersection.minX - displayFrame.minX,
+            y: intersection.minY - displayFrame.minY,
+            width: intersection.width,
+            height: intersection.height
+        )
+    }
+
     func detect() -> BG3Detection {
         let windows = (CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]]) ?? []
         let matchingWindows = windows.filter { window in

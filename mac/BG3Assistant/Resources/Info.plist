@@ -15,11 +15,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.0</string>
+	<string>1.1</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>BG3BackendURL</key>
-	<string>http://127.0.0.1:8787</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
@@ -31,10 +29,10 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>AI chat can attach one screenshot of the Baldur's Gate 3 window to a message you send through the configured assistant backend. There is no periodic capture or recording.</string>
+	<string>AI chat can attach one screenshot of the Baldur's Gate 3 window to a message you send through OpenRouter. There is no periodic capture or recording.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The assistant uses the microphone to dictate chat questions about your run.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Dictated questions are transcribed on-device where possible and sent only to the configured assistant backend.</string>
+	<string>Dictated questions are transcribed on-device where possible and sent only to your selected AI provider.</string>
 </dict>
 </plist>

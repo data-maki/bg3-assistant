@@ -148,7 +148,7 @@ extension AppState {
         let settings = AssistantSettings(
             overlayDensity: overlayDensity.rawValue,
             onboardingSeenVersion: onboardingSeenVersion,
-            seenHints: seenHints.isEmpty ? nil : seenHints.sorted()
+            aiProvider: aiProvider?.rawValue
         )
         do { try runStore.saveSettings(settings) }
         catch { errorMessage = "Could not save settings: \(error.localizedDescription)" }

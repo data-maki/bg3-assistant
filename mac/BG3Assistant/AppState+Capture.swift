@@ -54,10 +54,12 @@ extension AppState {
     func handlePermissionReturn(_ activatedApp: NSRunningApplication?) async {
         guard permissionProbeAfterSettings else { return }
         if activatedApp?.bundleIdentifier == "com.apple.systempreferences" { return }
-        permissionProbeAfterSettings = false
         let verified = await PermissionManager.verifyScreenRecordingAccess()
         applyCaptureAuthorization(verified, verifiedByPixels: verified)
-        if verified, plannerTab == .chat { await prepareChatScreenshot() }
+        if verified {
+            permissionProbeAfterSettings = false
+            if plannerTab == .chat { await prepareChatScreenshot() }
+        }
     }
 
     func captureBG3() async throws -> ScreenshotResult {

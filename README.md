@@ -1,116 +1,116 @@
 <p align="center">
-  <img src="docs/images/app-logo.png" width="180" alt="HM shield logo for BG3 Honor Mode Assistant">
+  <img src="docs/images/app-logo.png" width="128" alt="BG3 Honor Mode Assistant shield">
 </p>
 
-# BG3 Honor Mode Assistant
+<h1 align="center">BG3 Honor Mode Assistant</h1>
 
-A quiet macOS overlay for keeping an Honor Mode run on track without leaving Baldur's Gate 3.
+<p align="center"><strong>Keep your Honor run on track without tabbing out.</strong></p>
 
-![The Now view showing the current danger, outcome to avoid, recommended action, and progress controls](docs/images/overlay-now.png)
+<p align="center">
+  A native macOS overlay for the route's next move, fight risks, missable decisions,<br>
+  party progression, and equipment plan. You play the game; the app keeps the plan in view.
+</p>
 
-See the next safe action, check the risk before a fight, manage each companion's build, and mark progress yourself. The app stays in the menu bar and opens over BG3 only when you need it.
+<p align="center">
+  <a href="#install-from-source">
+    <img src="https://img.shields.io/badge/Build_and_install-macOS-B47A3C?style=for-the-badge&logo=apple&logoColor=white" alt="Build and install on macOS">
+  </a>
+  <br>
+  <sub>macOS 14+ | Apple silicon | Beta | No mod or account required</sub>
+</p>
 
-**This is not a BG3 mod.** It does not install game files, read memory or saves, automate input, record gameplay, or require Script Extender.
+<p align="center">
+  <img src="docs/images/product-tour.gif" width="560" alt="Animated tour of the Now, Route, Party, and Loadout views">
+</p>
 
-## What it does
+> **Current beta coverage:** Act 1 route guidance is available. Act 3 is available for runs started or caught up there. Act 2 includes equipment and a public map handoff, but its route is not ready, so normal progression from Act 2 to Act 3 remains locked.
 
-- **Now** keeps the current danger, outcome to avoid, recommended action, and Done/Skip controls in one place.
-- **Run** provides focused reviewed routes for Acts 1 and 3, with decisions, missable warnings, deadlines, and a resolved archive.
-- **Party** leads with what each active character should take and do at their current level, with roster, build, respec, and Withers setup on focused detail pages.
-- **Loadout** focuses on one active character at a time, including current-act equipment and public build imports.
-- **Act** reviews obtained or missed equipment, locks the previous act, and advances the run deliberately.
-- **Map** opens the local Act 1 walkthrough map or the current act's public map reference.
-- **Chat** answers questions from the reviewed guide and your current run, with optional speech input and AI.
+## Install from source
 
-| In-game guidance | Guide-grounded chat |
-| --- | --- |
-| ![The Now view showing the current recommendation](docs/images/overlay-now.png) | ![The chat view answering a guide-grounded question about the current run](docs/images/overlay-chat.png) |
+A notarized public binary is not available yet. The repository includes one installer that builds the same self-contained app locally.
 
-## Install the app bundle
+You need:
 
-Requirements: macOS 14 or later on Apple silicon. Building the bundle also needs Xcode 16 or its Command Line Tools (Swift 6) and [`uv`](https://docs.astral.sh/uv/), which provides the Python 3.11+ toolchain on its own.
+- macOS 14 or later on Apple silicon
+- An internet connection for the first build
+- About 3 GB of free space for build files, plus 2.5 GB if you choose Local Qwen
+- Apple Command Line Tools with Swift 6; run `xcode-select --install` if they are missing
+
+You do **not** need Python, Homebrew, `uv`, the full Xcode app, an Apple developer account, a mod manager, or Script Extender.
 
 ```sh
 git clone https://github.com/data-maki/bg3-assistant.git
-cd bg3-assistant/mac
-./scripts/build-app.sh
-mv "BG3 Honor Mode Assistant.app" /Applications/
+cd bg3-assistant
+bash ./install-macos.sh
 ```
 
-The script packages a keyless Python companion service, builds the Swift overlay in release mode, and assembles a codesigned **BG3 Honor Mode Assistant.app** (using your Developer ID or Apple Development identity when available, ad-hoc otherwise). The first build takes a few minutes; the script prints the finished bundle path when done.
+The first build takes a few minutes. The installer bundles the guide and a checksum-pinned Ollama runtime, verifies the app, installs it to `~/Applications`, and opens it. During setup, choose private Local Qwen or enter your own OpenRouter API key. Local Qwen downloads the 2.5 GB `qwen3:4b` model separately. You do not run another script or keep a terminal open while playing. Rerun the installer to update an existing copy.
 
-Once installed, the app is self-contained: the bundled local service starts and stops with it, and playing needs no terminal, Python installation, mod manager, or Script Extender.
+Do not want to use Git? Choose **Code -> Download ZIP** on GitHub, extract it, open that folder in Terminal, and run `bash ./install-macos.sh`.
 
-Invited TestFlight testers can skip the build: install [TestFlight from the Mac App Store](https://apps.apple.com/app/testflight/id899247664), accept the tester invite, and install **BG3 Honor Mode Assistant** from TestFlight.
+Invited TestFlight testers can instead install through [TestFlight](https://apps.apple.com/app/testflight/id899247664). Source and TestFlight builds use the same provider choices. The guide, run planning, party, loadout, and act review work without an account; AI chat and public-URL build import require configured Local Qwen or OpenRouter.
 
-## Set up
+## Why use it
 
-1. Open **BG3 Honor Mode Assistant** from Applications. The HM shield appears in the macOS menu bar.
-2. Open **Settings** from the shield menu and keep or decline **Launch at Login**.
-3. AI chat, screenshot questions, and build imports work when the release is configured for the hosted AI backend. TestFlight verifies the installation with Apple automatically; testers never create an account or enter an OpenRouter key. The guide itself is fully local.
-4. Optional: allow microphone access for speech input and Screen Recording for the one-shot chat screenshot. Both can be declined and chat keeps working.
-5. Use **Settings → Report a Bug** to open an email to `jcllobet@gmail.com`.
+**Know what matters now.** See the route's recommended action, the outcome to avoid, the risk and level, and the reason behind the recommendation. Mark it done, record a different outcome, or skip it yourself.
 
-## Launch and play
+**See what opens next.** Route dependencies separate what is ready from what comes later. Deadlines, lockouts, unresolved consequences, and completed steps stay attached to the run instead of a pile of browser tabs.
 
-1. Start Baldur's Gate 3 yourself, or use **Launch BG3** from the shield menu. The overlay stays out of the way until you show it from the menu bar.
-2. Move through **Now**, **Run**, **Party**, **Loadout**, and **Act**. Nothing is marked complete until you confirm it.
-3. Use the map icon for the current act map or the chat icon to ask about the active reviewed route.
+**Keep the party on plan.** Each active character gets current-level build guidance, equipment picks, ownership, and contention warnings. Built-in builds also include exact creation and respec ability recipes.
 
-## Keep separate Honor runs
+| Current-level party guidance | Equipment planning |
+| --- | --- |
+| <img src="docs/images/overlay-party.png" alt="Party view showing level-five guidance for four active characters"> | <img src="docs/images/overlay-loadout.png" alt="Loadout view showing equipment picks and contested items"> |
 
-Name and save multiple attempts, including solo and co-op campaigns. Each run keeps its own route progress, decisions, party, builds, and equipment. Switch the active run from the shield menu's **Run** submenu, or create and rename runs in the overlay's **Settings** view.
+## How a run works
 
-## Import a reusable build
+1. Pick your active four, levels, and builds. You can also catch up a run that is already in progress.
+2. Follow **Now** for the immediate recommendation or open **Route** to see the surrounding steps and blockers.
+3. Confirm what happened. The next recommendation updates from your recorded progress and decisions.
+4. Review equipment and unresolved consequences before advancing an act. Advancing locks that act's ledger inside the app; it does not change the BG3 save.
 
-Paste one public build URL from a character's **Party → Build** section. Gemini 3 Flash converts the guide into one validated reusable build, derives a legal 27-point creation recipe, assigns it after confirmation, and adds it to every character's build picker. Importing never changes party membership. Each Apple-verified user can make up to 30 lifetime build-import attempts; the remaining quota is shown before import.
+Nothing is inferred from the game. The app does not read saves or memory, and it never marks a fight, decision, or pickup complete on its own.
 
-Reviewed builds show an exact BG3 table for character creation and every Withers respec: point-buy values, the distinct +2/+1 bonuses, final values to enter, first class, and class order. A source ledger explains later ASIs, feats, unique permanent rewards, equipment setters, and consumables. Equipment follows confirmed Loadout ownership; one-time rewards and elixirs enforce their party and timing rules. **Reset character plan** is separate from respec guidance, states everything it removes, requires confirmation, and can be undone. The Withers roster includes all 12 predefined hirelings with legal class spreads.
+## More than a route checklist
 
-## AI features and screenshots
+- Save separate solo, co-op, and retry runs, each with its own party, decisions, equipment, and progress.
+- Use a full roster with Active, Camp, and Unrecruited placement, including Withers hirelings.
+- Open the native walkthrough and pickup plan, or hand off to the current act's public map.
+- Ask guide-grounded questions from the overlay with optional speech input.
+- Import one reusable build from a public URL, then assign it to the selected character.
 
-Chat has two modes:
+Imported builds are AI-extracted drafts, not a legality guarantee. The importer derives a legal 27-point starting allocation, but you should review classes, spells, feats, equipment, and later progression against the source. Importing never changes party membership.
 
-- **Guide-only:** returns deterministic answers from the reviewed route and current player-confirmed state, with no network dependency.
-- **OpenRouter AI:** chat and build imports use the release's hosted backend; testers do not configure or receive the provider key.
+## Coverage and route assumptions
 
-When OpenRouter AI is configured, opening chat prepares one current BG3-window screenshot for the next message. The attachment is visible in chat, opens as a preview, and can be removed before sending. It is sent through the configured hosted backend to OpenRouter only with that message. The overlay is excluded because the app captures the BG3 window directly.
+| Act | Route | Equipment | Map |
+| --- | --- | --- | --- |
+| Act 1 | Available | Available | Public map handoff |
+| Act 2 | Not yet available | Available | Public Shadow-Cursed Lands handoff |
+| Act 3 | Available for started/caught-up runs | Available | Public Baldur's Gate handoff |
 
-There is no periodic capture, background vision loop, video recording, or silent upload. Chat and speech input continue to work if you remove the screenshot or decline Screen Recording permission.
+The current route is opinionated: it favors a cautious, generally good-aligned run and preserving companion and rescue outcomes. Treat it as planning support, not a guarantee against patches, unusual choices, or Honor Mode variance.
 
-Run state stays in your Application Support directory, and the keyless bundled service listens only on `127.0.0.1`. The app bundle contains the hosted backend URL, not an OpenRouter or Exa credential. Provider credentials stay in the hosted backend's environment. The Apple-signed AppTransaction is exchanged for a short-lived hosted token; that token remains in the local companion's memory and is not exposed to the browser map or persisted run data.
+## Privacy and permissions
 
-For a build import, the local service asks the hosted backend to download the public URL and process its extracted text with OpenRouter, then saves the validated result locally. Private-network URLs, credential-bearing URLs, oversized pages, and unsupported file types are rejected. No API key is stored in the custom-build database or sent to the source website.
+This is not a BG3 mod. It does not install game files, read memory or saves, automate input, record gameplay, or require Script Extender. Core run and catalog data are stored in your Application Support directory.
 
-## Act 1 map
+The core guide and planner do not need AI or internet access. Public map handoffs require internet access.
 
-![The local Act 1 walkthrough and pickup map](docs/images/act-one-map.png)
+Local Qwen runs on this Mac after its model download. OpenRouter sends the selected run context needed to answer a question, including relevant guide facts, party, progress, and outcomes, to `google/gemini-3-flash-preview`. Its API key is stored only in macOS Keychain. The app never silently switches providers. With Screen Recording permission, OpenRouter chat can also prepare one visible BG3-window screenshot. You can preview or remove it, and it is sent only when you send that message. Local Qwen does not accept screenshots. There is no background capture or recording loop.
 
-The browser map shares the active run's manual progress and party equipment. It is the only separate app surface; normal planning and chat stay in the native in-game overlay.
+Build import downloads readable text from the public URL on this Mac. Local Qwen processes it locally; OpenRouter receives the URL and extracted text. Imported drafts are validated and saved locally. Speech input requests microphone and Speech Recognition access, and macOS may use Apple's speech service when on-device recognition is unavailable.
 
-## Act transitions
+Developer setup and provider details are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The **Act** tab is an irreversible gate. Before leaving an act, review every relevant active-party equipment item as obtained or missed and explicitly accept unresolved route consequences. Advancing locks that act's ledger and loads the next act's separate database.
+## Project links
 
-## Current scope
+- [Contributing](CONTRIBUTING.md)
+- [Architecture](docs/developers/ARCHITECTURE.md)
+- [Release guide](docs/developers/RELEASE.md)
+- [Security policy](SECURITY.md)
 
-The current guide includes reviewed Act 1 and Act 3 routes, act-scoped readiness and chat grounding, imported custom builds, named Honor runs, party and equipment state, the local Act 1 browser map, and public map handoffs for later acts. Act 2 equipment and map references are included, but its route is still research-only. The Act 2 to Act 3 gate therefore stays locked during normal progression even though the Act 3 guide is app-ready.
-
-Treat the guide as planning support, not a guarantee against game patches, player choices, or Honor Mode variance. This is an unofficial community project and is not affiliated with Larian Studios.
-
-## Contributing
-
-Technical contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [architecture overview](docs/developers/ARCHITECTURE.md), keep pull requests focused, source guide-data corrections, and describe local verification. Internal tests and generated QA artifacts are intentionally excluded from public Git.
-
-Good next milestones:
-
-- Convert the reviewed Act 2 research into tested route data, plus a local Act 2 map
-- TestFlight feedback, release automation, and a public beta invite
-- Accessibility, keyboard-navigation, and first-run onboarding passes
-- Localization-ready guide and interface strings
-- Stronger deterministic chat evaluation and screenshot-attachment coverage
-
-Security reports should follow [SECURITY.md](SECURITY.md). Release maintainers can use [docs/developers/RELEASE.md](docs/developers/RELEASE.md).
+This is an unofficial community project and is not affiliated with Larian Studios.
 
 ## License
 

@@ -3,8 +3,10 @@ import SwiftUI
 
 struct PetSpriteView: View {
     var size: CGFloat = 84
+    var attentionTrigger = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hoverStartedAt: Date?
+    @State private var attentionStartedAt: Date?
     @State private var pointerLocation: CGPoint?
 
     private var viewSize: CGSize {
@@ -12,11 +14,14 @@ struct PetSpriteView: View {
     }
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30, paused: hoverStartedAt == nil)) { timeline in
+        let animationStartedAt = hoverStartedAt ?? attentionStartedAt
+        TimelineView(.animation(minimumInterval: 1 / 30, paused: animationStartedAt == nil)) { timeline in
             let frame = PetAnimationModel.frame(
-                isHovered: hoverStartedAt != nil,
-                hoverElapsed: hoverStartedAt.map { max(0, timeline.date.timeIntervalSince($0)) } ?? 0,
-                pointerLocation: pointerLocation,
+                isHovered: animationStartedAt != nil,
+                hoverElapsed: animationStartedAt.map { max(0, timeline.date.timeIntervalSince($0)) } ?? 0,
+                pointerLocation: hoverStartedAt == nil && attentionStartedAt != nil
+                    ? CGPoint(x: viewSize.width * 1.3, y: viewSize.height * 0.45)
+                    : pointerLocation,
                 viewSize: viewSize,
                 reduceMotion: reduceMotion
             )
@@ -44,9 +49,17 @@ struct PetSpriteView: View {
                 pointerLocation = nil
             }
         }
+        .task(id: attentionTrigger) {
+            guard attentionTrigger > 0, !reduceMotion else { return }
+            attentionStartedAt = .now
+            defer { if Task.isCancelled { attentionStartedAt = nil } }
+            try? await Task.sleep(for: .seconds(2.4))
+            guard !Task.isCancelled else { return }
+            attentionStartedAt = nil
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Twilight Cleric companion")
-        .accessibilityValue(hoverStartedAt == nil ? "Resting" : "Awake")
+        .accessibilityValue(animationStartedAt == nil ? "Resting" : "Awake")
         .accessibilityHint("Hover to wake the companion")
     }
 }

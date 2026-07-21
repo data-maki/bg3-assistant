@@ -213,12 +213,12 @@ extension AppState {
     }
 
     func openActMap(_ act: Int, buildId: String? = nil, item: String? = nil, level: Int? = nil) {
-        guard let handoff = actGuide(for: act)?.mapHandoff else { return }
-        switch handoff {
-        case .external(let url):
-            NSWorkspace.shared.open(url)
-        case .local:
-            openLocalMap(buildId: buildId, item: item, level: level)
+        guard let value = actGuide(for: act)?.mapUrl,
+              let url = URL(string: value),
+              ["http", "https"].contains(url.scheme?.lowercased() ?? "") else {
+            errorMessage = "No browser map is configured for Act \(act)."
+            return
         }
+        NSWorkspace.shared.open(url)
     }
 }

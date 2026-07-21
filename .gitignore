@@ -30,17 +30,23 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+.swiftpm/
 .DS_Store
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Generated development and QA evidence (kept locally, never published)
+# Generated builds, development output, and QA evidence (kept locally, never published)
 outputs/
 qa/
 artifacts/
+*.profraw
 *.inspect.ndjson
 *.formula-errors.ndjson
+
+# Local App Store Connect submission material and private review contact details
+/app-store-submission/
+/docs/app-store/METADATA.md
 
 # Internal agent and research notes (kept locally, never published)
 DESIRES.md
@@ -55,13 +61,9 @@ data/EXPANSION.md
 backend/.env
 backend/.venv/
 backend/runs/
-mac/.build/
 DerivedData/
 __pycache__/
 *.pyc
-mac/BG3 Honor Mode Assistant.app/
-mac/BG3-Honor-Mode-Assistant-*-macOS-*.zip
-mac/BG3-Honor-Mode-Assistant-*-TestFlight.pkg
 backend/build/
 backend/dist/
 backend/*.spec

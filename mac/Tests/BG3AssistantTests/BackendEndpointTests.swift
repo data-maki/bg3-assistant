@@ -7,7 +7,6 @@ final class BackendEndpointTests: XCTestCase {
         let endpoint = try BackendEndpoint("http://127.0.0.1:8787")
 
         XCTAssertTrue(endpoint.managesLocalBackend)
-        XCTAssertEqual(endpoint.url(path: "/api/chat").absoluteString, "http://127.0.0.1:8787/api/chat")
     }
 
     func testRemoteEndpointUsesHTTPSWithoutManagingALocalProcess() throws {
@@ -15,7 +14,6 @@ final class BackendEndpointTests: XCTestCase {
 
         XCTAssertFalse(endpoint.managesLocalBackend)
         XCTAssertEqual(endpoint.baseURL.absoluteString, "https://assistant.example.com")
-        XCTAssertEqual(endpoint.url(path: "map").absoluteString, "https://assistant.example.com/map")
     }
 
     func testEnvironmentOverridesPackagedEndpoint() throws {

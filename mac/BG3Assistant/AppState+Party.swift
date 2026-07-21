@@ -34,35 +34,34 @@ extension AppState {
             return nil
         }
         guard buildImportAvailable else {
-            if buildImportQuota?.remaining == 0 {
-                loadoutImportStatus = "The lifetime build-import limit has been reached."
-            } else {
-                loadoutImportStatus = backendAuthenticationMessage
-                    ?? "AI build import is not available right now."
-            }
+            loadoutImportStatus = "Choose and configure an AI provider in Settings first."
             return nil
         }
         guard !isImportingLoadout else { return nil }
         isImportingLoadout = true
         loadoutImportStatus = "Reading and processing the build…"
         defer { isImportingLoadout = false }
-        let operationKey: UUID
-        if pendingBuildImportURL == url, let pendingBuildImportKey {
-            operationKey = pendingBuildImportKey
-        } else {
-            operationKey = UUID()
-            pendingBuildImportURL = url
-            pendingBuildImportKey = operationKey
-        }
         do {
-            let imported = try await backendClient.importBuild(
-                LoadoutImportRequest(url: url),
-                idempotencyKey: operationKey
+            guard let aiProvider else { throw AIProviderError.providerNotConfigured }
+            let source = try await BuildImportSourceLoader.load(url)
+            loadoutImportStatus = "Extracting classes, levels, abilities, and gear…"
+            let content = try await assistantAIClient.complete(
+                provider: aiProvider,
+                messages: [
+                    AssistantAIMessage(role: "system", content: BuildImportPrompt.system),
+                    AssistantAIMessage(
+                        role: "user",
+                        content: "SOURCE URL: \(source.url.absoluteString)\n\nBEGIN UNTRUSTED PAGE TEXT\n\(source.text)\nEND UNTRUSTED PAGE TEXT"
+                    ),
+                ],
+                jsonSchema: BuildImportPrompt.schema,
+                temperature: 0,
+                maxTokens: 10_000,
+                ollamaRuntime: ollamaRuntime
             )
-            applyImportedBuild(imported)
-            pendingBuildImportURL = nil
-            pendingBuildImportKey = nil
-            await refreshBuildImportQuota()
+            guard let data = content.data(using: .utf8) else { throw AIProviderError.invalidResponse }
+            let imported = try JSONDecoder().decode(BuildImportDraft.self, from: data).importedBuild(sourceURL: source.url)
+            try applyImportedBuild(imported)
             loadoutURLDraft = ""
             loadoutImportStatus = "Imported \(imported.name). Assign it to any character from Party."
             let encoder = JSONEncoder()
@@ -72,21 +71,9 @@ extension AppState {
             }
             return imported.build
         } catch {
-            await refreshBuildImportQuota()
-            if let backendError = error as? BackendClientError, backendError.statusCode != 409 {
-                pendingBuildImportURL = nil
-                pendingBuildImportKey = nil
-            }
             loadoutImportStatus = error.localizedDescription
             return nil
         }
-    }
-
-    private func refreshBuildImportQuota() async {
-        guard let health = await backendClient.healthDetails() else { return }
-        backendAIAvailable = health.aiAvailable == true
-        backendAuthenticated = health.authenticated == true
-        buildImportQuota = health.buildImports
     }
 
     func respec(_ member: PartyMember) {
@@ -174,9 +161,10 @@ extension AppState {
         return true
     }
 
-    private func applyImportedBuild(_ imported: ImportedBuild) {
+    private func applyImportedBuild(_ imported: ImportedBuild) throws {
         builds.removeAll { $0.id == imported.build.id }
         builds.append(imported.build)
+        try importedBuildStore.save(builds.filter { $0.id.hasPrefix("imported-") })
     }
 
     func migrateBuildAbilityScoresIfNeeded() {

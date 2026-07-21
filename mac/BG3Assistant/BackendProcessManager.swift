@@ -165,6 +165,11 @@ final class BackendProcessManager {
         candidates.append(cwd.appending(path: "../backend").standardizedFileURL)
         candidates.append(cwd.appending(path: "backend").standardizedFileURL)
 
+        // Xcode and SwiftPM run the debug executable from DerivedData rather
+        // than the package directory. #filePath still identifies this source
+        // checkout; packaged apps take the bundled-backend path above.
+        candidates.append(Self.sourceCheckoutBackend(from: #filePath))
+
         var cursor = Bundle.main.bundleURL
         for _ in 0..<8 {
             candidates.append(cursor.appending(path: "backend").standardizedFileURL)
@@ -175,6 +180,15 @@ final class BackendProcessManager {
         return candidates.first { candidate in
             FileManager.default.fileExists(atPath: candidate.appending(path: "pyproject.toml").path)
         }
+    }
+
+    nonisolated static func sourceCheckoutBackend(from sourceFilePath: String) -> URL {
+        URL(fileURLWithPath: sourceFilePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appending(path: "backend")
+            .standardizedFileURL
     }
 
     private func findExecutable(named name: String) -> String? {

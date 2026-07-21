@@ -1,13 +1,13 @@
 import Foundation
 
 /// Intake-wizard flow. The wizard is a third overlay mode (above planner and
-/// peek in `OverlayView`); it stays active until finished or skipped, and
+/// peek in `OverlayView`); it stays active until finished, and
 /// quitting mid-wizard re-shows it on the next launch.
 extension AppState {
     func advanceOnboarding() {
         guard let step = onboardingStep else { return }
         if let next = step.next(for: onboardingMode) { onboardingStep = next }
-        else { finishOnboarding(completed: true) }
+        else { finishOnboarding() }
     }
 
     func regressOnboarding() {
@@ -57,12 +57,10 @@ extension AppState {
         refreshReadiness()
     }
 
-    /// Finishing and skipping share one path so the wizard never re-nags.
-    /// Only a real finish counts as completed — that consent gates the
-    /// login item, which earlier builds enabled silently on first launch.
-    func finishOnboarding(completed: Bool) {
+    /// Finishing records the wizard version and applies the login-item choice.
+    func finishOnboarding() {
         onboardingSeenVersion = OnboardingStep.version
-        if completed, onboardingEnableLoginItem, !LoginItem.isEnabled {
+        if onboardingEnableLoginItem, !LoginItem.isEnabled {
             if let error = LoginItem.setEnabled(true) { errorMessage = error }
         }
         persistSettings()
@@ -73,12 +71,9 @@ extension AppState {
         showOverlay = true
     }
 
-    func skipOnboarding() { finishOnboarding(completed: false) }
-
     func replayOnboarding() {
         onboardingMode = .fresh
         onboardingCatchUpCheckpointId = nil
-        seenHints = []
         persistSettings()
         onboardingStep = .welcome
         forceOverlay = true

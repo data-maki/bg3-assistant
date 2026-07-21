@@ -22,15 +22,20 @@ final class AppState: ObservableObject {
     private static let storedSettings = RunStore().loadSettings()
 
     @Published var gameDetected = false
-    @Published var backendHealthy = false
-    @Published var backendAIAvailable = false
+    @Published var aiProvider = storedSettings.aiProvider.flatMap(AIProvider.init(rawValue:)) {
+        didSet { persistSettings() }
+    }
+    @Published var hasOpenRouterKey = false
+    @Published var localAIInstalled = false
+    @Published var isInstallingLocalAI = false
+    @Published var localAIInstallProgress: Double?
+    let ollamaRuntime = OllamaRuntime()
+    let assistantAIClient = AssistantAIClient()
+    let importedBuildStore = ImportedBuildStore()
     @Published var showOverlay = true { didSet { syncOverlay() } }
     @Published var forceOverlay = false { didSet { syncOverlay() } }
     @Published var overlayExpanded = false {
-        didSet {
-            if overlayExpanded { maybeShowHint(.plannerMap) }
-            syncOverlay()
-        }
+        didSet { syncOverlay() }
     }
     @Published var moreContextExpanded = false { didSet { if overlayExpanded { syncOverlay() } } }
     @Published var plannerTab: PlannerTab = .current { didSet { if overlayExpanded { syncOverlay() } } }
@@ -42,21 +47,16 @@ final class AppState: ObservableObject {
             syncOverlay()
         }
     }
-    // The active one-time coach mark; at most one per session (see
-    // maybeShowHint in AppState+Overlay).
-    @Published var activeHint: HintID? { didSet { syncOverlay() } }
-    var hintShownThisSession = false
     // The intake wizard renders in place of the planner/peek card while
-    // non-nil; only finishing or skipping records it as seen.
+    // non-nil; only finishing records it as seen.
     @Published var onboardingStep: OnboardingStep? = (storedSettings.onboardingSeenVersion ?? 0) >= OnboardingStep.version
         ? nil : .welcome { didSet { syncOverlay() } }
     @Published var onboardingMode: OnboardingMode = .fresh
     @Published var onboardingCatchUpCheckpointId: String?
-    // Login-item consent, applied only when the wizard finishes (never on
-    // skip). Defaults on: the disclosure sits next to the toggle.
+    // Login-item consent is applied only when the wizard finishes. Defaults
+    // on: the disclosure sits next to the toggle.
     @Published var onboardingEnableLoginItem = true
     var onboardingSeenVersion: Int? = storedSettings.onboardingSeenVersion
-    var seenHints: Set<String> = Set(storedSettings.seenHints ?? [])
     // Route step to scroll to and expand when the route tab opens (set by the
     // peek card's Talk shortcut so the current conversation is front and center).
     // Backed by the run so cross-process adoption can never desync it.
@@ -77,6 +77,7 @@ final class AppState: ObservableObject {
     @Published var chatDraft = ""
     @Published var chatLines: [ChatLine] = []
     @Published var chatScreenshot: ScreenshotResult?
+    @Published var chatScreenshotError: String?
     @Published var isPreparingChatScreenshot = false
     @Published var isSendingChat = false
     @Published var chatScope: ChatScope = .current
@@ -98,28 +99,16 @@ final class AppState: ObservableObject {
     @Published var isImportingLoadout = false
     @Published var loadoutImportStatus: String?
     @Published var loadoutImportJSON: String?
-    @Published var backendAuthenticated = false
-    @Published var buildImportQuota: BuildImportQuota?
-    @Published private(set) var backendAuthenticationMessage: String?
     @Published private(set) var loadedGuideAct: Int?
     @Published private(set) var loadedRouteAvailable = false
 
     private let detector = BG3Detector()
-    let backendEndpoint = BackendEndpoint.managedLocal
-    let upstreamBackendEndpoint: BackendEndpoint
-    let backendClient: BackendClient
-    private let backendProcess: BackendProcessManager
-    private let appTransactionAuthenticator = AppTransactionAuthenticator()
-    private let companionControlToken: String
+    private let guideRepository = try? GuideRepository()
     let captureService = ScreenCaptureService()
     let runStore = RunStore()
     let overlayController = OverlayPanelController()
     private var isStarting = false
     private var pollTask: Task<Void, Never>?
-    private var authenticationTask: Task<Void, Never>?
-    private var lastAuthenticationAttempt = Date.distantPast
-    var pendingBuildImportURL: String?
-    var pendingBuildImportKey: UUID?
     private var loadingGuideAct: Int?
     private var guideLoadGeneration = 0
     var chatGeneration = 0
@@ -137,18 +126,7 @@ final class AppState: ObservableObject {
     private var plannerRequestObserver: Any?
     var sharedRunToken: RunStore.ChangeToken?
 
-    init(upstreamBackendEndpoint: BackendEndpoint = .configured) {
-        let companionControlToken = "\(UUID().uuidString)\(UUID().uuidString)"
-        self.upstreamBackendEndpoint = upstreamBackendEndpoint
-        self.companionControlToken = companionControlToken
-        backendClient = BackendClient(
-            endpoint: .managedLocal,
-            companionControlToken: companionControlToken
-        )
-        backendProcess = BackendProcessManager(
-            upstreamBackendEndpoint: upstreamBackendEndpoint,
-            companionControlToken: companionControlToken
-        )
+    init() {
         var loaded = runStore.load()
         loaded.normalizeRoster()
         if loaded.name?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
@@ -321,7 +299,11 @@ final class AppState: ObservableObject {
     var lowestPartyLevel: Int { activeParty.map(\.level).min() ?? 1 }
     var selectedAct: Int { run.selectedAct ?? 1 }
     var buildImportAvailable: Bool {
-        backendAIAvailable && (buildImportQuota?.remaining ?? 1) > 0
+        switch aiProvider {
+        case .localQwen: localAIInstalled
+        case .openRouter: hasOpenRouterKey
+        case nil: false
+        }
     }
     var activeGuideLoaded: Bool { loadedGuideAct == selectedAct }
     var activeRouteAvailable: Bool { activeGuideLoaded && loadedRouteAvailable }
@@ -379,11 +361,6 @@ final class AppState: ObservableObject {
         guard pollTask == nil, !isStarting else { return }
         isStarting = true
         defer { isStarting = false }
-        // Do this before trusting /health. A stale frozen backend can answer
-        // successfully while serving an older embedded guide after an update.
-        if let runningHealth = await backendClient.healthDetails() {
-            await backendProcess.retireUnownedBackend(runningHealth)
-        }
         // The user typically grants access in System Settings and then returns
         // to BG3 (not this window), so app-activation alone is not enough — but
         // it is the fastest signal when they do come back here.
@@ -410,6 +387,7 @@ final class AppState: ObservableObject {
             forceOverlay = true
             showOverlay = true
         }
+        await refreshAIProviderStatus()
         await refreshStatuses()
         await loadRouteIfNeeded()
         // Dev hook, like BG3_ASSISTANT_STATE_DIR: launch with the planner
@@ -417,6 +395,8 @@ final class AppState: ObservableObject {
         // overlay can be exercised without synthetic input.
         if let debugTab {
             plannerTab = PlannerTab.allCases.first { $0.rawValue.lowercased() == debugTab.lowercased() } ?? .current
+            forceOverlay = true
+            showOverlay = true
             overlayExpanded = true
         }
         pollTask = Task { [weak self] in
@@ -430,14 +410,12 @@ final class AppState: ObservableObject {
     func stop() {
         pollTask?.cancel()
         pollTask = nil
-        authenticationTask?.cancel()
-        authenticationTask = nil
         if let activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(activationObserver) }
         activationObserver = nil
         if let plannerRequestObserver { NotificationCenter.default.removeObserver(plannerRequestObserver) }
         plannerRequestObserver = nil
         overlayController.hide()
-        backendProcess.stop()
+        ollamaRuntime.stop()
     }
 
     func launchBG3() {
@@ -445,52 +423,11 @@ final class AppState: ObservableObject {
         NSWorkspace.shared.open(url)
     }
 
-    /// Opens the configured backend map with view intent only. The URL never
-    /// carries run state.
-    func openLocalMap(buildId: String? = nil, item: String? = nil, level: Int? = nil) {
-        Task {
-            if !backendHealthy { await startBackend() }
-            var components = URLComponents(url: backendEndpoint.url(path: "map"), resolvingAgainstBaseURL: false)
-            var query: [URLQueryItem] = [
-                URLQueryItem(name: "level", value: String(level ?? lowestPartyLevel)),
-            ]
-            if let buildId { query.append(URLQueryItem(name: "build", value: buildId)) }
-            if let item {
-                query.append(URLQueryItem(name: "item", value: item))
-                query.append(URLQueryItem(name: "tab", value: "route"))
-            } else if buildId != nil {
-                query.append(URLQueryItem(name: "tab", value: "party"))
-            } else {
-                query.append(URLQueryItem(name: "tab", value: "walkthrough"))
-            }
-            components?.queryItems = query
-            guard backendHealthy, let url = components?.url else {
-                errorMessage = "The configured backend is unavailable."
-                return
-            }
-            NSWorkspace.shared.open(url)
-        }
-    }
-
-    func startBackend() async {
-        do {
-            try backendProcess.startIfNeeded()
-            for _ in 0..<20 {
-                if await backendClient.health() {
-                    backendHealthy = true
-                    await loadRouteIfNeeded(force: true)
-                    return
-                }
-                try await Task.sleep(for: .milliseconds(350))
-            }
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
     func selectCheckpoint(_ checkpoint: RouteCheckpoint) {
-        run.focusedWalkthroughStepId = walkthrough.first(where: { $0.checkpointId == checkpoint.id })?.id
-        run.selectedCheckpointId = checkpoint.id
+        run.focusRoute(
+            stepId: walkthrough.first(where: { $0.checkpointId == checkpoint.id })?.id,
+            checkpointId: checkpoint.id
+        )
         run.mapRegion = checkpoint.region
         persistRun()
         skipNoteDraft = run.progress[checkpoint.id]?.skipNote ?? ""
@@ -500,8 +437,7 @@ final class AppState: ObservableObject {
     }
 
     func followRecommendedRoute() {
-        run.focusedWalkthroughStepId = nil
-        run.selectedCheckpointId = nil
+        run.focusRoute(stepId: nil, checkpointId: nil)
         syncRegionToRecommendation()
         persistRun()
         refreshReadiness()
@@ -554,7 +490,7 @@ final class AppState: ObservableObject {
             run.selectedCheckpointId = nil
         }
         if disposition == .pending {
-            run.focusedWalkthroughStepId = step.id
+            run.focusRoute(stepId: step.id, checkpointId: step.checkpointId)
         } else if run.focusedWalkthroughStepId == step.id {
             run.focusedWalkthroughStepId = nil
         }
@@ -565,8 +501,7 @@ final class AppState: ObservableObject {
 
     func focusWalkthroughStep(_ step: WalkthroughStep) {
         guard walkthroughDisposition(step) == .pending else { return }
-        run.focusedWalkthroughStepId = step.id
-        run.selectedCheckpointId = step.checkpointId
+        run.focusRoute(stepId: step.id, checkpointId: step.checkpointId)
         run.mapRegion = step.region
         combatCardPinned = false
         persistRun()
@@ -700,7 +635,10 @@ final class AppState: ObservableObject {
         let requestedRunID = run.id
         guard force || loadedGuideAct != requestedAct else { return }
         guard force || loadingGuideAct != requestedAct else { return }
-        guard backendHealthy else { return }
+        guard let guideRepository else {
+            errorMessage = GuideRepositoryError.resourceMissing.localizedDescription
+            return
+        }
         guideLoadGeneration &+= 1
         let generation = guideLoadGeneration
         loadingGuideAct = requestedAct
@@ -719,7 +657,7 @@ final class AppState: ObservableObject {
             }
         }
         do {
-            let payload = try await backendClient.route(act: requestedAct)
+            let payload = try guideRepository.payload(for: requestedAct)
             guard generation == guideLoadGeneration,
                   requestedRunID == run.id,
                   requestedAct == selectedAct,
@@ -732,7 +670,10 @@ final class AppState: ObservableObject {
             route = payload.checkpoints
             walkthrough = payload.walkthrough
             timedEvents = payload.timedEvents
-            builds = payload.builds
+            let importedBuilds = importedBuildStore.load()
+            builds = payload.builds.filter { bundled in
+                !importedBuilds.contains(where: { $0.id == bundled.id })
+            } + importedBuilds
             acts = payload.acts
             loadedGuideAct = payload.act
             loadedRouteAvailable = payload.routeAvailable
@@ -742,18 +683,15 @@ final class AppState: ObservableObject {
             migrateBuildAbilityScoresIfNeeded()
             statusMessage = payload.routeAvailable
                 ? "Act \(requestedAct) guide ready • \(walkthrough.count) walkthrough steps"
-                : "Act \(requestedAct) route guidance is not available yet"
+                : "Route guidance is not included for Act \(requestedAct)"
             persistRun()
             guard generation == guideLoadGeneration,
                   requestedRunID == run.id,
                   requestedAct == selectedAct else { return }
-            // Non-fatal: an older bundled backend without /api/items just
-            // leaves the picker without alternatives.
-            if let items = try? await backendClient.items(),
-               generation == guideLoadGeneration,
+            if generation == guideLoadGeneration,
                requestedRunID == run.id,
                requestedAct == selectedAct {
-                itemCatalog = items
+                itemCatalog = guideRepository.items
             }
             refreshReadiness()
         } catch {
@@ -790,56 +728,8 @@ final class AppState: ObservableObject {
         let detection = detector.detect()
         gameDetected = detection.isRunning
         if gameWindowFrame != detection.windowFrame { gameWindowFrame = detection.windowFrame }
-        let health = await backendClient.healthDetails()
-        backendHealthy = health?.ok == true
-        backendAIAvailable = health?.aiAvailable == true
-        backendAuthenticated = health?.authenticated == true
-        buildImportQuota = health?.buildImports
-        if !backendHealthy { await startBackend() }
-        if backendHealthy, !upstreamBackendEndpoint.managesLocalBackend, !backendAuthenticated {
-            scheduleBackendAuthentication()
-        }
         await loadRouteIfNeeded()
-        // One-time hints fire at the moment of relevance: basics the first
-        // time the game is seen, fight tools the first pre-fight moment.
-        if gameDetected, !overlayExpanded {
-            maybeShowHint(.peekBasics)
-            if assistantPhase == .preflight { maybeShowHint(.fightTools) }
-        }
         syncOverlay()
-    }
-
-    func retryBackendAuthentication() {
-        backendAuthenticationMessage = nil
-        scheduleBackendAuthentication(force: true, refresh: true)
-    }
-
-    private func scheduleBackendAuthentication(force: Bool = false, refresh: Bool = false) {
-        guard authenticationTask == nil,
-              force || Date().timeIntervalSince(lastAuthenticationAttempt) >= 60 else { return }
-        lastAuthenticationAttempt = .now
-        authenticationTask = Task { [weak self] in
-            await self?.authenticateHostedBackend(refresh: refresh)
-        }
-    }
-
-    private func authenticateHostedBackend(refresh: Bool) async {
-        defer { authenticationTask = nil }
-        do {
-            let signedTransaction = try await appTransactionAuthenticator.signedAppTransaction(refresh: refresh)
-            try Task.checkCancellation()
-            let response = try await backendClient.authenticateAppTransaction(signedTransaction)
-            backendAuthenticated = response.authenticated
-            backendAIAvailable = response.authenticated
-            buildImportQuota = response.buildImports
-            backendAuthenticationMessage = nil
-        } catch is CancellationError {
-            return
-        } catch {
-            backendAuthenticated = false
-            backendAIAvailable = false
-            backendAuthenticationMessage = error.localizedDescription
-        }
     }
 
 }

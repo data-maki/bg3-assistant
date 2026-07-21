@@ -14,25 +14,18 @@ struct BuildImportView: View {
                 ? "Paste one public build guide. It will be added to every character's build picker."
                 : "Paste one public build guide. After review, it will be assigned to this character and remain available to everyone.")
                 .font(.caption).foregroundStyle(BG3Theme.mutedParchment)
-            if !appState.backendAIAvailable {
+            if !appState.buildImportAvailable {
                 Label(
-                    appState.upstreamBackendEndpoint.managesLocalBackend
-                        ? "AI build import is not available right now."
-                        : "App Store verification is required. Retry it from Settings.",
-                    systemImage: "wifi.exclamationmark"
+                    "Choose and configure Local Qwen 4B or OpenRouter in Settings.",
+                    systemImage: "exclamationmark.triangle"
                 )
                     .font(.caption2).foregroundStyle(.orange)
                     .padding(9)
                     .bg3InsetSurface(accent: BG3Theme.warning)
-            } else if let quota = appState.buildImportQuota {
-                Label(
-                    quota.remaining > 0
-                        ? "\(quota.remaining) of \(quota.limit) lifetime build-import attempts remaining"
-                        : "The lifetime limit of \(quota.limit) build-import attempts has been reached",
-                    systemImage: quota.remaining > 0 ? "gauge.with.dots.needle.33percent" : "nosign"
-                )
-                .font(.caption2)
-                .foregroundStyle(quota.remaining > 0 ? BG3Theme.mutedParchment : BG3Theme.warning)
+            } else if let provider = appState.aiProvider {
+                Label("Importing with \(provider.title)", systemImage: provider == .localQwen ? "desktopcomputer" : "cloud")
+                    .font(.caption2)
+                    .foregroundStyle(BG3Theme.mutedParchment)
             }
             HStack(spacing: 6) {
                 TextField("https://…", text: $appState.loadoutURLDraft)
