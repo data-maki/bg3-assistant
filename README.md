@@ -74,6 +74,30 @@ bash ./install-macos.sh
 3. Pick your active party, levels, and builds.
 4. Click **Start Adventuring**, then launch Baldur's Gate 3.
 
+### Pick an AI option based on memory
+
+Check your available memory with BG3 already running:
+
+1. Load your save so BG3 is using its normal amount of memory.
+2. Open **Activity Monitor** and click **Memory**.
+3. At the bottom, subtract **Memory Used** from **Physical Memory**.
+
+```text
+Available memory = Physical Memory - Memory Used
+```
+
+Use this quick guide:
+
+| Available memory after loading BG3 | Pick | Screenshot chat |
+| --- | --- | --- |
+| Less than 8 GB, or Memory Pressure is yellow or red | OpenRouter | Yes |
+| 8 to 15 GB | Local Qwen3 4B | No |
+| 16 GB or more | Local Gemma 4 12B | Yes |
+
+For example, if your Mac has 32 GB and Activity Monitor shows 19 GB used, you have about 13 GB available. Pick Qwen for local text chat or OpenRouter if you want screenshots. Because you check after loading your save, the calculation already includes BG3, macOS, Steam, Discord, and anything else you left open.
+
+These are conservative estimates, not hard limits. If Memory Pressure turns yellow or the game starts stuttering, switch to OpenRouter. It runs the model in the cloud and uses much less memory on your Mac. [Apple explains Memory Pressure here](https://support.apple.com/guide/activity-monitor/actmntr34865/mac).
+
 Follow **Now** for your next objective. Open **Route**, **Party**, or **Loadout** when you need more detail.
 
 You can close Terminal after installation. To update the app later, open the project folder in Terminal and run `bash ./install-macos.sh` again.
