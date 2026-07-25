@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="#install-from-source">
-    <img src="https://img.shields.io/badge/Build_and_install-macOS-B47A3C?style=for-the-badge&logo=apple&logoColor=white" alt="Build and install on macOS">
+  <a href="#quick-start">
+    <img src="https://img.shields.io/badge/Quick_start-macOS-B47A3C?style=for-the-badge&logo=apple&logoColor=white" alt="Quick start on macOS">
   </a>
   <br>
   <sub>macOS 14+ | Apple silicon | Beta | No mod or account required</sub>
@@ -25,18 +25,34 @@
 
 > **Current beta coverage:** Act 1 route guidance is available. Act 3 is available for runs started or caught up there. Act 2 includes equipment and a public map handoff, but its route is not ready, so normal progression from Act 2 to Act 3 remains locked.
 
-## Install from source
+## Quick start
 
-A notarized public binary is not available yet. The repository includes one installer that builds the same self-contained app locally.
+A notarized download is not available yet, so the one-click installer first builds the app on your Mac. No coding experience is required.
 
-You need:
+### What you need
 
 - macOS 14 or later on Apple silicon
 - An internet connection for the first build
 - About 3 GB of free space for build files, plus 2.5 GB if you choose Local Qwen
-- Apple Command Line Tools with Swift 6; run `xcode-select --install` if they are missing
+- About 5-10 minutes for the first install
 
-You do **not** need Python, Homebrew, `uv`, the full Xcode app, an Apple developer account, a mod manager, or Script Extender.
+You do **not** need Git, Python, Homebrew, the full Xcode app, an Apple developer account, a mod manager, or Script Extender.
+
+### Install without Git
+
+1. [Download the project ZIP](https://github.com/data-maki/bg3-assistant/archive/refs/heads/main.zip), then double-click it to extract the `bg3-assistant-main` folder.
+2. Open **Terminal** from Spotlight (`Command-Space`, then type `Terminal`).
+3. Type `cd `, including the space, then drag the extracted folder into Terminal and press Return.
+4. Paste the command below and press Return:
+
+```sh
+bash ./install-macos.sh
+```
+
+If macOS asks to install Command Line Tools, finish that installer and run the same command again. The assistant is then installed in `~/Applications` and opens automatically.
+
+<details>
+<summary><strong>Install with Git instead</strong></summary>
 
 ```sh
 git clone https://github.com/data-maki/bg3-assistant.git
@@ -44,11 +60,19 @@ cd bg3-assistant
 bash ./install-macos.sh
 ```
 
-The first build takes a few minutes. The installer bundles the guide and a checksum-pinned Ollama runtime, verifies the app, installs it to `~/Applications`, and opens it. During setup, choose private Local Qwen or enter your own OpenRouter API key. Local Qwen downloads the 2.5 GB `qwen3:4b` model separately. You do not run another script or keep a terminal open while playing. Rerun the installer to update an existing copy.
+</details>
 
-Do not want to use Git? Choose **Code -> Download ZIP** on GitHub, extract it, open that folder in Terminal, and run `bash ./install-macos.sh`.
+### First five minutes
 
-Invited TestFlight testers can instead install through [TestFlight](https://apps.apple.com/app/testflight/id899247664). Source and TestFlight builds use the same provider choices. The guide, run planning, party, loadout, and act review work without an account; AI chat and public-URL build import require configured Local Qwen or OpenRouter.
+1. Choose whether this is a fresh Honor run or one already in progress.
+2. Choose **Local Qwen** for the simplest private setup, then download its 2.5 GB model. Or choose **OpenRouter** and enter your own API key.
+3. Pick your active party, levels, and builds.
+4. Click **Start Adventuring**, then launch Baldur's Gate 3.
+5. Follow **Now** for the next action and use **Route**, **Party**, and **Loadout** when you need more detail.
+
+The installer includes the guide and local AI runtime, verifies the app, and installs it to `~/Applications`. You do not need to leave Terminal open while playing. Run `bash ./install-macos.sh` again from the project folder to update.
+
+Invited TestFlight testers can instead install through [TestFlight](https://apps.apple.com/app/testflight/id899247664). The guide, run planning, party, loadout, and act review work without an account; AI chat and public-URL build import require Local Qwen or OpenRouter.
 
 ## Why use it
 
@@ -101,7 +125,47 @@ Local Qwen runs on this Mac after its model download. OpenRouter sends the selec
 
 Build import downloads readable text from the public URL on this Mac. Local Qwen processes it locally; OpenRouter receives the URL and extracted text. Imported drafts are validated and saved locally. Speech input requests microphone and Speech Recognition access, and macOS may use Apple's speech service when on-device recognition is unavailable.
 
-Developer setup and provider details are in [CONTRIBUTING.md](CONTRIBUTING.md).
+## Build and contribute
+
+Contributions are welcome, from route corrections and build data to Swift UI and app behavior. Keep changes focused on helping a player make the next decision; this project intentionally does not connect to BG3 through mods, memory, saves, or automated input.
+
+### Developer quickstart
+
+You need macOS 14 or later and Swift 6. Clone the repo, run the full native validation, then build and open the app:
+
+```sh
+git clone https://github.com/data-maki/bg3-assistant.git
+cd bg3-assistant
+./scripts/macos/validate.sh
+./scripts/macos/build-app.sh
+open "artifacts/macos/app/BG3 Honor Mode Assistant.app"
+```
+
+| What you want to change | Start here |
+| --- | --- |
+| Overlay UI or native behavior | `mac/BG3Assistant/` |
+| Swift tests | `mac/Tests/` |
+| Routes, builds, items, or guide facts | `data/` |
+| Guide generation or backend tooling | `backend/` |
+| Build and release automation | `scripts/macos/` |
+
+Python 3.11+ and [`uv`](https://docs.astral.sh/uv/) are only required when changing guide data, its loaders, or backend tooling:
+
+```sh
+cd backend
+uv sync --extra dev
+uv run python scripts/export-swift-resources.py
+uv run pytest -q
+```
+
+Before opening a pull request:
+
+1. Read [CONTRIBUTING.md](CONTRIBUTING.md) and keep the change focused.
+2. Run `./scripts/macos/validate.sh`; run the backend tests too when changing `data/` or `backend/`.
+3. Include a screenshot for visible UI changes.
+4. Never commit `.env` files, API keys, player data, or generated QA artifacts. Use `.env.example` only as a template.
+
+See the [architecture guide](docs/developers/ARCHITECTURE.md) for data flow and component ownership, and the [release guide](docs/developers/RELEASE.md) for packaging and signing.
 
 ## Project links
 
