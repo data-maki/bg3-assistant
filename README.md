@@ -19,12 +19,12 @@
 </p>
 
 <p align="center">
-  <a href="https://www.linkedin.com/posts/jancarbonell_it-is-now-possible-to-build-custom-software-ugcPost-7485162568655745024-LwyS/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAABG_mREBWEh_UjLUDGTghaMHoO-wpl5zCsE">
+  <a href="https://youtu.be/CJtXg8_e2i8">
     <img src="docs/images/product-tour.gif" width="560" alt="Watch a walkthrough of the BG3 Honor Mode Assistant">
   </a>
 </p>
 
-I love Honor Mode, but I kept leaving the game to check guides, a spreadsheet, build pages, and maps. I built this overlay to keep that information beside the game. [Watch the walkthrough and why I built it on LinkedIn](https://www.linkedin.com/posts/jancarbonell_it-is-now-possible-to-build-custom-software-ugcPost-7485162568655745024-LwyS/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAABG_mREBWEh_UjLUDGTghaMHoO-wpl5zCsE).
+I love Honor Mode, but I kept leaving the game to check guides, a spreadsheet, build pages, and maps. I built this overlay to keep that information beside the game. [Watch the walkthrough and why I built it on YouTube](https://youtu.be/CJtXg8_e2i8).
 
 > **Current beta coverage:** Act 1 route guidance is available. Act 3 is available for runs started or caught up there. Act 2 includes equipment and a public map handoff, but its route is not ready, so normal progression from Act 2 to Act 3 remains locked.
 
