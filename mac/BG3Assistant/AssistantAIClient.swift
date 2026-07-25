@@ -18,13 +18,18 @@ struct AssistantAIClient: Sendable {
         ollamaRuntime: OllamaRuntime
     ) async throws -> String {
         switch provider {
-        case .localQwen:
-            guard imageData == nil else {
+        case .localGemma, .localQwen:
+            guard let model = provider.ollamaModel else {
+                throw AIProviderError.providerNotConfigured
+            }
+            guard imageData == nil || provider.supportsImages else {
                 throw AIProviderError.runtimeUnavailable("Qwen3 4B cannot read screenshots.")
             }
-            try await ollamaRuntime.ensureReady()
+            try await ollamaRuntime.ensureReady(model: model)
             return try await completeWithOllama(
+                model: model,
                 messages: messages,
+                imageData: imageData,
                 jsonSchema: jsonSchema,
                 temperature: temperature,
                 maxTokens: maxTokens
@@ -45,16 +50,18 @@ struct AssistantAIClient: Sendable {
     }
 
     private func completeWithOllama(
+        model: String,
         messages: [AssistantAIMessage],
+        imageData: Data?,
         jsonSchema: Data?,
         temperature: Double,
         maxTokens: Int
     ) async throws -> String {
         var body: [String: Any] = [
-            "model": OllamaRuntime.model,
+            "model": model,
             "stream": false,
             "think": false,
-            "messages": messages.map { ["role": $0.role, "content": $0.content] },
+            "messages": Self.ollamaMessages(messages, imageData: imageData),
             "options": ["temperature": temperature, "num_ctx": 32_768, "num_predict": maxTokens],
         ]
         if let jsonSchema { body["format"] = try JSONSerialization.jsonObject(with: jsonSchema) }
@@ -68,6 +75,14 @@ struct AssistantAIClient: Sendable {
               let message = root["message"] as? [String: Any],
               let content = message["content"] as? String else { throw AIProviderError.invalidResponse }
         return content
+    }
+
+    static func ollamaMessages(_ messages: [AssistantAIMessage], imageData: Data?) -> [[String: Any]] {
+        var encodedMessages: [[String: Any]] = messages.map { ["role": $0.role, "content": $0.content] }
+        if let imageData, let lastIndex = encodedMessages.indices.last {
+            encodedMessages[lastIndex]["images"] = [imageData.base64EncodedString()]
+        }
+        return encodedMessages
     }
 
     private func completeWithOpenRouter(

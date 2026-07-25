@@ -1,7 +1,6 @@
 import Foundation
 
 final class OllamaRuntime: @unchecked Sendable {
-    static let model = "qwen3:4b"
     static let version = "0.30.10"
     static let baseURL = URL(string: "http://127.0.0.1:11435")!
 
@@ -20,20 +19,20 @@ final class OllamaRuntime: @unchecked Sendable {
         return root["version"] as? String == Self.version
     }
 
-    func isModelInstalled() async throws -> Bool {
+    func isModelInstalled(_ model: String) async throws -> Bool {
         try await ensureRunning()
         let (data, response) = try await URLSession.shared.data(from: Self.baseURL.appending(path: "api/tags"))
         guard (response as? HTTPURLResponse)?.statusCode == 200,
               let root = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let models = root["models"] as? [[String: Any]] else { throw AIProviderError.invalidResponse }
-        return models.contains { model in
-            let name = model["name"] as? String ?? model["model"] as? String
-            return name == Self.model
+        return models.contains { installedModel in
+            let name = installedModel["name"] as? String ?? installedModel["model"] as? String
+            return name == model
         }
     }
 
-    func ensureReady() async throws {
-        guard try await isModelInstalled() else { throw AIProviderError.modelNotInstalled }
+    func ensureReady(model: String) async throws {
+        guard try await isModelInstalled(model) else { throw AIProviderError.modelNotInstalled(model) }
     }
 
     func ensureRunning() async throws {
@@ -46,12 +45,12 @@ final class OllamaRuntime: @unchecked Sendable {
         throw AIProviderError.runtimeUnavailable("Ollama did not start.")
     }
 
-    func installModel(progress: @escaping @Sendable (Double?) -> Void) async throws {
+    func installModel(_ model: String, progress: @escaping @Sendable (Double?) -> Void) async throws {
         try await ensureRunning()
         var request = URLRequest(url: Self.baseURL.appending(path: "api/pull"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: ["model": Self.model, "stream": true])
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["model": model, "stream": true])
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else {
             throw AIProviderError.runtimeUnavailable("The model download could not start.")
@@ -68,7 +67,7 @@ final class OllamaRuntime: @unchecked Sendable {
                 progress(nil)
             }
         }
-        guard try await isModelInstalled() else { throw AIProviderError.modelNotInstalled }
+        guard try await isModelInstalled(model) else { throw AIProviderError.modelNotInstalled(model) }
         progress(1)
     }
 

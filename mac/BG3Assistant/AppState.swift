@@ -300,7 +300,7 @@ final class AppState: ObservableObject {
     var selectedAct: Int { run.selectedAct ?? 1 }
     var buildImportAvailable: Bool {
         switch aiProvider {
-        case .localQwen: localAIInstalled
+        case .localGemma, .localQwen: localAIInstalled
         case .openRouter: hasOpenRouterKey
         case nil: false
         }

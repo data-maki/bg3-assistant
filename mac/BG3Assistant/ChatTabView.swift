@@ -87,7 +87,14 @@ struct ChatTabView: View {
     }
 
     @ViewBuilder private var attachment: some View {
-        if appState.aiProvider?.supportsImages != true {
+        if appState.aiProvider == .localQwen {
+            Label(
+                "Qwen3 4B is text-only. Choose Gemma 4 12B or OpenRouter to attach screenshots.",
+                systemImage: "photo.badge.exclamationmark"
+            )
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        } else if appState.aiProvider?.supportsImages != true {
             EmptyView()
         } else if appState.isPreparingChatScreenshot {
             HStack(spacing: 7) {

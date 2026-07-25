@@ -1,15 +1,18 @@
 import Foundation
 
 extension AppState {
-    func chooseAIProvider(_ provider: AIProvider) {
+    func chooseAIProvider(_ provider: AIProvider?) {
         aiProvider = provider
+        localAIInstalled = false
         Task { await refreshAIProviderStatus() }
     }
 
     func refreshAIProviderStatus() async {
         hasOpenRouterKey = (try? CredentialStore.openRouterKey())?.isEmpty == false
-        if aiProvider == .localQwen {
-            localAIInstalled = (try? await ollamaRuntime.isModelInstalled()) == true
+        if let model = aiProvider?.ollamaModel {
+            localAIInstalled = (try? await ollamaRuntime.isModelInstalled(model)) == true
+        } else {
+            localAIInstalled = false
         }
     }
 
@@ -41,15 +44,19 @@ extension AppState {
     }
 
     func installLocalAI() {
-        guard !isInstallingLocalAI else { return }
+        guard !isInstallingLocalAI,
+              let provider = aiProvider,
+              let model = provider.ollamaModel else { return }
         isInstallingLocalAI = true
         localAIInstallProgress = nil
         Task {
             do {
-                try await ollamaRuntime.installModel { progress in
+                try await ollamaRuntime.installModel(model) { progress in
                     Task { @MainActor in self.localAIInstallProgress = progress }
                 }
-                localAIInstalled = true
+                if aiProvider == provider {
+                    localAIInstalled = true
+                }
                 errorMessage = nil
             } catch {
                 errorMessage = error.localizedDescription

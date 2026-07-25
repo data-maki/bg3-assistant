@@ -8,24 +8,32 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("AI Provider") {
-                Picker("Provider", selection: $appState.aiProvider) {
+                Picker(
+                    "Provider",
+                    selection: Binding(
+                        get: { appState.aiProvider },
+                        set: { appState.chooseAIProvider($0) }
+                    )
+                ) {
                     Text("Choose a provider").tag(AIProvider?.none)
                     ForEach(AIProvider.allCases) { provider in
                         Text(provider.title).tag(Optional(provider))
                     }
                 }
-                if appState.aiProvider == .localQwen {
-                    LabeledContent("Model", value: OllamaRuntime.model)
+                if let provider = appState.aiProvider,
+                   let model = provider.ollamaModel,
+                   let downloadSize = provider.modelDownloadSize {
+                    LabeledContent("Model", value: model)
                     if appState.localAIInstalled {
                         Label("Installed and ready", systemImage: "checkmark.circle.fill")
                             .foregroundStyle(.green)
                     } else if appState.isInstallingLocalAI {
                         ProgressView(value: appState.localAIInstallProgress)
-                        Text("Downloading approximately 2.5 GB. Keep the assistant open.")
+                        Text("Downloading approximately \(downloadSize). Keep the assistant open.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
-                        Button("Download Qwen3 4B", action: appState.installLocalAI)
+                        Button("Download \(provider.title)", action: appState.installLocalAI)
                             .buttonStyle(.borderedProminent)
                     }
                 } else if appState.aiProvider == .openRouter {

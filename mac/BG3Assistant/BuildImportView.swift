@@ -16,14 +16,14 @@ struct BuildImportView: View {
                 .font(.caption).foregroundStyle(BG3Theme.mutedParchment)
             if !appState.buildImportAvailable {
                 Label(
-                    "Choose and configure Local Qwen 4B or OpenRouter in Settings.",
+                    "Choose and configure a local model or OpenRouter in Settings.",
                     systemImage: "exclamationmark.triangle"
                 )
                     .font(.caption2).foregroundStyle(.orange)
                     .padding(9)
                     .bg3InsetSurface(accent: BG3Theme.warning)
             } else if let provider = appState.aiProvider {
-                Label("Importing with \(provider.title)", systemImage: provider == .localQwen ? "desktopcomputer" : "cloud")
+                Label("Importing with \(provider.title)", systemImage: provider.isLocal ? "desktopcomputer" : "cloud")
                     .font(.caption2)
                     .foregroundStyle(BG3Theme.mutedParchment)
             }

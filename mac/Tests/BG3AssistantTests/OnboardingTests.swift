@@ -18,6 +18,29 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.steps(for: .midRun), [.welcome, .ai, .party, .catchUp, .ready])
     }
 
+    func testLocalModelCapabilitiesAreExplicit() {
+        XCTAssertEqual(AIProvider.localGemma.ollamaModel, "gemma4:12b")
+        XCTAssertEqual(AIProvider.localGemma.modelDownloadSize, "7.6 GB")
+        XCTAssertTrue(AIProvider.localGemma.supportsImages)
+
+        XCTAssertEqual(AIProvider.localQwen.ollamaModel, "qwen3:4b")
+        XCTAssertEqual(AIProvider.localQwen.modelDownloadSize, "2.5 GB")
+        XCTAssertFalse(AIProvider.localQwen.supportsImages)
+    }
+
+    func testOllamaImageIsAttachedToLastMessage() throws {
+        let encoded = AssistantAIClient.ollamaMessages(
+            [
+                AssistantAIMessage(role: "system", content: "Use the guide."),
+                AssistantAIMessage(role: "user", content: "What is on screen?"),
+            ],
+            imageData: Data([1, 2, 3])
+        )
+
+        XCTAssertNil(encoded[0]["images"])
+        XCTAssertEqual(try XCTUnwrap(encoded[1]["images"] as? [String]), ["AQID"])
+    }
+
     func testCatchUpMarksThroughLandmarkInclusive() throws {
         let walkthrough = [
             step(id: "s1", order: 1, checkpointId: "cp1"),
