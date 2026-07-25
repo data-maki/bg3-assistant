@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="docs/images/app-logo.png" width="128" alt="BG3 Honor Mode Assistant shield">
+  <img src="docs/images/app-logo.png" width="128" alt="BG3 Overlay shield">
 </p>
 
-<h1 align="center">BG3 Honor Mode Assistant</h1>
+<h1 align="center">BG3 Overlay</h1>
 
-<p align="center"><strong>Keep your Honor run on track without tabbing out.</strong></p>
+<p align="center"><strong>Keep any Baldur's Gate 3 run on track without tabbing out.</strong></p>
 
 <p align="center">
   A native macOS overlay for your next objective, route, party builds, and gear.
@@ -20,11 +20,11 @@
 
 <p align="center">
   <a href="https://youtu.be/CJtXg8_e2i8">
-    <img src="docs/images/product-tour.gif" width="560" alt="Watch a walkthrough of the BG3 Honor Mode Assistant">
+    <img src="docs/images/product-tour.gif" width="560" alt="Watch a walkthrough of BG3 Overlay">
   </a>
 </p>
 
-I love Honor Mode, but I kept leaving the game to check guides, a spreadsheet, build pages, and maps. I built this overlay to keep that information beside the game. [Watch the walkthrough and why I built it on YouTube](https://youtu.be/CJtXg8_e2i8).
+I kept leaving Baldur's Gate 3 to check guides, a spreadsheet, build pages, and maps. BG3 Overlay keeps that information beside the game and adapts it to Explorer, Balanced, Tactician, Honour, or Custom difficulty. [Watch the original walkthrough on YouTube](https://youtu.be/CJtXg8_e2i8).
 
 > **Current beta coverage:** Act 1 route guidance is available. Act 3 is available for runs started or caught up there. Act 2 includes equipment and a public map handoff, but its route is not ready, so normal progression from Act 2 to Act 3 remains locked.
 
@@ -60,8 +60,9 @@ bash ./install-macos.sh
 
 ### Set up your first run
 
-1. Choose whether this is a fresh Honor run or one already in progress.
-2. Choose an AI option:
+1. Choose whether this is a new run or one already in progress.
+2. Choose your difficulty and whether to reveal the full act or only three tasks ahead.
+3. Optionally choose an AI provider now, or continue and set it up later:
 
    | Option | Best for | Screenshot chat |
    | --- | --- | --- |
@@ -71,8 +72,8 @@ bash ./install-macos.sh
 
    <img src="docs/images/qwen-text-only-chat.jpg" width="420" alt="Chat explaining that Qwen3 4B is text-only and that Gemma 4 12B or OpenRouter is required for screenshots">
 
-3. Pick your active party, levels, and builds.
-4. Click **Start Adventuring**, then launch Baldur's Gate 3.
+4. Pick your active party, levels, and reviewed or manual builds.
+5. Click **Start Adventuring**, then launch Baldur's Gate 3.
 
 ### Pick an AI option based on memory
 
@@ -131,6 +132,7 @@ The app only knows what you tell it. It does not read your save or mark anything
 - Open the walkthrough, pickup plan, or public map for the current act.
 - Ask questions from the overlay by typing or speaking.
 - Import a build from a public URL and assign it to a character.
+- Build your own character from Level 1 to 12 with manual ability points, multiclass levels, subclasses, feats, class options, and the current bg3.wiki spell lists.
 
 Imported builds are drafts. The app creates a valid 27-point starting allocation, but you should check the classes, spells, feats, equipment, and later levels against the original build.
 
@@ -142,7 +144,7 @@ Imported builds are drafts. The app creates a valid 27-point starting allocation
 | Act 2 | Not yet available | Available | Public Shadow-Cursed Lands handoff |
 | Act 3 | Available for started/caught-up runs | Available | Public Baldur's Gate handoff |
 
-The current route is opinionated: it favors a cautious, generally good-aligned run and preserving companion and rescue outcomes. Treat it as planning support, not a guarantee against patches, unusual choices, or Honor Mode variance.
+The current route is opinionated: it favors a cautious, generally good-aligned run and preserving companion and rescue outcomes. Treat it as planning support, not a guarantee against patches, unusual choices, or difficulty-specific variance.
 
 ## Privacy and permissions
 
@@ -169,7 +171,7 @@ git clone https://github.com/data-maki/bg3-assistant.git
 cd bg3-assistant
 ./scripts/macos/validate.sh
 ./scripts/macos/build-app.sh
-open "artifacts/macos/app/BG3 Honor Mode Assistant.app"
+open "artifacts/macos/app/BG3 Overlay.app"
 ```
 
 | What you want to change | Start here |
@@ -201,6 +203,7 @@ See the [architecture guide](docs/developers/ARCHITECTURE.md) for data flow and 
 ## Project links
 
 - [Contributing](CONTRIBUTING.md)
+- [Product and design history](docs/developers/DESIGN_HISTORY.md)
 - [Architecture](docs/developers/ARCHITECTURE.md)
 - [Release guide](docs/developers/RELEASE.md)
 - [Security policy](SECURITY.md)

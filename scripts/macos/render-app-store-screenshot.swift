@@ -98,7 +98,7 @@ color(155, 103, 66, alpha: 0.70).setFill()
 NSRect(x: 88, y: height - 95, width: 520, height: 1).fill()
 
 drawText(
-    "BG3 HONOR MODE ASSISTANT",
+    "BG3 OVERLAY",
     x: 88,
     top: 58,
     width: 520,

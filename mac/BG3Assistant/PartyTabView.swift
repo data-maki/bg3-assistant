@@ -12,6 +12,7 @@ struct PartyTabView: View {
         case setup
         case member(String)
         case abilities(String)
+        case manualBuild(String)
     }
 
     var body: some View {
@@ -34,11 +35,18 @@ struct PartyTabView: View {
                         memberID: memberID,
                         onBack: { page = .guidance },
                         onAbilities: { page = .abilities(memberID) },
+                        onManualBuild: { page = .manualBuild(memberID) },
                         onReset: { pendingResetMemberID = memberID }
                     )
                     .transition(.move(edge: .trailing).combined(with: .opacity))
                 case .abilities(let memberID):
                     PartyAbilityRecipeView(
+                        memberID: memberID,
+                        onBack: { page = .member(memberID) }
+                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                case .manualBuild(let memberID):
+                    ManualBuildPlannerView(
                         memberID: memberID,
                         onBack: { page = .member(memberID) }
                     )

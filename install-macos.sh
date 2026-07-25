@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-app_name="BG3 Honor Mode Assistant.app"
+app_name="BG3 Overlay.app"
 executable_name="BG3HonorAssistant"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 install_dir="${INSTALL_DIR:-$HOME/Applications}"
@@ -78,7 +78,7 @@ if [[ -e "$target" && ( ! -d "$target" || ! -x "$target/Contents/MacOS/$executab
 fi
 
 if pgrep -x "$executable_name" >/dev/null 2>&1; then
-  /usr/bin/osascript -e 'quit app "BG3 Honor Mode Assistant"' >/dev/null 2>&1 || true
+  /usr/bin/osascript -e 'quit app "BG3 Overlay"' >/dev/null 2>&1 || true
   for _ in 1 2 3 4 5 6 7 8 9 10; do
     if ! pgrep -x "$executable_name" >/dev/null 2>&1; then break; fi
     /bin/sleep 1

@@ -156,7 +156,7 @@ def _extract_draft(source_url: str, source_text: str, settings: Settings) -> Imp
         headers={
             "Authorization": f"Bearer {settings.openrouter_api_key}",
             "HTTP-Referer": "http://127.0.0.1:8787",
-            "X-Title": "BG3 Honor Mode Assistant",
+            "X-Title": "BG3 Overlay",
         },
         json={
             "model": settings.openrouter_model,

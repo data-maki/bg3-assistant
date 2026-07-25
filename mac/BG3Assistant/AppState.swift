@@ -130,11 +130,11 @@ final class AppState: ObservableObject {
         var loaded = runStore.load()
         loaded.normalizeRoster()
         if loaded.name?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
-            loaded.name = "Honor Run 1"
+            loaded.name = "BG3 Run 1"
         }
         if loaded.createdAt == nil { loaded.createdAt = .now }
         run = loaded
-        runNameDraft = loaded.name ?? "Honor Run 1"
+        runNameDraft = loaded.name ?? "BG3 Run 1"
         try? runStore.save(loaded)
         sharedRunToken = runStore.changeToken(for: loaded)
         reloadSavedRuns()
@@ -160,7 +160,9 @@ final class AppState: ObservableObject {
         checkpointDispositions.compactMap { $0.value == .skipped ? $0.key : nil }
     }
 
-    var currentRunName: String { run.name ?? "Honor Run" }
+    var currentRunName: String { run.name ?? "BG3 Run" }
+    var runDifficulty: RunDifficulty { run.difficulty ?? .balanced }
+    var routeRevealPolicy: RouteRevealPolicy { run.routeRevealPolicy ?? .everything }
 
     var recommendedCheckpoint: RouteCheckpoint? {
         RunSafety.nextCheckpoint(route: route, dispositions: checkpointDispositions, selectedId: nil, partyLevel: lowestPartyLevel)
@@ -219,6 +221,11 @@ final class AppState: ObservableObject {
 
     var activeWalkthroughSteps: [WalkthroughStep] {
         walkthrough.filter { walkthroughDisposition($0) == .pending }
+    }
+
+    var visibleWalkthroughSteps: [WalkthroughStep] {
+        let pending = activeWalkthroughSteps.sorted { $0.order < $1.order }
+        return routeRevealPolicy == .nextThree ? Array(pending.prefix(3)) : pending
     }
 
     var archivedWalkthroughSteps: [WalkthroughStep] {

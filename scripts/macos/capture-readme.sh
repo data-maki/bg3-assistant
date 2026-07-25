@@ -15,7 +15,7 @@ for dependency in ffmpeg jq sqlite3; do
 done
 
 if pgrep -f '[B]G3HonorAssistant' >/dev/null; then
-  printf 'Quit BG3 Honor Mode Assistant before capturing README media.\n' >&2
+  printf 'Quit BG3 Overlay before capturing README media.\n' >&2
   exit 1
 fi
 
@@ -34,7 +34,7 @@ progress="$(jq -c 'reduce (.[] | select(.order < 38) | .id) as $id ({}; .[$id] =
 snapshot="$workspace/run.json"
 jq -cn --argjson walkthroughProgress "$progress" '{
   id: "readme-demo",
-  name: "Honor Run",
+  name: "BG3 Run",
   guideVersion: "2026-07-18-all-act-review-v2",
   party: [
     {id: "tav", name: "Tav", level: 5, buildId: "SB-A1", preparedTags: [], className: "Bard", appliedAbilitySetupId: "creation"},

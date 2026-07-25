@@ -1,0 +1,4934 @@
+{
+  "generated_by": "scripts/macos/fetch-build-option-icons.py",
+  "options": {
+    "+1 Constitution / +1 Charisma": {
+      "filename": "1-constitution-1-charisma.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Constitution / +1 Intelligence": {
+      "filename": "1-constitution-1-intelligence.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Constitution / +1 Wisdom": {
+      "filename": "1-constitution-1-wisdom.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Dexterity / +1 Charisma": {
+      "filename": "1-dexterity-1-charisma.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Dexterity / +1 Constitution": {
+      "filename": "1-dexterity-1-constitution.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Dexterity / +1 Intelligence": {
+      "filename": "1-dexterity-1-intelligence.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Dexterity / +1 Wisdom": {
+      "filename": "1-dexterity-1-wisdom.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Intelligence / +1 Charisma": {
+      "filename": "1-intelligence-1-charisma.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Intelligence / +1 Wisdom": {
+      "filename": "1-intelligence-1-wisdom.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Strength / +1 Charisma": {
+      "filename": "1-strength-1-charisma.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Strength / +1 Constitution": {
+      "filename": "1-strength-1-constitution.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Strength / +1 Dexterity": {
+      "filename": "1-strength-1-dexterity.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Strength / +1 Intelligence": {
+      "filename": "1-strength-1-intelligence.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Strength / +1 Wisdom": {
+      "filename": "1-strength-1-wisdom.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+1 Wisdom / +1 Charisma": {
+      "filename": "1-wisdom-1-charisma.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+2 Charisma": {
+      "filename": "2-charisma.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+2 Constitution": {
+      "filename": "2-constitution.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+2 Dexterity": {
+      "filename": "2-dexterity.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+2 Intelligence": {
+      "filename": "2-intelligence.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+2 Strength": {
+      "filename": "2-strength.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "+2 Wisdom": {
+      "filename": "2-wisdom.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Ability Improvement": {
+      "filename": "ability-improvement.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Ability Improvement Allocation": {
+      "filename": "ability-improvement-allocation.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Ability Improvement allocation": {
+      "filename": "ability-improvement-allocation.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Ability choice": {
+      "filename": "ability-choice.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Abjuration School": {
+      "filename": "abjuration-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Abjuration_School",
+      "source_title": "Abjuration School",
+      "source_url": "https://bg3.wiki/w/images/e/ee/Class_Wizard_Abjuration_Badge_Icon.png"
+    },
+    "Acid": {
+      "filename": "acid.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Acid",
+      "source_title": "Acid",
+      "source_url": "https://bg3.wiki/w/images/5/5f/Acid_Damage_Icon.png"
+    },
+    "Acid Splash": {
+      "filename": "acid-splash.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Acid_Splash",
+      "source_title": "Acid Splash",
+      "source_url": "https://bg3.wiki/w/images/9/99/Acid_Splash_Icon.webp"
+    },
+    "Acrobatics": {
+      "filename": "acrobatics.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Acrobatics",
+      "source_title": "Acrobatics",
+      "source_url": "https://bg3.wiki/w/images/5/57/Acrobatics_Icon.png"
+    },
+    "Action Surge": {
+      "filename": "action-surge.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Action_Surge",
+      "source_title": "Action Surge",
+      "source_url": "https://bg3.wiki/w/images/4/4d/Action_Surge_Icon.webp"
+    },
+    "Actor": {
+      "filename": "actor.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Actor",
+      "source_title": "Actor",
+      "source_url": "https://bg3.wiki/w/images/3/3f/Perform_Whistle_Icon.webp"
+    },
+    "Additional Animal Aspect": {
+      "filename": "additional-animal-aspect.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Arcane Shot": {
+      "filename": "additional-arcane-shot.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Arcane Trickster Spell": {
+      "filename": "additional-arcane-trickster-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Battle Manoeuvres": {
+      "filename": "additional-battle-manoeuvres.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Channel Oath Charge": {
+      "filename": "additional-channel-oath-charge.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Eldritch Knight Spell": {
+      "filename": "additional-eldritch-knight-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Elemental Discipline": {
+      "filename": "additional-elemental-discipline.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Invocation": {
+      "filename": "additional-invocation.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Metamagic": {
+      "filename": "additional-metamagic.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Additional Rage Charge": {
+      "filename": "additional-rage-charge.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Advanced Unarmoured Movement": {
+      "filename": "advanced-unarmoured-movement.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Advanced_Unarmoured_Movement",
+      "source_title": "Advanced Unarmoured Movement",
+      "source_url": "https://bg3.wiki/w/images/c/c9/Advanced_Unarmoured_Movement_Icon.webp"
+    },
+    "Agonising Blast": {
+      "filename": "agonising-blast.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Agonising_Blast",
+      "source_title": "Agonising Blast",
+      "source_url": "https://bg3.wiki/w/images/9/9d/Agonising_Blast_Icon.webp"
+    },
+    "Aid": {
+      "filename": "aid.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Aid",
+      "source_title": "Aid",
+      "source_url": "https://bg3.wiki/w/images/5/50/Aid_Icon.webp"
+    },
+    "Alert": {
+      "filename": "alert.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Alert",
+      "source_title": "Alert",
+      "source_url": "https://bg3.wiki/w/images/8/86/Generic_Threat_Icon.webp"
+    },
+    "Animal Aspect": {
+      "filename": "animal-aspect.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Animal Friendship": {
+      "filename": "animal-friendship.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Animal_Friendship",
+      "source_title": "Animal Friendship",
+      "source_url": "https://bg3.wiki/w/images/3/36/Animal_Friendship_Icon.webp"
+    },
+    "Animal Handling": {
+      "filename": "animal-handling.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Animal_Handling",
+      "source_title": "Animal Handling",
+      "source_url": "https://bg3.wiki/w/images/e/e0/Animal_Handling_Icon.png"
+    },
+    "Animate Dead": {
+      "filename": "animate-dead.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Animate_Dead",
+      "source_title": "Animate Dead",
+      "source_url": "https://bg3.wiki/w/images/2/2f/Animate_Dead_Icon.webp"
+    },
+    "Arcana": {
+      "filename": "arcana.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arcana",
+      "source_title": "Arcana",
+      "source_url": "https://bg3.wiki/w/images/a/af/Arcana_Icon.png"
+    },
+    "Arcane Archer": {
+      "filename": "arcane-archer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arcane_Archer",
+      "source_title": "Arcane Archer",
+      "source_url": "https://bg3.wiki/w/images/c/c2/Class_Fighter_Arcane_Archer_Badge_Icon.png"
+    },
+    "Arcane Archer Cantrip": {
+      "filename": "arcane-archer-cantrip.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Arcane Archer cantrip": {
+      "filename": "arcane-archer-cantrip.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Arcane Gate": {
+      "filename": "arcane-gate.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arcane_Gate",
+      "source_title": "Arcane Gate",
+      "source_url": "https://bg3.wiki/w/images/6/6e/Arcane_Gate_Icon.webp"
+    },
+    "Arcane Lock": {
+      "filename": "arcane-lock.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arcane_Lock",
+      "source_title": "Arcane Lock",
+      "source_url": "https://bg3.wiki/w/images/7/79/Arcane_Lock_Icon.webp"
+    },
+    "Arcane Recovery": {
+      "filename": "arcane-recovery.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arcane_Recovery",
+      "source_title": "Arcane Recovery",
+      "source_url": "https://bg3.wiki/w/images/e/ed/Arcane_Recovery_Icon.webp"
+    },
+    "Arcane Shot": {
+      "filename": "arcane-shot.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Arcane Shots": {
+      "filename": "arcane-shots.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Arcane Trickster": {
+      "filename": "arcane-trickster.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arcane_Trickster",
+      "source_title": "Arcane Trickster",
+      "source_url": "https://bg3.wiki/w/images/f/fd/Class_Rogue_Arcane_Trickster_Badge_Icon.png"
+    },
+    "Arcane Trickster Cantrips": {
+      "filename": "arcane-trickster-cantrips.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Arcane Trickster Spells": {
+      "filename": "arcane-trickster-spells.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Arcane Trickster cantrip": {
+      "filename": "arcane-trickster-cantrip.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Archery": {
+      "filename": "archery.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Archery",
+      "source_title": "Archery",
+      "source_url": "https://bg3.wiki/w/images/8/83/Archery_Icon.webp"
+    },
+    "Arctic": {
+      "filename": "arctic.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arctic",
+      "source_title": "Arctic",
+      "source_url": "https://bg3.wiki/w/images/0/03/Arctic_Icon.webp"
+    },
+    "Arm Thy Servant": {
+      "filename": "arm-thy-servant.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Armour of Agathys": {
+      "filename": "armour-of-agathys.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Armour_of_Agathys",
+      "source_title": "Armour of Agathys",
+      "source_url": "https://bg3.wiki/w/images/7/77/Armour_of_Agathys_Icon.webp"
+    },
+    "Armour of Shadows": {
+      "filename": "armour-of-shadows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Armour_of_Shadows",
+      "source_title": "Armour of Shadows",
+      "source_url": "https://bg3.wiki/w/images/0/0d/Mage_Armour_Icon.webp"
+    },
+    "Arms of Hadar": {
+      "filename": "arms-of-hadar.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Arms_of_Hadar",
+      "source_title": "Arms of Hadar",
+      "source_url": "https://bg3.wiki/w/images/3/3e/Arms_of_Hadar_Icon.webp"
+    },
+    "Assassin": {
+      "filename": "assassin.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Assassin",
+      "source_title": "Assassin",
+      "source_url": "https://bg3.wiki/w/images/d/df/Class_Rogue_Assassin_Badge_Icon.png"
+    },
+    "Athlete": {
+      "filename": "athlete.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Athlete_Icon.webp",
+      "source_title": "File:Athlete Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/1/15/Athlete_Standing_Up_Icon.webp"
+    },
+    "Athlete +1 ability": {
+      "filename": "athlete-1-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Athlete Ability": {
+      "filename": "athlete-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Athletics": {
+      "filename": "athletics.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Athletics",
+      "source_title": "Athletics",
+      "source_url": "https://bg3.wiki/w/images/3/30/Athletics_Icon.png"
+    },
+    "Aura of Courage": {
+      "filename": "aura-of-courage.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Aura_of_Courage",
+      "source_title": "Aura of Courage",
+      "source_url": "https://bg3.wiki/w/images/6/66/Aura_of_Courage_Icon.webp"
+    },
+    "Aura of Protection": {
+      "filename": "aura-of-protection.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Aura_of_Protection",
+      "source_title": "Aura of Protection",
+      "source_url": "https://bg3.wiki/w/images/8/80/Aura_of_Protection_Icon.webp"
+    },
+    "BG3 feat": {
+      "filename": "bg3-feat.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Balanced": {
+      "filename": "balanced.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Bane": {
+      "filename": "bane.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Bane_Icon.webp",
+      "source_title": "File:Bane Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/1/19/Bane_spell_Icon.webp"
+    },
+    "Banishing Arrow": {
+      "filename": "banishing-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Banishing Smite": {
+      "filename": "banishing-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Banishing_Smite",
+      "source_title": "Banishing Smite",
+      "source_url": "https://bg3.wiki/w/images/3/3b/Banishing_Smite_Melee_Icon.webp"
+    },
+    "Banishment": {
+      "filename": "banishment.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Banishment",
+      "source_title": "Banishment",
+      "source_url": "https://bg3.wiki/w/images/6/6d/Banishment_Icon.webp"
+    },
+    "Barbarian": {
+      "filename": "barbarian.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Barbarian",
+      "source_title": "Barbarian",
+      "source_url": "https://bg3.wiki/w/images/5/5c/Barbarian_Class_300px.png"
+    },
+    "Bard": {
+      "filename": "bard.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bard",
+      "source_title": "Bard",
+      "source_url": "https://bg3.wiki/w/images/3/38/Class_Bard_Badge_Icon.png"
+    },
+    "Bardic Inspiration": {
+      "filename": "bardic-inspiration.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Bardic_Inspiration_Icon.webp",
+      "source_title": "File:Bardic Inspiration Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/0/0a/Bardic_Inspiration_Icon.webp"
+    },
+    "Barkskin": {
+      "filename": "barkskin.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Barkskin",
+      "source_title": "Barkskin",
+      "source_url": "https://bg3.wiki/w/images/8/8b/Barkskin_Icon.webp"
+    },
+    "Battle Manoeuvres": {
+      "filename": "battle-manoeuvres.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Battle Master": {
+      "filename": "battle-master.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Battle_Master",
+      "source_title": "Battle Master",
+      "source_url": "https://bg3.wiki/w/images/3/35/Class_Fighter_Battle_Master_Badge_Icon.png"
+    },
+    "Battle Master manoeuvre": {
+      "filename": "battle-master-manoeuvre.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Battleaxes": {
+      "filename": "battleaxes.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Battleaxes",
+      "source_title": "Battleaxes",
+      "source_url": "https://bg3.wiki/w/images/3/39/Battleaxe_Unfaded.png"
+    },
+    "Beacon of Hope": {
+      "filename": "beacon-of-hope.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Beacon_of_Hope",
+      "source_title": "Beacon of Hope",
+      "source_url": "https://bg3.wiki/w/images/5/5d/Beacon_of_Hope_Icon.webp"
+    },
+    "Bear": {
+      "filename": "bear.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bear",
+      "source_title": "Bear",
+      "source_url": "https://bg3.wiki/w/images/9/9d/Bear_Model.png"
+    },
+    "Bear Heart": {
+      "filename": "bear-heart.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bear_Heart",
+      "source_title": "Bear Heart",
+      "source_url": "https://bg3.wiki/w/images/9/9d/Rage_Bear_Heart_Icon.webp"
+    },
+    "Beast Master": {
+      "filename": "beast-master.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Beast_Master",
+      "source_title": "Beast Master",
+      "source_url": "https://bg3.wiki/w/images/2/26/Class_Ranger_Beast_Master_Badge_Icon.png"
+    },
+    "Beast Master companion": {
+      "filename": "beast-master-companion.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Beast Speech": {
+      "filename": "beast-speech.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Beast_Speech",
+      "source_title": "Beast Speech",
+      "source_url": "https://bg3.wiki/w/images/2/24/Speak_with_Animals_Icon.webp"
+    },
+    "Beast Tamer": {
+      "filename": "beast-tamer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Beast_Tamer",
+      "source_title": "Beast Tamer",
+      "source_url": "https://bg3.wiki/w/images/c/cf/Beast_Tamer_Icon.webp"
+    },
+    "Beguiling Arrow": {
+      "filename": "beguiling-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Beguiling Influence": {
+      "filename": "beguiling-influence.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Beguiling_Influence",
+      "source_title": "Beguiling Influence",
+      "source_url": "https://bg3.wiki/w/images/c/cc/Beguiling_Influence_Icon.webp"
+    },
+    "Berserker": {
+      "filename": "berserker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Berserker",
+      "source_title": "Berserker",
+      "source_url": "https://bg3.wiki/w/images/6/62/Class_Barbarian_Berserker_Badge_Icon.png"
+    },
+    "Bestial Heart": {
+      "filename": "bestial-heart.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Bestow Curse": {
+      "filename": "bestow-curse.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bestow_Curse",
+      "source_title": "Bestow Curse",
+      "source_url": "https://bg3.wiki/w/images/0/00/Bestow_Curse_Icon.webp"
+    },
+    "Black (Acid)": {
+      "filename": "black-acid.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Blade Barrier": {
+      "filename": "blade-barrier.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Blade_Barrier",
+      "source_title": "Blade Barrier",
+      "source_url": "https://bg3.wiki/w/images/b/bb/Blade_Barrier_Icon.webp"
+    },
+    "Blade Ward": {
+      "filename": "blade-ward.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Blade of Rime": {
+      "filename": "blade-of-rime.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Blade_of_Rime",
+      "source_title": "Blade of Rime",
+      "source_url": "https://bg3.wiki/w/images/1/17/Ice_Knife_Icon.webp"
+    },
+    "Bladesinging": {
+      "filename": "bladesinging.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bladesinging",
+      "source_title": "Bladesinging",
+      "source_url": "https://bg3.wiki/w/images/2/26/Class_Wizard_Bladesinging_Badge_Icon.png"
+    },
+    "Bless": {
+      "filename": "bless.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bless",
+      "source_title": "Bless",
+      "source_url": "https://bg3.wiki/w/images/c/c4/Bless_Icon.webp"
+    },
+    "Blight": {
+      "filename": "blight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Blight",
+      "source_title": "Blight",
+      "source_url": "https://bg3.wiki/w/images/e/e0/Blight_Icon.webp"
+    },
+    "Blinding Smite": {
+      "filename": "blinding-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Blinding_Smite",
+      "source_title": "Blinding Smite",
+      "source_url": "https://bg3.wiki/w/images/5/5e/Blinding_Smite_Icon.webp"
+    },
+    "Blindness": {
+      "filename": "blindness.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Blindness",
+      "source_title": "Blindness",
+      "source_url": "https://bg3.wiki/w/images/5/5a/Blindness_Icon.webp"
+    },
+    "Blink": {
+      "filename": "blink.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Blink",
+      "source_title": "Blink",
+      "source_url": "https://bg3.wiki/w/images/b/b3/Blink_Icon.webp"
+    },
+    "Blue (Lightning)": {
+      "filename": "blue-lightning.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Blur": {
+      "filename": "blur.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Blur",
+      "source_title": "Blur",
+      "source_url": "https://bg3.wiki/w/images/0/0d/Blur_Icon.webp"
+    },
+    "Boar": {
+      "filename": "boar.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Boar",
+      "source_title": "Boar",
+      "source_url": "https://bg3.wiki/w/images/0/06/Verres_Model.png"
+    },
+    "Bone Chill": {
+      "filename": "bone-chill.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bone_Chill",
+      "source_title": "Bone Chill",
+      "source_url": "https://bg3.wiki/w/images/0/03/Bone_Chill_Icon.webp"
+    },
+    "Book of Ancient Secrets": {
+      "filename": "book-of-ancient-secrets.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Book_of_Ancient_Secrets",
+      "source_title": "Book of Ancient Secrets",
+      "source_url": "https://bg3.wiki/w/images/9/9a/Book_of_Ancient_Secrets_Icon.webp"
+    },
+    "Booming Blade": {
+      "filename": "booming-blade.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Booming_Blade",
+      "source_title": "Booming Blade",
+      "source_url": "https://bg3.wiki/w/images/f/fd/Booming_Blade_Icon.webp"
+    },
+    "Bounty Hunter": {
+      "filename": "bounty-hunter.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bounty_Hunter",
+      "source_title": "Bounty Hunter",
+      "source_url": "https://bg3.wiki/w/images/1/17/Bounty_Hunter_Icon.webp"
+    },
+    "Branding Smite": {
+      "filename": "branding-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Branding_Smite",
+      "source_title": "Branding Smite",
+      "source_url": "https://bg3.wiki/w/images/5/5e/Branding_Smite_Melee_Icon.webp"
+    },
+    "Brass (Fire)": {
+      "filename": "brass-fire.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Bronze (Lightning)": {
+      "filename": "bronze-lightning.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Brutal Critical": {
+      "filename": "brutal-critical.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Brutal_Critical",
+      "source_title": "Brutal Critical",
+      "source_url": "https://bg3.wiki/w/images/e/e1/Brutal_Critical_Icon.webp"
+    },
+    "Burning Hands": {
+      "filename": "burning-hands.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Burning_Hands",
+      "source_title": "Burning Hands",
+      "source_url": "https://bg3.wiki/w/images/c/cf/Burning_Hands_Icon.webp"
+    },
+    "Bursting Arrow": {
+      "filename": "bursting-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Bursting Sinew": {
+      "filename": "bursting-sinew.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Bursting_Sinew",
+      "source_title": "Bursting Sinew",
+      "source_url": "https://bg3.wiki/w/images/0/0f/Bursting_Sinew_Icon.webp"
+    },
+    "Call Lightning": {
+      "filename": "call-lightning.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Call_Lightning",
+      "source_title": "Call Lightning",
+      "source_url": "https://bg3.wiki/w/images/9/99/Call_Lightning_Icon.webp"
+    },
+    "Calm Emotions": {
+      "filename": "calm-emotions.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Calm_Emotions",
+      "source_title": "Calm Emotions",
+      "source_url": "https://bg3.wiki/w/images/d/d9/Calm_Emotions_Icon.webp"
+    },
+    "Cantrips": {
+      "filename": "cantrips.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Careful Spell": {
+      "filename": "careful-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Chain Lightning": {
+      "filename": "chain-lightning.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Chain_Lightning",
+      "source_title": "Chain Lightning",
+      "source_url": "https://bg3.wiki/w/images/c/c9/Chain_Lightning_Icon.webp"
+    },
+    "Champion": {
+      "filename": "champion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Champion",
+      "source_title": "Champion",
+      "source_url": "https://bg3.wiki/w/images/1/16/Class_Fighter_Champion_Badge_Icon.png"
+    },
+    "Channel Divinity": {
+      "filename": "channel-divinity.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Channel Oath Charges": {
+      "filename": "channel-oath-charges.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Charger": {
+      "filename": "charger.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Charger",
+      "source_title": "Charger",
+      "source_url": "https://bg3.wiki/w/images/f/f1/Charger_Weapon_Attack_Icon.webp"
+    },
+    "Charisma": {
+      "filename": "charisma.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Charm Person": {
+      "filename": "charm-person.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Charm_Person",
+      "source_title": "Charm Person",
+      "source_url": "https://bg3.wiki/w/images/b/bc/Charm_Person_Icon.webp"
+    },
+    "Chill of the Mountain": {
+      "filename": "chill-of-the-mountain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Chill_of_the_Mountain",
+      "source_title": "Chill of the Mountain",
+      "source_url": "https://bg3.wiki/w/images/f/f9/Ray_of_Frost_Icon.webp"
+    },
+    "Chimpanzee": {
+      "filename": "chimpanzee.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Chromatic Orb": {
+      "filename": "chromatic-orb.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Chromatic_Orb",
+      "source_title": "Chromatic Orb",
+      "source_url": "https://bg3.wiki/w/images/8/8e/Chromatic_Orb_Icon.webp"
+    },
+    "Circle Spells Land": {
+      "filename": "circle-spells-land.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Circle of Death": {
+      "filename": "circle-of-death.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Circle_of_Death",
+      "source_title": "Circle of Death",
+      "source_url": "https://bg3.wiki/w/images/f/f2/Circle_of_Death_Icon.webp"
+    },
+    "Circle of Spores": {
+      "filename": "circle-of-spores.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Circle of the Land": {
+      "filename": "circle-of-the-land.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Circle_of_the_Land",
+      "source_title": "Circle of the Land",
+      "source_url": "https://bg3.wiki/w/images/c/c1/Class_Druid_Land_Badge_Icon.png"
+    },
+    "Circle of the Land terrain": {
+      "filename": "circle-of-the-land-terrain.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Circle of the Moon": {
+      "filename": "circle-of-the-moon.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Circle_of_the_Moon",
+      "source_title": "Circle of the Moon",
+      "source_url": "https://bg3.wiki/w/images/4/45/Class_Druid_Moon_Badge_Icon.png"
+    },
+    "Circle of the Stars": {
+      "filename": "circle-of-the-stars.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Circle_of_the_Stars",
+      "source_title": "Circle of the Stars",
+      "source_url": "https://bg3.wiki/w/images/5/54/Class_Druid_Stars_Badge_Icon.png"
+    },
+    "Clench of the North Wind": {
+      "filename": "clench-of-the-north-wind.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Clench_of_the_North_Wind",
+      "source_title": "Clench of the North Wind",
+      "source_url": "https://bg3.wiki/w/images/7/75/Hold_Person_Icon.webp"
+    },
+    "Cleric": {
+      "filename": "cleric.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Cleric",
+      "source_title": "Cleric",
+      "source_url": "https://bg3.wiki/w/images/a/ac/Class_Cleric_Badge_Icon.png"
+    },
+    "Cloud of Daggers": {
+      "filename": "cloud-of-daggers.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Cloud_of_Daggers",
+      "source_title": "Cloud of Daggers",
+      "source_url": "https://bg3.wiki/w/images/3/3d/Cloud_of_Daggers_Icon.webp"
+    },
+    "Cloud of Jellyfish": {
+      "filename": "cloud-of-jellyfish.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Cloud_of_Jellyfish",
+      "source_title": "Cloud of Jellyfish",
+      "source_url": "https://bg3.wiki/w/images/d/d4/Cloud_of_Jellyfish_Icon.webp"
+    },
+    "Cloudkill": {
+      "filename": "cloudkill.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Cloudkill",
+      "source_title": "Cloudkill",
+      "source_url": "https://bg3.wiki/w/images/7/74/Cloudkill_Icon.webp"
+    },
+    "Clubs": {
+      "filename": "clubs.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Clubs",
+      "source_title": "Clubs",
+      "source_url": "https://bg3.wiki/w/images/b/bd/Club_Unfaded.png"
+    },
+    "Coast": {
+      "filename": "coast.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Coast",
+      "source_title": "Coast",
+      "source_url": "https://bg3.wiki/w/images/9/96/Coast_Icon.webp"
+    },
+    "Cold": {
+      "filename": "cold.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Cold",
+      "source_title": "Cold",
+      "source_url": "https://bg3.wiki/w/images/0/05/Cold_Damage_Icon.png"
+    },
+    "College of Glamour": {
+      "filename": "college-of-glamour.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/College_of_Glamour",
+      "source_title": "College of Glamour",
+      "source_url": "https://bg3.wiki/w/images/f/fb/Class_Bard_Glamour_Badge_Icon.png"
+    },
+    "College of Lore": {
+      "filename": "college-of-lore.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/College_of_Lore",
+      "source_title": "College of Lore",
+      "source_url": "https://bg3.wiki/w/images/0/03/College_Of_Lore_Icon.png"
+    },
+    "College of Lore Skills": {
+      "filename": "college-of-lore-skills.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "College of Swords": {
+      "filename": "college-of-swords.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/College_of_Swords",
+      "source_title": "College of Swords",
+      "source_url": "https://bg3.wiki/w/images/5/54/Class_Bard_Swords_Badge_Icon.png"
+    },
+    "College of Swords Fighting Style": {
+      "filename": "college-of-swords-fighting-style.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "College of Swords style": {
+      "filename": "college-of-swords-style.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "College of Valour": {
+      "filename": "college-of-valour.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/College_of_Valour",
+      "source_title": "College of Valour",
+      "source_url": "https://bg3.wiki/w/images/6/65/Class_Bard_Valour_Badge_Icon.png"
+    },
+    "Colossus Slayer": {
+      "filename": "colossus-slayer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Colossus_Slayer",
+      "source_title": "Colossus Slayer",
+      "source_url": "https://bg3.wiki/w/images/f/f0/Colossus_Slayer_Icon.webp"
+    },
+    "Colour Spray": {
+      "filename": "colour-spray.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Colour_Spray",
+      "source_title": "Colour Spray",
+      "source_url": "https://bg3.wiki/w/images/2/24/Colour_Spray_Icon.webp"
+    },
+    "Command": {
+      "filename": "command.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Command",
+      "source_title": "Command",
+      "source_url": "https://bg3.wiki/w/images/7/7f/Command_Halt_Icon.webp"
+    },
+    "Commander's Strike": {
+      "filename": "commander-s-strike.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Commander's_Strike",
+      "source_title": "Commander's Strike",
+      "source_url": "https://bg3.wiki/w/images/d/d2/Commander%27s_Strike_Icon.webp"
+    },
+    "Compelled Duel": {
+      "filename": "compelled-duel.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Compelled_Duel",
+      "source_title": "Compelled Duel",
+      "source_url": "https://bg3.wiki/w/images/7/73/Compelled_Duel_Icon.webp"
+    },
+    "Cone of Cold": {
+      "filename": "cone-of-cold.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Cone_of_Cold",
+      "source_title": "Cone of Cold",
+      "source_url": "https://bg3.wiki/w/images/e/ef/Cone_of_Cold_Icon.webp"
+    },
+    "Confusion": {
+      "filename": "confusion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Confusion",
+      "source_title": "Confusion",
+      "source_url": "https://bg3.wiki/w/images/7/7b/Confusion_Icon.webp"
+    },
+    "Conjuration School": {
+      "filename": "conjuration-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Conjuration_School",
+      "source_title": "Conjuration School",
+      "source_url": "https://bg3.wiki/w/images/b/bc/Class_Wizard_Conjuration_Badge_Icon.png"
+    },
+    "Conjure Barrage": {
+      "filename": "conjure-barrage.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Conjure_Barrage",
+      "source_title": "Conjure Barrage",
+      "source_url": "https://bg3.wiki/w/images/d/df/Conjure_Barrage_Icon.webp"
+    },
+    "Conjure Elemental": {
+      "filename": "conjure-elemental.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Conjure_Elemental",
+      "source_title": "Conjure Elemental",
+      "source_url": "https://bg3.wiki/w/images/e/e6/Conjure_Elemental_Icon.webp"
+    },
+    "Conjure Minor Elemental": {
+      "filename": "conjure-minor-elemental.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Conjure_Minor_Elemental",
+      "source_title": "Conjure Minor Elemental",
+      "source_url": "https://bg3.wiki/w/images/0/08/Conjure_Minor_Elemental_Azer_Icon.webp"
+    },
+    "Conjure Woodland Being": {
+      "filename": "conjure-woodland-being.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Conjure_Woodland_Being",
+      "source_title": "Conjure Woodland Being",
+      "source_url": "https://bg3.wiki/w/images/8/8a/Conjure_Woodland_Being_Icon.webp"
+    },
+    "Constitution": {
+      "filename": "constitution.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Contagion": {
+      "filename": "contagion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Contagion",
+      "source_title": "Contagion",
+      "source_url": "https://bg3.wiki/w/images/6/60/Contagion_Filth_Fever_Icon.webp"
+    },
+    "Copper (Acid)": {
+      "filename": "copper-acid.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Countercharm": {
+      "filename": "countercharm.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Countercharm",
+      "source_title": "Countercharm",
+      "source_url": "https://bg3.wiki/w/images/4/48/Countercharm_Icon.webp"
+    },
+    "Counterspell": {
+      "filename": "counterspell.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Counterspell",
+      "source_title": "Counterspell",
+      "source_url": "https://bg3.wiki/w/images/5/50/Counterspell_Icon.webp"
+    },
+    "Create Sorcery Points": {
+      "filename": "create-sorcery-points.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Create_Sorcery_Points",
+      "source_title": "Create Sorcery Points",
+      "source_url": "https://bg3.wiki/w/images/a/a7/Create_Sorcery_Points_Icon.webp"
+    },
+    "Create Spell Slot": {
+      "filename": "create-spell-slot.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Create_Spell_Slot",
+      "source_title": "Create Spell Slot",
+      "source_url": "https://bg3.wiki/w/images/1/17/Create_Spell_Slot_Icon.webp"
+    },
+    "Create Undead": {
+      "filename": "create-undead.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Create_Undead",
+      "source_title": "Create Undead",
+      "source_url": "https://bg3.wiki/w/images/d/da/Create_Undead_Icon.webp"
+    },
+    "Create or Destroy Water": {
+      "filename": "create-or-destroy-water.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Create_or_Destroy_Water",
+      "source_title": "Create or Destroy Water",
+      "source_url": "https://bg3.wiki/w/images/d/d1/Create_Water_Icon.webp"
+    },
+    "Crocodile": {
+      "filename": "crocodile.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Crossbow Expert": {
+      "filename": "crossbow-expert.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Crossbow_Expert_Icon.webp",
+      "source_title": "File:Crossbow Expert Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/4/46/Crossbow_Expert_Icon.webp"
+    },
+    "Crown of Madness": {
+      "filename": "crown-of-madness.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Crown_of_Madness",
+      "source_title": "Crown of Madness",
+      "source_url": "https://bg3.wiki/w/images/4/48/Crown_of_Madness_Icon.webp"
+    },
+    "Crusader's Mantle": {
+      "filename": "crusader-s-mantle.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Crusader's_Mantle",
+      "source_title": "Crusader's Mantle",
+      "source_url": "https://bg3.wiki/w/images/4/4d/Crusader%27s_Mantle_Icon.webp"
+    },
+    "Cunning Action": {
+      "filename": "cunning-action.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Cure Wounds": {
+      "filename": "cure-wounds.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Cure_Wounds",
+      "source_title": "Cure Wounds",
+      "source_url": "https://bg3.wiki/w/images/4/40/Cure_Wounds_Icon.webp"
+    },
+    "Custom": {
+      "filename": "custom.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Custom combinations vary, so warnings cannot match every rule mix.": {
+      "filename": "custom-combinations-vary-so-warnings-cannot-match-every-rule-mix.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Daggers": {
+      "filename": "daggers.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Daggers",
+      "source_title": "Daggers",
+      "source_url": "https://bg3.wiki/w/images/2/2d/Dagger_Unfaded.png"
+    },
+    "Dancing Lights": {
+      "filename": "dancing-lights.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dancing_Lights",
+      "source_title": "Dancing Lights",
+      "source_url": "https://bg3.wiki/w/images/b/ba/Dancing_Lights_Icon.webp"
+    },
+    "Danger Sense": {
+      "filename": "danger-sense.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Danger_Sense",
+      "source_title": "Danger Sense",
+      "source_url": "https://bg3.wiki/w/images/9/93/Danger_Sense_Icon.webp"
+    },
+    "Darkness": {
+      "filename": "darkness.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Darkness",
+      "source_title": "Darkness",
+      "source_url": "https://bg3.wiki/w/images/b/bf/Darkness_Icon.webp"
+    },
+    "Darkvision": {
+      "filename": "darkvision.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Darkvision",
+      "source_title": "Darkvision",
+      "source_url": "https://bg3.wiki/w/images/0/0d/Darkvision_Icon.webp"
+    },
+    "Darts": {
+      "filename": "darts.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Darts",
+      "source_title": "Darts",
+      "source_url": "https://bg3.wiki/w/images/c/cc/Dart_Unfaded.png"
+    },
+    "Daylight": {
+      "filename": "daylight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Daylight",
+      "source_title": "Daylight",
+      "source_url": "https://bg3.wiki/w/images/6/6e/Daylight_Icon.webp"
+    },
+    "Death Domain": {
+      "filename": "death-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Death_Domain",
+      "source_title": "Death Domain",
+      "source_url": "https://bg3.wiki/w/images/c/ca/Class_Cleric_Death_Badge_Icon.png"
+    },
+    "Death Ward": {
+      "filename": "death-ward.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Death_Ward",
+      "source_title": "Death Ward",
+      "source_url": "https://bg3.wiki/w/images/8/84/Death_Ward_Icon.webp"
+    },
+    "Deception": {
+      "filename": "deception.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Deception",
+      "source_title": "Deception",
+      "source_url": "https://bg3.wiki/w/images/1/1c/Deception_Icon.png"
+    },
+    "Deepened Pact": {
+      "filename": "deepened-pact.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Deepened_Pact",
+      "source_title": "Deepened Pact",
+      "source_url": "https://bg3.wiki/w/images/1/18/Deepened_Pact_Icon.webp"
+    },
+    "Defence": {
+      "filename": "defence.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Defence",
+      "source_title": "Defence",
+      "source_url": "https://bg3.wiki/w/images/e/e2/Defence_Icon.webp"
+    },
+    "Defensive Duellist": {
+      "filename": "defensive-duellist.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Defensive_Duellist",
+      "source_title": "Defensive Duellist",
+      "source_url": "https://bg3.wiki/w/images/b/be/Defensive_Duellist_Icon.webp"
+    },
+    "Defensive Tactics": {
+      "filename": "defensive-tactics.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Deflect Missiles": {
+      "filename": "deflect-missiles.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Deflect_Missiles",
+      "source_title": "Deflect Missiles",
+      "source_url": "https://bg3.wiki/w/images/7/75/Deflect_Missiles_Icon.webp"
+    },
+    "Desert": {
+      "filename": "desert.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Desert",
+      "source_title": "Desert",
+      "source_url": "https://bg3.wiki/w/images/5/55/Desert_Icon.webp"
+    },
+    "Destroy Undead": {
+      "filename": "destroy-undead.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Destroy_Undead",
+      "source_title": "Destroy Undead",
+      "source_url": "https://bg3.wiki/w/images/a/a7/Destroy_Undead_Icon.webp"
+    },
+    "Detect Thoughts": {
+      "filename": "detect-thoughts.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Detect_Thoughts",
+      "source_title": "Detect Thoughts",
+      "source_url": "https://bg3.wiki/w/images/b/b6/Detect_Thoughts_Icon.webp"
+    },
+    "Devil's Sight": {
+      "filename": "devil-s-sight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Devil's_Sight",
+      "source_title": "Devil's Sight",
+      "source_url": "https://bg3.wiki/w/images/c/c0/Devils_Sight_Icon.webp"
+    },
+    "Dexterity": {
+      "filename": "dexterity.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Dimension Door": {
+      "filename": "dimension-door.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dimension_Door",
+      "source_title": "Dimension Door",
+      "source_url": "https://bg3.wiki/w/images/d/da/Dimension_Door_Icon.webp"
+    },
+    "Dire Raven": {
+      "filename": "dire-raven.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dire_Raven",
+      "source_title": "Dire Raven",
+      "source_url": "https://bg3.wiki/w/images/a/ad/Corvus_Model.png"
+    },
+    "Disarming Attack": {
+      "filename": "disarming-attack.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Disguise Self": {
+      "filename": "disguise-self.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Disguise_Self",
+      "source_title": "Disguise Self",
+      "source_url": "https://bg3.wiki/w/images/8/8d/Disguise_Self_Icon.webp"
+    },
+    "Disintegrate": {
+      "filename": "disintegrate.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Disintegrate",
+      "source_title": "Disintegrate",
+      "source_url": "https://bg3.wiki/w/images/8/8a/Disintegrate_Icon.webp"
+    },
+    "Dispel Evil And Good": {
+      "filename": "dispel-evil-and-good.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dispel_Evil_And_Good",
+      "source_title": "Dispel Evil And Good",
+      "source_url": "https://bg3.wiki/w/images/a/a5/Dispel_Evil_And_Good_Icon.webp"
+    },
+    "Dissonant Whispers": {
+      "filename": "dissonant-whispers.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dissonant_Whispers",
+      "source_title": "Dissonant Whispers",
+      "source_url": "https://bg3.wiki/w/images/4/40/Dissonant_Whispers_Icon.webp"
+    },
+    "Distant Spell": {
+      "filename": "distant-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Distracting Strike": {
+      "filename": "distracting-strike.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Divination School": {
+      "filename": "divination-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Divination_School",
+      "source_title": "Divination School",
+      "source_url": "https://bg3.wiki/w/images/5/5c/Class_Wizard_Divination_Badge_Icon.png"
+    },
+    "Divine Favour": {
+      "filename": "divine-favour.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Divine_Favour",
+      "source_title": "Divine Favour",
+      "source_url": "https://bg3.wiki/w/images/4/44/Divine_Favour_Icon.webp"
+    },
+    "Divine Health": {
+      "filename": "divine-health.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Divine_Health",
+      "source_title": "Divine Health",
+      "source_url": "https://bg3.wiki/w/images/1/1e/Divine_Health_Icon.webp"
+    },
+    "Divine Intervention": {
+      "filename": "divine-intervention.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Divine_Intervention",
+      "source_title": "Divine Intervention",
+      "source_url": "https://bg3.wiki/w/images/6/61/Divine_Intervention_Sunder_the_Heretical_Icon.webp"
+    },
+    "Divine Smite": {
+      "filename": "divine-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Divine_Smite",
+      "source_title": "Divine Smite",
+      "source_url": "https://bg3.wiki/w/images/4/4b/Divine_Smite_Icon.webp"
+    },
+    "Dominate Beast": {
+      "filename": "dominate-beast.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dominate_Beast",
+      "source_title": "Dominate Beast",
+      "source_url": "https://bg3.wiki/w/images/8/83/Dominate_Beast_Icon.webp"
+    },
+    "Dominate Person": {
+      "filename": "dominate-person.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dominate_Person",
+      "source_title": "Dominate Person",
+      "source_url": "https://bg3.wiki/w/images/1/1d/Dominate_Person_Icon.webp"
+    },
+    "Draconic Ancestry": {
+      "filename": "draconic-ancestry.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Draconic Bloodline": {
+      "filename": "draconic-bloodline.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Draconic_Bloodline",
+      "source_title": "Draconic Bloodline",
+      "source_url": "https://bg3.wiki/w/images/1/14/Class_Sorcerer_Draconic_Bloodline_Badge_Icon.png"
+    },
+    "Draconic ancestry": {
+      "filename": "draconic-ancestry.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Dreadful Word": {
+      "filename": "dreadful-word.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dreadful_Word",
+      "source_title": "Dreadful Word",
+      "source_url": "https://bg3.wiki/w/images/7/7b/Confusion_Icon.webp"
+    },
+    "Druid": {
+      "filename": "druid.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Druid",
+      "source_title": "Druid",
+      "source_url": "https://bg3.wiki/w/images/c/c9/Class_Druid_Badge_Icon.png"
+    },
+    "Druidic": {
+      "filename": "druidic.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Dual Wielder": {
+      "filename": "dual-wielder.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Dual_Wielder",
+      "source_title": "Dual Wielder",
+      "source_url": "https://bg3.wiki/w/images/0/0f/Dual_Wielder_Icon.webp"
+    },
+    "Duelling": {
+      "filename": "duelling.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Duelling",
+      "source_title": "Duelling",
+      "source_url": "https://bg3.wiki/w/images/a/ae/Duelling_Icon.webp"
+    },
+    "Dungeon Delver": {
+      "filename": "dungeon-delver.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Durable": {
+      "filename": "durable.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Durable",
+      "source_title": "Durable",
+      "source_url": "https://bg3.wiki/w/images/a/ab/Durable_Icon.webp"
+    },
+    "Eagle": {
+      "filename": "eagle.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Eagle Heart": {
+      "filename": "eagle-heart.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Eagle_Heart",
+      "source_title": "Eagle Heart",
+      "source_url": "https://bg3.wiki/w/images/1/16/Rage_Eagle_Heart_Icon.webp"
+    },
+    "Eldritch Blast": {
+      "filename": "eldritch-blast.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Eldritch_Blast",
+      "source_title": "Eldritch Blast",
+      "source_url": "https://bg3.wiki/w/images/d/db/Eldritch_Blast_Icon.webp"
+    },
+    "Eldritch Invocations": {
+      "filename": "eldritch-invocations.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Eldritch Knight": {
+      "filename": "eldritch-knight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Eldritch_Knight",
+      "source_title": "Eldritch Knight",
+      "source_url": "https://bg3.wiki/w/images/9/93/Class_Fighter_Eldritch_Knight_Badge_Icon.png"
+    },
+    "Eldritch Knight Cantrips": {
+      "filename": "eldritch-knight-cantrips.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Eldritch Knight Spells": {
+      "filename": "eldritch-knight-spells.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Eldritch Knight cantrip": {
+      "filename": "eldritch-knight-cantrip.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Eldritch Knight spell": {
+      "filename": "eldritch-knight-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Eldritch invocation": {
+      "filename": "eldritch-invocation.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Elemental Adept": {
+      "filename": "elemental-adept.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Elemental_Adept_Icon.webp",
+      "source_title": "File:Elemental Adept Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/c/c1/Elemental_Adept_Fire_Icon.webp"
+    },
+    "Elemental Adept Damage": {
+      "filename": "elemental-adept-damage.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Elemental Adept type": {
+      "filename": "elemental-adept-type.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Elemental Cleaver": {
+      "filename": "elemental-cleaver.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Elemental_Cleaver",
+      "source_title": "Elemental Cleaver",
+      "source_url": "https://bg3.wiki/w/images/1/1e/Elemental_Cleaver_acid_Icon.webp"
+    },
+    "Elemental Discipline": {
+      "filename": "elemental-discipline.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Elemental Disciplines": {
+      "filename": "elemental-disciplines.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Elemental Weapon": {
+      "filename": "elemental-weapon.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Elemental_Weapon",
+      "source_title": "Elemental Weapon",
+      "source_url": "https://bg3.wiki/w/images/0/06/Elemental_Weapon_Icon.webp"
+    },
+    "Elk": {
+      "filename": "elk.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Elk Heart": {
+      "filename": "elk-heart.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Elk_Heart",
+      "source_title": "Elk Heart",
+      "source_url": "https://bg3.wiki/w/images/c/ce/Rage_Elk_Heart_Icon.webp"
+    },
+    "Embrace of the Inferno": {
+      "filename": "embrace-of-the-inferno.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Embrace_of_the_Inferno",
+      "source_title": "Embrace of the Inferno",
+      "source_url": "https://bg3.wiki/w/images/8/8e/Scorching_Ray_Icon.webp"
+    },
+    "Enchantment School": {
+      "filename": "enchantment-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Enchantment_School",
+      "source_title": "Enchantment School",
+      "source_url": "https://bg3.wiki/w/images/e/e8/Class_Wizard_Enchantment_Badge_Icon.png"
+    },
+    "Enfeebling Arrow": {
+      "filename": "enfeebling-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Enhance Ability": {
+      "filename": "enhance-ability.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Enhance_Ability",
+      "source_title": "Enhance Ability",
+      "source_url": "https://bg3.wiki/w/images/6/65/Enhance_Ability_Icon.webp"
+    },
+    "Enhance Leap": {
+      "filename": "enhance-leap.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Enhance_Leap",
+      "source_title": "Enhance Leap",
+      "source_url": "https://bg3.wiki/w/images/4/46/Enhance_Leap_Icon.webp"
+    },
+    "Enlarge/Reduce": {
+      "filename": "enlarge-reduce.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Enlarge/Reduce",
+      "source_title": "Enlarge/Reduce",
+      "source_url": "https://bg3.wiki/w/images/c/c6/Enlarge_Reduce_Icon.webp"
+    },
+    "Ensnaring Strike": {
+      "filename": "ensnaring-strike.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ensnaring_Strike",
+      "source_title": "Ensnaring Strike",
+      "source_url": "https://bg3.wiki/w/images/6/60/Ensnaring_Strike_Ranged_Icon.webp"
+    },
+    "Entangle": {
+      "filename": "entangle.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Entangle",
+      "source_title": "Entangle",
+      "source_url": "https://bg3.wiki/w/images/d/d9/Entangle_Icon.webp"
+    },
+    "Enthrall": {
+      "filename": "enthrall.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Enthrall",
+      "source_title": "Enthrall",
+      "source_url": "https://bg3.wiki/w/images/9/90/Enthrall_Icon.webp"
+    },
+    "Escape the Horde": {
+      "filename": "escape-the-horde.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Escape_the_Horde",
+      "source_title": "Escape the Horde",
+      "source_url": "https://bg3.wiki/w/images/7/78/Escape_the_Horde_Icon.webp"
+    },
+    "Evard's Black Tentacles": {
+      "filename": "evard-s-black-tentacles.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Evard's_Black_Tentacles",
+      "source_title": "Evard's Black Tentacles",
+      "source_url": "https://bg3.wiki/w/images/d/d6/Evard%27s_Black_Tentacles_Icon.webp"
+    },
+    "Evasion": {
+      "filename": "evasion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Evasion",
+      "source_title": "Evasion",
+      "source_url": "https://bg3.wiki/w/images/7/7c/Evasion_Icon.webp"
+    },
+    "Evasive Footwork": {
+      "filename": "evasive-footwork.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Evasive_Footwork",
+      "source_title": "Evasive Footwork",
+      "source_url": "https://bg3.wiki/w/images/b/b6/Evasive_Footwork_Icon.webp"
+    },
+    "Evocation School": {
+      "filename": "evocation-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Evocation_School",
+      "source_title": "Evocation School",
+      "source_url": "https://bg3.wiki/w/images/8/81/Class_Wizard_Evocation_Badge_Icon.png"
+    },
+    "Expeditious Retreat": {
+      "filename": "expeditious-retreat.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Expeditious_Retreat",
+      "source_title": "Expeditious Retreat",
+      "source_url": "https://bg3.wiki/w/images/d/d6/Expeditious_Retreat_Icon.webp"
+    },
+    "Expertise": {
+      "filename": "expertise.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Expertise_Icon.webp",
+      "source_title": "File:Expertise Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/f/f7/Expertise_Subclass_Feature_Icon.webp"
+    },
+    "Explorer": {
+      "filename": "explorer.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Explorer is best enjoyed without a checklist. BG3 Overlay is unavailable.": {
+      "filename": "explorer-is-best-enjoyed-without-a-checklist-bg3-overlay-is-unavailable.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Extended Spell": {
+      "filename": "extended-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Extra Attack": {
+      "filename": "extra-attack.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Extra_Attack",
+      "source_title": "Extra Attack",
+      "source_url": "https://bg3.wiki/w/images/5/5a/Extra_Attack_Icon.webp"
+    },
+    "Eyebite": {
+      "filename": "eyebite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Eyebite",
+      "source_title": "Eyebite",
+      "source_url": "https://bg3.wiki/w/images/f/f7/Eyebite_Panicked_Icon.webp"
+    },
+    "Faerie Fire": {
+      "filename": "faerie-fire.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Faerie_Fire",
+      "source_title": "Faerie Fire",
+      "source_url": "https://bg3.wiki/w/images/a/a1/Faerie_Fire_Icon.webp"
+    },
+    "False Life": {
+      "filename": "false-life.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/False_Life",
+      "source_title": "False Life",
+      "source_url": "https://bg3.wiki/w/images/f/f2/False_Life_Icon.webp"
+    },
+    "Fangs of the Fire Snake": {
+      "filename": "fangs-of-the-fire-snake.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fangs_of_the_Fire_Snake",
+      "source_title": "Fangs of the Fire Snake",
+      "source_url": "https://bg3.wiki/w/images/d/d1/Fangs_of_the_Fire_Snake_Icon.webp"
+    },
+    "Fast Movement": {
+      "filename": "fast-movement.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fast_Movement",
+      "source_title": "Fast Movement",
+      "source_url": "https://bg3.wiki/w/images/4/4f/Fast_Movement_Icon.webp"
+    },
+    "Favoured Enemy": {
+      "filename": "favoured-enemy.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Favoured enemy": {
+      "filename": "favoured-enemy.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Fear": {
+      "filename": "fear.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fear",
+      "source_title": "Fear",
+      "source_url": "https://bg3.wiki/w/images/a/ad/Fear_Icon.webp"
+    },
+    "Feat or Ability Improvement": {
+      "filename": "feat-or-ability-improvement.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Feather Fall": {
+      "filename": "feather-fall.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Feather_Fall",
+      "source_title": "Feather Fall",
+      "source_url": "https://bg3.wiki/w/images/0/00/Feather_Fall_Icon.webp"
+    },
+    "Feign Death": {
+      "filename": "feign-death.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Feign_Death",
+      "source_title": "Feign Death",
+      "source_url": "https://bg3.wiki/w/images/f/fe/Feign_Death_Icon.webp"
+    },
+    "Feinting Attack": {
+      "filename": "feinting-attack.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Feinting_Attack",
+      "source_title": "Feinting Attack",
+      "source_url": "https://bg3.wiki/w/images/7/7a/Feinting_Attack_Icon.webp"
+    },
+    "Feral Instinct": {
+      "filename": "feral-instinct.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Feral_Instinct",
+      "source_title": "Feral Instinct",
+      "source_url": "https://bg3.wiki/w/images/4/4e/Feral_Instinct_Icon.webp"
+    },
+    "Fiendish Vigour": {
+      "filename": "fiendish-vigour.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fiendish_Vigour",
+      "source_title": "Fiendish Vigour",
+      "source_url": "https://bg3.wiki/w/images/f/f2/False_Life_Icon.webp"
+    },
+    "Fighter": {
+      "filename": "fighter.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fighter",
+      "source_title": "Fighter",
+      "source_url": "https://bg3.wiki/w/images/2/21/Class_Fighter_Badge_Icon.png"
+    },
+    "Fighting Style": {
+      "filename": "fighting-style.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Fighting style": {
+      "filename": "fighting-style.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Find Familiar": {
+      "filename": "find-familiar.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Find_Familiar",
+      "source_title": "Find Familiar",
+      "source_url": "https://bg3.wiki/w/images/8/8b/Find_Familiar_Cat_Icon.webp"
+    },
+    "Fire": {
+      "filename": "fire.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fire",
+      "source_title": "Fire",
+      "source_url": "https://bg3.wiki/w/images/8/84/Fire_Damage_Icon.png"
+    },
+    "Fire Bolt": {
+      "filename": "fire-bolt.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fire_Bolt",
+      "source_title": "Fire Bolt",
+      "source_url": "https://bg3.wiki/w/images/2/23/Fire_Bolt_Icon.webp"
+    },
+    "Fire Shield": {
+      "filename": "fire-shield.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fire_Shield",
+      "source_title": "Fire Shield",
+      "source_url": "https://bg3.wiki/w/images/e/e0/Fire_Shield_Icon.webp"
+    },
+    "Fireball": {
+      "filename": "fireball.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fireball",
+      "source_title": "Fireball",
+      "source_url": "https://bg3.wiki/w/images/c/cb/Fireball_Icon.webp"
+    },
+    "Fist of Four Thunders": {
+      "filename": "fist-of-four-thunders.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fist_of_Four_Thunders",
+      "source_title": "Fist of Four Thunders",
+      "source_url": "https://bg3.wiki/w/images/0/04/Thunderwave_Icon.webp"
+    },
+    "Fist of Unbroken Air": {
+      "filename": "fist-of-unbroken-air.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fist_of_Unbroken_Air",
+      "source_title": "Fist of Unbroken Air",
+      "source_url": "https://bg3.wiki/w/images/7/7d/Fist_of_Unbroken_Air_Icon.webp"
+    },
+    "Flails": {
+      "filename": "flails.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flails",
+      "source_title": "Flails",
+      "source_url": "https://bg3.wiki/w/images/c/ca/Flail_Unfaded.png"
+    },
+    "Flame Blade": {
+      "filename": "flame-blade.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flame_Blade",
+      "source_title": "Flame Blade",
+      "source_url": "https://bg3.wiki/w/images/c/c8/Flame_Blade_Icon.webp"
+    },
+    "Flame Strike": {
+      "filename": "flame-strike.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flame_Strike",
+      "source_title": "Flame Strike",
+      "source_url": "https://bg3.wiki/w/images/b/b8/Flame_Strike_Icon.webp"
+    },
+    "Flames of the Phoenix": {
+      "filename": "flames-of-the-phoenix.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flames_of_the_Phoenix",
+      "source_title": "Flames of the Phoenix",
+      "source_url": "https://bg3.wiki/w/images/c/cb/Fireball_Icon.webp"
+    },
+    "Flaming Sphere": {
+      "filename": "flaming-sphere.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flaming_Sphere",
+      "source_title": "Flaming Sphere",
+      "source_url": "https://bg3.wiki/w/images/6/66/Flaming_Sphere_Icon.webp"
+    },
+    "Flesh to Stone": {
+      "filename": "flesh-to-stone.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flesh_to_Stone",
+      "source_title": "Flesh to Stone",
+      "source_url": "https://bg3.wiki/w/images/7/72/Flesh_to_Stone_Icon.webp"
+    },
+    "Flurry of Blows": {
+      "filename": "flurry-of-blows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flurry_of_Blows",
+      "source_title": "Flurry of Blows",
+      "source_url": "https://bg3.wiki/w/images/e/ef/Flurry_of_Blows_Icon.webp"
+    },
+    "Flurry of Moths": {
+      "filename": "flurry-of-moths.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Flurry_of_Moths",
+      "source_title": "Flurry of Moths",
+      "source_url": "https://bg3.wiki/w/images/f/fa/Flurry_of_Moths_Icon.webp"
+    },
+    "Fog Cloud": {
+      "filename": "fog-cloud.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Fog_Cloud",
+      "source_title": "Fog Cloud",
+      "source_url": "https://bg3.wiki/w/images/c/c0/Fog_Cloud_Icon.webp"
+    },
+    "Font of Inspiration": {
+      "filename": "font-of-inspiration.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Font_of_Inspiration",
+      "source_title": "Font of Inspiration",
+      "source_url": "https://bg3.wiki/w/images/a/a2/Font_of_Inspiration_Icon.webp"
+    },
+    "Forest": {
+      "filename": "forest.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Forest",
+      "source_title": "Forest",
+      "source_url": "https://bg3.wiki/w/images/3/3a/Forest.jpg"
+    },
+    "Freedom of Movement": {
+      "filename": "freedom-of-movement.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Freedom_of_Movement",
+      "source_title": "Freedom of Movement",
+      "source_url": "https://bg3.wiki/w/images/f/f0/Freedom_of_Movement_Icon.webp"
+    },
+    "Friends": {
+      "filename": "friends.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Friends",
+      "source_title": "Friends",
+      "source_url": "https://bg3.wiki/w/images/7/75/Friends_Icon.webp"
+    },
+    "Gaseous Form": {
+      "filename": "gaseous-form.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Gaseous_Form",
+      "source_title": "Gaseous Form",
+      "source_url": "https://bg3.wiki/w/images/6/62/Gaseous_Form_Icon.webp"
+    },
+    "Gathered Swarm": {
+      "filename": "gathered-swarm.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Giant Killer": {
+      "filename": "giant-killer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Giant_Killer",
+      "source_title": "Giant Killer",
+      "source_url": "https://bg3.wiki/w/images/b/bd/Giant_Killer_Icon.webp"
+    },
+    "Glaives": {
+      "filename": "glaives.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Glaives",
+      "source_title": "Glaives",
+      "source_url": "https://bg3.wiki/w/images/f/f0/Glaive_Unfaded.png"
+    },
+    "Globe of Invulnerability": {
+      "filename": "globe-of-invulnerability.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Globe_of_Invulnerability",
+      "source_title": "Globe of Invulnerability",
+      "source_url": "https://bg3.wiki/w/images/7/7a/Globe_of_Invulnerability_Icon.webp"
+    },
+    "Gloom Stalker": {
+      "filename": "gloom-stalker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Gloom_Stalker",
+      "source_title": "Gloom Stalker",
+      "source_url": "https://bg3.wiki/w/images/a/a6/Gloom_Stalker_Icon.png"
+    },
+    "Glyph of Warding": {
+      "filename": "glyph-of-warding.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Glyph_of_Warding",
+      "source_title": "Glyph of Warding",
+      "source_url": "https://bg3.wiki/w/images/8/88/Glyph_of_Warding_Icon.webp"
+    },
+    "Goading Attack": {
+      "filename": "goading-attack.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Gold (Fire)": {
+      "filename": "gold-fire.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Golden Generosity": {
+      "filename": "golden-generosity.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Gong of the Summit": {
+      "filename": "gong-of-the-summit.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Gong_of_the_Summit",
+      "source_title": "Gong of the Summit",
+      "source_url": "https://bg3.wiki/w/images/c/c5/Shatter_Icon.webp"
+    },
+    "Goodberry": {
+      "filename": "goodberry.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Goodberry",
+      "source_title": "Goodberry",
+      "source_url": "https://bg3.wiki/w/images/4/42/Goodberry_Icon.webp"
+    },
+    "Grant Flight": {
+      "filename": "grant-flight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Grant_Flight",
+      "source_title": "Grant Flight",
+      "source_url": "https://bg3.wiki/w/images/4/45/Grant_Flight_Icon.webp"
+    },
+    "Grasping Arrow": {
+      "filename": "grasping-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Grasping Vine": {
+      "filename": "grasping-vine.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Grasping_Vine",
+      "source_title": "Grasping Vine",
+      "source_url": "https://bg3.wiki/w/images/8/8b/Grasping_Vine_Icon.webp"
+    },
+    "Grassland": {
+      "filename": "grassland.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Grassland",
+      "source_title": "Grassland",
+      "source_url": "https://bg3.wiki/w/images/f/fc/Grassland_Icon.webp"
+    },
+    "Grease": {
+      "filename": "grease.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Grease",
+      "source_title": "Grease",
+      "source_url": "https://bg3.wiki/w/images/7/7a/Grease_Icon.webp"
+    },
+    "Great Weapon Fighting": {
+      "filename": "great-weapon-fighting.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Great_Weapon_Fighting",
+      "source_title": "Great Weapon Fighting",
+      "source_url": "https://bg3.wiki/w/images/1/1f/Great_Weapon_Fighting_Icon.webp"
+    },
+    "Great Weapon Master": {
+      "filename": "great-weapon-master.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Great_Weapon_Master_Icon.webp",
+      "source_title": "File:Great Weapon Master Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/6/63/Great_Weapon_Master_Icon.webp"
+    },
+    "Greataxes": {
+      "filename": "greataxes.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Greataxes",
+      "source_title": "Greataxes",
+      "source_url": "https://bg3.wiki/w/images/0/07/Greataxe_Unfaded.png"
+    },
+    "Greatclubs": {
+      "filename": "greatclubs.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Greatclubs",
+      "source_title": "Greatclubs",
+      "source_url": "https://bg3.wiki/w/images/1/11/Greatclub_Unfaded.png"
+    },
+    "Greater Invisibility": {
+      "filename": "greater-invisibility.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Greater_Invisibility",
+      "source_title": "Greater Invisibility",
+      "source_url": "https://bg3.wiki/w/images/2/28/Greater_Invisibility_Icon.webp"
+    },
+    "Greater Restoration": {
+      "filename": "greater-restoration.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Greater_Restoration",
+      "source_title": "Greater Restoration",
+      "source_url": "https://bg3.wiki/w/images/e/ee/Greater_Restoration_Icon.webp"
+    },
+    "Greatswords": {
+      "filename": "greatswords.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Greatswords",
+      "source_title": "Greatswords",
+      "source_url": "https://bg3.wiki/w/images/7/7c/Greatsword_Unfaded.png"
+    },
+    "Green (Poison)": {
+      "filename": "green-poison.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Guardian of Faith": {
+      "filename": "guardian-of-faith.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Guardian_of_Faith",
+      "source_title": "Guardian of Faith",
+      "source_url": "https://bg3.wiki/w/images/7/7d/Guardian_of_Faith_Icon.webp"
+    },
+    "Guidance": {
+      "filename": "guidance.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Guiding Bolt": {
+      "filename": "guiding-bolt.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Guiding_Bolt",
+      "source_title": "Guiding Bolt",
+      "source_url": "https://bg3.wiki/w/images/2/2c/Guiding_Bolt_Icon.webp"
+    },
+    "Gust of Wind": {
+      "filename": "gust-of-wind.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Gust_of_Wind",
+      "source_title": "Gust of Wind",
+      "source_url": "https://bg3.wiki/w/images/5/58/Gust_of_Wind_Icon.webp"
+    },
+    "Hail of Thorns": {
+      "filename": "hail-of-thorns.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hail_of_Thorns",
+      "source_title": "Hail of Thorns",
+      "source_url": "https://bg3.wiki/w/images/6/63/Hail_of_Thorns_Icon.webp"
+    },
+    "Halberds": {
+      "filename": "halberds.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Halberds",
+      "source_title": "Halberds",
+      "source_url": "https://bg3.wiki/w/images/9/9e/Halberd_Unfaded.png"
+    },
+    "Hand Crossbows": {
+      "filename": "hand-crossbows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hand_Crossbows",
+      "source_title": "Hand Crossbows",
+      "source_url": "https://bg3.wiki/w/images/7/72/Hand_Crossbow_Unfaded.png"
+    },
+    "Handaxes": {
+      "filename": "handaxes.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Handaxes",
+      "source_title": "Handaxes",
+      "source_url": "https://bg3.wiki/w/images/b/b2/Handaxe_Unfaded.png"
+    },
+    "Harder fights where preparation and stronger builds matter.": {
+      "filename": "harder-fights-where-preparation-and-stronger-builds-matter.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Harm": {
+      "filename": "harm.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Harm",
+      "source_title": "Harm",
+      "source_url": "https://bg3.wiki/w/images/0/09/Harm_Icon.webp"
+    },
+    "Haste": {
+      "filename": "haste.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Haste",
+      "source_title": "Haste",
+      "source_url": "https://bg3.wiki/w/images/1/11/Haste_Icon.webp"
+    },
+    "Heal": {
+      "filename": "heal.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Heal",
+      "source_title": "Heal",
+      "source_url": "https://bg3.wiki/w/images/d/d3/Heal_Icon.webp"
+    },
+    "Healing Word": {
+      "filename": "healing-word.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Healing_Word",
+      "source_title": "Healing Word",
+      "source_url": "https://bg3.wiki/w/images/e/ef/Healing_Word_Icon.webp"
+    },
+    "Heat Metal": {
+      "filename": "heat-metal.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Heat_Metal",
+      "source_title": "Heat Metal",
+      "source_url": "https://bg3.wiki/w/images/a/a3/Heat_Metal_Icon.webp"
+    },
+    "Heavily Armoured": {
+      "filename": "heavily-armoured.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Heavily_Armoured",
+      "source_title": "Heavily Armoured",
+      "source_url": "https://bg3.wiki/w/images/2/2a/Heavily_Armoured_Icon.webp"
+    },
+    "Heavy Armour Master": {
+      "filename": "heavy-armour-master.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Heavy_Armour_Master",
+      "source_title": "Heavy Armour Master",
+      "source_url": "https://bg3.wiki/w/images/8/8d/Heavy_Armour_Master_Icon.webp"
+    },
+    "Heavy Crossbows": {
+      "filename": "heavy-crossbows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Heavy_Crossbows",
+      "source_title": "Heavy Crossbows",
+      "source_url": "https://bg3.wiki/w/images/2/23/Heavy_Crossbow_Unfaded.png"
+    },
+    "Heightened Spell": {
+      "filename": "heightened-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Hellish Rebuke": {
+      "filename": "hellish-rebuke.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hellish_Rebuke",
+      "source_title": "Hellish Rebuke",
+      "source_url": "https://bg3.wiki/w/images/8/82/Hellish_Rebuke_Icon.webp"
+    },
+    "Heroes' Feast": {
+      "filename": "heroes-feast.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Heroes'_Feast",
+      "source_title": "Heroes' Feast",
+      "source_url": "https://bg3.wiki/w/images/a/a0/Heroes%27_Feast_Icon.webp"
+    },
+    "Heroism": {
+      "filename": "heroism.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Heroism",
+      "source_title": "Heroism",
+      "source_url": "https://bg3.wiki/w/images/1/19/Heroism_Icon.webp"
+    },
+    "Hex": {
+      "filename": "hex.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hex",
+      "source_title": "Hex",
+      "source_url": "https://bg3.wiki/w/images/9/9f/Hex_Icon.webp"
+    },
+    "Hide in Plain Sight": {
+      "filename": "hide-in-plain-sight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hide_in_Plain_Sight",
+      "source_title": "Hide in Plain Sight",
+      "source_url": "https://bg3.wiki/w/images/0/04/Hide_in_Plain_Sight_Icon.webp"
+    },
+    "History": {
+      "filename": "history.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/History",
+      "source_title": "History",
+      "source_url": "https://bg3.wiki/w/images/c/c5/History_Icon.png"
+    },
+    "Hold Monster": {
+      "filename": "hold-monster.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hold_Monster",
+      "source_title": "Hold Monster",
+      "source_url": "https://bg3.wiki/w/images/c/cf/Hold_Monster_Icon.webp"
+    },
+    "Hold Person": {
+      "filename": "hold-person.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hold_Person",
+      "source_title": "Hold Person",
+      "source_url": "https://bg3.wiki/w/images/7/75/Hold_Person_Icon.webp"
+    },
+    "Honey Badger": {
+      "filename": "honey-badger.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Honour Mode": {
+      "filename": "honour-mode.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Horde Breaker": {
+      "filename": "horde-breaker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Horde_Breaker",
+      "source_title": "Horde Breaker",
+      "source_url": "https://bg3.wiki/w/images/e/e1/Horde_Breaker_Melee_Icon.webp"
+    },
+    "Hunger of Hadar": {
+      "filename": "hunger-of-hadar.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hunger_of_Hadar",
+      "source_title": "Hunger of Hadar",
+      "source_url": "https://bg3.wiki/w/images/4/44/Hunger_of_Hadar_Icon.webp"
+    },
+    "Hunter": {
+      "filename": "hunter.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hunter",
+      "source_title": "Hunter",
+      "source_url": "https://bg3.wiki/w/images/c/c1/Class_Ranger_Hunter_Badge_Icon.png"
+    },
+    "Hunter defensive tactic": {
+      "filename": "hunter-defensive-tactic.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Hunter's Mark": {
+      "filename": "hunter-s-mark.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hunter's_Mark",
+      "source_title": "Hunter's Mark",
+      "source_url": "https://bg3.wiki/w/images/f/f6/Hunter%27s_Mark_Icon.webp"
+    },
+    "Hunter's Prey": {
+      "filename": "hunter-s-prey.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Hypnotic Pattern": {
+      "filename": "hypnotic-pattern.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Hypnotic_Pattern",
+      "source_title": "Hypnotic Pattern",
+      "source_url": "https://bg3.wiki/w/images/2/28/Hypnotic_Pattern_Icon.webp"
+    },
+    "Ice Knife": {
+      "filename": "ice-knife.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ice_Knife",
+      "source_title": "Ice Knife",
+      "source_url": "https://bg3.wiki/w/images/1/17/Ice_Knife_Icon.webp"
+    },
+    "Ice Storm": {
+      "filename": "ice-storm.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ice_Storm",
+      "source_title": "Ice Storm",
+      "source_url": "https://bg3.wiki/w/images/9/9b/Ice_Storm_Icon.webp"
+    },
+    "Illusion School": {
+      "filename": "illusion-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Illusion_School",
+      "source_title": "Illusion School",
+      "source_url": "https://bg3.wiki/w/images/b/b2/Class_Wizard_Illusion_Badge_Icon.png"
+    },
+    "Improved Bardic Inspiration": {
+      "filename": "improved-bardic-inspiration.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Improved_Bardic_Inspiration_Icon.webp",
+      "source_title": "File:Improved Bardic Inspiration Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/0/0a/Bardic_Inspiration_Icon.webp"
+    },
+    "Improved Divine Smite": {
+      "filename": "improved-divine-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Improved_Divine_Smite",
+      "source_title": "Improved Divine Smite",
+      "source_url": "https://bg3.wiki/w/images/f/fb/Improved_Divine_Smite_Icon.webp"
+    },
+    "Improved Extra Attack": {
+      "filename": "improved-extra-attack.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Improved_Extra_Attack",
+      "source_title": "Improved Extra Attack",
+      "source_url": "https://bg3.wiki/w/images/5/5a/Extra_Attack_Icon.webp"
+    },
+    "Improved Wild Strike": {
+      "filename": "improved-wild-strike.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Improved_Wild_Strike",
+      "source_title": "Improved Wild Strike",
+      "source_url": "https://bg3.wiki/w/images/2/27/Wild_Strike_Icon.webp"
+    },
+    "Indomitable": {
+      "filename": "indomitable.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Indomitable",
+      "source_title": "Indomitable",
+      "source_url": "https://bg3.wiki/w/images/1/16/Indomitable_Icon.webp"
+    },
+    "Inflict Wounds": {
+      "filename": "inflict-wounds.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Inflict_Wounds",
+      "source_title": "Inflict Wounds",
+      "source_url": "https://bg3.wiki/w/images/3/3d/Inflict_Wounds_Icon.webp"
+    },
+    "Insect Plague": {
+      "filename": "insect-plague.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Insect_Plague",
+      "source_title": "Insect Plague",
+      "source_url": "https://bg3.wiki/w/images/a/a2/Insect_Plague_Icon.webp"
+    },
+    "Insight": {
+      "filename": "insight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Insight",
+      "source_title": "Insight",
+      "source_url": "https://bg3.wiki/w/images/f/f9/Insight_Icon.png"
+    },
+    "Intelligence": {
+      "filename": "intelligence.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Intimidation": {
+      "filename": "intimidation.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Intimidation",
+      "source_title": "Intimidation",
+      "source_url": "https://bg3.wiki/w/images/e/e2/Intimidation_Icon.png"
+    },
+    "Investigation": {
+      "filename": "investigation.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Investigation",
+      "source_title": "Investigation",
+      "source_url": "https://bg3.wiki/w/images/5/57/Investigation_Icon.png"
+    },
+    "Invisibility": {
+      "filename": "invisibility.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Invisibility_Icon.webp",
+      "source_title": "File:Invisibility Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/4/4e/Invisibility_spell_Icon.webp"
+    },
+    "Jack of All Trades": {
+      "filename": "jack-of-all-trades.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Jack_of_All_Trades",
+      "source_title": "Jack of All Trades",
+      "source_url": "https://bg3.wiki/w/images/1/19/Jack_of_All_Trades_Icon.webp"
+    },
+    "Javelins": {
+      "filename": "javelins.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Javelins",
+      "source_title": "Javelins",
+      "source_url": "https://bg3.wiki/w/images/d/d6/Javelin_Unfaded.png"
+    },
+    "Keep story details hidden beyond the next three route tasks; build gear stays visible.": {
+      "filename": "keep-story-details-hidden-beyond-the-next-three-route-tasks-build-gear-stays-visible.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Keeper of the Veil": {
+      "filename": "keeper-of-the-veil.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Keeper_of_the_Veil",
+      "source_title": "Keeper of the Veil",
+      "source_url": "https://bg3.wiki/w/images/5/53/Keeper_of_the_Veil_Icon.webp"
+    },
+    "Ki-Empowered Strikes": {
+      "filename": "ki-empowered-strikes.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ki-Empowered_Strikes",
+      "source_title": "Ki-Empowered Strikes",
+      "source_url": "https://bg3.wiki/w/images/4/4a/Ki-Empowered_Strikes_Icon.webp"
+    },
+    "Knock": {
+      "filename": "knock.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Knock",
+      "source_title": "Knock",
+      "source_url": "https://bg3.wiki/w/images/a/a4/Knock_Icon.webp"
+    },
+    "Knowledge Domain": {
+      "filename": "knowledge-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Knowledge_Domain",
+      "source_title": "Knowledge Domain",
+      "source_url": "https://bg3.wiki/w/images/f/ff/Class_Cleric_Knowledge_Badge_Icon.png"
+    },
+    "Land's Stride: Difficult Terrain": {
+      "filename": "land-s-stride-difficult-terrain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Land's_Stride:_Difficult_Terrain",
+      "source_title": "Land's Stride: Difficult Terrain",
+      "source_url": "https://bg3.wiki/w/images/7/7f/Land%27s_Stride_Difficult_Terrain_Icon.webp"
+    },
+    "Lands Stride: Difficult Terrain": {
+      "filename": "lands-stride-difficult-terrain.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Lay on Hands": {
+      "filename": "lay-on-hands.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lay_on_Hands",
+      "source_title": "Lay on Hands",
+      "source_url": "https://bg3.wiki/w/images/5/5d/Lay_on_Hands_Greater_Healing_Icon.webp"
+    },
+    "Learn Spells": {
+      "filename": "learn-spells.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Legion of Bees": {
+      "filename": "legion-of-bees.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Legion_of_Bees",
+      "source_title": "Legion of Bees",
+      "source_url": "https://bg3.wiki/w/images/8/86/Legion_of_Bees_Icon.webp"
+    },
+    "Lesser Restoration": {
+      "filename": "lesser-restoration.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lesser_Restoration",
+      "source_title": "Lesser Restoration",
+      "source_url": "https://bg3.wiki/w/images/e/e4/Lesser_Restoration_Icon.webp"
+    },
+    "Life Domain": {
+      "filename": "life-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Life_Domain",
+      "source_title": "Life Domain",
+      "source_url": "https://bg3.wiki/w/images/9/98/Class_Cleric_Life_Badge_Icon.png"
+    },
+    "Lifedrinker": {
+      "filename": "lifedrinker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lifedrinker",
+      "source_title": "Lifedrinker",
+      "source_url": "https://bg3.wiki/w/images/7/79/Lifedrinker_Icon.webp"
+    },
+    "Light": {
+      "filename": "light.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Light Crossbows": {
+      "filename": "light-crossbows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Light_Crossbows",
+      "source_title": "Light Crossbows",
+      "source_url": "https://bg3.wiki/w/images/7/74/Light_Crossbow_Unfaded.png"
+    },
+    "Light Domain": {
+      "filename": "light-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Light_Domain",
+      "source_title": "Light Domain",
+      "source_url": "https://bg3.wiki/w/images/3/30/Class_Cleric_Light_Badge_Icon.png"
+    },
+    "Light Hammers": {
+      "filename": "light-hammers.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Light_Hammers",
+      "source_title": "Light Hammers",
+      "source_url": "https://bg3.wiki/w/images/0/09/Light_Hammer_Unfaded.png"
+    },
+    "Lightly Armoured": {
+      "filename": "lightly-armoured.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lightly_Armoured",
+      "source_title": "Lightly Armoured",
+      "source_url": "https://bg3.wiki/w/images/9/92/Lightly_Armoured_Icon.webp"
+    },
+    "Lightning": {
+      "filename": "lightning.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lightning",
+      "source_title": "Lightning",
+      "source_url": "https://bg3.wiki/w/images/3/31/Lightning_Damage_Icon.png"
+    },
+    "Lightning Arrow": {
+      "filename": "lightning-arrow.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lightning_Arrow",
+      "source_title": "Lightning Arrow",
+      "source_url": "https://bg3.wiki/w/images/e/e3/Lightning_Arrow_Icon.webp"
+    },
+    "Lightning Bolt": {
+      "filename": "lightning-bolt.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lightning_Bolt",
+      "source_title": "Lightning Bolt",
+      "source_url": "https://bg3.wiki/w/images/c/cb/Lightning_Bolt_Icon.webp"
+    },
+    "Longbows": {
+      "filename": "longbows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Longbows",
+      "source_title": "Longbows",
+      "source_url": "https://bg3.wiki/w/images/b/b1/Longbow_Unfaded.png"
+    },
+    "Longstrider": {
+      "filename": "longstrider.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Longstrider",
+      "source_title": "Longstrider",
+      "source_url": "https://bg3.wiki/w/images/3/35/Longstrider_Icon.webp"
+    },
+    "Longswords": {
+      "filename": "longswords.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Longswords",
+      "source_title": "Longswords",
+      "source_url": "https://bg3.wiki/w/images/5/5d/Longsword_Unfaded.png"
+    },
+    "Lucky": {
+      "filename": "lucky.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Lucky",
+      "source_title": "Lucky",
+      "source_url": "https://bg3.wiki/w/images/1/13/Lucky_Reroll_Attacker%27s_Die_Icon.webp"
+    },
+    "Maces": {
+      "filename": "maces.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Maces",
+      "source_title": "Maces",
+      "source_url": "https://bg3.wiki/w/images/3/39/Mace_Unfaded.png"
+    },
+    "Mage Armour": {
+      "filename": "mage-armour.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mage_Armour",
+      "source_title": "Mage Armour",
+      "source_url": "https://bg3.wiki/w/images/0/0d/Mage_Armour_Icon.webp"
+    },
+    "Mage Breaker": {
+      "filename": "mage-breaker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mage_Breaker",
+      "source_title": "Mage Breaker",
+      "source_url": "https://bg3.wiki/w/images/0/07/Mage_Breaker_Icon.webp"
+    },
+    "Mage Hand": {
+      "filename": "mage-hand.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mage_Hand",
+      "source_title": "Mage Hand",
+      "source_url": "https://bg3.wiki/w/images/f/f9/Mage_Hand_Icon.webp"
+    },
+    "Mage Slayer": {
+      "filename": "mage-slayer.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Mage_Slayer_Icon.webp",
+      "source_title": "File:Mage Slayer Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/3/38/Mage_Slayer_Attack_Caster_Icon.webp"
+    },
+    "Magic Initiate: Bard": {
+      "filename": "magic-initiate-bard.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Initiate:_Bard",
+      "source_title": "Magic Initiate: Bard",
+      "source_url": "https://bg3.wiki/w/images/f/f7/Magic_Initiate_Bard_Icon.webp"
+    },
+    "Magic Initiate: Cleric": {
+      "filename": "magic-initiate-cleric.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Initiate:_Cleric",
+      "source_title": "Magic Initiate: Cleric",
+      "source_url": "https://bg3.wiki/w/images/1/13/Magic_Initiate_Cleric_Icon.webp"
+    },
+    "Magic Initiate: Druid": {
+      "filename": "magic-initiate-druid.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Initiate:_Druid",
+      "source_title": "Magic Initiate: Druid",
+      "source_url": "https://bg3.wiki/w/images/9/92/Magic_Initiate_Druid_Icon.webp"
+    },
+    "Magic Initiate: Sorcerer": {
+      "filename": "magic-initiate-sorcerer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Initiate:_Sorcerer",
+      "source_title": "Magic Initiate: Sorcerer",
+      "source_url": "https://bg3.wiki/w/images/c/c0/Magic_Initiate_Sorcerer_Icon.webp"
+    },
+    "Magic Initiate: Warlock": {
+      "filename": "magic-initiate-warlock.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Initiate:_Warlock",
+      "source_title": "Magic Initiate: Warlock",
+      "source_url": "https://bg3.wiki/w/images/6/6e/Magic_Initiate_Warlock_Icon.webp"
+    },
+    "Magic Initiate: Wizard": {
+      "filename": "magic-initiate-wizard.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Initiate:_Wizard",
+      "source_title": "Magic Initiate: Wizard",
+      "source_url": "https://bg3.wiki/w/images/3/3d/Magic_Initiate_Wizard_Icon.webp"
+    },
+    "Magic Missile": {
+      "filename": "magic-missile.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Missile",
+      "source_title": "Magic Missile",
+      "source_url": "https://bg3.wiki/w/images/d/d4/Magic_Missile_Icon.webp"
+    },
+    "Magic Weapon": {
+      "filename": "magic-weapon.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magic_Weapon",
+      "source_title": "Magic Weapon",
+      "source_url": "https://bg3.wiki/w/images/9/9c/Magic_Weapon_Icon.webp"
+    },
+    "Magical Secrets": {
+      "filename": "magical-secrets.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Magical_Secrets",
+      "source_title": "Magical Secrets",
+      "source_url": "https://bg3.wiki/w/images/3/38/Class_Bard_Badge_Icon.png"
+    },
+    "Magical Secrets spell": {
+      "filename": "magical-secrets-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Manoeuvring Attack": {
+      "filename": "manoeuvring-attack.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Martial Adept": {
+      "filename": "martial-adept.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Martial_Adept",
+      "source_title": "Martial Adept",
+      "source_url": "https://bg3.wiki/w/images/2/2f/Martial_Adept_Icon.webp"
+    },
+    "Martial Adept Manoeuvres": {
+      "filename": "martial-adept-manoeuvres.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Martial Arts": {
+      "filename": "martial-arts.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Mask of Many Faces": {
+      "filename": "mask-of-many-faces.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mask_of_Many_Faces",
+      "source_title": "Mask of Many Faces",
+      "source_url": "https://bg3.wiki/w/images/8/8d/Disguise_Self_Icon.webp"
+    },
+    "Mass Cure Wounds": {
+      "filename": "mass-cure-wounds.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mass_Cure_Wounds",
+      "source_title": "Mass Cure Wounds",
+      "source_url": "https://bg3.wiki/w/images/3/32/Mass_Cure_Wounds_Icon.webp"
+    },
+    "Mass Healing Word": {
+      "filename": "mass-healing-word.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mass_Healing_Word",
+      "source_title": "Mass Healing Word",
+      "source_url": "https://bg3.wiki/w/images/f/f8/Mass_Healing_Word_Icon.webp"
+    },
+    "Mauls": {
+      "filename": "mauls.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mauls",
+      "source_title": "Mauls",
+      "source_url": "https://bg3.wiki/w/images/8/83/Maul_Unfaded.png"
+    },
+    "Medicine": {
+      "filename": "medicine.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Medicine",
+      "source_title": "Medicine",
+      "source_url": "https://bg3.wiki/w/images/8/8f/Medicine_Icon.png"
+    },
+    "Medium Armour Master": {
+      "filename": "medium-armour-master.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Medium_Armour_Master",
+      "source_title": "Medium Armour Master",
+      "source_url": "https://bg3.wiki/w/images/8/84/Medium_Armour_Master_Icon.webp"
+    },
+    "Melf's Acid Arrow": {
+      "filename": "melf-s-acid-arrow.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Melf's_Acid_Arrow",
+      "source_title": "Melf's Acid Arrow",
+      "source_url": "https://bg3.wiki/w/images/6/67/Melf%27s_Acid_Arrow_Icon.webp"
+    },
+    "Menacing Attack": {
+      "filename": "menacing-attack.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Metamagic": {
+      "filename": "metamagic.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Minions of Chaos": {
+      "filename": "minions-of-chaos.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Minions_of_Chaos",
+      "source_title": "Minions of Chaos",
+      "source_url": "https://bg3.wiki/w/images/0/08/Conjure_Minor_Elemental_Azer_Icon.webp"
+    },
+    "Minor Illusion": {
+      "filename": "minor-illusion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Minor_Illusion",
+      "source_title": "Minor Illusion",
+      "source_url": "https://bg3.wiki/w/images/9/9d/Minor_Illusion_Icon.webp"
+    },
+    "Mire the Mind": {
+      "filename": "mire-the-mind.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mire_the_Mind",
+      "source_title": "Mire the Mind",
+      "source_url": "https://bg3.wiki/w/images/b/be/Slow_Icon.webp"
+    },
+    "Mirror Image": {
+      "filename": "mirror-image.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mirror_Image",
+      "source_title": "Mirror Image",
+      "source_url": "https://bg3.wiki/w/images/4/41/Mirror_Image_Icon.webp"
+    },
+    "Mist Stance": {
+      "filename": "mist-stance.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mist_Stance",
+      "source_title": "Mist Stance",
+      "source_url": "https://bg3.wiki/w/images/6/62/Gaseous_Form_Icon.webp"
+    },
+    "Misty Step": {
+      "filename": "misty-step.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Misty_Step",
+      "source_title": "Misty Step",
+      "source_url": "https://bg3.wiki/w/images/1/1f/Misty_Step_Icon.webp"
+    },
+    "Mobile": {
+      "filename": "mobile.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mobile",
+      "source_title": "Mobile",
+      "source_url": "https://bg3.wiki/w/images/c/cc/Dash_Icon.webp"
+    },
+    "Moderately Armoured": {
+      "filename": "moderately-armoured.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Moderately_Armoured",
+      "source_title": "Moderately Armoured",
+      "source_url": "https://bg3.wiki/w/images/0/05/Moderately_Armoured_Icon.webp"
+    },
+    "Moderately Armoured +1 ability": {
+      "filename": "moderately-armoured-1-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Moderately Armoured Ability": {
+      "filename": "moderately-armoured-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Monk": {
+      "filename": "monk.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Monk",
+      "source_title": "Monk",
+      "source_url": "https://bg3.wiki/w/images/9/93/Class_Monk_Badge_Icon.png"
+    },
+    "Moonbeam": {
+      "filename": "moonbeam.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Moonbeam",
+      "source_title": "Moonbeam",
+      "source_url": "https://bg3.wiki/w/images/8/8b/Moonbeam_Icon.webp"
+    },
+    "Morningstars": {
+      "filename": "morningstars.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Morningstars",
+      "source_title": "Morningstars",
+      "source_url": "https://bg3.wiki/w/images/2/24/Morningstar_Unfaded.png"
+    },
+    "Mountain": {
+      "filename": "mountain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mountain",
+      "source_title": "Mountain",
+      "source_url": "https://bg3.wiki/w/images/b/bb/Mountain_Icon.webp"
+    },
+    "Multiattack Defence": {
+      "filename": "multiattack-defence.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Multiattack_Defence",
+      "source_title": "Multiattack Defence",
+      "source_url": "https://bg3.wiki/w/images/0/09/Multiattack_Defense_Icon.webp"
+    },
+    "Mystic Arcanum": {
+      "filename": "mystic-arcanum.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Mystic_Arcanum",
+      "source_title": "Mystic Arcanum",
+      "source_url": "https://bg3.wiki/w/images/6/66/Class_Warlock_Badge_Icon.png"
+    },
+    "Natural Explorer": {
+      "filename": "natural-explorer.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Natural_Explorer_Icon.webp",
+      "source_title": "File:Natural Explorer Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/0/06/Generic_Nature_Icon.webp"
+    },
+    "Natural explorer": {
+      "filename": "natural-explorer.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Nature": {
+      "filename": "nature.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Nature",
+      "source_title": "Nature",
+      "source_url": "https://bg3.wiki/w/images/f/fe/Nature_Icon.png"
+    },
+    "Nature Domain": {
+      "filename": "nature-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Nature_Domain",
+      "source_title": "Nature Domain",
+      "source_url": "https://bg3.wiki/w/images/3/3c/Class_Cleric_Nature_Badge_Icon.png"
+    },
+    "Necromancy School": {
+      "filename": "necromancy-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Necromancy_School",
+      "source_title": "Necromancy School",
+      "source_url": "https://bg3.wiki/w/images/6/6a/Class_Wizard_Necromancy_Badge_Icon.png"
+    },
+    "Oath of Devotion": {
+      "filename": "oath-of-devotion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Oath_of_Devotion",
+      "source_title": "Oath of Devotion",
+      "source_url": "https://bg3.wiki/w/images/2/2c/Paladin_Oath_of_Devotion_Icon.png"
+    },
+    "Oath of Vengeance": {
+      "filename": "oath-of-vengeance.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Oath_of_Vengeance",
+      "source_title": "Oath of Vengeance",
+      "source_url": "https://bg3.wiki/w/images/4/48/Paladin_Oath_of_Vengeance.png"
+    },
+    "Oath of the Ancients": {
+      "filename": "oath-of-the-ancients.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Oath_of_the_Ancients",
+      "source_title": "Oath of the Ancients",
+      "source_url": "https://bg3.wiki/w/images/2/22/Paladin_Oath_of_the_Ancients_Icon.png"
+    },
+    "Oath of the Crown": {
+      "filename": "oath-of-the-crown.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Oath_of_the_Crown",
+      "source_title": "Oath of the Crown",
+      "source_url": "https://bg3.wiki/w/images/3/35/Class_Paladin_Crown_Badge_Icon.png"
+    },
+    "Oathbreaker": {
+      "filename": "oathbreaker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Oathbreaker",
+      "source_title": "Oathbreaker",
+      "source_url": "https://bg3.wiki/w/images/8/87/Paladin_Oathbreaker_Icon.png"
+    },
+    "One with Shadows": {
+      "filename": "one-with-shadows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/One_with_Shadows",
+      "source_title": "One with Shadows",
+      "source_url": "https://bg3.wiki/w/images/1/12/One_with_Shadows_Icon.webp"
+    },
+    "One-use Divine Intervention": {
+      "filename": "one-use-divine-intervention.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Only 3 tasks ahead": {
+      "filename": "only-3-tasks-ahead.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Opulent Revival": {
+      "filename": "opulent-revival.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Otherworldly Leap": {
+      "filename": "otherworldly-leap.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Otherworldly_Leap",
+      "source_title": "Otherworldly Leap",
+      "source_url": "https://bg3.wiki/w/images/4/46/Enhance_Leap_Icon.webp"
+    },
+    "Otiluke's Freezing Sphere": {
+      "filename": "otiluke-s-freezing-sphere.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Otiluke's_Freezing_Sphere",
+      "source_title": "Otiluke's Freezing Sphere",
+      "source_url": "https://bg3.wiki/w/images/a/af/Otiluke%27s_Freezing_Sphere_Icon.webp"
+    },
+    "Otiluke's Resilient Sphere": {
+      "filename": "otiluke-s-resilient-sphere.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Otiluke's_Resilient_Sphere",
+      "source_title": "Otiluke's Resilient Sphere",
+      "source_url": "https://bg3.wiki/w/images/8/82/Otiluke%27s_Resilient_Sphere_Icon.webp"
+    },
+    "Otto's Irresistible Dance": {
+      "filename": "otto-s-irresistible-dance.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Otto's_Irresistible_Dance",
+      "source_title": "Otto's Irresistible Dance",
+      "source_url": "https://bg3.wiki/w/images/8/8c/Otto%27s_Irresistible_Dance_Icon.webp"
+    },
+    "Pact Boon": {
+      "filename": "pact-boon.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Pact_Boon",
+      "source_title": "Pact Boon",
+      "source_url": "https://bg3.wiki/w/images/0/04/Find_Familiar_Imp_Icon.webp"
+    },
+    "Pact Magic": {
+      "filename": "pact-magic.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Pact boon": {
+      "filename": "pact-boon.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Pact of the Blade": {
+      "filename": "pact-of-the-blade.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Pact_of_the_Blade",
+      "source_title": "Pact of the Blade",
+      "source_url": "https://bg3.wiki/w/images/5/5f/Pact_of_the_Blade_Icon.webp"
+    },
+    "Pact of the Chain": {
+      "filename": "pact-of-the-chain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Pact_of_the_Chain",
+      "source_title": "Pact of the Chain",
+      "source_url": "https://bg3.wiki/w/images/0/04/Find_Familiar_Imp_Icon.webp"
+    },
+    "Pact of the Tome": {
+      "filename": "pact-of-the-tome.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Pact_of_the_Tome",
+      "source_title": "Pact of the Tome",
+      "source_url": "https://bg3.wiki/w/images/3/3e/Pact_of_the_Tome_Icon.webp"
+    },
+    "Paladin": {
+      "filename": "paladin.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Paladin",
+      "source_title": "Paladin",
+      "source_url": "https://bg3.wiki/w/images/5/56/Paladin_Class_Icon.png"
+    },
+    "Pass Without Trace": {
+      "filename": "pass-without-trace.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Pass_Without_Trace",
+      "source_title": "Pass Without Trace",
+      "source_url": "https://bg3.wiki/w/images/2/2b/Pass_Without_Trace_Icon.webp"
+    },
+    "Path of Giants": {
+      "filename": "path-of-giants.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Path of Giants element": {
+      "filename": "path-of-giants-element.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Patient Defence": {
+      "filename": "patient-defence.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Patient_Defence",
+      "source_title": "Patient Defence",
+      "source_url": "https://bg3.wiki/w/images/8/81/Patient_Defence_Icon.webp"
+    },
+    "Perception": {
+      "filename": "perception.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Perception",
+      "source_title": "Perception",
+      "source_url": "https://bg3.wiki/w/images/9/92/Perception_Icon.png"
+    },
+    "Performance": {
+      "filename": "performance.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Performance",
+      "source_title": "Performance",
+      "source_url": "https://bg3.wiki/w/images/f/f3/Performance_Icon.png"
+    },
+    "Performer": {
+      "filename": "performer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Performer",
+      "source_title": "Performer",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Persuasion": {
+      "filename": "persuasion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Persuasion",
+      "source_title": "Persuasion",
+      "source_url": "https://bg3.wiki/w/images/f/f7/Persuasion_Icon.png"
+    },
+    "Phantasmal Force": {
+      "filename": "phantasmal-force.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Phantasmal_Force",
+      "source_title": "Phantasmal Force",
+      "source_url": "https://bg3.wiki/w/images/a/ac/Phantasmal_Force_Icon.webp"
+    },
+    "Phantasmal Killer": {
+      "filename": "phantasmal-killer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Phantasmal_Killer",
+      "source_title": "Phantasmal Killer",
+      "source_url": "https://bg3.wiki/w/images/d/da/Phantasmal_Killer_Icon.webp"
+    },
+    "Piercing Arrow": {
+      "filename": "piercing-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Pikes": {
+      "filename": "pikes.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Pikes",
+      "source_title": "Pikes",
+      "source_url": "https://bg3.wiki/w/images/8/8f/Pike_Unfaded.png"
+    },
+    "Planar Ally": {
+      "filename": "planar-ally.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Planar_Ally",
+      "source_title": "Planar Ally",
+      "source_url": "https://bg3.wiki/w/images/f/f3/Planar_Ally_Icon.webp"
+    },
+    "Planar Binding": {
+      "filename": "planar-binding.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Planar_Binding",
+      "source_title": "Planar Binding",
+      "source_url": "https://bg3.wiki/w/images/f/fa/Planar_Binding_Icon.webp"
+    },
+    "Plant Growth": {
+      "filename": "plant-growth.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Plant_Growth",
+      "source_title": "Plant Growth",
+      "source_url": "https://bg3.wiki/w/images/a/ad/Plant_Growth_Icon.webp"
+    },
+    "Poison Spray": {
+      "filename": "poison-spray.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Poison_Spray",
+      "source_title": "Poison Spray",
+      "source_url": "https://bg3.wiki/w/images/1/1d/Poison_Spray_Icon.webp"
+    },
+    "Polearm Master": {
+      "filename": "polearm-master.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Polearm_Master_Icon.webp",
+      "source_title": "File:Polearm Master Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/6/6d/Polearm_Master_Opportunity_Attack_Icon.webp"
+    },
+    "Polymorph": {
+      "filename": "polymorph.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Polymorph",
+      "source_title": "Polymorph",
+      "source_url": "https://bg3.wiki/w/images/f/f6/Polymorph_Icon.webp"
+    },
+    "Prayer of Healing": {
+      "filename": "prayer-of-healing.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Prayer_of_Healing",
+      "source_title": "Prayer of Healing",
+      "source_url": "https://bg3.wiki/w/images/e/e0/Prayer_of_Healing_Icon.webp"
+    },
+    "Precision Attack": {
+      "filename": "precision-attack.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Precision_Attack",
+      "source_title": "Precision Attack",
+      "source_url": "https://bg3.wiki/w/images/2/24/Precision_Attack_Icon.webp"
+    },
+    "Prepared Spells": {
+      "filename": "prepared-spells.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Prepared_Spells_Icon.webp",
+      "source_title": "File:Prepared Spells Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/8/81/Prepared_Spells_Icon.webp"
+    },
+    "Primary Beast Companion": {
+      "filename": "primary-beast-companion.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Primeval Awareness": {
+      "filename": "primeval-awareness.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Produce Flame": {
+      "filename": "produce-flame.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Produce_Flame",
+      "source_title": "Produce Flame",
+      "source_url": "https://bg3.wiki/w/images/e/ec/Produce_Flame_Icon.webp"
+    },
+    "Protection": {
+      "filename": "protection.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Protection",
+      "source_title": "Protection",
+      "source_url": "https://bg3.wiki/w/images/7/73/Protection_Icon.webp"
+    },
+    "Protection from Energy": {
+      "filename": "protection-from-energy.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Protection_from_Energy",
+      "source_title": "Protection from Energy",
+      "source_url": "https://bg3.wiki/w/images/1/15/Protection_from_Energy_Icon.webp"
+    },
+    "Protection from Evil and Good": {
+      "filename": "protection-from-evil-and-good.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Protection_from_Evil_and_Good",
+      "source_title": "Protection from Evil and Good",
+      "source_url": "https://bg3.wiki/w/images/3/35/Protection_from_Evil_and_Good_Icon.webp"
+    },
+    "Protection from Poison": {
+      "filename": "protection-from-poison.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Protection_from_Poison",
+      "source_title": "Protection from Poison",
+      "source_url": "https://bg3.wiki/w/images/3/3b/Protection_from_Poison_Icon.webp"
+    },
+    "Purity of Body": {
+      "filename": "purity-of-body.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Purity_of_Body",
+      "source_title": "Purity of Body",
+      "source_url": "https://bg3.wiki/w/images/0/0b/Purity_of_Body_Icon.webp"
+    },
+    "Pushing Attack": {
+      "filename": "pushing-attack.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Quarterstaves": {
+      "filename": "quarterstaves.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Quarterstaves",
+      "source_title": "Quarterstaves",
+      "source_url": "https://bg3.wiki/w/images/4/41/Quarterstaff_Unfaded.png"
+    },
+    "Quickened Spell": {
+      "filename": "quickened-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Rage": {
+      "filename": "rage.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Rage",
+      "source_title": "Rage",
+      "source_url": "https://bg3.wiki/w/images/c/c9/Rage_Icon.webp"
+    },
+    "Rally": {
+      "filename": "rally.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Rally",
+      "source_title": "Rally",
+      "source_url": "https://bg3.wiki/w/images/d/d2/Rally_Icon.webp"
+    },
+    "Ranger": {
+      "filename": "ranger.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ranger",
+      "source_title": "Ranger",
+      "source_url": "https://bg3.wiki/w/images/f/f5/Class_Ranger_Badge_Icon.png"
+    },
+    "Ranger Knight": {
+      "filename": "ranger-knight.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ranger_Knight",
+      "source_title": "Ranger Knight",
+      "source_url": "https://bg3.wiki/w/images/0/02/Ranger_Knight_Icon.webp"
+    },
+    "Rapiers": {
+      "filename": "rapiers.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Rapiers",
+      "source_title": "Rapiers",
+      "source_url": "https://bg3.wiki/w/images/4/41/Rapier_Unfaded.png"
+    },
+    "Ray of Enfeeblement": {
+      "filename": "ray-of-enfeeblement.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ray_of_Enfeeblement",
+      "source_title": "Ray of Enfeeblement",
+      "source_url": "https://bg3.wiki/w/images/7/7b/Ray_of_Enfeeblement_Icon.webp"
+    },
+    "Ray of Frost": {
+      "filename": "ray-of-frost.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ray_of_Frost",
+      "source_title": "Ray of Frost",
+      "source_url": "https://bg3.wiki/w/images/f/f9/Ray_of_Frost_Icon.webp"
+    },
+    "Ray of Sickness": {
+      "filename": "ray-of-sickness.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ray_of_Sickness",
+      "source_title": "Ray of Sickness",
+      "source_url": "https://bg3.wiki/w/images/7/74/Ray_of_Sickness_Icon.webp"
+    },
+    "Reckless Attack": {
+      "filename": "reckless-attack.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Reckless_Attack",
+      "source_title": "Reckless Attack",
+      "source_url": "https://bg3.wiki/w/images/2/21/Reckless_Attack_Icon.webp"
+    },
+    "Red (Fire)": {
+      "filename": "red-fire.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Relentless Rage": {
+      "filename": "relentless-rage.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Relentless_Rage",
+      "source_title": "Relentless Rage",
+      "source_url": "https://bg3.wiki/w/images/e/e8/Relentless_Rage_Icon.webp"
+    },
+    "Reliable Talent": {
+      "filename": "reliable-talent.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Reliable_Talent",
+      "source_title": "Reliable Talent",
+      "source_url": "https://bg3.wiki/w/images/4/43/Reliable_Talent_Icon.webp"
+    },
+    "Religion": {
+      "filename": "religion.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Religion",
+      "source_title": "Religion",
+      "source_url": "https://bg3.wiki/w/images/1/1a/Religion_Icon.png"
+    },
+    "Remove Curse": {
+      "filename": "remove-curse.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Remove_Curse",
+      "source_title": "Remove Curse",
+      "source_url": "https://bg3.wiki/w/images/7/7f/Remove_Curse_Icon.webp"
+    },
+    "Repelling Blast": {
+      "filename": "repelling-blast.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Repelling_Blast",
+      "source_title": "Repelling Blast",
+      "source_url": "https://bg3.wiki/w/images/6/65/Repelling_Blast_Icon.webp"
+    },
+    "Resilient": {
+      "filename": "resilient.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Resilient_Icon.webp",
+      "source_title": "File:Resilient Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/6/6c/Resilient_Icon.webp"
+    },
+    "Resilient Ability": {
+      "filename": "resilient-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Resistance": {
+      "filename": "resistance.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Resources/BuildOptionIcons": {
+      "filename": "resources-buildoptionicons.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Revivify": {
+      "filename": "revivify.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Revivify",
+      "source_title": "Revivify",
+      "source_url": "https://bg3.wiki/w/images/5/59/Revivify_Icon.webp"
+    },
+    "Ride the Wind": {
+      "filename": "ride-the-wind.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Ride_the_Wind",
+      "source_title": "Ride the Wind",
+      "source_url": "https://bg3.wiki/w/images/f/f3/Fly_Icon.webp"
+    },
+    "Riposte": {
+      "filename": "riposte.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Riposte",
+      "source_title": "Riposte",
+      "source_url": "https://bg3.wiki/w/images/9/9e/Riposte_Icon.webp"
+    },
+    "Ritual Caster": {
+      "filename": "ritual-caster.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ritual_Caster_Icon.webp",
+      "source_title": "File:Ritual Caster Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/4/45/Ritual_Caster_Free_Spells_Icon.webp"
+    },
+    "Ritual Caster Spells": {
+      "filename": "ritual-caster-spells.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Ritual Caster spell": {
+      "filename": "ritual-caster-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Rogue": {
+      "filename": "rogue.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Rogue",
+      "source_title": "Rogue",
+      "source_url": "https://bg3.wiki/w/images/d/da/Class_Rogue_Badge_Icon.png"
+    },
+    "Rush of the Gale Spirits": {
+      "filename": "rush-of-the-gale-spirits.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Rush_of_the_Gale_Spirits",
+      "source_title": "Rush of the Gale Spirits",
+      "source_url": "https://bg3.wiki/w/images/5/58/Gust_of_Wind_Icon.webp"
+    },
+    "Sacred Flame": {
+      "filename": "sacred-flame.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sacred_Flame",
+      "source_title": "Sacred Flame",
+      "source_url": "https://bg3.wiki/w/images/1/16/Sacred_Flame_Icon.webp"
+    },
+    "Sanctified Stalker": {
+      "filename": "sanctified-stalker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sanctified_Stalker",
+      "source_title": "Sanctified Stalker",
+      "source_url": "https://bg3.wiki/w/images/3/30/Sanctified_Stalker_Icon.webp"
+    },
+    "Sanctuary": {
+      "filename": "sanctuary.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sanctuary",
+      "source_title": "Sanctuary",
+      "source_url": "https://bg3.wiki/w/images/c/c1/Sanctuary_Icon.webp"
+    },
+    "Savage Attacker": {
+      "filename": "savage-attacker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Savage_Attacker",
+      "source_title": "Savage Attacker",
+      "source_url": "https://bg3.wiki/w/images/2/24/Savage_Attacker_Icon.webp"
+    },
+    "Scimitars": {
+      "filename": "scimitars.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Scimitars",
+      "source_title": "Scimitars",
+      "source_url": "https://bg3.wiki/w/images/1/1c/Scimitar_Unfaded.png"
+    },
+    "Scorching Ray": {
+      "filename": "scorching-ray.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Scorching_Ray",
+      "source_title": "Scorching Ray",
+      "source_url": "https://bg3.wiki/w/images/8/8e/Scorching_Ray_Icon.webp"
+    },
+    "Scroll Transcription": {
+      "filename": "scroll-transcription.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Sculptor of Flesh": {
+      "filename": "sculptor-of-flesh.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sculptor_of_Flesh",
+      "source_title": "Sculptor of Flesh",
+      "source_url": "https://bg3.wiki/w/images/f/f6/Polymorph_Icon.webp"
+    },
+    "Searing Smite": {
+      "filename": "searing-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Searing_Smite",
+      "source_title": "Searing Smite",
+      "source_url": "https://bg3.wiki/w/images/5/50/Searing_Smite_Icon.webp"
+    },
+    "Second Wind": {
+      "filename": "second-wind.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Second_Wind",
+      "source_title": "Second Wind",
+      "source_url": "https://bg3.wiki/w/images/9/95/Second_Wind_Icon.webp"
+    },
+    "See Invisibility": {
+      "filename": "see-invisibility.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:See_Invisibility_Icon.webp",
+      "source_title": "File:See Invisibility Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/c/c3/See_Invisibility_Icon.webp"
+    },
+    "See the complete act route, decisions, and equipment challenges.": {
+      "filename": "see-the-complete-act-route-decisions-and-equipment-challenges.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Seeking Arrow": {
+      "filename": "seeking-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Seeming": {
+      "filename": "seeming.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Seeming",
+      "source_title": "Seeming",
+      "source_url": "https://bg3.wiki/w/images/f/f4/Seeming_Icon.webp"
+    },
+    "Sentinel": {
+      "filename": "sentinel.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Sentinel_Icon.webp",
+      "source_title": "File:Sentinel Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/8/80/Sentinel_Vengeance_Icon.webp"
+    },
+    "Shadow Arrow": {
+      "filename": "shadow-arrow.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Shadow Blade": {
+      "filename": "shadow-blade.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shadow_Blade",
+      "source_title": "Shadow Blade",
+      "source_url": "https://bg3.wiki/w/images/6/6e/Shadow_Blade_Icon.webp"
+    },
+    "Shadow Magic": {
+      "filename": "shadow-magic.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shadow_Magic",
+      "source_title": "Shadow Magic",
+      "source_url": "https://bg3.wiki/w/images/4/4f/Class_Sorcerer_Shadow_Magic_Badge_Icon.png"
+    },
+    "Shaping of the Ice": {
+      "filename": "shaping-of-the-ice.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shaping_of_the_Ice",
+      "source_title": "Shaping of the Ice",
+      "source_url": "https://bg3.wiki/w/images/a/a3/Shaping_of_the_Ice_Icon.webp"
+    },
+    "Sharpshooter": {
+      "filename": "sharpshooter.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Sharpshooter_Icon.webp",
+      "source_title": "File:Sharpshooter Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/9/9c/Sharpshooter_All_In_Icon.webp"
+    },
+    "Shatter": {
+      "filename": "shatter.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shatter",
+      "source_title": "Shatter",
+      "source_url": "https://bg3.wiki/w/images/c/c5/Shatter_Icon.webp"
+    },
+    "Shield": {
+      "filename": "shield.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shield_(spell)",
+      "source_title": "Shield (spell)",
+      "source_url": "https://bg3.wiki/w/images/c/cf/Shield_spell_Icon.webp"
+    },
+    "Shield Master": {
+      "filename": "shield-master.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shield_Master",
+      "source_title": "Shield Master",
+      "source_url": "https://bg3.wiki/w/images/2/2d/Shield_Master_Icon.webp"
+    },
+    "Shield of Faith": {
+      "filename": "shield-of-faith.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shield_of_Faith",
+      "source_title": "Shield of Faith",
+      "source_url": "https://bg3.wiki/w/images/8/83/Shield_of_Faith_Icon.webp"
+    },
+    "Shillelagh": {
+      "filename": "shillelagh.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shillelagh",
+      "source_title": "Shillelagh",
+      "source_url": "https://bg3.wiki/w/images/6/68/Shillelagh_Icon.webp"
+    },
+    "Shocking Grasp": {
+      "filename": "shocking-grasp.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shocking_Grasp",
+      "source_title": "Shocking Grasp",
+      "source_url": "https://bg3.wiki/w/images/2/2f/Shocking_Grasp_Icon.webp"
+    },
+    "Shortbows": {
+      "filename": "shortbows.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shortbows",
+      "source_title": "Shortbows",
+      "source_url": "https://bg3.wiki/w/images/0/08/Shortbow_Unfaded.png"
+    },
+    "Shortswords": {
+      "filename": "shortswords.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Shortswords",
+      "source_title": "Shortswords",
+      "source_url": "https://bg3.wiki/w/images/0/02/Shortsword_Unfaded.png"
+    },
+    "Show everything": {
+      "filename": "show-everything.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Sickles": {
+      "filename": "sickles.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sickles",
+      "source_title": "Sickles",
+      "source_url": "https://bg3.wiki/w/images/4/44/Sickle_Unfaded.png"
+    },
+    "Sign of Ill Omen": {
+      "filename": "sign-of-ill-omen.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sign_of_Ill_Omen",
+      "source_title": "Sign of Ill Omen",
+      "source_url": "https://bg3.wiki/w/images/0/00/Bestow_Curse_Icon.webp"
+    },
+    "Silence": {
+      "filename": "silence.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Silence",
+      "source_title": "Silence",
+      "source_url": "https://bg3.wiki/w/images/7/78/Silence_Icon.webp"
+    },
+    "Silver (Cold)": {
+      "filename": "silver-cold.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Single save, Legendary Actions, and no room for careless mistakes.": {
+      "filename": "single-save-legendary-actions-and-no-room-for-careless-mistakes.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Skill proficiency": {
+      "filename": "skill-proficiency.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Skilled": {
+      "filename": "skilled.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Skilled",
+      "source_title": "Skilled",
+      "source_url": "https://bg3.wiki/w/images/3/36/Skilled_Icon.webp"
+    },
+    "Skilled Proficiencies": {
+      "filename": "skilled-proficiencies.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Sleep": {
+      "filename": "sleep.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sleep",
+      "source_title": "Sleep",
+      "source_url": "https://bg3.wiki/w/images/a/ae/Sleep_Icon.webp"
+    },
+    "Sleet Storm": {
+      "filename": "sleet-storm.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sleet_Storm",
+      "source_title": "Sleet Storm",
+      "source_url": "https://bg3.wiki/w/images/5/50/Sleet_Storm_Icon.webp"
+    },
+    "Sleight of Hand": {
+      "filename": "sleight-of-hand.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sleight_of_Hand",
+      "source_title": "Sleight of Hand",
+      "source_url": "https://bg3.wiki/w/images/4/46/Sleight_of_Hand_Icon.png"
+    },
+    "Slings": {
+      "filename": "slings.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Slings",
+      "source_title": "Slings",
+      "source_url": "https://bg3.wiki/w/images/b/bf/Sling_Unfaded.png"
+    },
+    "Slow": {
+      "filename": "slow.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Slow",
+      "source_title": "Slow",
+      "source_url": "https://bg3.wiki/w/images/b/be/Slow_Icon.webp"
+    },
+    "Slow Fall": {
+      "filename": "slow-fall.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Slow_Fall",
+      "source_title": "Slow Fall",
+      "source_url": "https://bg3.wiki/w/images/d/de/Slow_Fall_Icon.webp"
+    },
+    "Sneak Attack": {
+      "filename": "sneak-attack.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Sneak_Attack_Icon.webp",
+      "source_title": "File:Sneak Attack Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/e/e0/Sneak_Attack_Melee_Icon.webp"
+    },
+    "Song of Rest": {
+      "filename": "song-of-rest.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Song_of_Rest",
+      "source_title": "Song of Rest",
+      "source_url": "https://bg3.wiki/w/images/b/b1/Song_of_Rest_Icon.webp"
+    },
+    "Sorcerer": {
+      "filename": "sorcerer.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sorcerer",
+      "source_title": "Sorcerer",
+      "source_url": "https://bg3.wiki/w/images/a/a8/Sorcerer_Class_Icon.png"
+    },
+    "Sorcery Points": {
+      "filename": "sorcery-points.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Speak with Animals": {
+      "filename": "speak-with-animals.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Speak_with_Animals",
+      "source_title": "Speak with Animals",
+      "source_url": "https://bg3.wiki/w/images/2/24/Speak_with_Animals_Icon.webp"
+    },
+    "Speak with Dead": {
+      "filename": "speak-with-dead.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Speak_with_Dead",
+      "source_title": "Speak with Dead",
+      "source_url": "https://bg3.wiki/w/images/8/8c/Speak_with_Dead_Icon.webp"
+    },
+    "Spears": {
+      "filename": "spears.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Spears",
+      "source_title": "Spears",
+      "source_url": "https://bg3.wiki/w/images/e/e7/Spear_Unfaded.png"
+    },
+    "Spell Sniper": {
+      "filename": "spell-sniper.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Spell_Sniper",
+      "source_title": "Spell Sniper",
+      "source_url": "https://bg3.wiki/w/images/b/b0/Spell_Sniper_Icon.webp"
+    },
+    "Spell Sniper Cantrip": {
+      "filename": "spell-sniper-cantrip.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Spell Sniper cantrip": {
+      "filename": "spell-sniper-cantrip.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Spellbook": {
+      "filename": "spellbook.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Sphere of Elemental Balance": {
+      "filename": "sphere-of-elemental-balance.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sphere_of_Elemental_Balance",
+      "source_title": "Sphere of Elemental Balance",
+      "source_url": "https://bg3.wiki/w/images/8/8e/Chromatic_Orb_Icon.webp"
+    },
+    "Spike Growth": {
+      "filename": "spike-growth.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Spike_Growth",
+      "source_title": "Spike Growth",
+      "source_url": "https://bg3.wiki/w/images/d/d4/Spike_Growth_Icon.webp"
+    },
+    "Spirit Guardians": {
+      "filename": "spirit-guardians.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Spirit_Guardians",
+      "source_title": "Spirit Guardians",
+      "source_url": "https://bg3.wiki/w/images/d/d6/Spirit_Guardians_Icon.webp"
+    },
+    "Spiritual Weapon": {
+      "filename": "spiritual-weapon.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Spiritual_Weapon",
+      "source_title": "Spiritual Weapon",
+      "source_url": "https://bg3.wiki/w/images/7/73/Spiritual_Weapon_Halberd_Icon.webp"
+    },
+    "Stallion": {
+      "filename": "stallion.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Standard rules with route, build, and encounter planning.": {
+      "filename": "standard-rules-with-route-build-and-encounter-planning.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Stealth": {
+      "filename": "stealth.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Stealth",
+      "source_title": "Stealth",
+      "source_url": "https://bg3.wiki/w/images/b/b9/Stealth_Icon.png"
+    },
+    "Steel Will": {
+      "filename": "steel-will.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Steel_Will",
+      "source_title": "Steel Will",
+      "source_url": "https://bg3.wiki/w/images/a/a6/Steel_Will_Icon.webp"
+    },
+    "Step of the Wind": {
+      "filename": "step-of-the-wind.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Step_of_the_Wind_Icon.webp",
+      "source_title": "File:Step of the Wind Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/c/c9/Step_of_the_Wind_Dash_Icon.webp"
+    },
+    "Stillness of Mind": {
+      "filename": "stillness-of-mind.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Stillness_of_Mind",
+      "source_title": "Stillness of Mind",
+      "source_url": "https://bg3.wiki/w/images/2/25/Stillness_of_Mind_Icon.webp"
+    },
+    "Stinking Cloud": {
+      "filename": "stinking-cloud.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Stinking_Cloud",
+      "source_title": "Stinking Cloud",
+      "source_url": "https://bg3.wiki/w/images/b/b7/Stinking_Cloud_Icon.webp"
+    },
+    "Stoneskin": {
+      "filename": "stoneskin.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Stoneskin",
+      "source_title": "Stoneskin",
+      "source_url": "https://bg3.wiki/w/images/c/c3/Stoneskin_Icon.webp"
+    },
+    "Storm Sorcery": {
+      "filename": "storm-sorcery.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Storm_Sorcery",
+      "source_title": "Storm Sorcery",
+      "source_url": "https://bg3.wiki/w/images/e/ef/Storm_Sorcery_Subclass_Icon.png"
+    },
+    "Strength": {
+      "filename": "strength.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Stunning Strike": {
+      "filename": "stunning-strike.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Subclass": {
+      "filename": "subclass.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Subtle Spell": {
+      "filename": "subtle-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Sunbeam": {
+      "filename": "sunbeam.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sunbeam",
+      "source_title": "Sunbeam",
+      "source_url": "https://bg3.wiki/w/images/6/63/Sunbeam_Icon.webp"
+    },
+    "Sunder the Heretical": {
+      "filename": "sunder-the-heretical.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Survival": {
+      "filename": "survival.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Survival",
+      "source_title": "Survival",
+      "source_url": "https://bg3.wiki/w/images/2/2d/Survival_Icon.png"
+    },
+    "Swamp": {
+      "filename": "swamp.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Swamp",
+      "source_title": "Swamp",
+      "source_url": "https://bg3.wiki/w/images/b/b5/Swamp_Icon.webp"
+    },
+    "Swarmkeeper": {
+      "filename": "swarmkeeper.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Swarmkeeper",
+      "source_title": "Swarmkeeper",
+      "source_url": "https://bg3.wiki/w/images/9/9f/Class_Ranger_Swarmkeeper_Badge_Icon.png"
+    },
+    "Swarmkeeper swarm": {
+      "filename": "swarmkeeper-swarm.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Swashbuckler": {
+      "filename": "swashbuckler.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Swashbuckler",
+      "source_title": "Swashbuckler",
+      "source_url": "https://bg3.wiki/w/images/c/cd/Class_Rogue_Swashbuckler_Badge_Icon.png"
+    },
+    "Sweeping Attack": {
+      "filename": "sweeping-attack.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sweeping_Attack",
+      "source_title": "Sweeping Attack",
+      "source_url": "https://bg3.wiki/w/images/d/d5/Sweeping_Attack_Icon.webp"
+    },
+    "Sweeping Cinder Strike": {
+      "filename": "sweeping-cinder-strike.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Sweeping_Cinder_Strike",
+      "source_title": "Sweeping Cinder Strike",
+      "source_url": "https://bg3.wiki/w/images/c/cf/Burning_Hands_Icon.webp"
+    },
+    "Tactician": {
+      "filename": "tactician.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Tasha's Hideous Laughter": {
+      "filename": "tasha-s-hideous-laughter.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Tasha's_Hideous_Laughter",
+      "source_title": "Tasha's Hideous Laughter",
+      "source_url": "https://bg3.wiki/w/images/2/27/Tasha%27s_Hideous_Laughter_Icon.webp"
+    },
+    "Tavern Brawler": {
+      "filename": "tavern-brawler.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Tavern_Brawler",
+      "source_title": "Tavern Brawler",
+      "source_url": "https://bg3.wiki/w/images/3/31/Tavern_Brawler_Icon.webp"
+    },
+    "Tavern Brawler +1 ability": {
+      "filename": "tavern-brawler-1-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Tavern Brawler Ability": {
+      "filename": "tavern-brawler-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Telekinesis": {
+      "filename": "telekinesis.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Telekinesis",
+      "source_title": "Telekinesis",
+      "source_url": "https://bg3.wiki/w/images/c/c7/Telekinesis_Icon.webp"
+    },
+    "Tempest Domain": {
+      "filename": "tempest-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Tempest_Domain",
+      "source_title": "Tempest Domain",
+      "source_url": "https://bg3.wiki/w/images/1/1f/Class_Cleric_Tempest_Badge_Icon.png"
+    },
+    "Thaumaturgy": {
+      "filename": "thaumaturgy.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Thaumaturgy",
+      "source_title": "Thaumaturgy",
+      "source_url": "https://bg3.wiki/w/images/3/3f/Thaumaturgy_Icon.webp"
+    },
+    "The Archfey": {
+      "filename": "the-archfey.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/The_Archfey",
+      "source_title": "The Archfey",
+      "source_url": "https://bg3.wiki/w/images/a/a2/Class_Warlock_Archfey_Badge_Icon.png"
+    },
+    "The Fiend": {
+      "filename": "the-fiend.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/The_Fiend",
+      "source_title": "The Fiend",
+      "source_url": "https://bg3.wiki/w/images/c/c7/Class_Warlock_Fiend_Badge_Icon.png"
+    },
+    "The Great Old One": {
+      "filename": "the-great-old-one.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/The_Great_Old_One",
+      "source_title": "The Great Old One",
+      "source_url": "https://bg3.wiki/w/images/4/4f/Class_Warlock_Great_Old_One_Badge_Icon.png"
+    },
+    "The Hexblade": {
+      "filename": "the-hexblade.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Thief": {
+      "filename": "thief.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Thief",
+      "source_title": "Thief",
+      "source_url": "https://bg3.wiki/w/images/d/d1/Class_Rogue_Thief_Badge_Icon.png"
+    },
+    "Thief of Five Fates": {
+      "filename": "thief-of-five-fates.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Thief_of_Five_Fates",
+      "source_title": "Thief of Five Fates",
+      "source_url": "https://bg3.wiki/w/images/1/19/Bane_spell_Icon.webp"
+    },
+    "Thorn Whip": {
+      "filename": "thorn-whip.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Thorn_Whip",
+      "source_title": "Thorn Whip",
+      "source_url": "https://bg3.wiki/w/images/e/e8/Thorn_Whip_Icon.webp"
+    },
+    "Thunder": {
+      "filename": "thunder.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Thunder",
+      "source_title": "Thunder",
+      "source_url": "https://bg3.wiki/w/images/8/87/Thunder_Damage_Icon.png"
+    },
+    "Thunderous Smite": {
+      "filename": "thunderous-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Thunderous_Smite",
+      "source_title": "Thunderous Smite",
+      "source_url": "https://bg3.wiki/w/images/d/dd/Thunderous_Smite_Icon.webp"
+    },
+    "Thunderwave": {
+      "filename": "thunderwave.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Thunderwave",
+      "source_title": "Thunderwave",
+      "source_url": "https://bg3.wiki/w/images/0/04/Thunderwave_Icon.webp"
+    },
+    "Tiger": {
+      "filename": "tiger.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Tiger Heart": {
+      "filename": "tiger-heart.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Tiger_Heart",
+      "source_title": "Tiger Heart",
+      "source_url": "https://bg3.wiki/w/images/b/bf/Rage_Tiger_Heart_Icon.webp"
+    },
+    "Toll the Dead": {
+      "filename": "toll-the-dead.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Toll_the_Dead",
+      "source_title": "Toll the Dead",
+      "source_url": "https://bg3.wiki/w/images/c/c0/Toll_the_Dead_Icon.webp"
+    },
+    "Touch of the Storm": {
+      "filename": "touch-of-the-storm.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Touch_of_the_Storm",
+      "source_title": "Touch of the Storm",
+      "source_url": "https://bg3.wiki/w/images/2/2f/Shocking_Grasp_Icon.webp"
+    },
+    "Tough": {
+      "filename": "tough.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Tough",
+      "source_title": "Tough",
+      "source_url": "https://bg3.wiki/w/images/e/e3/Tough_Icon.webp"
+    },
+    "Transmutation School": {
+      "filename": "transmutation-school.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Transmutation_School",
+      "source_title": "Transmutation School",
+      "source_url": "https://bg3.wiki/w/images/c/cb/Class_Wizard_Transmutation_Badge_Icon.png"
+    },
+    "Trickery Domain": {
+      "filename": "trickery-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Trickery_Domain",
+      "source_title": "Trickery Domain",
+      "source_url": "https://bg3.wiki/w/images/a/ac/Class_Cleric_Trickery_Badge_Icon.png"
+    },
+    "Tridents": {
+      "filename": "tridents.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Tridents",
+      "source_title": "Tridents",
+      "source_url": "https://bg3.wiki/w/images/e/ef/Trident_Unfaded.png"
+    },
+    "Trip Attack": {
+      "filename": "trip-attack.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "True Strike": {
+      "filename": "true-strike.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Turn Undead": {
+      "filename": "turn-undead.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Turn_Undead",
+      "source_title": "Turn Undead",
+      "source_url": "https://bg3.wiki/w/images/4/4c/Turn_Undead_Icon.webp"
+    },
+    "Twinned Spell": {
+      "filename": "twinned-spell.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Two-Weapon Fighting": {
+      "filename": "two-weapon-fighting.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Two-Weapon_Fighting",
+      "source_title": "Two-Weapon Fighting",
+      "source_url": "https://bg3.wiki/w/images/5/54/Two-Weapon_Fighting_Icon.webp"
+    },
+    "Unarmoured Defence": {
+      "filename": "unarmoured-defence.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Unarmoured_Defence_Icon.webp",
+      "source_title": "File:Unarmoured Defence Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/f/f6/Unarmoured_Defence_%28Barbarian%29_Icon.webp"
+    },
+    "Unarmoured Movement": {
+      "filename": "unarmoured-movement.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Unarmoured_Movement",
+      "source_title": "Unarmoured Movement",
+      "source_url": "https://bg3.wiki/w/images/6/62/Unarmoured_Movement_Icon.webp"
+    },
+    "Uncanny Dodge": {
+      "filename": "uncanny-dodge.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Uncanny_Dodge",
+      "source_title": "Uncanny Dodge",
+      "source_url": "https://bg3.wiki/w/images/4/4d/Uncanny_Dodge_Icon.webp"
+    },
+    "Underdark": {
+      "filename": "underdark.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Underdark",
+      "source_title": "Underdark",
+      "source_url": "https://bg3.wiki/w/images/c/c5/Underdark.jpg"
+    },
+    "Urban Tracker": {
+      "filename": "urban-tracker.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Urban_Tracker",
+      "source_title": "Urban Tracker",
+      "source_url": "https://bg3.wiki/w/images/7/75/Urban_Tracker_Icon.webp"
+    },
+    "Vampiric Touch": {
+      "filename": "vampiric-touch.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Vampiric_Touch",
+      "source_title": "Vampiric Touch",
+      "source_url": "https://bg3.wiki/w/images/8/85/Vampiric_Touch_Icon.webp"
+    },
+    "Vicious Mockery": {
+      "filename": "vicious-mockery.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Vicious_Mockery",
+      "source_title": "Vicious Mockery",
+      "source_url": "https://bg3.wiki/w/images/6/66/Vicious_Mockery_Icon.webp"
+    },
+    "Wall of Fire": {
+      "filename": "wall-of-fire.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wall_of_Fire",
+      "source_title": "Wall of Fire",
+      "source_url": "https://bg3.wiki/w/images/c/ca/Wall_of_Fire_Icon.webp"
+    },
+    "Wall of Ice": {
+      "filename": "wall-of-ice.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wall_of_Ice",
+      "source_title": "Wall of Ice",
+      "source_url": "https://bg3.wiki/w/images/d/d2/Wall_of_Ice_Icon.webp"
+    },
+    "Wall of Stone": {
+      "filename": "wall-of-stone.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wall_of_Stone",
+      "source_title": "Wall of Stone",
+      "source_url": "https://bg3.wiki/w/images/e/e2/Wall_of_Stone_Icon.webp"
+    },
+    "Wall of Thorns": {
+      "filename": "wall-of-thorns.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wall_of_Thorns",
+      "source_title": "Wall of Thorns",
+      "source_url": "https://bg3.wiki/w/images/6/6e/Wall_of_Thorns_Icon.webp"
+    },
+    "War Caster": {
+      "filename": "war-caster.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:War_Caster_Icon.webp",
+      "source_title": "File:War Caster Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/8/84/War_Caster_Concentration_Icon.webp"
+    },
+    "War Domain": {
+      "filename": "war-domain.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/War_Domain",
+      "source_title": "War Domain",
+      "source_url": "https://bg3.wiki/w/images/5/5d/Class_Cleric_War_Badge_Icon.png"
+    },
+    "War Picks": {
+      "filename": "war-picks.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/War_Picks",
+      "source_title": "War Picks",
+      "source_url": "https://bg3.wiki/w/images/9/93/War_Pick_Unfaded.png"
+    },
+    "Warden of Vitality": {
+      "filename": "warden-of-vitality.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Warden_of_Vitality",
+      "source_title": "Warden of Vitality",
+      "source_url": "https://bg3.wiki/w/images/0/0b/Warden_of_Vitality_Icon.webp"
+    },
+    "Warding Bond": {
+      "filename": "warding-bond.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Warding_Bond",
+      "source_title": "Warding Bond",
+      "source_url": "https://bg3.wiki/w/images/e/ea/Warding_Bond_Icon.webp"
+    },
+    "Warhammers": {
+      "filename": "warhammers.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Warhammers",
+      "source_title": "Warhammers",
+      "source_url": "https://bg3.wiki/w/images/7/7c/Warhammer_Unfaded.png"
+    },
+    "Warlock": {
+      "filename": "warlock.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Warlock",
+      "source_title": "Warlock",
+      "source_url": "https://bg3.wiki/w/images/6/66/Class_Warlock_Badge_Icon.png"
+    },
+    "Wasteland Wanderer: Cold": {
+      "filename": "wasteland-wanderer-cold.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wasteland_Wanderer:_Cold",
+      "source_title": "Wasteland Wanderer: Cold",
+      "source_url": "https://bg3.wiki/w/images/a/a2/Wasteland_Wanderer_Cold_Icon.webp"
+    },
+    "Wasteland Wanderer: Fire": {
+      "filename": "wasteland-wanderer-fire.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wasteland_Wanderer:_Fire",
+      "source_title": "Wasteland Wanderer: Fire",
+      "source_url": "https://bg3.wiki/w/images/e/e2/Wasteland_Wanderer_Fire_Icon.webp"
+    },
+    "Wasteland Wanderer: Poison": {
+      "filename": "wasteland-wanderer-poison.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wasteland_Wanderer:_Poison",
+      "source_title": "Wasteland Wanderer: Poison",
+      "source_url": "https://bg3.wiki/w/images/d/de/Wasteland_Wanderer_Poison_Icon.webp"
+    },
+    "Water Whip": {
+      "filename": "water-whip.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Water_Whip",
+      "source_title": "Water Whip",
+      "source_url": "https://bg3.wiki/w/images/6/64/Water_Whip_Icon.webp"
+    },
+    "Way of Shadow": {
+      "filename": "way-of-shadow.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Way_of_Shadow",
+      "source_title": "Way of Shadow",
+      "source_url": "https://bg3.wiki/w/images/a/a6/Class_Monk_Shadow_Badge_Icon.png"
+    },
+    "Way of the Drunken Master": {
+      "filename": "way-of-the-drunken-master.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Way_of_the_Drunken_Master",
+      "source_title": "Way of the Drunken Master",
+      "source_url": "https://bg3.wiki/w/images/e/e0/Class_Monk_Drunken_Master_Badge_Icon.png"
+    },
+    "Way of the Four Elements": {
+      "filename": "way-of-the-four-elements.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Way_of_the_Four_Elements",
+      "source_title": "Way of the Four Elements",
+      "source_url": "https://bg3.wiki/w/images/0/01/Class_Monk_Four_Elements_Badge_Icon.png"
+    },
+    "Way of the Open Hand": {
+      "filename": "way-of-the-open-hand.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Way_of_the_Open_Hand",
+      "source_title": "Way of the Open Hand",
+      "source_url": "https://bg3.wiki/w/images/c/c6/Class_Monk_Open_Hand_Badge_Icon.png"
+    },
+    "Weapon Master": {
+      "filename": "weapon-master.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Weapon_Master",
+      "source_title": "Weapon Master",
+      "source_url": "https://bg3.wiki/w/images/d/de/Weapon_Master_Icon.webp"
+    },
+    "Weapon Master +1 ability": {
+      "filename": "weapon-master-1-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Weapon Master Ability": {
+      "filename": "weapon-master-ability.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Weapon Master Proficiencies": {
+      "filename": "weapon-master-proficiencies.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Weapon proficiency": {
+      "filename": "weapon-proficiency.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Web": {
+      "filename": "web.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Web",
+      "source_title": "Web",
+      "source_url": "https://bg3.wiki/w/images/8/8b/Web_Icon.webp"
+    },
+    "Whispers of the Grave": {
+      "filename": "whispers-of-the-grave.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Whispers_of_the_Grave",
+      "source_title": "Whispers of the Grave",
+      "source_url": "https://bg3.wiki/w/images/8/8c/Speak_with_Dead_Icon.webp"
+    },
+    "White (Cold)": {
+      "filename": "white-cold.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Wild Magic": {
+      "filename": "wild-magic.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Wild Shape": {
+      "filename": "wild-shape.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wild_Shape",
+      "source_title": "Wild Shape",
+      "source_url": "https://bg3.wiki/w/images/b/b9/Wild_Shape_Icon.webp"
+    },
+    "Wild Shape: Deep Rothé": {
+      "filename": "wild-shape-deep-rothe.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wild_Shape:_Deep_Rothé",
+      "source_title": "Wild Shape: Deep Rothé",
+      "source_url": "https://bg3.wiki/w/images/0/04/Wild_Shape_Deep_Roth%C3%A9_Icon.webp"
+    },
+    "Wild Shape: Sabre-Toothed Tiger": {
+      "filename": "wild-shape-sabre-toothed-tiger.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wild_Shape:_Sabre-Toothed_Tiger",
+      "source_title": "Wild Shape: Sabre-Toothed Tiger",
+      "source_url": "https://bg3.wiki/w/images/f/fa/Wild_Shape_Sabre-Toothed_Tiger_Icon.webp"
+    },
+    "Wild Strike": {
+      "filename": "wild-strike.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wild_Strike",
+      "source_title": "Wild Strike",
+      "source_url": "https://bg3.wiki/w/images/2/27/Wild_Strike_Icon.webp"
+    },
+    "Wildheart": {
+      "filename": "wildheart.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wildheart",
+      "source_title": "Wildheart",
+      "source_url": "https://bg3.wiki/w/images/2/2a/Class_Barbarian_Wildheart_Badge_Icon.png"
+    },
+    "Wildheart Animal Aspect": {
+      "filename": "wildheart-animal-aspect.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Wildheart Bestial Heart": {
+      "filename": "wildheart-bestial-heart.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Wind Walk": {
+      "filename": "wind-walk.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wind_Walk",
+      "source_title": "Wind Walk",
+      "source_url": "https://bg3.wiki/w/images/0/06/Wind_Walk_Icon.webp"
+    },
+    "Wisdom": {
+      "filename": "wisdom.webp",
+      "kind": "wiki-file-image",
+      "page_url": "https://bg3.wiki/wiki/File:Ability_Improvement_Icon.webp",
+      "source_title": "File:Ability Improvement Icon.webp",
+      "source_url": "https://bg3.wiki/w/images/a/a9/Generic_Feature_Icon.webp"
+    },
+    "Witch Bolt": {
+      "filename": "witch-bolt.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Witch_Bolt",
+      "source_title": "Witch Bolt",
+      "source_url": "https://bg3.wiki/w/images/d/d2/Witch_Bolt_Icon.webp"
+    },
+    "Wizard": {
+      "filename": "wizard.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wizard",
+      "source_title": "Wizard",
+      "source_url": "https://bg3.wiki/w/images/d/d9/Class_Wizard_Badge_Icon.png"
+    },
+    "Wolf": {
+      "filename": "wolf.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wolf",
+      "source_title": "Wolf",
+      "source_url": "https://bg3.wiki/w/images/c/cc/D%27hak_Model.png"
+    },
+    "Wolf Heart": {
+      "filename": "wolf-heart.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wolf_Heart",
+      "source_title": "Wolf Heart",
+      "source_url": "https://bg3.wiki/w/images/1/19/Rage_Wolf_Heart_Icon.webp"
+    },
+    "Wolf Spider": {
+      "filename": "wolf-spider.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Wolverine": {
+      "filename": "wolverine.webp",
+      "kind": "generated-fallback",
+      "page_url": "",
+      "source_title": "",
+      "source_url": ""
+    },
+    "Wrathful Smite": {
+      "filename": "wrathful-smite.webp",
+      "kind": "wiki-page-image",
+      "page_url": "https://bg3.wiki/wiki/Wrathful_Smite",
+      "source_title": "Wrathful Smite",
+      "source_url": "https://bg3.wiki/w/images/7/79/Wrathful_Smite_Icon.webp"
+    }
+  },
+  "source": "https://bg3.wiki"
+}

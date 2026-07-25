@@ -47,7 +47,7 @@ from .usage import (
 
 STATIC_DIR = resource_root() / "backend" / "app" / "static" / "map"
 
-app = FastAPI(title="BG3 Honor Assistant Backend")
+app = FastAPI(title="BG3 Overlay Backend")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost", "http://localhost:8787", "http://127.0.0.1", "http://127.0.0.1:8787"],

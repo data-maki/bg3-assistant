@@ -7,6 +7,7 @@ struct PartyMemberDetailView: View {
     let memberID: String
     let onBack: () -> Void
     let onAbilities: () -> Void
+    let onManualBuild: () -> Void
     let onReset: () -> Void
 
     @State private var pendingBuildID: String?
@@ -73,6 +74,7 @@ struct PartyMemberDetailView: View {
                     identity(member)
                     abilityDistribution(member)
                     guidance(member)
+                    manualBuildCard(member)
                     buildSelection(member)
                     destructiveControls(member)
                 }
@@ -140,7 +142,37 @@ struct PartyMemberDetailView: View {
            let hireling = WithersHireling.matching(member.name) {
             return "\(hireling.race) · Withers hireling"
         }
-        return build?.name ?? member.className ?? "No reviewed build"
+        return member.manualBuild?.name ?? build?.name ?? member.className ?? "No build"
+    }
+
+    private func manualBuildCard(_ member: PartyMember) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack {
+                Text("BUILD IT YOURSELF")
+                    .font(BG3Type.overline)
+                    .foregroundStyle(BG3Theme.gold)
+                Spacer()
+                if member.manualBuild != nil {
+                    StatusChip(text: "ACTIVE", tint: BG3Theme.success, filled: true)
+                }
+            }
+            Text("Set base ability points, choose a class at every character level, and pick subclasses, feats, spells, and class options through Level 12.")
+                .font(BG3Type.caption)
+                .foregroundStyle(BG3Theme.mutedParchment)
+                .fixedSize(horizontal: false, vertical: true)
+            Button {
+                onManualBuild()
+            } label: {
+                Label(
+                    member.manualBuild == nil ? "Create manual build" : "Edit \(member.manualBuild?.name ?? "manual build")",
+                    systemImage: "hammer.fill"
+                )
+                .frame(maxWidth: .infinity)
+            }
+            .assistantActionButton(accent: BG3Theme.gold, prominent: member.manualBuild == nil)
+        }
+        .padding(10)
+        .bg3InsetSurface(accent: member.manualBuild == nil ? BG3Theme.bronze : BG3Theme.success)
     }
 
     @ViewBuilder private func guidance(_ member: PartyMember) -> some View {
@@ -173,9 +205,11 @@ struct PartyMemberDetailView: View {
             .bg3InsetSurface(accent: exact ? BG3Theme.success : BG3Theme.control)
         } else {
             VStack(alignment: .leading, spacing: 6) {
-                Label("No reviewed build assigned", systemImage: "exclamationmark.triangle.fill")
-                    .font(BG3Type.rowTitle).foregroundStyle(BG3Theme.warning)
-                Text("Choose or import a build below to get current-level guidance and an exact Ability Points recipe.")
+                Label(member.manualBuild == nil ? "No build assigned" : "Manual build active", systemImage: member.manualBuild == nil ? "exclamationmark.triangle.fill" : "hammer.fill")
+                    .font(BG3Type.rowTitle).foregroundStyle(member.manualBuild == nil ? BG3Theme.warning : BG3Theme.success)
+                Text(member.manualBuild == nil
+                    ? "Choose, import, or create a build below."
+                    : "Open the manual builder to record this level's class, feat, spell, and ability choices.")
                     .font(BG3Type.caption).foregroundStyle(BG3Theme.mutedParchment)
             }
             .padding(10)
@@ -183,10 +217,45 @@ struct PartyMemberDetailView: View {
         }
     }
 
-    private func abilityDistribution(_ member: PartyMember) -> some View {
+    private func abilityDistribution(_ member: PartyMember) -> AnyView {
+        if let manual = member.manualBuild {
+            let spent = AbilityProgression.pointBuyCost(manual.abilityScores)
+            return AnyView(
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack {
+                        Text("ABILITY SCORES")
+                            .font(BG3Type.overline)
+                            .foregroundStyle(BG3Theme.gold)
+                        Spacer()
+                        StatusChip(
+                            text: spent == 27 ? "27/27 VALID" : "\(max(spent, 0))/27",
+                            tint: spent == 27 ? BG3Theme.success : BG3Theme.warning,
+                            filled: spent == 27
+                        )
+                    }
+                    HStack(spacing: 5) {
+                        ForEach(Ability.allCases) { ability in
+                            VStack(spacing: 2) {
+                                Text(ability.shortName)
+                                    .font(BG3Type.captionBold)
+                                    .foregroundStyle(BG3Theme.gold)
+                                Text("\(ability.value(in: manual.abilityScores))")
+                                    .font(BG3Type.rowTitle)
+                                    .foregroundStyle(BG3Theme.parchment)
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                    Button("Edit ability points and levels", action: onManualBuild)
+                        .assistantActionButton(accent: BG3Theme.gold, prominent: true)
+                }
+                .padding(10)
+                .bg3InsetSurface(accent: spent == 27 ? BG3Theme.success : BG3Theme.gold)
+            )
+        }
         let setup = AbilityProgression.activeSetup(in: build, at: member.level)
         let applied = setup.map { member.appliedAbilitySetupId == $0.id } ?? false
-        return VStack(alignment: .leading, spacing: 7) {
+        return AnyView(VStack(alignment: .leading, spacing: 7) {
             HStack(alignment: .firstTextBaseline) {
                 Text("ABILITY SCORES")
                     .font(BG3Type.overline)
@@ -239,6 +308,7 @@ struct PartyMemberDetailView: View {
         }
         .padding(10)
         .bg3InsetSurface(accent: applied ? BG3Theme.success : BG3Theme.gold)
+        )
     }
 
     private func buildSelection(_ member: PartyMember) -> some View {

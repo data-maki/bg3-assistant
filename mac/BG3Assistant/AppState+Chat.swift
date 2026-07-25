@@ -130,9 +130,10 @@ extension AppState {
         let guideJSON = (try? encoder.encode(grounding)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let rosterJSON = (try? encoder.encode(roster)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let system = """
-        You are a concise Baldur's Gate 3 Honor Mode assistant. Answer only from the bundled guide facts and run state below. Never invent mechanics, locations, rewards, or completion state. Clearly say when the guide does not establish an answer. Prioritize irreversible risks and the safest next action. Keep the answer under 220 words. Return strict JSON matching the supplied schema.
+        You are a concise Baldur's Gate 3 assistant for a \(runDifficulty.title) run. Answer only from the bundled guide facts and run state below. Never invent mechanics, locations, rewards, or completion state. Clearly say when the guide does not establish an answer. Prioritize irreversible risks and the safest next action. Only treat legendary actions and single-save consequences as active when difficulty is Honour. Keep the answer under 220 words. Return strict JSON matching the supplied schema.
 
         RUN STATE
+        Difficulty: \(runDifficulty.title)
         Act: \(selectedAct)
         Region: \(run.mapRegion)
         Lowest active party level: \(lowestPartyLevel)

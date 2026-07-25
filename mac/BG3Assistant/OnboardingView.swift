@@ -66,6 +66,8 @@ struct OnboardingCardView: View {
     @ViewBuilder private var stepContent: some View {
         switch step {
         case .welcome: welcomeContent
+        case .difficulty: difficultyContent
+        case .spoilers: spoilerContent
         case .ai: aiContent
         case .party: partyContent
         case .catchUp: catchUpContent
@@ -124,7 +126,7 @@ struct OnboardingCardView: View {
             FactRow(
                 glyph: "◆",
                 tint: BG3Theme.gold,
-                text: "Gemma reads screenshots locally. Qwen is local but text-only. OpenRouter sends prompts and screenshots to \(AssistantAIClient.openRouterModel)."
+                text: "The route and character builder work without AI. Gemma reads screenshots locally; Qwen is text-only; OpenRouter sends prompts and screenshots to \(AssistantAIClient.openRouterModel)."
             )
         }
     }
@@ -156,7 +158,7 @@ struct OnboardingCardView: View {
         VStack(spacing: 8) {
             forkButton(
                 icon: "figure.walk.departure",
-                title: "Starting a fresh honor run",
+                title: "Starting a new run",
                 detail: "Act 1, level 1 — routed from the Nautiloid beach.",
                 action: appState.chooseFreshRun
             )
@@ -165,6 +167,119 @@ struct OnboardingCardView: View {
                 title: "Already mid-run",
                 detail: "Tell me where you are; the route and warnings catch up to you.",
                 action: appState.chooseMidRun
+            )
+        }
+    }
+
+    private var difficultyContent: some View {
+        VStack(spacing: 6) {
+            ForEach(RunDifficulty.selectableOverlayDifficulties) { difficulty in
+                let selected = appState.runDifficulty == difficulty
+                Button {
+                    appState.setRunDifficulty(difficulty)
+                } label: {
+                    HStack(spacing: 9) {
+                        Image(systemName: selected ? "largecircle.fill.circle" : "circle")
+                            .foregroundStyle(selected ? BG3Theme.gold : BG3Theme.mutedParchment)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(difficulty.title)
+                                .font(BG3Type.rowTitle)
+                                .foregroundStyle(BG3Theme.parchment)
+                            Text(difficulty.detail)
+                                .font(BG3Type.caption)
+                                .foregroundStyle(BG3Theme.mutedParchment)
+                                .lineLimit(2)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .bg3InsetSurface(accent: selected ? BG3Theme.gold : BG3Theme.bronze)
+            }
+            let explorerSelected = appState.runDifficulty == .explorer
+            Button {
+                appState.setRunDifficulty(.explorer)
+            } label: {
+                HStack(spacing: 9) {
+                    Image(systemName: explorerSelected ? "largecircle.fill.circle" : "circle")
+                        .foregroundStyle(explorerSelected ? BG3Theme.gold : BG3Theme.mutedParchment)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 5) {
+                            Text("Explorer")
+                                .font(BG3Type.rowTitle)
+                                .foregroundStyle(BG3Theme.parchment)
+                            StatusChip(text: "NO OVERLAY NEEDED", tint: BG3Theme.success)
+                        }
+                        Text("Relax, explore, and enjoy your adventure without a checklist.")
+                            .font(BG3Type.caption)
+                            .foregroundStyle(BG3Theme.mutedParchment)
+                            .lineLimit(2)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(8)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .bg3InsetSurface(accent: explorerSelected ? BG3Theme.success : BG3Theme.bronze)
+
+            if explorerSelected {
+                VStack(alignment: .leading, spacing: 7) {
+                    Text("Explorer is designed for discovering BG3 at your own pace. Close the overlay and enjoy the game—we'll be here for a future Balanced, Tactician, or Honour Mode run.")
+                        .font(BG3Type.caption)
+                        .foregroundStyle(BG3Theme.parchment)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Close BG3 Overlay") { NSApp.terminate(nil) }
+                        .assistantActionButton(accent: BG3Theme.success, prominent: true)
+                }
+                .padding(9)
+                .bg3InsetSurface(accent: BG3Theme.success)
+            }
+        }
+    }
+
+    private var spoilerContent: some View {
+        VStack(spacing: 8) {
+            ForEach(RouteRevealPolicy.allCases) { policy in
+                let selected = appState.routeRevealPolicy == policy
+                Button {
+                    appState.setRouteRevealPolicy(policy)
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: policy == .everything ? "map.fill" : "list.number")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(BG3Theme.gold)
+                            .frame(width: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 5) {
+                                Text(policy.title)
+                                    .font(BG3Type.rowTitle)
+                                    .foregroundStyle(BG3Theme.parchment)
+                                if policy == .everything {
+                                    StatusChip(text: "RECOMMENDED AFTER PLAYTHROUGH 1", tint: BG3Theme.success)
+                                }
+                            }
+                            Text(policy.detail)
+                                .font(BG3Type.caption)
+                                .foregroundStyle(BG3Theme.mutedParchment)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(selected ? BG3Theme.success : BG3Theme.mutedParchment)
+                    }
+                    .padding(10)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .bg3InsetSurface(accent: selected ? BG3Theme.gold : BG3Theme.bronze)
+            }
+            FactRow(
+                glyph: "◆",
+                tint: BG3Theme.gold,
+                text: "Recommendation: show everything when this is not your first playthrough."
             )
         }
     }
@@ -408,17 +523,12 @@ struct OnboardingCardView: View {
                     }
                 }
                 .assistantActionButton(accent: BG3Theme.success, prominent: true)
-                .disabled((step == .catchUp && guideStillLoading) || (step == .ai && !selectedProviderReady))
+                .disabled(
+                    (step == .catchUp && guideStillLoading)
+                        || !step.allowsAdvance(with: appState.runDifficulty)
+                )
                 .accessibilityLabel(title)
             }
-        }
-    }
-
-    private var selectedProviderReady: Bool {
-        switch appState.aiProvider {
-        case .localGemma, .localQwen: appState.localAIInstalled
-        case .openRouter: appState.hasOpenRouterKey
-        case nil: false
         }
     }
 

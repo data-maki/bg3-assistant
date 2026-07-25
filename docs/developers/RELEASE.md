@@ -4,7 +4,7 @@ The current macOS artifact is a native Swift app with a generated guide JSON and
 
 ## Artifact contract
 
-A releasable `BG3 Honor Mode Assistant.app` contains:
+A releasable `BG3 Overlay.app` contains:
 
 - `Contents/MacOS/BG3HonorAssistant`
 - `Contents/Resources/Data/guide-bundle.json`
@@ -106,7 +106,7 @@ Xcode may finish the upload with `Upload Symbols Failed` warnings for Ollama, gg
 Run these checks against the app produced by `build-app.sh` or extracted from the final ZIP:
 
 ```sh
-APP="artifacts/macos/app/BG3 Honor Mode Assistant.app"
+APP="artifacts/macos/app/BG3 Overlay.app"
 
 test -x "$APP/Contents/MacOS/BG3HonorAssistant"
 test -f "$APP/Contents/Resources/Data/guide-bundle.json"
@@ -130,7 +130,7 @@ codesign -dv --verbose=4 "$APP"
 For a public direct release, inspect `Info.plist` to confirm it has no backend endpoint setting. Inspect `codesign` output for the expected Developer ID Application authority and successful hardened-runtime signing, then run Gatekeeper against the notarized app:
 
 ```sh
-spctl --assess --type execute --verbose=2 "artifacts/macos/app/BG3 Honor Mode Assistant.app"
+spctl --assess --type execute --verbose=2 "artifacts/macos/app/BG3 Overlay.app"
 ```
 
 This assessment is expected to fail for an ad-hoc local build. Verify the notarization result and stapled ticket on the exact artifact being distributed.

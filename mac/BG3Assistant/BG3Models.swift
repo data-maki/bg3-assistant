@@ -353,6 +353,17 @@ struct AbilityScores: Codable, Hashable {
         default: .customDefault
         }
     }
+
+    var clampedForPointBuy: AbilityScores {
+        .init(
+            strength: min(max(strength, 8), 15),
+            dexterity: min(max(dexterity, 8), 15),
+            constitution: min(max(constitution, 8), 15),
+            intelligence: min(max(intelligence, 8), 15),
+            wisdom: min(max(wisdom, 8), 15),
+            charisma: min(max(charisma, 8), 15)
+        )
+    }
 }
 
 struct ImportedBuild: Codable, Identifiable, Hashable {
@@ -464,6 +475,7 @@ struct PartyMember: Codable, Identifiable, Hashable {
     var abilityModifiers: [AbilityModifier]? = nil
     var usesBuildAbilityScores: Bool? = nil
     var appliedAbilitySetupId: String? = nil
+    var manualBuild: ManualBuildPlan? = nil
 
     var rosterStatus: RosterStatus { status ?? .active }
 
@@ -523,6 +535,8 @@ extension HonorRun {
         fresh.name = name
         fresh.createdAt = createdAt
         fresh.guideVersion = guideVersion
+        fresh.difficulty = source.difficulty
+        fresh.routeRevealPolicy = source.routeRevealPolicy
 
         let buildsByID = Dictionary(uniqueKeysWithValues: availableBuilds.map { ($0.id, $0) })
         let defaultMembers = Dictionary(uniqueKeysWithValues: (fresh.roster ?? fresh.party).map { ($0.id, $0) })
@@ -557,7 +571,8 @@ extension HonorRun {
                 sourceLoadoutId: nil,
                 abilityModifiers: [],
                 usesBuildAbilityScores: build != nil,
-                appliedAbilitySetupId: nil
+                appliedAbilitySetupId: nil,
+                manualBuild: build == nil ? member.manualBuild : nil
             )
         }
         fresh.buildAssignedAt = Dictionary(uniqueKeysWithValues: (fresh.roster ?? []).compactMap { member in
@@ -602,6 +617,8 @@ struct HonorRun: Codable {
     var id = UUID().uuidString
     var name: String?
     var createdAt: Date?
+    var difficulty: RunDifficulty?
+    var routeRevealPolicy: RouteRevealPolicy?
     var guideVersion = ""
     var party: [PartyMember] = [
         PartyMember(id: "tav", name: "Tav", level: 1, buildId: nil, preparedTags: [], className: nil),
@@ -646,6 +663,8 @@ struct HonorRun: Codable {
     /// cap enforced. Idempotent — safe to call on every load.
     mutating func normalizeRoster() {
         if !(1...3).contains(selectedAct ?? 0) { selectedAct = 1 }
+        if difficulty == nil { difficulty = .balanced }
+        if routeRevealPolicy == nil { routeRevealPolicy = .everything }
         var members = roster ?? party
         for index in members.indices {
             if roster == nil { members[index].status = .active }

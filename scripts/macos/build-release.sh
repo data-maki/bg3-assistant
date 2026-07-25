@@ -4,14 +4,14 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_dir="$(cd "$script_dir/../.." && pwd)"
 artifacts_dir="$repo_dir/artifacts/macos"
-app="$artifacts_dir/app/BG3 Honor Mode Assistant.app"
+app="$artifacts_dir/app/BG3 Overlay.app"
 release_dir="$artifacts_dir/releases"
 
 "$script_dir/build-app.sh"
 mkdir -p "$release_dir"
 
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")"
-ARCHIVE="$release_dir/BG3-Honor-Mode-Assistant-${VERSION}-macOS-arm64.zip"
+ARCHIVE="$release_dir/BG3-Overlay-${VERSION}-macOS-arm64.zip"
 REQUIRE_RELEASE_SIGNING="${REQUIRE_RELEASE_SIGNING:-0}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-}"
 

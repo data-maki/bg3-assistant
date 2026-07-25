@@ -48,7 +48,7 @@ struct BG3HonorAssistantApp: App {
                 .environmentObject(appState)
         } label: {
             Image(systemName: "shield.fill")
-                .accessibilityLabel("BG3 Honor Mode Assistant")
+                .accessibilityLabel("BG3 Overlay")
                 // The menu-bar label always exists on a login launch, so it
                 // owns the detector loop's kick-off.
                 .task { await appState.start() }

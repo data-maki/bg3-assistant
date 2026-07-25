@@ -92,6 +92,7 @@ extension AppState {
         reset.usesBuildAbilityScores = false
         reset.appliedAbilitySetupId = nil
         reset.sourceLoadoutId = nil
+        reset.manualBuild = nil
         run.roster?[index] = reset
         run.equippedByMember?[member.id] = nil
         run.buildAssignedAt?.removeValue(forKey: member.id)
@@ -204,10 +205,100 @@ extension AppState {
     func updatePartyLevel(_ level: Int, for member: PartyMember) {
         var copy = member
         copy.level = level
-        if let build = builds.first(where: { $0.id == copy.buildId }),
+        if let manual = copy.manualBuild, !manual.classSummary.isEmpty {
+            copy.className = manual.classSummary
+        } else if let build = builds.first(where: { $0.id == copy.buildId }),
            let plan = build.levels.last(where: { $0.level <= level }) {
             copy.className = plan.take
         }
+        updatePartyMember(copy)
+    }
+
+    func beginManualBuild(for member: PartyMember) {
+        guard member.manualBuild == nil else { return }
+        var copy = member
+        copy.buildId = nil
+        var plan = ManualBuildPlan.empty(
+            name: "\(member.name)'s Build",
+            scores: member.effectiveAbilityScores.clampedForPointBuy
+        )
+        if let existingClass = member.className,
+           let startingClass = BG3ClassCatalog.definitions.first(where: {
+               existingClass == $0.name || existingClass.hasPrefix("\($0.name) ")
+           })?.name {
+            for index in plan.levels.indices {
+                plan.levels[index].className = startingClass
+            }
+        }
+        copy.manualBuild = plan
+        copy.abilityScores = copy.manualBuild?.abilityScores
+        copy.usesBuildAbilityScores = false
+        run.buildAssignedAt?.removeValue(forKey: member.id)
+        updatePartyMember(copy)
+    }
+
+    func renameManualBuild(_ name: String, for member: PartyMember) {
+        var copy = member
+        guard copy.manualBuild != nil else { return }
+        copy.manualBuild?.name = name
+        updatePartyMember(copy)
+    }
+
+    func setManualAbility(_ ability: Ability, value: Int, for member: PartyMember) {
+        var copy = member
+        guard copy.manualBuild != nil else { return }
+        var scores = copy.manualBuild!.abilityScores
+        switch ability {
+        case .strength: scores.strength = value
+        case .dexterity: scores.dexterity = value
+        case .constitution: scores.constitution = value
+        case .intelligence: scores.intelligence = value
+        case .wisdom: scores.wisdom = value
+        case .charisma: scores.charisma = value
+        }
+        copy.manualBuild?.abilityScores = scores
+        copy.abilityScores = scores
+        updatePartyMember(copy)
+    }
+
+    func setManualClass(_ className: String, at characterLevel: Int, for member: PartyMember) {
+        var copy = member
+        guard var plan = copy.manualBuild,
+              plan.levels.contains(where: { $0.characterLevel == characterLevel }) else { return }
+        if runDifficulty == .explorer,
+           let firstClass = plan.levels.first?.className,
+           !firstClass.isEmpty,
+           !className.isEmpty,
+           className != firstClass {
+            errorMessage = "Explorer difficulty does not allow multiclassing."
+            return
+        }
+        plan.setClass(className, at: characterLevel)
+        copy.manualBuild = plan
+        copy.buildId = nil
+        copy.className = plan.classSummary.isEmpty ? nil : plan.classSummary
+        copy.usesBuildAbilityScores = false
+        updatePartyMember(copy)
+    }
+
+    func toggleManualChoice(
+        _ option: String,
+        in group: BG3BuildChoiceGroup,
+        at characterLevel: Int,
+        for member: PartyMember
+    ) {
+        var copy = member
+        guard var plan = copy.manualBuild,
+              let index = plan.levels.firstIndex(where: { $0.characterLevel == characterLevel }) else { return }
+        var selected = plan.levels[index].selections[group.id] ?? []
+        if let existing = selected.firstIndex(of: option) {
+            selected.remove(at: existing)
+        } else {
+            if selected.count >= group.maximumSelections { selected.removeFirst() }
+            selected.append(option)
+        }
+        plan.levels[index].selections[group.id] = selected
+        copy.manualBuild = plan
         updatePartyMember(copy)
     }
 
@@ -225,6 +316,7 @@ extension AppState {
         recordPartyUndo("Changed \(member.name)'s build")
         var copy = member
         copy.buildId = buildID
+        if buildID != nil { copy.manualBuild = nil }
         copy.appliedAbilitySetupId = nil
         // "First to request" recency: stamp when a (different) build lands;
         // clearing the build also clears the stamp and any slot swaps.

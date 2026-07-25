@@ -31,7 +31,7 @@ MAX_SEARCH_ROUNDS = 2
 MAX_SOURCES = 5
 
 SYSTEM_PROMPT = """\
-You are a Baldur's Gate 3 Honor Mode assistant inside a small in-game overlay chat. \
+You are a Baldur's Gate 3 assistant inside a small in-game overlay chat. \
 The player is mid-game and reads answers in a narrow window, so:
 - Lead with the answer. First line = the action to take or the fact asked for; put the key action in **bold**.
 - Stay under ~60 words unless the player explicitly asks for detail. No preamble, no restating the question.
@@ -181,7 +181,7 @@ def _completion(messages: list[dict], settings: Settings, allow_tools: bool) -> 
         headers={
             "Authorization": f"Bearer {settings.openrouter_api_key}",
             "HTTP-Referer": "http://127.0.0.1:8787",
-            "X-Title": "BG3 Honor Mode Assistant",
+            "X-Title": "BG3 Overlay",
         },
         json=payload,
         timeout=30,

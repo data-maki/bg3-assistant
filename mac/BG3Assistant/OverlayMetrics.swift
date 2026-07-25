@@ -54,7 +54,8 @@ enum OverlayMetrics {
         let width = min(max(reference.width * 0.22, 430), 520)
         let height = switch step {
         case .welcome: min(max(reference.height * 0.34, 350), 390)
-        case .ai, .party, .catchUp, .ready: min(max(reference.height * 0.46, 470), 540)
+        case .difficulty: min(max(reference.height * 0.56, 560), 640)
+        case .spoilers, .ai, .party, .catchUp, .ready: min(max(reference.height * 0.46, 470), 540)
         }
         return CGSize(width: width.rounded(), height: height.rounded())
     }

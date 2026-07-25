@@ -14,8 +14,20 @@ final class OnboardingTests: XCTestCase {
     }
 
     func testProviderSetupIsRequiredForBothOnboardingPaths() {
-        XCTAssertEqual(OnboardingStep.steps(for: .fresh), [.welcome, .ai, .party, .ready])
-        XCTAssertEqual(OnboardingStep.steps(for: .midRun), [.welcome, .ai, .party, .catchUp, .ready])
+        XCTAssertEqual(OnboardingStep.steps(for: .fresh), [.welcome, .difficulty, .spoilers, .ai, .party, .ready])
+        XCTAssertEqual(OnboardingStep.steps(for: .midRun), [.welcome, .difficulty, .spoilers, .ai, .party, .catchUp, .ready])
+    }
+
+    func testOnlyKnownOverlayDifficultiesAreSelectable() {
+        XCTAssertEqual(
+            RunDifficulty.selectableOverlayDifficulties,
+            [.balanced, .tactician, .honour]
+        )
+        XCTAssertFalse(RunDifficulty.explorer.supportsOverlay)
+        XCTAssertTrue(RunDifficulty.custom.supportsOverlay)
+        XCTAssertFalse(OnboardingStep.difficulty.allowsAdvance(with: .explorer))
+        XCTAssertTrue(OnboardingStep.difficulty.allowsAdvance(with: .balanced))
+        XCTAssertTrue(OnboardingStep.spoilers.allowsAdvance(with: .explorer))
     }
 
     func testLocalModelCapabilitiesAreExplicit() {

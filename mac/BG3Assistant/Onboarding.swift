@@ -30,6 +30,8 @@ enum OnboardingMode {
 /// (Foundation only) so the flow is verifiable without XCTest.
 enum OnboardingStep: Int, CaseIterable {
     case welcome
+    case difficulty
+    case spoilers
     case ai
     case party
     case catchUp
@@ -37,10 +39,12 @@ enum OnboardingStep: Int, CaseIterable {
 
     /// Bump after a UX overhaul to re-show the wizard once. Finishing or
     /// skipping records this in `AssistantSettings.onboardingSeenVersion`.
-    static let version = 3
+    static let version = 5
 
     static func steps(for mode: OnboardingMode) -> [OnboardingStep] {
-        mode == .midRun ? [.welcome, .ai, .party, .catchUp, .ready] : [.welcome, .ai, .party, .ready]
+        mode == .midRun
+            ? [.welcome, .difficulty, .spoilers, .ai, .party, .catchUp, .ready]
+            : [.welcome, .difficulty, .spoilers, .ai, .party, .ready]
     }
 
     static func stepCount(for mode: OnboardingMode) -> Int { steps(for: mode).count }
@@ -68,6 +72,8 @@ enum OnboardingStep: Int, CaseIterable {
     var title: String {
         switch self {
         case .welcome: "Well Met, Adventurer"
+        case .difficulty: "Choose Your Difficulty"
+        case .spoilers: "How Far Ahead?"
         case .ai: "Choose Your Oracle"
         case .party: "Who Is at Your Table?"
         case .catchUp: "Where Are You?"
@@ -78,9 +84,13 @@ enum OnboardingStep: Int, CaseIterable {
     var intro: String {
         switch self {
         case .welcome:
-            "Your Honor Mode companion floats above Baldur's Gate 3. A short setup makes its advice match your run — not a default one."
+            "BG3 Overlay floats above Baldur's Gate 3. Tell it whether this is a new adventure or a run already in progress."
+        case .difficulty:
+            "BG3 Overlay is built for Balanced, Tactician, and Honour Mode runs. Pick the difficulty you are actually playing."
+        case .spoilers:
+            "Choose the full act plan or keep future story details hidden. Equipment challenges remain visible either way."
         case .ai:
-            "Choose private local AI or connect your own OpenRouter account. You can change this later in Settings."
+            "AI is optional. Choose private local AI, connect OpenRouter, or continue and set it up later in Settings."
         case .party:
             "Set who is actually in the party and their level. Fight readiness and danger warnings key off your lowest active level."
         case .catchUp:
@@ -107,11 +117,17 @@ enum OnboardingStep: Int, CaseIterable {
     func primaryActionTitle(for mode: OnboardingMode) -> String? {
         switch self {
         case .welcome: nil
+        case .difficulty: "Use BG3 Overlay"
+        case .spoilers: "Continue"
         case .ai: "Continue"
         case .party: "Continue"
         case .catchUp: "Catch Up & Continue"
         case .ready: "Start Adventuring"
         }
+    }
+
+    func allowsAdvance(with difficulty: RunDifficulty) -> Bool {
+        self != .difficulty || difficulty.supportsOverlay
     }
 }
 

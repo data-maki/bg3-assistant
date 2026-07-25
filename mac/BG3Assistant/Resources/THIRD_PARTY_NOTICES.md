@@ -2,7 +2,7 @@
 
 ## Baldur's Gate 3 fan content
 
-BG3 Honor Mode Assistant is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
+BG3 Overlay is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
 
 This app is not commissioned, sponsored, endorsed, or approved by Larian Studios. Baldur's Gate, Dungeons & Dragons, D&D, Forgotten Realms, and related names and materials are property of their respective owners.
 
@@ -15,7 +15,7 @@ The app is distributed free of charge. Its use of fan content is subject to:
 
 ## bg3.wiki
 
-Guide facts and item references are adapted from the bg3.wiki pages cited in the bundled `guide-bundle.json`. Bg3.wiki contributor content is available under CC BY-NC-SA 4.0 or CC BY-SA 4.0 depending on its authorship and publication date. The adapted guide data distributed with this app is available under CC BY-NC-SA 4.0. Game assets and other third-party material remain subject to their owners' rights and the applicable fan content terms.
+Guide facts, class spell lists, item references, and build-choice artwork are adapted from the bg3.wiki pages cited in the bundled data, icon manifest, and source generators. The build-choice artwork consists primarily of game-extracted spell, action, feature, and feat icons used for informative identification in this free fan app. Bg3.wiki contributor content is available under CC BY-NC-SA 4.0 or CC BY-SA 4.0 depending on its authorship and publication date. The adapted guide data distributed with this app is available under CC BY-NC-SA 4.0. Game assets and other third-party material remain subject to their owners' rights and the applicable fan content terms.
 
 - Bg3.wiki copyright and reuse terms: https://bg3.wiki/wiki/bg3wiki:Copyrights
 - CC BY-NC-SA 4.0: https://creativecommons.org/licenses/by-nc-sa/4.0/

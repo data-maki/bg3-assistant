@@ -41,7 +41,7 @@ struct ActTabView: View {
             Text("The equipment review and unresolved consequences will be locked. This run cannot return to Act \(appState.selectedAct).")
         }
         .confirmationDialog(
-            "Complete this Honor run?",
+            "Complete this run?",
             isPresented: $confirmingFinal,
             titleVisibility: .visible
         ) {
@@ -253,7 +253,7 @@ struct ActTabView: View {
                 .assistantActionButton(accent: BG3Theme.gold, prominent: true)
                 .disabled(appState.actTransitionBlockedReason != nil || (!appState.currentActRouteConsequences.isEmpty && !acceptsRouteConsequences))
             } else if appState.run.finalActRecord != nil {
-                Label("Honor run complete · Act 3 ledger locked", systemImage: "checkmark.seal.fill")
+                Label("Run complete · Act 3 ledger locked", systemImage: "checkmark.seal.fill")
                     .font(BG3Type.captionBold).foregroundStyle(BG3Theme.success)
             } else {
                 if let blocker = appState.finalActBlockedReason {
@@ -263,7 +263,7 @@ struct ActTabView: View {
                 Button {
                     confirmingFinal = true
                 } label: {
-                    Label("Complete Honor run", systemImage: "checkmark.seal.fill")
+                    Label("Complete run", systemImage: "checkmark.seal.fill")
                         .font(BG3Type.captionBold).frame(maxWidth: .infinity)
                 }
                 .assistantActionButton(accent: BG3Theme.gold, prominent: true)

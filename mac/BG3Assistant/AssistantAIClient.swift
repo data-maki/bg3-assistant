@@ -123,7 +123,7 @@ struct AssistantAIClient: Sendable {
             headers: [
                 "Authorization": "Bearer \(key)",
                 "HTTP-Referer": "https://github.com/jcarbs/bg3_assistant",
-                "X-Title": "BG3 Honor Mode Assistant",
+                "X-Title": "BG3 Overlay",
             ],
             timeout: 90
         )

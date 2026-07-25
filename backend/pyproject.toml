@@ -1,7 +1,7 @@
 [project]
 name = "bg3-honor-assistant-backend"
 version = "0.1.0"
-description = "Local companion and authenticated hosted API for the BG3 Honor Mode Assistant."
+description = "Local companion and authenticated hosted API for BG3 Overlay."
 requires-python = ">=3.11"
 dependencies = [
     "app-store-server-library>=3.1.2,<4",

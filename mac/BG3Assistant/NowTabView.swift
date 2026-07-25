@@ -178,7 +178,7 @@ struct NowTabView: View {
             Divider().overlay(BG3Theme.bronze.opacity(0.38))
 
             FactRow(glyph: "→", tint: BG3Theme.gold, text: checkpoint.advice)
-            if let legendary = checkpoint.legendaryAction {
+            if appState.runDifficulty.showsHonourMechanics, let legendary = checkpoint.legendaryAction {
                 FactRow(glyph: "⚠", tint: BG3Theme.warning, text: legendary)
             }
             if let failure = checkpoint.failureConditions.first {
@@ -191,7 +191,7 @@ struct NowTabView: View {
     private func checkpointMoreDisclosure(_ checkpoint: RouteCheckpoint) -> some View {
         DisclosureGroup("More", isExpanded: $appState.moreContextExpanded) {
             VStack(alignment: .leading, spacing: 8) {
-                if !checkpoint.honorDecisions.isEmpty {
+                if appState.runDifficulty.showsHonourMechanics, !checkpoint.honorDecisions.isEmpty {
                     ForEach(checkpoint.honorDecisions, id: \.text) { decision in
                         FactRow(glyph: "⑂", tint: BG3Theme.gold, text: decision.text, secondary: true)
                     }

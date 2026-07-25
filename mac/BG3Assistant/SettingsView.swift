@@ -83,7 +83,7 @@ struct SettingsView: View {
                 .buttonStyle(.bordered)
             }
 
-            Section("Honor Runs") {
+            Section("Runs") {
                 Picker("Active run", selection: Binding(
                     get: { appState.run.id },
                     set: { appState.switchRun(to: $0) }
@@ -98,12 +98,37 @@ struct SettingsView: View {
                         .buttonStyle(.bordered)
                         .disabled(appState.runNameDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
+                Picker(
+                    "Difficulty",
+                    selection: Binding(
+                        get: { appState.runDifficulty },
+                        set: { appState.setRunDifficulty($0) }
+                    )
+                ) {
+                    ForEach(RunDifficulty.selectableOverlayDifficulties) { difficulty in
+                        Text(difficulty.title).tag(difficulty)
+                    }
+                }
+                Text("Explorer is intentionally checklist-free. Custom rule combinations are not offered because their encounter rules vary.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Picker(
+                    "Route spoilers",
+                    selection: Binding(
+                        get: { appState.routeRevealPolicy },
+                        set: { appState.setRouteRevealPolicy($0) }
+                    )
+                ) {
+                    ForEach(RouteRevealPolicy.allCases) { policy in
+                        Text(policy.title).tag(policy)
+                    }
+                }
                 Divider()
                 TextField("New run name (optional)", text: $appState.newRunNameDraft)
                 Button {
                     appState.newRunConfirmation = true
                 } label: {
-                    Label("New Honor Run", systemImage: "plus")
+                    Label("New Run", systemImage: "plus")
                 }
                 .buttonStyle(.bordered)
             }
@@ -114,7 +139,7 @@ struct SettingsView: View {
                     message.scheme = "mailto"
                     message.path = "jcllobet@gmail.com"
                     message.queryItems = [
-                        URLQueryItem(name: "subject", value: "BG3 Honor Mode Assistant bug report"),
+                        URLQueryItem(name: "subject", value: "BG3 Overlay bug report"),
                     ]
                     if let url = message.url, !NSWorkspace.shared.open(url) {
                         appState.errorMessage = "Could not open an email app. Report bugs to jcllobet@gmail.com."
@@ -128,7 +153,7 @@ struct SettingsView: View {
             }
 
             DisclosureGroup("Legal & Credits") {
-                Text("BG3 Honor Mode Assistant is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.")
+                Text("BG3 Overlay is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.")
                     .font(.caption)
                 Text("This app is not commissioned, sponsored, endorsed, or approved by Larian Studios.")
                     .font(.caption)
@@ -170,7 +195,7 @@ struct SettingsView: View {
         .padding(.vertical, 8)
         .task { await appState.refreshAIProviderStatus() }
         .confirmationDialog(
-            "Create a new Honor run? \(appState.currentRunName) stays saved and can be resumed anytime.",
+            "Create a new run? \(appState.currentRunName) stays saved and can be resumed anytime.",
             isPresented: $appState.newRunConfirmation
         ) {
             Button("Use Current Characters & Builds", action: appState.startNewRunWithCurrentPartyPreset)

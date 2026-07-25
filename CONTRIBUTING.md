@@ -1,6 +1,6 @@
 # Contributing
 
-BG3 Honor Mode Assistant is a focused in-game companion. Contributions should make the next player decision clearer without turning the overlay into a dashboard.
+BG3 Overlay is a focused in-game companion. Contributions should make the next player decision clearer without turning the overlay into a dashboard.
 
 ## Before opening a change
 
@@ -19,7 +19,7 @@ The editable app source is `mac/BG3Assistant/`. Build scripts are in `scripts/ma
 ```sh
 ./scripts/macos/validate.sh
 ./scripts/macos/build-app.sh
-open "artifacts/macos/app/BG3 Honor Mode Assistant.app"
+open "artifacts/macos/app/BG3 Overlay.app"
 ```
 
 The app loads its generated guide bundle directly. Configure Local Qwen or an OpenRouter key in onboarding or Settings; OpenRouter credentials are stored in macOS Keychain.
@@ -38,6 +38,8 @@ uv run pytest -q
 
 Run `./scripts/macos/validate.sh` from the repository root and `uv run --extra dev pytest` from `backend/`, then exercise the changed player flow locally. Keep screenshots, workbooks, and reports in ignored internal folders.
 
+For product intent and the decisions behind the current architecture, see
+[`docs/developers/DESIGN_HISTORY.md`](docs/developers/DESIGN_HISTORY.md).
 For packaging and signing, see [`docs/developers/RELEASE.md`](docs/developers/RELEASE.md).
 
 ## Pull requests

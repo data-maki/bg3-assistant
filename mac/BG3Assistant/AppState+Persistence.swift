@@ -10,7 +10,7 @@ extension AppState {
     func adoptRun(_ shared: HonorRun, token: RunStore.ChangeToken?) {
         let guideContextChanged = run.id != shared.id || selectedAct != (shared.selectedAct ?? 1)
         run = shared
-        runNameDraft = shared.name ?? "Honor Run"
+        runNameDraft = shared.name ?? "BG3 Run"
         partyUndoState = nil
         sharedRunToken = token
         reloadSavedRuns()
@@ -80,7 +80,7 @@ extension AppState {
     ) {
         let nameDraft = requestedName ?? newRunNameDraft
         let trimmedName = nameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        let name = trimmedName.isEmpty ? "Honor Run \(savedRuns.count + 1)" : trimmedName
+        let name = trimmedName.isEmpty ? "BG3 Run \(savedRuns.count + 1)" : trimmedName
         let targetGuideVersion = guideVersion ?? self.availableGuideVersion
         let targetBuilds = availableBuilds ?? builds
         var fresh = HonorRun()
@@ -99,7 +99,7 @@ extension AppState {
         run = fresh
         resetGuideContext()
         partyUndoState = nil
-        runNameDraft = fresh.name ?? "Honor Run"
+        runNameDraft = fresh.name ?? "BG3 Run"
         newRunNameDraft = ""
         skipNoteDraft = ""
         combatCardPinned = false
@@ -137,7 +137,7 @@ extension AppState {
         savedRuns = runStore.listRuns().map { saved in
             SavedRunSummary(
                 id: saved.id,
-                name: saved.name ?? "Honor Run",
+                name: saved.name ?? "BG3 Run",
                 completedSteps: saved.walkthroughProgress?.values.filter(\.countsAsCompleted).count ?? 0,
                 partyLevel: saved.activeParty.map(\.level).min() ?? 1
             )

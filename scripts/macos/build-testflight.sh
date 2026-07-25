@@ -26,11 +26,11 @@ MARKETING_VERSION="${MARKETING_VERSION:-1.1}"
 BUILD_NUMBER="${BUILD_NUMBER:-$(date -u +%Y%m%d%H%M)}"
 UPLOAD_TO_APP_STORE="${UPLOAD_TO_APP_STORE:-1}"
 APP_NAME="BG3HonorAssistant.app"
-DISPLAY_NAME="BG3 Honor Mode Assistant"
+DISPLAY_NAME="BG3 Overlay"
 DERIVED_DATA_PATH="${DERIVED_DATA_PATH:-$artifacts_dir/build/xcode}"
 ARCHIVE_PATH="${ARCHIVE_PATH:-$artifacts_dir/testflight/$DISPLAY_NAME.xcarchive}"
 EXPORT_PATH="${EXPORT_PATH:-$artifacts_dir/testflight/export}"
-FINAL_PACKAGE="$artifacts_dir/testflight/packages/BG3-Honor-Mode-Assistant-$MARKETING_VERSION-$BUILD_NUMBER-TestFlight.pkg"
+FINAL_PACKAGE="$artifacts_dir/testflight/packages/BG3-Overlay-$MARKETING_VERSION-$BUILD_NUMBER-TestFlight.pkg"
 
 TEMP_DIR="$(mktemp -d)"
 trap '/bin/rm -rf "$TEMP_DIR"' EXIT
@@ -40,7 +40,7 @@ EXPORT_OPTIONS="$TEMP_DIR/export-options.plist"
 UPLOAD_OPTIONS="$TEMP_DIR/upload-options.plist"
 
 "$script_dir/build-app.sh" >/dev/null
-RUNTIME_SOURCE="$artifacts_dir/app/BG3 Honor Mode Assistant.app/Contents/Resources/ollama"
+RUNTIME_SOURCE="$artifacts_dir/app/BG3 Overlay.app/Contents/Resources/ollama"
 [[ -x "$RUNTIME_SOURCE/ollama" ]] || fail "the verified Ollama runtime is missing."
 [[ -f "$RUNTIME_ENTITLEMENTS" ]] || fail "the App Store runtime entitlements are missing."
 
@@ -66,6 +66,7 @@ xcodebuild archive \
 ARCHIVED_APP="$ARCHIVE_PATH/Products/Applications/$APP_NAME"
 [[ -x "$ARCHIVED_APP/Contents/MacOS/BG3HonorAssistant" ]] || fail "Xcode did not create the expected archive."
 [[ -f "$ARCHIVED_APP/Contents/Resources/ItemIcons/safeguard-shield.webp" ]] || fail "the equipment item icons are missing from the archive."
+[[ -f "$ARCHIVED_APP/Contents/Resources/BuildOptionIcons/magic-missile.webp" ]] || fail "the build option icons are missing from the archive."
 [[ -f "$ARCHIVED_APP/Contents/Resources/CompanionPortraits/shadowheart.png" ]] || fail "the companion portraits are missing from the archive."
 [[ -f "$ARCHIVED_APP/Contents/Resources/THIRD_PARTY_NOTICES.md" ]] || fail "the fan-content and runtime notices are missing from the archive."
 [[ -f "$ARCHIVED_APP/Contents/Resources/PrivacyInfo.xcprivacy" ]] || fail "the privacy manifest is missing from the archive."

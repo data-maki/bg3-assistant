@@ -55,7 +55,7 @@ make_screenshot "01" "overlay-now.png" "01-next-move.png" \
 make_screenshot "02" "overlay-route.png" "02-plan-the-run.png" \
   "PLAN THE RUN" \
   "Follow dependencies decisions and missed steps" \
-  "in one Honor Mode route" \
+  "in one guided route" \
   "570"
 
 make_screenshot "03" "overlay-party.png" "03-build-the-party.png" \

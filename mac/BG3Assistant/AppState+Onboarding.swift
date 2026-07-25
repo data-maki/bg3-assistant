@@ -4,8 +4,19 @@ import Foundation
 /// peek in `OverlayView`); it stays active until finished, and
 /// quitting mid-wizard re-shows it on the next launch.
 extension AppState {
+    func setRunDifficulty(_ difficulty: RunDifficulty) {
+        run.difficulty = difficulty
+        persistRun()
+    }
+
+    func setRouteRevealPolicy(_ policy: RouteRevealPolicy) {
+        run.routeRevealPolicy = policy
+        persistRun()
+    }
+
     func advanceOnboarding() {
         guard let step = onboardingStep else { return }
+        guard step.allowsAdvance(with: runDifficulty) else { return }
         if let next = step.next(for: onboardingMode) { onboardingStep = next }
         else { finishOnboarding() }
     }

@@ -147,6 +147,11 @@ struct RouteTabView: View {
             .labelsHidden()
             .pickerStyle(.segmented)
             .controlSize(.small)
+            if appState.routeRevealPolicy == .nextThree {
+                Label("Spoiler-light · showing only the next 3 route tasks", systemImage: "eye.slash.fill")
+                    .font(BG3Type.captionBold)
+                    .foregroundStyle(BG3Theme.success)
+            }
         }
         .padding(8)
         .bg3InsetSurface(accent: BG3Theme.gold)
@@ -226,8 +231,8 @@ struct RouteTabView: View {
 
     private var filteredRouteSteps: [WalkthroughStep] {
         switch contentFilter {
-        case .all: appState.activeWalkthroughSteps
-        case .core: appState.activeWalkthroughSteps.filter { $0.importance != "optional" }
+        case .all: appState.visibleWalkthroughSteps
+        case .core: appState.visibleWalkthroughSteps.filter { $0.importance != "optional" }
         case .equipment: []
         }
     }

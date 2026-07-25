@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>BG3 Honor Mode Assistant</string>
+	<string>BG3 Overlay</string>
 	<key>CFBundleExecutable</key>
 	<string>BG3HonorAssistant</string>
 	<key>CFBundleIconFile</key>
@@ -11,7 +11,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.datamaki.BG3HonorAssistant</string>
 	<key>CFBundleName</key>
-	<string>BG3 Honor Mode Assistant</string>
+	<string>BG3 Overlay</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

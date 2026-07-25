@@ -1,6 +1,6 @@
 # Architecture
 
-BG3 Honor Mode Assistant is a native menu-bar macOS app with an in-game SwiftUI/AppKit overlay. The macOS release runtime does not include or start Python, FastAPI, a localhost companion, or a project-hosted AI service. Swift reads a generated guide resource, owns run persistence, calls the user-selected AI provider, and opens the configured public map in the default browser.
+BG3 Overlay is a native menu-bar macOS app with an in-game SwiftUI/AppKit overlay. The macOS release runtime does not include or start Python, FastAPI, a localhost companion, or a project-hosted AI service. Swift reads a generated guide resource, owns run persistence, calls the user-selected AI provider, and opens the configured public map in the default browser.
 
 ## Product boundary
 
@@ -195,14 +195,14 @@ Build, test, and run the native app without starting a server:
 ```sh
 ./scripts/macos/validate.sh
 ./scripts/macos/build-app.sh
-open "artifacts/macos/app/BG3 Honor Mode Assistant.app"
+open "artifacts/macos/app/BG3 Overlay.app"
 ```
 
 Assemble the release-style app:
 
 ```sh
 ./scripts/macos/build-app.sh
-codesign --verify --deep --strict "artifacts/macos/app/BG3 Honor Mode Assistant.app"
+codesign --verify --deep --strict "artifacts/macos/app/BG3 Overlay.app"
 ```
 
 `build-app.sh` compiles the Swift executable, copies the committed guide JSON, downloads and SHA-256-verifies the pinned Ollama v0.30.10 archive when needed, bundles that runtime, and signs the result. It neither invokes `backend/scripts/build-standalone.sh` nor packages a backend directory. Release verification is documented in `docs/developers/RELEASE.md`.

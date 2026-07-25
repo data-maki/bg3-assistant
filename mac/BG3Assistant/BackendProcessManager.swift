@@ -240,7 +240,7 @@ enum BackendProcessError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .backendDirectoryNotFound:
-            return "Could not find the BG3 Honor Mode Assistant backend directory from this app launch path."
+            return "Could not find the BG3 Overlay backend directory from this app launch path."
         case .uvNotFound:
             return "Could not start backend because uv was not found and backend/.venv/bin/python does not exist."
         }
