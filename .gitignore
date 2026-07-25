@@ -58,6 +58,8 @@ data/EXPANSION.md
 
 # Local app/backend state
 .env
+.env.*
+!.env.example
 backend/.env
 backend/.venv/
 backend/runs/
