@@ -7,8 +7,7 @@
 <p align="center"><strong>Keep your Honor run on track without tabbing out.</strong></p>
 
 <p align="center">
-  A native macOS overlay for the route's next move, fight risks, missable decisions,<br>
-  party progression, and equipment plan. You play the game; the app keeps the plan in view.
+  A native macOS overlay for your next objective, route, party builds, and gear.
 </p>
 
 <p align="center">
@@ -20,23 +19,18 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/product-tour.gif" width="560" alt="Animated tour of the Now, Route, Party, and Loadout views">
+  <a href="https://www.linkedin.com/posts/jancarbonell_it-is-now-possible-to-build-custom-software-ugcPost-7485162568655745024-LwyS/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAABG_mREBWEh_UjLUDGTghaMHoO-wpl5zCsE">
+    <img src="docs/images/product-tour.gif" width="560" alt="Watch a walkthrough of the BG3 Honor Mode Assistant">
+  </a>
 </p>
+
+I love Honor Mode, but I kept leaving the game to check guides, a spreadsheet, build pages, and maps. I built this overlay to keep that information beside the game. [Watch the walkthrough and why I built it on LinkedIn](https://www.linkedin.com/posts/jancarbonell_it-is-now-possible-to-build-custom-software-ugcPost-7485162568655745024-LwyS/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAABG_mREBWEh_UjLUDGTghaMHoO-wpl5zCsE).
 
 > **Current beta coverage:** Act 1 route guidance is available. Act 3 is available for runs started or caught up there. Act 2 includes equipment and a public map handoff, but its route is not ready, so normal progression from Act 2 to Act 3 remains locked.
 
 ## Quick start
 
-A notarized download is not available yet, so the one-click installer first builds the app on your Mac. No coding experience is required.
-
-### What you need
-
-- macOS 14 or later on Apple silicon
-- An internet connection for the first build
-- About 3 GB of free space for build files, plus 2.5 GB if you choose Local Qwen
-- About 5-10 minutes for the first install
-
-You do **not** need Git, Python, Homebrew, the full Xcode app, an Apple developer account, a mod manager, or Script Extender.
+The app works on Apple silicon Macs running macOS 14 or later. The first install takes about 5 to 10 minutes and needs an internet connection and about 3 GB of free space. Local Qwen needs another 2.5 GB for its model.
 
 ### Install without Git
 
@@ -51,6 +45,8 @@ bash ./install-macos.sh
 
 If macOS asks to install Command Line Tools, finish that installer and run the same command again. The assistant is then installed in `~/Applications` and opens automatically.
 
+You do not need Git, Python, Homebrew, the full Xcode app, an Apple developer account, a mod manager, or Script Extender.
+
 <details>
 <summary><strong>Install with Git instead</strong></summary>
 
@@ -62,50 +58,50 @@ bash ./install-macos.sh
 
 </details>
 
-### First five minutes
+### Set up your first run
 
 1. Choose whether this is a fresh Honor run or one already in progress.
-2. Choose **Local Qwen** for the simplest private setup, then download its 2.5 GB model. Or choose **OpenRouter** and enter your own API key.
+2. Choose Local Qwen for private AI on your Mac, or choose OpenRouter and enter your API key.
 3. Pick your active party, levels, and builds.
 4. Click **Start Adventuring**, then launch Baldur's Gate 3.
-5. Follow **Now** for the next action and use **Route**, **Party**, and **Loadout** when you need more detail.
 
-The installer includes the guide and local AI runtime, verifies the app, and installs it to `~/Applications`. You do not need to leave Terminal open while playing. Run `bash ./install-macos.sh` again from the project folder to update.
+Follow **Now** for your next objective. Open **Route**, **Party**, or **Loadout** when you need more detail.
 
-Invited TestFlight testers can instead install through [TestFlight](https://apps.apple.com/app/testflight/id899247664). The guide, run planning, party, loadout, and act review work without an account; AI chat and public-URL build import require Local Qwen or OpenRouter.
+You can close Terminal after installation. To update the app later, open the project folder in Terminal and run `bash ./install-macos.sh` again.
 
-## Why use it
+Invited TestFlight testers can install through [TestFlight](https://apps.apple.com/app/testflight/id899247664) instead.
 
-**Know what matters now.** See the route's recommended action, the outcome to avoid, the risk and level, and the reason behind the recommendation. Mark it done, record a different outcome, or skip it yourself.
+## What the app shows
 
-**See what opens next.** Route dependencies separate what is ready from what comes later. Deadlines, lockouts, unresolved consequences, and completed steps stay attached to the run instead of a pile of browser tabs.
+| Next objective | Route and blockers |
+| --- | --- |
+| <img src="docs/images/overlay-now.png" alt="Now view showing the next recommended objective and its main risk"> | <img src="docs/images/overlay-route.png" alt="Route view showing ready objectives, later objectives, deadlines, and act progress"> |
 
-**Keep the party on plan.** Each active character gets current-level build guidance, equipment picks, ownership, and contention warnings. Built-in builds also include exact creation and respec ability recipes.
-
-| Current-level party guidance | Equipment planning |
+| Party builds | Gear targets |
 | --- | --- |
 | <img src="docs/images/overlay-party.png" alt="Party view showing level-five guidance for four active characters"> | <img src="docs/images/overlay-loadout.png" alt="Loadout view showing equipment picks and contested items"> |
 
-## How a run works
+## Use it during a run
 
-1. Pick your active four, levels, and builds. You can also catch up a run that is already in progress.
-2. Follow **Now** for the immediate recommendation or open **Route** to see the surrounding steps and blockers.
-3. Confirm what happened. The next recommendation updates from your recorded progress and decisions.
-4. Review equipment and unresolved consequences before advancing an act. Advancing locks that act's ledger inside the app; it does not change the BG3 save.
+1. Check **Now** for the next objective, its risk, and what to avoid.
+2. Mark the objective done, record another outcome, or skip it.
+3. Open **Route** to change priorities or see what is blocked.
+4. Use **Party** and **Loadout** when you level up or want to chase an item.
+5. Review missed equipment and unresolved decisions before leaving an act.
 
-Nothing is inferred from the game. The app does not read saves or memory, and it never marks a fight, decision, or pickup complete on its own.
+The app only knows what you tell it. It does not read your save or mark anything complete on its own.
 
-## More than a route checklist
+## Other features
 
-- Save separate solo, co-op, and retry runs, each with its own party, decisions, equipment, and progress.
-- Use a full roster with Active, Camp, and Unrecruited placement, including Withers hirelings.
-- Open the native walkthrough and pickup plan, or hand off to the current act's public map.
-- Ask guide-grounded questions from the overlay with optional speech input.
-- Import one reusable build from a public URL, then assign it to the selected character.
+- Keep separate solo, co-op, and retry runs.
+- Manage active, camp, and unrecruited characters, including Withers hirelings.
+- Open the walkthrough, pickup plan, or public map for the current act.
+- Ask questions from the overlay by typing or speaking.
+- Import a build from a public URL and assign it to a character.
 
-Imported builds are AI-extracted drafts, not a legality guarantee. The importer derives a legal 27-point starting allocation, but you should review classes, spells, feats, equipment, and later progression against the source. Importing never changes party membership.
+Imported builds are drafts. The app creates a valid 27-point starting allocation, but you should check the classes, spells, feats, equipment, and later levels against the original build.
 
-## Coverage and route assumptions
+## Current coverage
 
 | Act | Route | Equipment | Map |
 | --- | --- | --- | --- |
@@ -117,17 +113,19 @@ The current route is opinionated: it favors a cautious, generally good-aligned r
 
 ## Privacy and permissions
 
-This is not a BG3 mod. It does not install game files, read memory or saves, automate input, record gameplay, or require Script Extender. Core run and catalog data are stored in your Application Support directory.
+- This is not a BG3 mod. It does not change game files, read saves or memory, automate input, or record gameplay.
+- Your runs, party, and imported builds stay in your Application Support folder.
+- The guide and planner work without AI. Public maps need internet access.
+- Local Qwen runs on your Mac after you download its model.
+- OpenRouter receives the run details needed to answer your question. The API key stays in macOS Keychain.
 
-The core guide and planner do not need AI or internet access. Public map handoffs require internet access.
+OpenRouter chat can attach one screenshot of the visible BG3 window if you grant Screen Recording permission. You can preview or remove the screenshot before sending it. The app does not capture in the background, and Local Qwen does not accept screenshots.
 
-Local Qwen runs on this Mac after its model download. OpenRouter sends the selected run context needed to answer a question, including relevant guide facts, party, progress, and outcomes, to `google/gemini-3-flash-preview`. Its API key is stored only in macOS Keychain. The app never silently switches providers. With Screen Recording permission, OpenRouter chat can also prepare one visible BG3-window screenshot. You can preview or remove it, and it is sent only when you send that message. Local Qwen does not accept screenshots. There is no background capture or recording loop.
+Build import downloads text from the public URL. Local Qwen processes it on your Mac; OpenRouter receives the URL and extracted text. Speech input asks for microphone and Speech Recognition permission.
 
-Build import downloads readable text from the public URL on this Mac. Local Qwen processes it locally; OpenRouter receives the URL and extracted text. Imported drafts are validated and saved locally. Speech input requests microphone and Speech Recognition access, and macOS may use Apple's speech service when on-device recognition is unavailable.
+## Contribute
 
-## Build and contribute
-
-Contributions are welcome, from route corrections and build data to Swift UI and app behavior. Keep changes focused on helping a player make the next decision; this project intentionally does not connect to BG3 through mods, memory, saves, or automated input.
+You can contribute route corrections, build data, Swift UI, or app behavior. Keep each change focused on one player problem. The app will remain an overlay, not a BG3 mod.
 
 ### Developer quickstart
 
