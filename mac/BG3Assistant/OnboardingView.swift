@@ -77,20 +77,22 @@ struct OnboardingCardView: View {
 
     private var aiContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            providerButton(.localQwen)
-            if appState.aiProvider == .localQwen {
-                if appState.localAIInstalled {
-                    Label("Qwen3 4B is installed", systemImage: "checkmark.circle.fill")
-                        .font(BG3Type.caption)
-                        .foregroundStyle(BG3Theme.success)
-                } else if appState.isInstallingLocalAI {
-                    ProgressView(value: appState.localAIInstallProgress)
-                    Text("Downloading Qwen3 4B. Keep the assistant open.")
-                        .font(BG3Type.caption)
-                        .foregroundStyle(BG3Theme.mutedParchment)
-                } else {
-                    Button("Download 2.5 GB Model", action: appState.installLocalAI)
-                        .assistantActionButton(accent: BG3Theme.gold, prominent: true)
+            ForEach([AIProvider.localGemma, AIProvider.localQwen]) { provider in
+                providerButton(provider)
+                if appState.aiProvider == provider {
+                    if appState.localAIInstalled {
+                        Label("\(provider.title) is installed", systemImage: "checkmark.circle.fill")
+                            .font(BG3Type.caption)
+                            .foregroundStyle(BG3Theme.success)
+                    } else if appState.isInstallingLocalAI {
+                        ProgressView(value: appState.localAIInstallProgress)
+                        Text("Downloading \(provider.title). Keep the assistant open.")
+                            .font(BG3Type.caption)
+                            .foregroundStyle(BG3Theme.mutedParchment)
+                    } else if let downloadSize = provider.modelDownloadSize {
+                        Button("Download \(downloadSize) Model", action: appState.installLocalAI)
+                            .assistantActionButton(accent: BG3Theme.gold, prominent: true)
+                    }
                 }
             }
             providerButton(.openRouter)
@@ -122,7 +124,7 @@ struct OnboardingCardView: View {
             FactRow(
                 glyph: "◆",
                 tint: BG3Theme.gold,
-                text: "Local Qwen never sends prompts off this Mac. OpenRouter sends prompts to \(AssistantAIClient.openRouterModel)."
+                text: "Gemma reads screenshots locally. Qwen is local but text-only. OpenRouter sends prompts and screenshots to \(AssistantAIClient.openRouterModel)."
             )
         }
     }
@@ -414,7 +416,7 @@ struct OnboardingCardView: View {
 
     private var selectedProviderReady: Bool {
         switch appState.aiProvider {
-        case .localQwen: appState.localAIInstalled
+        case .localGemma, .localQwen: appState.localAIInstalled
         case .openRouter: appState.hasOpenRouterKey
         case nil: false
         }

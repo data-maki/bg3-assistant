@@ -30,7 +30,7 @@ I love Honor Mode, but I kept leaving the game to check guides, a spreadsheet, b
 
 ## Quick start
 
-The app works on Apple silicon Macs running macOS 14 or later. The first install takes about 5 to 10 minutes and needs an internet connection and about 3 GB of free space. Local Qwen needs another 2.5 GB for its model.
+The app works on Apple silicon Macs running macOS 14 or later. The first install takes about 5 to 10 minutes and needs an internet connection and about 3 GB of free space. A local model needs another 2.5 GB for Qwen or 7.6 GB for Gemma.
 
 ### Install without Git
 
@@ -61,7 +61,16 @@ bash ./install-macos.sh
 ### Set up your first run
 
 1. Choose whether this is a fresh Honor run or one already in progress.
-2. Choose Local Qwen for private AI on your Mac, or choose OpenRouter and enter your API key.
+2. Choose an AI option:
+
+   | Option | Best for | Screenshot chat |
+   | --- | --- | --- |
+   | Local Gemma 4 12B | The full private experience. Uses about 7.6 GB. | Yes |
+   | Local Qwen3 4B | A smaller, faster 2.5 GB download for text chat. | No |
+   | OpenRouter | Cloud AI without a large local model. Requires your API key and credits. | Yes |
+
+   <img src="docs/images/qwen-text-only-chat.jpg" width="420" alt="Chat explaining that Qwen3 4B is text-only and that Gemma 4 12B or OpenRouter is required for screenshots">
+
 3. Pick your active party, levels, and builds.
 4. Click **Start Adventuring**, then launch Baldur's Gate 3.
 
@@ -116,12 +125,12 @@ The current route is opinionated: it favors a cautious, generally good-aligned r
 - This is not a BG3 mod. It does not change game files, read saves or memory, automate input, or record gameplay.
 - Your runs, party, and imported builds stay in your Application Support folder.
 - The guide and planner work without AI. Public maps need internet access.
-- Local Qwen runs on your Mac after you download its model.
+- Local Gemma and Local Qwen run on your Mac after you download the model.
 - OpenRouter receives the run details needed to answer your question. The API key stays in macOS Keychain.
 
-OpenRouter chat can attach one screenshot of the visible BG3 window if you grant Screen Recording permission. You can preview or remove the screenshot before sending it. The app does not capture in the background, and Local Qwen does not accept screenshots.
+Local Gemma and OpenRouter chat can attach one screenshot of the visible BG3 window if you grant Screen Recording permission. You can preview or remove it before sending. The app does not capture in the background. Gemma processes screenshots on your Mac; OpenRouter sends them to its cloud model. Local Qwen is text-only and does not accept screenshots.
 
-Build import downloads text from the public URL. Local Qwen processes it on your Mac; OpenRouter receives the URL and extracted text. Speech input asks for microphone and Speech Recognition permission.
+Build import downloads text from the public URL. Local Gemma and Local Qwen process it on your Mac; OpenRouter receives the URL and extracted text. Speech input asks for microphone and Speech Recognition permission.
 
 ## Contribute
 
