@@ -18,14 +18,22 @@ public sealed class PackageManifestTests
         "app.manifest");
 
     [Fact]
-    public void ManifestTargetsOnlySupportedWindowsDesktopArchitecture()
+    public void ManifestTemplateRequiresExplicitSupportedWindowsDesktopArchitecture()
     {
         var document = XDocument.Load(ManifestPath);
         XNamespace foundation = "http://schemas.microsoft.com/appx/manifest/foundation/windows10";
         XNamespace uap10 = "http://schemas.microsoft.com/appx/manifest/uap/windows10/10";
 
         var identity = Assert.Single(document.Descendants(foundation + "Identity"));
-        Assert.Equal("x64", identity.Attribute("ProcessorArchitecture")?.Value);
+        Assert.Equal(
+            "ARCHITECTURE_PLACEHOLDER",
+            identity.Attribute("ProcessorArchitecture")?.Value);
+        Assert.DoesNotContain(
+            identity.Attributes(),
+            attribute =>
+                attribute.Value.Equals("neutral", StringComparison.OrdinalIgnoreCase) ||
+                attribute.Value.Equals("AnyCPU", StringComparison.OrdinalIgnoreCase) ||
+                attribute.Value.Equals("MSIL", StringComparison.OrdinalIgnoreCase));
 
         var target = Assert.Single(document.Descendants(foundation + "TargetDeviceFamily"));
         Assert.Equal("Windows.Desktop", target.Attribute("Name")?.Value);
@@ -36,6 +44,61 @@ public sealed class PackageManifestTests
         Assert.Equal("Windows.FullTrustApplication", application.Attribute("EntryPoint")?.Value);
         Assert.Equal("packagedClassicApp", application.Attribute(uap10 + "RuntimeBehavior")?.Value);
         Assert.Equal("mediumIL", application.Attribute(uap10 + "TrustLevel")?.Value);
+    }
+
+    [Fact]
+    public void DevelopmentMsixBuildValidatesBothArchitectureSpecificPackages()
+    {
+        var script = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "tools",
+            "build-development-msix.ps1"));
+
+        Assert.Contains(
+            "[ValidateSet('arm64', 'x64')]",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "$runtimeIdentifier = \"win-$Architecture\"",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "-Architecture $Architecture",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "ProcessorArchitecture = $Architecture",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Assert-PackageLayout -Root $publishRoot",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "MakeAppx validation unpack failed",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Assert-PackageLayout -Root $inspectionRoot",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "ARM64EC payloads are not allowed",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Cross-architecture PE payload",
+            script,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "ProcessorArchitecture=\"x64\"",
+            script,
+            StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(
+            "\\x64\\makeappx.exe$",
+            script,
+            StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -73,12 +136,7 @@ public sealed class PackageManifestTests
     [Fact]
     public void MvpExcludesCaptureAndMicrophoneProductSurface()
     {
-        var appXaml = File.ReadAllText(Path.Combine(
-            RepositoryRoot,
-            "windows",
-            "src",
-            "BG3HonorAssistant.App",
-            "MainWindow.xaml"));
+        var appXaml = ReadAppXaml();
         var solution = File.ReadAllText(Path.Combine(
             RepositoryRoot,
             "windows",
@@ -100,10 +158,7 @@ public sealed class PackageManifestTests
             .Where(path => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
             .Select(File.ReadAllText)
             .ToList();
-        var appXaml = File.ReadAllText(Path.Combine(
-            sourceRoot,
-            "BG3HonorAssistant.App",
-            "MainWindow.xaml"));
+        var appXaml = ReadAppXaml();
         var persistence = File.ReadAllText(Path.Combine(
             sourceRoot,
             "BG3HonorAssistant.Infrastructure",
@@ -141,6 +196,7 @@ public sealed class PackageManifestTests
             "windows",
             "src",
             "BG3HonorAssistant.App",
+            "Shell",
             "TrayMenu.cs"));
 
         foreach (var label in new[]
@@ -190,8 +246,11 @@ public sealed class PackageManifestTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            if (Directory.Exists(Path.Combine(directory.FullName, ".git")) &&
-                Directory.Exists(Path.Combine(directory.FullName, "windows")))
+            if (File.Exists(Path.Combine(
+                    directory.FullName,
+                    "windows",
+                    "BG3HonorAssistant.slnx")) &&
+                Directory.Exists(Path.Combine(directory.FullName, "Resources")))
             {
                 return directory.FullName;
             }
@@ -213,6 +272,21 @@ public sealed class PackageManifestTests
         return Directory.Exists(directory)
             ? Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
             : [];
+    }
+
+    private static string ReadAppXaml()
+    {
+        var appRoot = Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "src",
+            "BG3HonorAssistant.App");
+        return string.Join(
+            Environment.NewLine,
+            Directory
+                .EnumerateFiles(appRoot, "*.xaml", SearchOption.AllDirectories)
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .Select(File.ReadAllText));
     }
 
     private static IEnumerable<int> Occurrences(string value, string needle)

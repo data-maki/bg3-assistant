@@ -51,8 +51,11 @@ public sealed class SharedResourceTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            if (Directory.Exists(Path.Combine(directory.FullName, ".git")) &&
-                Directory.Exists(Path.Combine(directory.FullName, "mac")))
+            if (File.Exists(Path.Combine(
+                    directory.FullName,
+                    "windows",
+                    "BG3HonorAssistant.slnx")) &&
+                Directory.Exists(Path.Combine(directory.FullName, "Resources")))
             {
                 return directory.FullName;
             }

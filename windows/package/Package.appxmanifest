@@ -11,7 +11,7 @@
     Name="BG3HonorAssistant.Dev"
     Publisher="CN=BG3HonorAssistant Development"
     Version="0.1.0.0"
-    ProcessorArchitecture="x64" />
+    ProcessorArchitecture="ARCHITECTURE_PLACEHOLDER" />
 
   <Properties>
     <DisplayName>BG3 Honor Assistant</DisplayName>
