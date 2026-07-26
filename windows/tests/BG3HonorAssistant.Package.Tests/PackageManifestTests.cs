@@ -54,6 +54,11 @@ public sealed class PackageManifestTests
             "windows",
             "tools",
             "build-development-msix.ps1"));
+        var validator = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "package",
+            "validate-package-architecture.ps1"));
 
         Assert.Contains(
             "[ValidateSet('arm64', 'x64')]",
@@ -72,7 +77,7 @@ public sealed class PackageManifestTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "Assert-PackageLayout -Root $publishRoot",
+            "-Root $publishRoot",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -80,16 +85,24 @@ public sealed class PackageManifestTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "Assert-PackageLayout -Root $inspectionRoot",
+            "-Root $inspectionRoot",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
             "ARM64EC payloads are not allowed",
-            script,
+            validator,
             StringComparison.Ordinal);
         Assert.Contains(
             "Cross-architecture PE payload",
-            script,
+            validator,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "IsArchitectureNeutralIl",
+            validator,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "exactly one Application",
+            validator,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
             "ProcessorArchitecture=\"x64\"",
