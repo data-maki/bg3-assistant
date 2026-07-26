@@ -130,7 +130,8 @@ final class ManualBuildTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-            .appending(path: "BG3Assistant/Resources/BuildOptionIcons", directoryHint: .isDirectory)
+            .deletingLastPathComponent()
+            .appending(path: "Resources/BuildOptionIcons", directoryHint: .isDirectory)
         let missing = Set(options.map(\.artworkFilename)).filter {
             !FileManager.default.fileExists(atPath: iconDirectory.appending(path: $0).path)
         }

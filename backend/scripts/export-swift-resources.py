@@ -13,9 +13,9 @@ from app.walkthrough_data import load_walkthrough
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUTPUT = ROOT / "mac" / "BG3Assistant" / "Resources" / "Data" / "guide-bundle.json"
+OUTPUT = ROOT / "Resources" / "Data" / "guide-bundle.json"
 ICON_SOURCE = ROOT / "backend" / "app" / "static" / "map" / "icons"
-ICON_OUTPUT = ROOT / "mac" / "BG3Assistant" / "Resources" / "ItemIcons"
+ICON_OUTPUT = ROOT / "Resources" / "ItemIcons"
 
 
 def dump(item):

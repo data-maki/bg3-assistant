@@ -19,7 +19,7 @@ No landing-page value is called "actual" unless it was recorded by the player. N
 
 ## Build Data Sources
 
-Reviewed builds originate in `data`, pass through the Python guide/catalog loaders, and are compiled by `backend/scripts/export-swift-resources.py` into `mac/BG3Assistant/Resources/Data/guide-bundle.json`. The released app reads that JSON directly through `GuideRepository`; it does not request Party data from a local or hosted backend.
+Reviewed builds originate in `data`, pass through the Python guide/catalog loaders, and are compiled by `backend/scripts/export-swift-resources.py` into `Resources/Data/guide-bundle.json`. The released apps read that shared JSON directly; they do not request Party data from a local or hosted backend.
 
 Imported builds are created by Swift from a public URL using the provider selected in Settings. They are saved separately to `~/Library/Application Support/BG3HonorAssistant/imported-builds.json` and merged into the native build picker. Imported builds remain labelled `Imported; verify choices in game` because structured extraction and point-buy validation do not prove complete build legality.
 

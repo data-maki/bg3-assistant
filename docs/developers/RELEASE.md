@@ -35,7 +35,7 @@ The user downloads only the `qwen3:4b` model through Settings. Its files live un
 - Developer ID Application certificate for a direct public release
 - A `notarytool` Keychain profile for notarization
 - Internet access on a clean build to download the pinned Ollama archive
-- Up-to-date generated `mac/BG3Assistant/Resources/Data/guide-bundle.json`
+- Up-to-date generated `Resources/Data/guide-bundle.json`
 
 The app uses standard HTTPS/TLS and does not implement proprietary encryption. `ITSAppUsesNonExemptEncryption` is `false`; the release owner must still confirm export-compliance answers for the distribution channel.
 
@@ -62,7 +62,7 @@ uv run python scripts/export-swift-resources.py
 
 cd ..
 git diff --check
-git diff --exit-code -- mac/BG3Assistant/Resources/Data/guide-bundle.json
+git diff --exit-code -- Resources/Data/guide-bundle.json
 ```
 
 The final command intentionally fails when the generated guide was stale before regeneration. Review and commit a legitimate generated diff rather than discarding it.
@@ -110,7 +110,7 @@ APP="artifacts/macos/app/BG3 Overlay.app"
 
 test -x "$APP/Contents/MacOS/BG3HonorAssistant"
 test -f "$APP/Contents/Resources/Data/guide-bundle.json"
-cmp mac/BG3Assistant/Resources/Data/guide-bundle.json \
+cmp Resources/Data/guide-bundle.json \
   "$APP/Contents/Resources/Data/guide-bundle.json"
 
 test -x "$APP/Contents/Resources/ollama/ollama" || \

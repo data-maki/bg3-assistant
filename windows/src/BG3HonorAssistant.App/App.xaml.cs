@@ -32,8 +32,6 @@ public partial class App : System.Windows.Application
     {
         OverlayWindowService.EnablePerMonitorV2DpiAwareness();
         base.OnStartup(eventArgs);
-        ApplyAccessibilityTheme();
-        SystemParameters.StaticPropertyChanged += OnSystemParametersChanged;
 
         try
         {
@@ -162,60 +160,11 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs eventArgs)
     {
-        SystemParameters.StaticPropertyChanged -= OnSystemParametersChanged;
         overlay?.Dispose();
         trayIcon?.Dispose();
         trayMenu?.Dispose();
         singleInstance?.Dispose();
         base.OnExit(eventArgs);
-    }
-
-    private void OnSystemParametersChanged(
-        object? sender,
-        System.ComponentModel.PropertyChangedEventArgs eventArgs)
-    {
-        _ = sender;
-        if (eventArgs.PropertyName == nameof(SystemParameters.HighContrast))
-        {
-            ApplyAccessibilityTheme();
-        }
-    }
-
-    private void ApplyAccessibilityTheme()
-    {
-        if (SystemParameters.HighContrast)
-        {
-            Resources["WindowBackgroundBrush"] = System.Windows.SystemColors.WindowBrush;
-            Resources["PanelBrush"] = System.Windows.SystemColors.ControlBrush;
-            Resources["PanelRaisedBrush"] = System.Windows.SystemColors.ControlBrush;
-            Resources["AccentBrush"] = System.Windows.SystemColors.HighlightBrush;
-            Resources["PrimaryTextBrush"] = System.Windows.SystemColors.WindowTextBrush;
-            Resources["SecondaryTextBrush"] = System.Windows.SystemColors.GrayTextBrush;
-            Resources["DangerBrush"] = System.Windows.SystemColors.HotTrackBrush;
-            return;
-        }
-
-        Resources["WindowBackgroundBrush"] =
-            new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0x11, 0x13, 0x1A));
-        Resources["PanelBrush"] =
-            new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0x1B, 0x1E, 0x28));
-        Resources["PanelRaisedBrush"] =
-            new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0x24, 0x28, 0x36));
-        Resources["AccentBrush"] =
-            new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0xD5, 0xA6, 0x4C));
-        Resources["PrimaryTextBrush"] =
-            new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0xF4, 0xF0, 0xE8));
-        Resources["SecondaryTextBrush"] =
-            new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0xBB, 0xB5, 0xAA));
-        Resources["DangerBrush"] =
-            new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0xE1, 0x70, 0x70));
     }
 
     private void AttachActivationHook(Window window)

@@ -57,32 +57,34 @@ public partial class OverlayWindow : Window
 
     public nint NativeHandle => handle;
 
-    public void Update(CurrentGoalPresentation goal, AppPreferences preferences)
+    public void Update(
+        CurrentGoalPresentation goal,
+        AppPreferences preferences,
+        int selectedAct = 1)
     {
         var density = preferences.OverlayDensity;
         GoalText.Text = goal.Title;
-        AreaText.Text = string.IsNullOrWhiteSpace(goal.Area)
-            ? goal.Danger.ToUpperInvariant()
-            : $"{goal.Area} - {goal.Danger.ToUpperInvariant()}";
-        LevelText.Text = $"L{goal.MinimumLevel}+";
-        AvoidText.Text = goal.Avoid;
-        ReferenceGoalText.Text = goal.Title;
-        ReferenceMetaText.Text =
-            $"{goal.Area} · L{goal.MinimumLevel}+ · {goal.Danger.ToUpperInvariant()}";
-        ReferenceAvoidText.Text = goal.Avoid;
+        TaskOverlineText.Text = $"CURRENT TASK · ACT {selectedAct}";
+        LevelText.Text = $"L{goal.MinimumLevel}+ · {goal.Danger.ToUpperInvariant()}";
+        LevelText.Foreground = DangerBrush(goal.Danger);
+        AvoidText.Text = string.IsNullOrWhiteSpace(goal.Area)
+            ? $"AVOID {goal.Avoid}"
+            : $"{goal.Area.ToUpperInvariant()} · AVOID {goal.Avoid}";
 
         MinimalPanel.Visibility =
             density == OverlayDensity.Minimal ? Visibility.Visible : Visibility.Collapsed;
         FocusPanel.Visibility =
             density == OverlayDensity.Focus ? Visibility.Visible : Visibility.Collapsed;
-        ReferencePanel.Visibility =
-            density == OverlayDensity.Reference ? Visibility.Visible : Visibility.Collapsed;
         (Width, Height) = density switch
         {
-            OverlayDensity.Minimal => (92, 92),
-            OverlayDensity.Reference => (390, 290),
-            _ => (340, 190),
+            OverlayDensity.Minimal => (126, 98),
+            OverlayDensity.Reference => (437, 184),
+            _ => (437, 165),
         };
+        TopRow.Height = new GridLength(
+            density == OverlayDensity.Reference ? 105D : 86D);
+        AvoidText.MaxHeight =
+            density == OverlayDensity.Reference ? 50D : 31D;
 
         reduceMotion =
             preferences.ReducedMotion ||
@@ -97,6 +99,19 @@ public partial class OverlayWindow : Window
 
         lastGoalTitle = goal.Title;
         UpdatePetFrame();
+    }
+
+    private static Brush DangerBrush(string danger)
+    {
+        var key = danger.ToLowerInvariant() switch
+        {
+            "extreme" => "BG3DangerBrush",
+            "high" => "BG3WarningBrush",
+            "medium" => "BG3CautionBrush",
+            _ => "BG3ControlBrush",
+        };
+        return Application.Current.TryFindResource(key) as Brush ??
+               Brushes.SlateGray;
     }
 
     public void EnsurePassive()
@@ -132,6 +147,20 @@ public partial class OverlayWindow : Window
         }
 
         OpenPlannerRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnShowGoalClick(object sender, RoutedEventArgs eventArgs)
+    {
+        _ = sender;
+        _ = eventArgs;
+        if (handle != nint.Zero)
+        {
+            windowService.SetPassive(handle, passive: false);
+        }
+
+        DensityRequested?.Invoke(
+            this,
+            new OverlayDensityChangedEventArgs(OverlayDensity.Focus));
     }
 
     private void OnCollapseClick(object sender, RoutedEventArgs eventArgs)
@@ -285,6 +314,7 @@ public partial class OverlayWindow : Window
                 Math.Max(1D, PetImage.ActualHeight > 0D ? PetImage.ActualHeight : 67D)),
             reduceMotion);
         PetImage.Source = PetSpriteLoader.Frame(frame);
+        FocusPetImage.Source = PetImage.Source;
         PetImage.Visibility =
             PetImage.Source is null ? Visibility.Collapsed : Visibility.Visible;
         PetFallbackText.Visibility =

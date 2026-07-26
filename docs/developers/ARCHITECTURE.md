@@ -57,10 +57,13 @@ backend Python loaders and catalog validation
 backend/scripts/export-swift-resources.py
           |
           v
-mac/BG3Assistant/Resources/Data/guide-bundle.json
-          |
-          v
-scripts/macos/build-app.sh copies the JSON into the app bundle
+Resources/Data/guide-bundle.json
+          |----------------------------------|
+          v                                  v
+scripts/macos/build-app.sh             Windows MSBuild
+          |                                  |
+          v                                  v
+macOS app bundle                       Windows app package
 ```
 
 `build-app.sh` does not regenerate the guide. Changes to reviewed data or Python loaders must regenerate and commit `guide-bundle.json` before building the app.
@@ -70,7 +73,7 @@ scripts/macos/build-app.sh copies the JSON into the app bundle
 | Path | Responsibility |
 | --- | --- |
 | `mac/BG3Assistant` | App lifecycle, overlay UI, domain state, direct persistence, guide loading, provider calls, import, capture, and OS integration |
-| `mac/BG3Assistant/Resources/Data/guide-bundle.json` | Generated, read-only guide/catalog input for the Swift runtime |
+| `Resources/Data/guide-bundle.json` | Generated, read-only guide/catalog input shared by the macOS and Windows runtimes |
 | `mac/Tests` | Swift tests for the native app |
 | `scripts/macos` | App validation, assembly, signing, direct-release packaging, and release helpers |
 | `artifacts/macos` | Ignored Swift/Xcode caches, assembled apps, archives, and packages |

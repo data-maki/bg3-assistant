@@ -29,6 +29,28 @@ public sealed class GameLauncher
         });
     }
 
+    public void OpenSupportEmail()
+    {
+        Process.Start(new ProcessStartInfo(
+            "mailto:jcllobet@gmail.com?subject=BG3%20Overlay%20bug%20report")
+        {
+            UseShellExecute = true,
+        });
+    }
+
+    public void OpenLocalFile(string path)
+    {
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("The bundled file was not found.", path);
+        }
+
+        Process.Start(new ProcessStartInfo(path)
+        {
+            UseShellExecute = true,
+        });
+    }
+
     public static bool TryCreateHttpUri(string value, out Uri uri)
     {
         if (Uri.TryCreate(value, UriKind.Absolute, out var candidate) &&

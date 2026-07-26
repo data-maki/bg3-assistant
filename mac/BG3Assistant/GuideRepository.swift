@@ -12,6 +12,8 @@ struct GuideRepository {
     init(bundle: Bundle = .main) throws {
         let sourceDataDirectory = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
             .appending(path: "Resources/Data", directoryHint: .isDirectory)
         let candidates = [
             bundle.resourceURL?.appending(path: "Data/guide-bundle.json"),

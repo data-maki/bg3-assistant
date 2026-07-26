@@ -92,13 +92,13 @@ Commit the NuGet `packages.lock.json` generated beside each project.
 
 Link shared guide/media into the Windows project from the existing repository resources instead of duplicating them:
 
-- `mac/BG3Assistant/Resources/Data/guide-bundle.json`
-- `mac/BG3Assistant/Resources/CompanionPortraits`
-- `mac/BG3Assistant/Resources/ItemIcons`
-- `mac/BG3Assistant/Resources/BuildOptionIcons`
-- `mac/BG3Assistant/Resources/twilight-cleric.webp`
+- `Resources/Data/guide-bundle.json`
+- `Resources/CompanionPortraits`
+- `Resources/ItemIcons`
+- `Resources/BuildOptionIcons`
+- `Resources/twilight-cleric.webp`
 
-MSBuild `Content` items can assign package-relative `Link` paths. This preserves the macOS tree and gives both builds one committed asset source. Generate/commit a JSON spell catalog for Windows from the existing canonical generator because Swift generated source cannot be consumed by C#. Do not require Python during player install or app runtime.
+MSBuild `Content` items can assign package-relative `Link` paths, giving both builds one committed asset source. Generate/commit a JSON spell catalog for Windows from the existing canonical generator because Swift generated source cannot be consumed by C#. Do not require Python during player install or app runtime.
 
 ## Ordered milestones
 

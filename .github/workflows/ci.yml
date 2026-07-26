@@ -23,3 +23,16 @@ jobs:
       - name: Test
         working-directory: backend
         run: uv run --extra dev pytest -q
+
+  windows:
+    name: Windows app build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore locked dependencies
+        run: dotnet restore windows/src/BG3HonorAssistant.App/BG3HonorAssistant.App.csproj --locked-mode
+      - name: Build
+        run: dotnet build windows/src/BG3HonorAssistant.App/BG3HonorAssistant.App.csproj --configuration Release --no-restore

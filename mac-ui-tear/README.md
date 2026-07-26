@@ -1,8 +1,14 @@
 # BG3 Overlay macOS UI tear
 
-This folder is a current-state visual inventory of the native macOS app.
+This folder is a current-state visual inventory of the native macOS app and the
+Windows replica reference.
 
-- **59 PNG screenshots** are in [`screenshots/`](screenshots/).
+- **47 clone 1-to-1 screenshots** are in
+  [`screenshots/clone-1-to-1/`](screenshots/clone-1-to-1/).
+- **12 Windows-adapted screenshots** are in
+  [`screenshots/windows-adapted/`](screenshots/windows-adapted/).
+- The exact differences for the adapted screens are defined in
+  [`WINDOWS-PORT-GUIDE.md`](WINDOWS-PORT-GUIDE.md).
 - Every captured state and action is indexed in [`SCREEN-INVENTORY.md`](SCREEN-INVENTORY.md).
 - The SwiftUI owners, state/actions, runtime data, and image assets are mapped in [`SOURCE-ASSET-MAP.md`](SOURCE-ASSET-MAP.md).
 
@@ -34,15 +40,15 @@ Transient macOS `NSMenu` option lists do not consistently return a bitmap throug
 
 | Onboarding | Route |
 | --- | --- |
-| [![Onboarding](screenshots/01-onboarding-welcome.png)](screenshots/01-onboarding-welcome.png) | [![Route](screenshots/16-planner-route.png)](screenshots/16-planner-route.png) |
+| [![Onboarding](screenshots/clone-1-to-1/01-onboarding-welcome.png)](screenshots/clone-1-to-1/01-onboarding-welcome.png) | [![Route](screenshots/clone-1-to-1/16-planner-route.png)](screenshots/clone-1-to-1/16-planner-route.png) |
 
 | Party build | Loadout |
 | --- | --- |
-| [![Party build](screenshots/32-party-reviewed-build-assigned.png)](screenshots/32-party-reviewed-build-assigned.png) | [![Loadout](screenshots/34-gear-detail.png)](screenshots/34-gear-detail.png) |
+| [![Party build](screenshots/clone-1-to-1/32-party-reviewed-build-assigned.png)](screenshots/clone-1-to-1/32-party-reviewed-build-assigned.png) | [![Loadout](screenshots/clone-1-to-1/34-gear-detail.png)](screenshots/clone-1-to-1/34-gear-detail.png) |
 
-| Act ledger | Local AI response |
+| Act ledger | Windows-adapted chat reference |
 | --- | --- |
-| [![Act ledger](screenshots/37-planner-act.png)](screenshots/37-planner-act.png) | [![Local AI response](screenshots/50-chat-qwen-response.png)](screenshots/50-chat-qwen-response.png) |
+| [![Act ledger](screenshots/clone-1-to-1/37-planner-act.png)](screenshots/clone-1-to-1/37-planner-act.png) | [![Chat response reference](screenshots/windows-adapted/50-chat-qwen-response.png)](screenshots/windows-adapted/50-chat-qwen-response.png) |
 
 ## Observed current-state notes
 

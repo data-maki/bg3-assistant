@@ -1,0 +1,219 @@
+<UserControl x:Class="BG3HonorAssistant.App.Screens.Party.Components.ManualBuildView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:BG3HonorAssistant.App.UI"
+        xmlns:models="clr-namespace:BG3HonorAssistant.Core.Models;assembly=BG3HonorAssistant.Core">
+<Grid x:Name="ManualBuildPanel"
+                              Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <DockPanel Margin="0,0,0,7">
+                                <Button DockPanel.Dock="Left"
+                                        Style="{StaticResource BG3ActionButton}"
+                                        Click="OnPartyCharacterBackClick"
+                                        Content="‹  Character" />
+                                <Border DockPanel.Dock="Right"
+                                        Padding="7,2"
+                                        Background="#338C5224"
+                                        BorderBrush="#808C5224"
+                                        BorderThickness="0.7"
+                                        CornerRadius="8">
+                                    <TextBlock x:Name="ManualDifficultyText"
+                                               Style="{StaticResource BG3Caption}"
+                                               FontWeight="Bold" />
+                                </Border>
+                            </DockPanel>
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <Border Padding="10"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="#668C5224"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource BG3Overline}"
+                                                       Text="MANUAL BUILD" />
+                                            <TextBox x:Name="ManualBuildNameTextBox"
+                                                     Margin="0,6,0,0"
+                                                     LostFocus="OnManualBuildNameLostFocus" />
+                                            <TextBlock x:Name="ManualBuildClassSummaryText"
+                                                       Margin="0,5,0,0"
+                                                       Style="{StaticResource BG3Caption}"
+                                                       FontWeight="Bold"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Margin="0,8,0,0"
+                                            Padding="10"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="#4D8C5224"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9">
+                                        <StackPanel>
+                                            <DockPanel>
+                                                <TextBlock x:Name="ManualPointBuyStatusText"
+                                                           DockPanel.Dock="Right"
+                                                           Style="{StaticResource BG3Caption}"
+                                                           FontWeight="Bold" />
+                                                <TextBlock Style="{StaticResource BG3Overline}"
+                                                           Text="ABILITY POINTS" />
+                                            </DockPanel>
+                                            <ItemsControl x:Name="ManualAbilityList"
+                                                          Margin="0,7,0,0">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <UniformGrid Columns="6" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Margin="2"
+                                                                Padding="3"
+                                                                Background="#800E0C09"
+                                                                CornerRadius="7">
+                                                            <StackPanel>
+                                                                <TextBlock HorizontalAlignment="Center"
+                                                                           Style="{StaticResource BG3Caption}"
+                                                                           FontWeight="Bold"
+                                                                           Foreground="{StaticResource BG3GoldBrush}"
+                                                                           Text="{Binding Label}" />
+                                                                <Button Padding="0"
+                                                                        Background="Transparent"
+                                                                        BorderThickness="0"
+                                                                        Click="OnManualAbilityAdjustClick"
+                                                                        Content="−"
+                                                                        Tag="-1" />
+                                                                <TextBlock HorizontalAlignment="Center"
+                                                                           Style="{StaticResource BG3PageTitle}"
+                                                                           Text="{Binding Value}" />
+                                                                <Button Padding="0"
+                                                                        Background="Transparent"
+                                                                        BorderThickness="0"
+                                                                        Click="OnManualAbilityAdjustClick"
+                                                                        Content="+"
+                                                                        Tag="1" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                    <DockPanel Margin="0,9,0,6">
+                                        <TextBlock x:Name="ManualCurrentLevelText"
+                                                   DockPanel.Dock="Right"
+                                                   Style="{StaticResource BG3Caption}"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Style="{StaticResource BG3Overline}"
+                                                   Text="LEVELS 1–12" />
+                                    </DockPanel>
+                                    <ListBox x:Name="ManualLevelList"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             SelectionChanged="OnManualLevelSelectionChanged">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                <Setter Property="Padding" Value="0" />
+                                                <Setter Property="Margin" Value="0,0,0,6" />
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="9"
+                                                        Background="{StaticResource BG3InsetBrush}"
+                                                        BorderBrush="#4D8C5224"
+                                                        BorderThickness="0.7"
+                                                        CornerRadius="9">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="36" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="148" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Width="32"
+                                                                Height="32"
+                                                                Background="{StaticResource BG3GoldBrush}"
+                                                                CornerRadius="16">
+                                                            <TextBlock HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       FontFamily="{StaticResource BG3SerifFont}"
+                                                                       FontWeight="Bold"
+                                                                       Foreground="{StaticResource BG3InkBrush}"
+                                                                       Text="{Binding Level}" />
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1">
+                                                            <TextBlock Style="{StaticResource BG3RowTitle}"
+                                                                       Text="{Binding Heading}" />
+                                                            <TextBlock Style="{StaticResource BG3Caption}"
+                                                                       Text="{Binding Summary}"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                        </StackPanel>
+                                                        <ComboBox Grid.Column="2"
+                                                                  ItemsSource="{Binding Classes}"
+                                                                  SelectedItem="{Binding SelectedClass, Mode=OneWay}"
+                                                                  SelectionChanged="OnManualClassChanged" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Border x:Name="ManualChoicesPanel"
+                                            Margin="0,2,0,0"
+                                            Padding="9"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="#668C5224"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9"
+                                            Visibility="Collapsed">
+                                        <StackPanel>
+                                            <TextBlock x:Name="ManualChoicesTitleText"
+                                                       Style="{StaticResource BG3Overline}" />
+                                            <ListBox x:Name="ManualChoiceList"
+                                                     Margin="0,5,0,0"
+                                                     Background="Transparent"
+                                                     BorderThickness="0">
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                        <Setter Property="Padding" Value="0" />
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Margin="0,3,0,0"
+                                                                  IsChecked="{Binding Selected, Mode=OneWay}"
+                                                                  Click="OnManualChoiceClick">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="29" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Image Width="24"
+                                                                       Height="24"
+                                                                       Source="{Binding Label, Converter={StaticResource BuildOptionIconConverter}}"
+                                                                       Stretch="Uniform" />
+                                                                <StackPanel Grid.Column="1">
+                                                                    <TextBlock Style="{StaticResource BG3Caption}"
+                                                                               FontWeight="Bold"
+                                                                               Text="{Binding Label}" />
+                                                                    <TextBlock Style="{StaticResource BG3Caption}"
+                                                                               Text="{Binding Detail}"
+                                                                               TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </CheckBox>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+</UserControl>

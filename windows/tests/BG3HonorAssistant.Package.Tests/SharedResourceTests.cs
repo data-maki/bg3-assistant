@@ -7,8 +7,6 @@ public sealed class SharedResourceTests
     private static readonly string RepositoryRoot = FindRepositoryRoot();
     private static readonly string ResourceRoot = Path.Combine(
         RepositoryRoot,
-        "mac",
-        "BG3Assistant",
         "Resources");
 
     [Fact]
