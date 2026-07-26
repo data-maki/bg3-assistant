@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Screens.Now;
 
-public partial class NowView : UserControl
+public partial class NowView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 

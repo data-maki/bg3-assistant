@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Components.Onboarding;
 
-public partial class OnboardingView : UserControl
+public partial class OnboardingView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 

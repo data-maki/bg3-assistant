@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Screens.Settings;
 
-public partial class SettingsView : UserControl
+public partial class SettingsView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 

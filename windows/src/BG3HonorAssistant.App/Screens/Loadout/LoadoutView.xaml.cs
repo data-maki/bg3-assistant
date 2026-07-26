@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Screens.Loadout;
 
-public partial class LoadoutView : UserControl
+public partial class LoadoutView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 

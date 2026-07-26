@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Screens.Chat;
 
-public partial class ChatView : UserControl
+public partial class ChatView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 
@@ -18,7 +18,9 @@ public partial class ChatView : UserControl
         Host = host;
     }
 
-    private void OnChatDraftKeyDown(object sender, KeyEventArgs eventArgs) =>
+    private void OnChatDraftKeyDown(
+        object sender,
+        System.Windows.Input.KeyEventArgs eventArgs) =>
         Host.OnChatDraftKeyDown(sender, eventArgs);
 
     private void OnChatScopeClick(object sender, RoutedEventArgs eventArgs) =>

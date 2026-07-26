@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Screens.Party.Components;
 
-public partial class PartyAbilitiesView : UserControl
+public partial class PartyAbilitiesView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 

@@ -101,7 +101,7 @@ public partial class OverlayWindow : Window
         UpdatePetFrame();
     }
 
-    private static Brush DangerBrush(string danger)
+    private static System.Windows.Media.Brush DangerBrush(string danger)
     {
         var key = danger.ToLowerInvariant() switch
         {
@@ -110,7 +110,7 @@ public partial class OverlayWindow : Window
             "medium" => "BG3CautionBrush",
             _ => "BG3ControlBrush",
         };
-        return Application.Current.TryFindResource(key) as Brush ??
+        return Application.Current.TryFindResource(key) as System.Windows.Media.Brush ??
                Brushes.SlateGray;
     }
 

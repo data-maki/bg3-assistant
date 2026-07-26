@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Components.Dialogs;
 
-public partial class DialogsView : UserControl
+public partial class DialogsView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 

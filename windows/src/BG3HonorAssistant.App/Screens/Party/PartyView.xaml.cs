@@ -2,7 +2,7 @@ using System.Windows.Controls;
 
 namespace BG3HonorAssistant.App.Screens.Party;
 
-public partial class PartyView : UserControl
+public partial class PartyView : System.Windows.Controls.UserControl
 {
     public PartyView()
     {

@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BG3HonorAssistant.App.Screens.Route;
 
-public partial class RouteView : UserControl
+public partial class RouteView : System.Windows.Controls.UserControl
 {
     private MainWindow Host { get; set; } = null!;
 
