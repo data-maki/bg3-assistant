@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="d55dc9b1-8399-4498-970f-800120f4b066" name="jcarbs@JANCARBONELB5E7 2026-07-26 03:39:20" runUser="JANCARBONELB5E7\jcarbs" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-07-26T03:39:20.4921530-07:00" queuing="2026-07-26T03:39:20.4921541-07:00" start="2026-07-26T03:39:03.6854181-07:00" finish="2026-07-26T03:39:23.0190261-07:00" />
+  <TestSettings name="default" id="2ae8dccb-4709-427b-a94b-75fa75cbbec3">
+    <Deployment runDeploymentRoot="jcarbs_JANCARBONELB5E7_2026-07-26_03_39_20" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0bd25808-abf4-4671-942b-a95eb01dc262" testId="54d3532b-5775-59f6-21df-ffbac77f8059" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.FightPinSnoozeAndMuteRemainExplicitSessionAndRunState" computerName="JANCARBONELB5E7" duration="00:00:00.0062077" startTime="2026-07-26T03:39:20.3134536-07:00" endTime="2026-07-26T03:39:20.3137287-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0bd25808-abf4-4671-942b-a95eb01dc262">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FightPinSnoozeAndMuteRemainExplicitSessionAndRunState() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 141&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="11c48994-eea7-46fd-9aa9-17bc14e40cf5" testId="1667b900-7d2e-3615-c08d-ff14a514cb9f" testName="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.BundledWindowsCodecDecodesAndCropsAtlasFrame(row: 0, column: 0)" computerName="JANCARBONELB5E7" duration="00:00:01.8687954" startTime="2026-07-26T03:39:20.4909902-07:00" endTime="2026-07-26T03:39:22.3531337-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="11c48994-eea7-46fd-9aa9-17bc14e40cf5" />
+    <UnitTestResult executionId="453311cc-1b14-4670-a003-f5a91a5e187a" testId="e3d52633-9df5-89d5-d8ac-492a3d2d2098" testName="BG3HonorAssistant.App.Tests.TrayMenuTests.EveryCommandInvokesItsOwnedActionAndRunMenuTracksState" computerName="JANCARBONELB5E7" duration="00:00:02.1122828" startTime="2026-07-26T03:39:19.3327824-07:00" endTime="2026-07-26T03:39:21.2053107-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="453311cc-1b14-4670-a003-f5a91a5e187a" />
+    <UnitTestResult executionId="3a466c39-3a7f-4546-9ef0-0f1b4acf91de" testId="5ffcdc81-905b-5e45-22c3-7726d8172e7e" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate" computerName="JANCARBONELB5E7" duration="00:00:00.0040710" startTime="2026-07-26T03:39:20.3152687-07:00" endTime="2026-07-26T03:39:20.3158145-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3a466c39-3a7f-4546-9ef0-0f1b4acf91de">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 166&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="14d97d4f-64fb-470d-94fd-f95ad95e17cf" testId="905bb2a8-a4cb-36d1-d505-61ead9b746b3" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.FirstStartCreatesNormalizedRecoverableRunFromSharedGuide" computerName="JANCARBONELB5E7" duration="00:00:00.0081664" startTime="2026-07-26T03:39:20.3107509-07:00" endTime="2026-07-26T03:39:20.3108840-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="14d97d4f-64fb-470d-94fd-f95ad95e17cf">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FirstStartCreatesNormalizedRecoverableRunFromSharedGuide() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 20&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2e808ce5-9b93-454f-88a6-7a54981a3d3a" testId="ed3f121c-fb23-78af-67b6-b0932d0ca645" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.GearTargetReplacesNowGoalAndCompletionRecordsOwnership" computerName="JANCARBONELB5E7" duration="00:00:00.0051593" startTime="2026-07-26T03:39:20.2323248-07:00" endTime="2026-07-26T03:39:20.2748974-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2e808ce5-9b93-454f-88a6-7a54981a3d3a">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.GearTargetReplacesNowGoalAndCompletionRecordsOwnership() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 113&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7937336f-1a9f-442b-8394-d2e5ae072479" testId="158cfc5b-61a7-fe5e-bbb4-b31dc142cfa5" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.ImportedBuildPersistsGloballyAndCanBeAssigned" computerName="JANCARBONELB5E7" duration="00:00:00.1428355" startTime="2026-07-26T03:39:20.2155828-07:00" endTime="2026-07-26T03:39:20.2163616-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7937336f-1a9f-442b-8394-d2e5ae072479">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.ImportedBuildPersistsGloballyAndCanBeAssigned() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 192&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="dcceb178-e462-4159-a43d-7ee74a39f207" testId="55ad0e65-18ec-7f21-74a2-ccd481ce1e62" testName="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.BundledWindowsCodecDecodesAndCropsAtlasFrame(row: 10, column: 7)" computerName="JANCARBONELB5E7" duration="00:00:00.0070067" startTime="2026-07-26T03:39:22.3585665-07:00" endTime="2026-07-26T03:39:22.3606090-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dcceb178-e462-4159-a43d-7ee74a39f207" />
+    <UnitTestResult executionId="4d9404b0-b6fb-49a0-8cf1-db9f7b4c5b3d" testId="3c9330eb-d083-c1c9-c75b-ec9292b67f41" testName="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: 0, column: 8)" computerName="JANCARBONELB5E7" duration="00:00:00.0746085" startTime="2026-07-26T03:39:20.4058241-07:00" endTime="2026-07-26T03:39:20.4819671-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d9404b0-b6fb-49a0-8cf1-db9f7b4c5b3d" />
+    <UnitTestResult executionId="31c6f725-266a-47d2-8f47-b76159767243" testId="222ccff8-ad76-644f-3130-9e074c33589b" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.RouteMutationSurvivesControllerAndRepositoryRestart" computerName="JANCARBONELB5E7" duration="00:00:00.7762289" startTime="2026-07-26T03:39:19.3275203-07:00" endTime="2026-07-26T03:39:20.0528163-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="31c6f725-266a-47d2-8f47-b76159767243">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.RouteMutationSurvivesControllerAndRepositoryRestart() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 36&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fd11ed3e-bdbd-475a-9aad-44b0fb43058d" testId="3d0ff132-359e-21d0-e8a4-f6ca3f51d1f5" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.PreferencesAndActTwoGapSurviveRestart" computerName="JANCARBONELB5E7" duration="00:00:00.0068582" startTime="2026-07-26T03:39:20.3175049-07:00" endTime="2026-07-26T03:39:20.3177829-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fd11ed3e-bdbd-475a-9aad-44b0fb43058d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.PreferencesAndActTwoGapSurviveRestart() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 81&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="980f06bb-68ce-480f-b532-7ca729650b1f" testId="eceac31c-e281-8130-6e67-ba09bcf0984a" testName="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: 11, column: 0)" computerName="JANCARBONELB5E7" duration="00:00:00.0000079" startTime="2026-07-26T03:39:20.4904378-07:00" endTime="2026-07-26T03:39:20.4905975-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="980f06bb-68ce-480f-b532-7ca729650b1f" />
+    <UnitTestResult executionId="f3f522ed-de62-426e-ae01-959edccd91f8" testId="626dce5a-5057-67f2-bdbd-991a277fe052" testName="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: -1, column: 0)" computerName="JANCARBONELB5E7" duration="00:00:00.0000337" startTime="2026-07-26T03:39:20.4887567-07:00" endTime="2026-07-26T03:39:20.4889723-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f3f522ed-de62-426e-ae01-959edccd91f8" />
+    <UnitTestResult executionId="82cb2ffe-6584-4243-b693-69983f02a737" testId="1d03bdf8-6f83-32d6-d5d9-2158ebc49e82" testName="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: 0, column: -1)" computerName="JANCARBONELB5E7" duration="00:00:00.0089480" startTime="2026-07-26T03:39:20.4864038-07:00" endTime="2026-07-26T03:39:20.4866664-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="82cb2ffe-6584-4243-b693-69983f02a737" />
+    <UnitTestResult executionId="c493e83b-d681-446a-999f-2eb7ac715058" testId="e95a9fea-b1e0-a0ef-9193-ca186c6772ce" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.RunCreationAndSwitchingPreserveIndependentSnapshots" computerName="JANCARBONELB5E7" duration="00:00:00.0559608" startTime="2026-07-26T03:39:20.3068548-07:00" endTime="2026-07-26T03:39:20.3095004-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c493e83b-d681-446a-999f-2eb7ac715058">
+      <Output>
+        <ErrorInfo>
+          <Message>System.IO.FileNotFoundException : Could not locate the shared guide bundle.</Message>
+          <StackTrace>   at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 264&#xD;
+   at BG3HonorAssistant.App.Tests.AssistantControllerTests.RunCreationAndSwitchingPreserveIndependentSnapshots() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs:line 58&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5fec2678-e887-4955-9341-28981005c82d" testId="34843b87-a7f5-5f19-0d2d-0c0d130ea548" testName="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.BundledWindowsCodecDecodesAndCropsAtlasFrame(row: 4, column: 4)" computerName="JANCARBONELB5E7" duration="00:00:00.0003561" startTime="2026-07-26T03:39:22.3625656-07:00" endTime="2026-07-26T03:39:22.3628265-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5fec2678-e887-4955-9341-28981005c82d" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: 0, column: -1)" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="1d03bdf8-6f83-32d6-d5d9-2158ebc49e82">
+      <Execution id="82cb2ffe-6584-4243-b693-69983f02a737" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests" name="InvalidAtlasCoordinatesReturnNoFrame" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="5ffcdc81-905b-5e45-22c3-7726d8172e7e">
+      <Execution id="3a466c39-3a7f-4546-9ef0-0f1b4acf91de" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: 11, column: 0)" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="eceac31c-e281-8130-6e67-ba09bcf0984a">
+      <Execution id="980f06bb-68ce-480f-b532-7ca729650b1f" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests" name="InvalidAtlasCoordinatesReturnNoFrame" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.PreferencesAndActTwoGapSurviveRestart" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="3d0ff132-359e-21d0-e8a4-f6ca3f51d1f5">
+      <Execution id="fd11ed3e-bdbd-475a-9aad-44b0fb43058d" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="PreferencesAndActTwoGapSurviveRestart" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.RunCreationAndSwitchingPreserveIndependentSnapshots" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="e95a9fea-b1e0-a0ef-9193-ca186c6772ce">
+      <Execution id="c493e83b-d681-446a-999f-2eb7ac715058" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="RunCreationAndSwitchingPreserveIndependentSnapshots" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.GearTargetReplacesNowGoalAndCompletionRecordsOwnership" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="ed3f121c-fb23-78af-67b6-b0932d0ca645">
+      <Execution id="2e808ce5-9b93-454f-88a6-7a54981a3d3a" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="GearTargetReplacesNowGoalAndCompletionRecordsOwnership" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.TrayMenuTests.EveryCommandInvokesItsOwnedActionAndRunMenuTracksState" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="e3d52633-9df5-89d5-d8ac-492a3d2d2098">
+      <Execution id="453311cc-1b14-4670-a003-f5a91a5e187a" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.TrayMenuTests" name="EveryCommandInvokesItsOwnedActionAndRunMenuTracksState" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: -1, column: 0)" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="626dce5a-5057-67f2-bdbd-991a277fe052">
+      <Execution id="f3f522ed-de62-426e-ae01-959edccd91f8" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests" name="InvalidAtlasCoordinatesReturnNoFrame" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.BundledWindowsCodecDecodesAndCropsAtlasFrame(row: 10, column: 7)" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="55ad0e65-18ec-7f21-74a2-ccd481ce1e62">
+      <Execution id="dcceb178-e462-4159-a43d-7ee74a39f207" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests" name="BundledWindowsCodecDecodesAndCropsAtlasFrame" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.BundledWindowsCodecDecodesAndCropsAtlasFrame(row: 4, column: 4)" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="34843b87-a7f5-5f19-0d2d-0c0d130ea548">
+      <Execution id="5fec2678-e887-4955-9341-28981005c82d" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests" name="BundledWindowsCodecDecodesAndCropsAtlasFrame" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.FirstStartCreatesNormalizedRecoverableRunFromSharedGuide" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="905bb2a8-a4cb-36d1-d505-61ead9b746b3">
+      <Execution id="14d97d4f-64fb-470d-94fd-f95ad95e17cf" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="FirstStartCreatesNormalizedRecoverableRunFromSharedGuide" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.ImportedBuildPersistsGloballyAndCanBeAssigned" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="158cfc5b-61a7-fe5e-bbb4-b31dc142cfa5">
+      <Execution id="7937336f-1a9f-442b-8394-d2e5ae072479" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="ImportedBuildPersistsGloballyAndCanBeAssigned" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.BundledWindowsCodecDecodesAndCropsAtlasFrame(row: 0, column: 0)" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="1667b900-7d2e-3615-c08d-ff14a514cb9f">
+      <Execution id="11c48994-eea7-46fd-9aa9-17bc14e40cf5" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests" name="BundledWindowsCodecDecodesAndCropsAtlasFrame" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.RouteMutationSurvivesControllerAndRepositoryRestart" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="222ccff8-ad76-644f-3130-9e074c33589b">
+      <Execution id="31c6f725-266a-47d2-8f47-b76159767243" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="RouteMutationSurvivesControllerAndRepositoryRestart" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.FightPinSnoozeAndMuteRemainExplicitSessionAndRunState" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="54d3532b-5775-59f6-21df-ffbac77f8059">
+      <Execution id="0bd25808-abf4-4671-942b-a95eb01dc262" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="FightPinSnoozeAndMuteRemainExplicitSessionAndRunState" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests.InvalidAtlasCoordinatesReturnNoFrame(row: 0, column: 8)" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.app.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.app.tests.dll" id="3c9330eb-d083-c1c9-c75b-ec9292b67f41">
+      <Execution id="4d9404b0-b6fb-49a0-8cf1-db9f7b4c5b3d" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.PetSpriteLoaderTests" name="InvalidAtlasCoordinatesReturnNoFrame" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="54d3532b-5775-59f6-21df-ffbac77f8059" executionId="0bd25808-abf4-4671-942b-a95eb01dc262" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1667b900-7d2e-3615-c08d-ff14a514cb9f" executionId="11c48994-eea7-46fd-9aa9-17bc14e40cf5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3d52633-9df5-89d5-d8ac-492a3d2d2098" executionId="453311cc-1b14-4670-a003-f5a91a5e187a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5ffcdc81-905b-5e45-22c3-7726d8172e7e" executionId="3a466c39-3a7f-4546-9ef0-0f1b4acf91de" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="905bb2a8-a4cb-36d1-d505-61ead9b746b3" executionId="14d97d4f-64fb-470d-94fd-f95ad95e17cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed3f121c-fb23-78af-67b6-b0932d0ca645" executionId="2e808ce5-9b93-454f-88a6-7a54981a3d3a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="158cfc5b-61a7-fe5e-bbb4-b31dc142cfa5" executionId="7937336f-1a9f-442b-8394-d2e5ae072479" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="55ad0e65-18ec-7f21-74a2-ccd481ce1e62" executionId="dcceb178-e462-4159-a43d-7ee74a39f207" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3c9330eb-d083-c1c9-c75b-ec9292b67f41" executionId="4d9404b0-b6fb-49a0-8cf1-db9f7b4c5b3d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="222ccff8-ad76-644f-3130-9e074c33589b" executionId="31c6f725-266a-47d2-8f47-b76159767243" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3d0ff132-359e-21d0-e8a4-f6ca3f51d1f5" executionId="fd11ed3e-bdbd-475a-9aad-44b0fb43058d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eceac31c-e281-8130-6e67-ba09bcf0984a" executionId="980f06bb-68ce-480f-b532-7ca729650b1f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="626dce5a-5057-67f2-bdbd-991a277fe052" executionId="f3f522ed-de62-426e-ae01-959edccd91f8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d03bdf8-6f83-32d6-d5d9-2158ebc49e82" executionId="82cb2ffe-6584-4243-b693-69983f02a737" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e95a9fea-b1e0-a0ef-9193-ca186c6772ce" executionId="c493e83b-d681-446a-999f-2eb7ac715058" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="34843b87-a7f5-5f19-0d2d-0c0d130ea548" executionId="5fec2678-e887-4955-9341-28981005c82d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="16" executed="16" passed="8" failed="8" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.10)&#xD;
+[xUnit.net 00:00:02.56]   Discovering: BG3HonorAssistant.App.Tests&#xD;
+[xUnit.net 00:00:03.10]   Discovered:  BG3HonorAssistant.App.Tests&#xD;
+[xUnit.net 00:00:03.34]   Starting:    BG3HonorAssistant.App.Tests&#xD;
+[xUnit.net 00:00:04.52]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.53]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.53]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.53]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(36,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.RouteMutationSurvivesControllerAndRepositoryRestart()&#xD;
+[xUnit.net 00:00:04.53]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.68]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.68]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.68]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.68]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(192,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.ImportedBuildPersistsGloballyAndCanBeAssigned()&#xD;
+[xUnit.net 00:00:04.68]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.76]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.76]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(113,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.GearTargetReplacesNowGoalAndCompletionRecordsOwnership()&#xD;
+[xUnit.net 00:00:04.77]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.77]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.77]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(58,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.RunCreationAndSwitchingPreserveIndependentSnapshots()&#xD;
+[xUnit.net 00:00:04.77]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.77]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.77]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(20,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FirstStartCreatesNormalizedRecoverableRunFromSharedGuide()&#xD;
+[xUnit.net 00:00:04.77]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.77]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.77]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.77]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(141,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FightPinSnoozeAndMuteRemainExplicitSessionAndRunState()&#xD;
+[xUnit.net 00:00:04.77]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.78]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.78]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.78]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.78]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(166,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate()&#xD;
+[xUnit.net 00:00:04.78]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.78]       System.IO.FileNotFoundException : Could not locate the shared guide bundle.&#xD;
+[xUnit.net 00:00:04.78]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.78]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(264,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.FindGuidePath()&#xD;
+[xUnit.net 00:00:04.78]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.App.Tests\AssistantControllerTests.cs(81,0): at BG3HonorAssistant.App.Tests.AssistantControllerTests.PreferencesAndActTwoGapSurviveRestart()&#xD;
+[xUnit.net 00:00:04.78]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.84]   Finished:    BG3HonorAssistant.App.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.0644179-07:00">
+        <Text>[xUnit.net 00:00:04.52]     BG3HonorAssistant.App.Tests.AssistantControllerTests.RouteMutationSurvivesControllerAndRepositoryRestart [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.2171809-07:00">
+        <Text>[xUnit.net 00:00:04.68]     BG3HonorAssistant.App.Tests.AssistantControllerTests.ImportedBuildPersistsGloballyAndCanBeAssigned [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.3019429-07:00">
+        <Text>[xUnit.net 00:00:04.76]     BG3HonorAssistant.App.Tests.AssistantControllerTests.GearTargetReplacesNowGoalAndCompletionRecordsOwnership [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.3099924-07:00">
+        <Text>[xUnit.net 00:00:04.77]     BG3HonorAssistant.App.Tests.AssistantControllerTests.RunCreationAndSwitchingPreserveIndependentSnapshots [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.3118658-07:00">
+        <Text>[xUnit.net 00:00:04.77]     BG3HonorAssistant.App.Tests.AssistantControllerTests.FirstStartCreatesNormalizedRecoverableRunFromSharedGuide [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.3140545-07:00">
+        <Text>[xUnit.net 00:00:04.77]     BG3HonorAssistant.App.Tests.AssistantControllerTests.FightPinSnoozeAndMuteRemainExplicitSessionAndRunState [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.3314886-07:00">
+        <Text>[xUnit.net 00:00:04.78]     BG3HonorAssistant.App.Tests.AssistantControllerTests.ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:39:20.3317172-07:00">
+        <Text>[xUnit.net 00:00:04.78]     BG3HonorAssistant.App.Tests.AssistantControllerTests.PreferencesAndActTwoGapSurviveRestart [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

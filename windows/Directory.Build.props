@@ -3,11 +3,31 @@
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <PlatformTarget>x64</PlatformTarget>
-    <Platforms>x64</Platforms>
+    <BG3SupportedRuntimeIdentifiers>win-x64;win-arm64</BG3SupportedRuntimeIdentifiers>
+    <RuntimeIdentifiers>$(BG3SupportedRuntimeIdentifiers)</RuntimeIdentifiers>
+    <BG3ExpectedRuntimeIdentifier Condition="'$(BG3Architecture)' != ''">win-$(BG3Architecture)</BG3ExpectedRuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(BG3ExpectedRuntimeIdentifier)' != ''">$(BG3ExpectedRuntimeIdentifier)</RuntimeIdentifier>
+    <Platform Condition="'$(Platform)' == '' and '$(BG3Architecture)' != ''">$(BG3Architecture)</Platform>
+    <PlatformTarget Condition="'$(PlatformTarget)' == '' and '$(BG3Architecture)' != ''">$(BG3Architecture)</PlatformTarget>
+    <Platforms>x64;arm64</Platforms>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
+  <Target Name="ValidateBG3Architecture"
+          BeforeTargets="Restore;PrepareForBuild;Publish">
+    <Error Condition="'$(BG3Architecture)' == ''"
+           Text="BG3Architecture is required. Pass -p:BG3Architecture=x64 or -p:BG3Architecture=arm64." />
+    <Error Condition="'$(BG3Architecture)' != 'x64' and '$(BG3Architecture)' != 'arm64'"
+           Text="Unsupported BG3Architecture '$(BG3Architecture)'. Supported values are x64 and arm64; 32-bit x86 is not supported." />
+    <Error Condition="'$(BG3Architecture)' != '' and '$(RuntimeIdentifier)' != '$(BG3ExpectedRuntimeIdentifier)'"
+           Text="RuntimeIdentifier '$(RuntimeIdentifier)' conflicts with BG3Architecture '$(BG3Architecture)'; expected '$(BG3ExpectedRuntimeIdentifier)'." />
+    <Error Condition="'$(BG3Architecture)' != '' and '$(Platform)' != '$(BG3Architecture)'"
+           Text="Platform '$(Platform)' conflicts with BG3Architecture '$(BG3Architecture)'." />
+    <Error Condition="'$(BG3Architecture)' != '' and '$(PlatformTarget)' != '$(BG3Architecture)'"
+           Text="PlatformTarget '$(PlatformTarget)' conflicts with BG3Architecture '$(BG3Architecture)'." />
+    <Error Condition="'$(RuntimeIdentifiers)' != '$(BG3SupportedRuntimeIdentifiers)'"
+           Text="RuntimeIdentifiers must remain exactly '$(BG3SupportedRuntimeIdentifiers)'." />
+  </Target>
 </Project>
