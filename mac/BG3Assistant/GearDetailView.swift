@@ -167,6 +167,8 @@ struct GearItemIcon: View {
         guard !filename.isEmpty else { return nil }
         let sourceDirectory = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
             .appending(path: "Resources/ItemIcons", directoryHint: .isDirectory)
         let candidates = [
             Bundle.main.resourceURL?.appending(path: "ItemIcons/\(filename)"),

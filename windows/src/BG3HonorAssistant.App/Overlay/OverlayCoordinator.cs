@@ -24,6 +24,7 @@ public sealed class OverlayCoordinator : IDisposable
     private readonly OverlayWindow window;
     private CurrentGoalPresentation? goal;
     private AppPreferences preferences = new();
+    private int selectedAct = 1;
     private bool forcedPreview;
     private bool disposed;
 
@@ -81,11 +82,15 @@ public sealed class OverlayCoordinator : IDisposable
         monitor.Start();
     }
 
-    public void Update(CurrentGoalPresentation presentation, AppPreferences nextPreferences)
+    public void Update(
+        CurrentGoalPresentation presentation,
+        AppPreferences nextPreferences,
+        int nextSelectedAct = 1)
     {
         goal = presentation;
         preferences = nextPreferences;
-        window.Update(presentation, preferences);
+        selectedAct = nextSelectedAct;
+        window.Update(presentation, preferences, selectedAct);
         if (GameWindow is not null && preferences.ShowOverlayWhileGameRuns)
         {
             ShowAtGame();
@@ -102,7 +107,7 @@ public sealed class OverlayCoordinator : IDisposable
         forcedPreview = true;
         if (goal is not null)
         {
-            window.Update(goal, preferences);
+            window.Update(goal, preferences, selectedAct);
         }
 
         if (GameWindow is not null)
@@ -155,7 +160,7 @@ public sealed class OverlayCoordinator : IDisposable
             new OverlayDensityChangedEventArgs(density));
         if (goal is not null)
         {
-            window.Update(goal, preferences);
+            window.Update(goal, preferences, selectedAct);
         }
 
         if (GameWindow is not null)

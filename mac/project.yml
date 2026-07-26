@@ -12,21 +12,22 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: BG3Assistant
+      - path: ../Resources
         excludes:
-          - Resources/BuildOptionIcons
-          - Resources/CompanionPortraits
-          - Resources/ItemIcons
-      - path: BG3Assistant/Resources/BuildOptionIcons
+          - BuildOptionIcons
+          - CompanionPortraits
+          - ItemIcons
+      - path: ../Resources/BuildOptionIcons
         type: folder
         buildPhase: resources
-      - path: BG3Assistant/Resources/CompanionPortraits
+      - path: ../Resources/CompanionPortraits
         type: folder
         buildPhase: resources
-      - path: BG3Assistant/Resources/ItemIcons
+      - path: ../Resources/ItemIcons
         type: folder
         buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.local.BG3HonorAssistant
-        INFOPLIST_FILE: BG3Assistant/Resources/Info.plist
+        INFOPLIST_FILE: ../Resources/Info.plist
         CODE_SIGN_STYLE: Automatic

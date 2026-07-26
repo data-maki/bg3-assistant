@@ -28,7 +28,7 @@ SOURCE_FILES = (
     ROOT / "mac/BG3Assistant/ManualBuild.swift",
     ROOT / "mac/BG3Assistant/BG3SpellCatalog.generated.swift",
 )
-OUTPUT = ROOT / "mac/BG3Assistant/Resources/BuildOptionIcons"
+OUTPUT = ROOT / "Resources/BuildOptionIcons"
 MANIFEST = OUTPUT / "manifest.json"
 API = "https://bg3.wiki/w/api.php"
 USER_AGENT = "BG3Overlay/1.0 (fan-content build asset fetcher)"

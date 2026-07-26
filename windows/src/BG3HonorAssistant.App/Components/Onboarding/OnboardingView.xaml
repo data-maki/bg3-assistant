@@ -1,0 +1,454 @@
+<UserControl x:Class="BG3HonorAssistant.App.Components.Onboarding.OnboardingView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:BG3HonorAssistant.App.UI"
+        xmlns:models="clr-namespace:BG3HonorAssistant.Core.Models;assembly=BG3HonorAssistant.Core">
+    <Grid>
+<Border x:Name="OnboardingPanel"
+                Grid.RowSpan="4"
+                Margin="0"
+                Padding="14"
+                Panel.ZIndex="25"
+                Background="{StaticResource BG3PanelBrush}"
+                BorderBrush="{StaticResource BG3BronzeBrush}"
+                BorderThickness="1.5"
+                CornerRadius="16"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="46" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Image x:Name="OnboardingPetImage"
+                           Width="46"
+                           Height="46"
+                           Stretch="Uniform" />
+                    <StackPanel Grid.Column="2"
+                                VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource BG3Overline}"
+                                   Text="SETUP" />
+                        <TextBlock x:Name="OnboardingStepText"
+                                   Margin="0,2,0,0"
+                                   Style="{StaticResource BG3Caption}"
+                                   Text="Step 1 of 6" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock x:Name="OnboardingTitleText"
+                           Grid.Row="1"
+                           Margin="0,7,0,0"
+                           FontFamily="{StaticResource BG3SerifFont}"
+                           FontSize="19"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource BG3ParchmentBrush}"
+                           Text="Well Met, Adventurer" />
+                <TextBlock x:Name="OnboardingBodyText"
+                           Grid.Row="2"
+                           Margin="0,7,0,8"
+                           Style="{StaticResource BG3Body}"
+                           FontSize="11"
+                           Foreground="{StaticResource BG3MutedParchmentBrush}"
+                           TextWrapping="Wrap" />
+
+                <Grid Grid.Row="3">
+                    <StackPanel x:Name="OnboardingWelcomePanel">
+                        <Button Padding="10"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingModeClick"
+                                Tag="Fresh">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="18" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="20"
+                                           Foreground="{StaticResource BG3GoldBrush}"
+                                           Text="⚔" />
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Style="{StaticResource BG3RowTitle}"
+                                               Text="Starting a new run" />
+                                    <TextBlock Style="{StaticResource BG3Caption}"
+                                               Text="Act 1, level 1 — routed from the Nautiloid beach." />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Style="{StaticResource BG3Body}"
+                                           Text="›" />
+                            </Grid>
+                        </Button>
+                        <Button Margin="0,8,0,0"
+                                Padding="10"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingModeClick"
+                                Tag="MidRun">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="18" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="19"
+                                           Foreground="{StaticResource BG3GoldBrush}"
+                                           Text="▧" />
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Style="{StaticResource BG3RowTitle}"
+                                               Text="Already mid-run" />
+                                    <TextBlock Style="{StaticResource BG3Caption}"
+                                               Text="Tell me where you are; the route and warnings catch up to you."
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Style="{StaticResource BG3Body}"
+                                           Text="›" />
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel x:Name="OnboardingDifficultyPanel"
+                                Visibility="Collapsed">
+                        <Button x:Name="OnboardingBalancedButton"
+                                Margin="0,0,0,6"
+                                Padding="8"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingDifficultyClick"
+                                Tag="Balanced"
+                                Content="○  Balanced&#x0a;     Standard rules with route, build, and encounter planning." />
+                        <Button x:Name="OnboardingTacticianButton"
+                                Margin="0,0,0,6"
+                                Padding="8"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingDifficultyClick"
+                                Tag="Tactician"
+                                Content="○  Tactician&#x0a;     Harder fights where preparation and stronger builds matter." />
+                        <Button x:Name="OnboardingHonourButton"
+                                Margin="0,0,0,6"
+                                Padding="8"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingDifficultyClick"
+                                Tag="Honour"
+                                Content="○  Honour Mode&#x0a;     Single save, Legendary Actions, and no room for careless mistakes." />
+                        <Button x:Name="OnboardingExplorerButton"
+                                Padding="8"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingDifficultyClick"
+                                Tag="Explorer"
+                                Content="○  Explorer · NO OVERLAY NEEDED&#x0a;     Relax, explore, and enjoy your adventure without a checklist." />
+                        <Border x:Name="OnboardingExplorerExplanation"
+                                Margin="0,6,0,0"
+                                Padding="9"
+                                Background="{StaticResource BG3InsetBrush}"
+                                BorderBrush="{StaticResource BG3SuccessBrush}"
+                                BorderThickness="0.8"
+                                CornerRadius="8"
+                                Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource BG3Caption}"
+                                           Foreground="{StaticResource BG3ParchmentBrush}"
+                                           Text="Explorer is designed for discovering BG3 at your own pace. Close the overlay and enjoy the game—we'll be here for a future Balanced, Tactician, or Honour Mode run."
+                                           TextWrapping="Wrap" />
+                                <Button Margin="0,7,0,0"
+                                        HorizontalAlignment="Left"
+                                        Style="{StaticResource BG3SuccessActionButton}"
+                                        Click="OnCloseExplorerOverlayClick"
+                                        Content="Close BG3 Overlay" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel x:Name="OnboardingSpoilersPanel"
+                                Visibility="Collapsed">
+                        <Button x:Name="OnboardingEverythingButton"
+                                Padding="10"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingSpoilerClick"
+                                Tag="Everything"
+                                Content="▥  Show everything · RECOMMENDED AFTER PLAYTHROUGH 1&#x0a;     See the complete act route, decisions, and equipment challenges." />
+                        <Button x:Name="OnboardingNextThreeButton"
+                                Margin="0,8,0,0"
+                                Padding="10"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingSpoilerClick"
+                                Tag="NextThree"
+                                Content="☷  Only 3 tasks ahead&#x0a;     Keep story details hidden beyond the next three route tasks." />
+                        <TextBlock Margin="3,9,0,0"
+                                   Style="{StaticResource BG3Caption}"
+                                   Foreground="{StaticResource BG3ParchmentBrush}"
+                                   Text="◆  Recommendation: show everything when this is not your first playthrough."
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="OnboardingAiPanel"
+                                Visibility="Collapsed">
+                        <Button x:Name="OnboardingGuideOnlyButton"
+                                Padding="10"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingAiChoiceClick"
+                                Tag="Guide"
+                                Content="○  Guide only&#x0a;     Route, warnings, character builder, and loadouts work without AI." />
+                        <Button x:Name="OnboardingOpenRouterButton"
+                                Margin="0,8,0,0"
+                                Padding="10"
+                                Style="{StaticResource BG3ActionButton}"
+                                HorizontalContentAlignment="Stretch"
+                                Click="OnOnboardingAiChoiceClick"
+                                Tag="OpenRouter"
+                                Content="○  OpenRouter&#x0a;     Uses your own API key for typed chat and public build import." />
+                        <StackPanel x:Name="OnboardingKeyPanel"
+                                    Margin="0,7,0,0"
+                                    Visibility="Collapsed">
+                            <TextBlock x:Name="OnboardingKeyStatusText"
+                                       Style="{StaticResource BG3Caption}"
+                                       Foreground="{StaticResource BG3SuccessBrush}"
+                                       Text="API key saved in Windows Credential Manager." />
+                            <Grid Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <PasswordBox x:Name="OnboardingKeyPasswordBox" />
+                                <Button Grid.Column="2"
+                                        Style="{StaticResource BG3ProminentActionButton}"
+                                        Click="OnSaveOnboardingKeyClick"
+                                        Content="Save" />
+                            </Grid>
+                        </StackPanel>
+                        <TextBlock Margin="3,9,0,0"
+                                   Style="{StaticResource BG3Caption}"
+                                   Foreground="{StaticResource BG3ParchmentBrush}"
+                                   Text="◆  The guide works without AI. OpenRouter is optional and sends typed prompts to the pinned model."
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="OnboardingPartyPanel"
+                                Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       Style="{StaticResource BG3RowTitle}"
+                                       Text="Everyone's level" />
+                            <Button Grid.Column="1"
+                                    Width="24"
+                                    Padding="0"
+                                    Style="{StaticResource BG3ActionButton}"
+                                    Click="OnOnboardingLevelDownClick"
+                                    Content="−" />
+                            <TextBlock x:Name="OnboardingPartyLevelText"
+                                       Grid.Column="3"
+                                       VerticalAlignment="Center"
+                                       Style="{StaticResource BG3RowTitle}"
+                                       Foreground="{StaticResource BG3GoldBrush}"
+                                       Text="L1" />
+                            <Button Grid.Column="5"
+                                    Width="24"
+                                    Padding="0"
+                                    Style="{StaticResource BG3ActionButton}"
+                                    Click="OnOnboardingLevelUpClick"
+                                    Content="＋" />
+                        </Grid>
+                        <ScrollViewer Height="202"
+                                      Margin="0,6,0,0"
+                                      VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="OnboardingRosterList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,0,5"
+                                                Padding="6"
+                                                Background="{StaticResource BG3InsetBrush}"
+                                                BorderBrush="#858C5224"
+                                                BorderThickness="0.6"
+                                                CornerRadius="8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="34" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="112" />
+                                                </Grid.ColumnDefinitions>
+                                                <Image Width="30"
+                                                       Height="30"
+                                                       Source="{Binding Name, Converter={StaticResource CompanionPortraitConverter}}"
+                                                       Stretch="UniformToFill" />
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Style="{StaticResource BG3RowTitle}"
+                                                               FontSize="11"
+                                                               Text="{Binding Name}" />
+                                                    <TextBlock Style="{StaticResource BG3Caption}"
+                                                               FontSize="9"
+                                                               Text="{Binding ClassName}" />
+                                                </StackPanel>
+                                                <ComboBox Grid.Column="2"
+                                                          Tag="{Binding Id}"
+                                                          SelectedValue="{Binding RosterStatus, Mode=OneWay}"
+                                                          SelectedValuePath="Tag"
+                                                          SelectionChanged="OnOnboardingRosterStatusChanged">
+                                                    <ComboBoxItem Content="Active"
+                                                                  Tag="{x:Static models:RosterStatus.Active}" />
+                                                    <ComboBoxItem Content="Camp"
+                                                                  Tag="{x:Static models:RosterStatus.Camp}" />
+                                                    <ComboBoxItem Content="Not recruited"
+                                                                  Tag="{x:Static models:RosterStatus.Unrecruited}" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        <TextBlock Margin="3,5,0,0"
+                                   Style="{StaticResource BG3Caption}"
+                                   Foreground="{StaticResource BG3ParchmentBrush}"
+                                   Text="◆  Readiness and danger warnings key off the lowest active level. Builds can be assigned anytime in PARTY."
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="OnboardingCatchUpPanel"
+                                Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="0,4,6,0"
+                                       Style="{StaticResource BG3RowTitle}"
+                                       Text="Act" />
+                            <Button x:Name="OnboardingAct1Button"
+                                    Margin="0,0,4,0"
+                                    Style="{StaticResource BG3ActionButton}"
+                                    Click="OnOnboardingActClick"
+                                    Content="1"
+                                    Tag="1" />
+                            <Button x:Name="OnboardingAct2Button"
+                                    Margin="0,0,4,0"
+                                    Style="{StaticResource BG3ActionButton}"
+                                    Click="OnOnboardingActClick"
+                                    Content="2"
+                                    Tag="2" />
+                            <Button x:Name="OnboardingAct3Button"
+                                    Style="{StaticResource BG3ActionButton}"
+                                    Click="OnOnboardingActClick"
+                                    Content="3"
+                                    Tag="3" />
+                        </StackPanel>
+                        <ListBox x:Name="OnboardingLandmarkList"
+                                 Height="202"
+                                 Margin="0,6,0,0"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 SelectionChanged="OnOnboardingLandmarkChanged"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="3,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="145" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Glyph}" />
+                                        <TextBlock Grid.Column="1"
+                                                   Style="{StaticResource BG3Body}"
+                                                   FontSize="10"
+                                                   Text="{Binding Name}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="2"
+                                                   HorizontalAlignment="Right"
+                                                   Style="{StaticResource BG3Caption}"
+                                                   FontSize="9"
+                                                   Text="{Binding Note}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock x:Name="OnboardingCatchUpCaptionText"
+                                   Margin="3,5,0,0"
+                                   Style="{StaticResource BG3Caption}"
+                                   Foreground="{StaticResource BG3ParchmentBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="OnboardingReadyPanel"
+                                Visibility="Collapsed">
+                        <Border Padding="10"
+                                Background="{StaticResource BG3InsetBrush}"
+                                BorderBrush="#858C5224"
+                                BorderThickness="0.7"
+                                CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource BG3Body}"
+                                           Text="→  Click the chevron on the card — or the system-tray icon — to open the full planner."
+                                           TextWrapping="Wrap" />
+                                <TextBlock Margin="0,7,0,0"
+                                           Style="{StaticResource BG3Body}"
+                                           Text="◆  The map button opens an act map in your browser, synced to this run."
+                                           TextWrapping="Wrap" />
+                                <TextBlock Margin="0,7,0,0"
+                                           Style="{StaticResource BG3Body}"
+                                           Text="★  Ask anything in CHAT; answers cite the bundled guide."
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                        <CheckBox x:Name="OnboardingStartupToggle"
+                                  Margin="0,10,0,0"
+                                  Content="Start at login" />
+                        <TextBlock Margin="0,3,0,0"
+                                   Style="{StaticResource BG3Caption}"
+                                   Text="The assistant waits in the Windows system tray so the companion appears whenever BG3 opens."
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock x:Name="OnboardingProgressDotsText"
+                           Grid.Row="4"
+                           Margin="0,7,0,7"
+                           HorizontalAlignment="Center"
+                           Style="{StaticResource BG3Overline}"
+                           Text="━ • • • • •" />
+
+                <Grid x:Name="OnboardingFooter"
+                      Grid.Row="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="OnboardingBackButton"
+                            Style="{StaticResource BG3ActionButton}"
+                            Click="OnOnboardingBackClick"
+                            Content="‹  Back" />
+                    <Button x:Name="OnboardingNextButton"
+                            Grid.Column="2"
+                            Style="{StaticResource BG3SuccessActionButton}"
+                            Click="OnOnboardingNextClick"
+                            Content="Continue  ›" />
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

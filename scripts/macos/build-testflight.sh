@@ -35,7 +35,7 @@ FINAL_PACKAGE="$artifacts_dir/testflight/packages/BG3-Overlay-$MARKETING_VERSION
 TEMP_DIR="$(mktemp -d)"
 trap '/bin/rm -rf "$TEMP_DIR"' EXIT
 ENTITLEMENTS="$TEMP_DIR/archive.entitlements"
-RUNTIME_ENTITLEMENTS="$mac_dir/BG3Assistant/Resources/BG3HonorRuntime-AppStore.entitlements"
+RUNTIME_ENTITLEMENTS="$repo_dir/Resources/BG3HonorRuntime-AppStore.entitlements"
 EXPORT_OPTIONS="$TEMP_DIR/export-options.plist"
 UPLOAD_OPTIONS="$TEMP_DIR/upload-options.plist"
 

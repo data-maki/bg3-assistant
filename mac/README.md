@@ -1,6 +1,6 @@
 # macOS app project
 
-The app you edit is **`mac/BG3Assistant/`**. Its bundled images, plist files, entitlements, and guide data are in `mac/BG3Assistant/Resources/`.
+The app you edit is **`mac/BG3Assistant/`**. Shared images and guide data, plus the packaging files consumed by the app builds, are in the repository-root **`Resources/`** directory.
 
 The other items here belong to that same app project:
 

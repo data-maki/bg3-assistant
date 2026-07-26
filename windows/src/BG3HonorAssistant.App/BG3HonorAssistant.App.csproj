@@ -17,24 +17,28 @@
     <ProjectReference Include="..\BG3HonorAssistant.Windows\BG3HonorAssistant.Windows.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\..\mac\BG3Assistant\Resources\Data\guide-bundle.json"
+    <Content Include="..\..\..\Resources\Data\guide-bundle.json"
              Link="Resources\Data\guide-bundle.json"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\..\mac\BG3Assistant\Resources\CompanionPortraits\**\*"
+    <Content Include="..\..\..\Resources\CompanionPortraits\**\*"
              Link="Resources\CompanionPortraits\%(RecursiveDir)%(Filename)%(Extension)"
-             CopyToOutputDirectory="Never"
+             CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\..\mac\BG3Assistant\Resources\ItemIcons\**\*"
+    <Content Include="..\..\..\Resources\ItemIcons\**\*"
              Link="Resources\ItemIcons\%(RecursiveDir)%(Filename)%(Extension)"
-             CopyToOutputDirectory="Never"
+             CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\..\mac\BG3Assistant\Resources\BuildOptionIcons\**\*"
+    <Content Include="..\..\..\Resources\BuildOptionIcons\**\*"
              Link="Resources\BuildOptionIcons\%(RecursiveDir)%(Filename)%(Extension)"
-             CopyToOutputDirectory="Never"
+             CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\..\mac\BG3Assistant\Resources\twilight-cleric.webp"
+    <Content Include="..\..\..\Resources\twilight-cleric.webp"
              Link="Resources\twilight-cleric.webp"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\..\Resources\THIRD_PARTY_NOTICES.md"
+             Link="Resources\THIRD_PARTY_NOTICES.md"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

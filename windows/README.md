@@ -173,6 +173,9 @@ Report suspected security problems privately to the repository maintainers rathe
 
 ## Contributing
 
+Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for the screen-owned folder
+structure, UI data flow, and the smallest safe way to change a feature.
+
 The implementation plan is in:
 
 - [`research/feature-parity.md`](research/feature-parity.md)

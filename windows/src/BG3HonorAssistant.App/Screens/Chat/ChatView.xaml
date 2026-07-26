@@ -1,0 +1,185 @@
+<UserControl x:Class="BG3HonorAssistant.App.Screens.Chat.ChatView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:BG3HonorAssistant.App.UI"
+        xmlns:models="clr-namespace:BG3HonorAssistant.Core.Models;assembly=BG3HonorAssistant.Core"
+        Background="Transparent">
+
+                <Grid Margin="0,7,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Margin="0,0,5,0"
+                                    Padding="7,4"
+                                    Background="{StaticResource BG3InsetBrush}"
+                                    BorderBrush="#858C5224"
+                                    BorderThickness="0.7"
+                                    CornerRadius="12">
+                                <TextBlock x:Name="ChatActContextText"
+                                           Style="{StaticResource BG3Caption}"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource BG3GoldBrush}"
+                                           Text="▧  Act 1 · Wilderness" />
+                            </Border>
+                            <Border Margin="0,0,5,0"
+                                    Padding="7,4"
+                                    Background="{StaticResource BG3InsetBrush}"
+                                    BorderBrush="#858C5224"
+                                    BorderThickness="0.7"
+                                    CornerRadius="12">
+                                <TextBlock x:Name="ChatPartyContextText"
+                                           Style="{StaticResource BG3Caption}"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource BG3GoldBrush}"
+                                           Text="♙  Active L1 · 4/4" />
+                            </Border>
+                            <Border Padding="7,4"
+                                    Background="{StaticResource BG3InsetBrush}"
+                                    BorderBrush="#858C5224"
+                                    BorderThickness="0.7"
+                                    CornerRadius="12">
+                                <TextBlock x:Name="ChatRecommendedContextText"
+                                           Style="{StaticResource BG3Caption}"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource BG3GoldBrush}"
+                                           Text="✦  Recommended: Recruit the party" />
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="1"
+                                Margin="0,6,0,4"
+                                Orientation="Horizontal">
+                        <TextBlock Margin="0,4,5,0"
+                                   Style="{StaticResource BG3Overline}"
+                                   Text="ASK" />
+                        <Button x:Name="ChatCurrentScopeButton"
+                                Margin="0,0,4,0"
+                                Padding="7,3"
+                                Style="{StaticResource BG3ActionButton}"
+                                Click="OnChatScopeClick"
+                                Content="Current"
+                                Tag="Current" />
+                        <Button x:Name="ChatRouteScopeButton"
+                                Margin="0,0,4,0"
+                                Padding="7,3"
+                                Style="{StaticResource BG3ActionButton}"
+                                Click="OnChatScopeClick"
+                                Content="Route"
+                                Tag="Route" />
+                        <Button x:Name="ChatPartyScopeButton"
+                                Padding="7,3"
+                                Style="{StaticResource BG3ActionButton}"
+                                Click="OnChatScopeClick"
+                                Content="Party"
+                                Tag="Party" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="2">
+                        <RichTextBox x:Name="ChatHistoryBox"
+                                     Padding="0"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     CaretBrush="Transparent"
+                                     FontFamily="{StaticResource BG3BodyFont}"
+                                     FontSize="12"
+                                     Foreground="{StaticResource BG3ParchmentBrush}"
+                                     IsDocumentEnabled="True"
+                                     IsReadOnly="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     AutomationProperties.Name="Session chat history" />
+                        <StackPanel x:Name="ChatEmptyState"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsHitTestVisible="False">
+                            <TextBlock HorizontalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="27"
+                                       Foreground="{StaticResource BG3MutedParchmentBrush}"
+                                       Text="&#xE8BD;" />
+                            <TextBlock Margin="0,7,0,0"
+                                       HorizontalAlignment="Center"
+                                       Style="{StaticResource BG3Caption}"
+                                       Text="Ask about this run state." />
+                            <TextBlock Margin="0,4,0,0"
+                                       HorizontalAlignment="Center"
+                                       Style="{StaticResource BG3Caption}"
+                                       FontSize="9"
+                                       Opacity="0.58"
+                                       Text="Action first. Guide facts and unknowns stay labelled." />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock x:Name="ChatStatusText"
+                               Grid.Row="3"
+                               Margin="4,4"
+                               Style="{StaticResource BG3Caption}"
+                               Foreground="{StaticResource BG3WarningBrush}"
+                               Text="Waiting for OpenRouter…"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed" />
+
+                    <StackPanel Grid.Row="4"
+                                Margin="0,3,0,7"
+                                Orientation="Horizontal">
+                        <Button Margin="0,0,5,0"
+                                Padding="8,4"
+                                Style="{StaticResource BG3ActionButton}"
+                                Click="OnQuickChatClick"
+                                Content="What's next?"
+                                Tag="What's next?" />
+                        <Button Margin="0,0,5,0"
+                                Padding="8,4"
+                                Style="{StaticResource BG3ActionButton}"
+                                Click="OnQuickChatClick"
+                                Content="How do I not die here?"
+                                Tag="How do I not die here?" />
+                        <Button Padding="8,4"
+                                Style="{StaticResource BG3ActionButton}"
+                                Click="OnQuickChatClick"
+                                Content="Is my party ready?"
+                                Tag="Is my party ready?" />
+                    </StackPanel>
+
+                    <Border Grid.Row="5"
+                            Padding="8,4,5,4"
+                            Background="{StaticResource BG3InsetBrush}"
+                            BorderBrush="#858C5224"
+                            BorderThickness="0.8"
+                            CornerRadius="15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="30" />
+                            </Grid.ColumnDefinitions>
+                        <TextBox x:Name="ChatDraftTextBox"
+                                 MinHeight="27"
+                                 Padding="5,4"
+                                 AcceptsReturn="False"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{StaticResource BG3ParchmentBrush}"
+                                 KeyDown="OnChatDraftKeyDown"
+                                 TextWrapping="NoWrap"
+                                 AutomationProperties.Name="Chat message" />
+                        <Button x:Name="SendChatButton"
+                                Grid.Column="1"
+                                Width="26"
+                                Height="26"
+                                Padding="0"
+                                Style="{StaticResource BG3ActionButton}"
+                                Click="OnSendChatClick"
+                                Content="↑"
+                                ToolTip="Send typed question" />
+                        </Grid>
+                    </Border>
+                </Grid>
+</UserControl>

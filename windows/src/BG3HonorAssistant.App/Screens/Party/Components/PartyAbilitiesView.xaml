@@ -1,0 +1,168 @@
+<UserControl x:Class="BG3HonorAssistant.App.Screens.Party.Components.PartyAbilitiesView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:BG3HonorAssistant.App.UI"
+        xmlns:models="clr-namespace:BG3HonorAssistant.Core.Models;assembly=BG3HonorAssistant.Core">
+<Grid x:Name="PartyAbilityPanel"
+                              Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <DockPanel Margin="0,0,0,7">
+                                <Button DockPanel.Dock="Left"
+                                        Style="{StaticResource BG3ActionButton}"
+                                        Click="OnPartyCharacterBackClick"
+                                        Content="‹  Character" />
+                                <TextBlock x:Name="AbilityMemberNameText"
+                                           DockPanel.Dock="Right"
+                                           Style="{StaticResource BG3Caption}"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource BG3GoldBrush}" />
+                            </DockPanel>
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <ComboBox x:Name="AbilitySetupPicker"
+                                              DisplayMemberPath="Label"
+                                              SelectionChanged="OnAbilitySetupChanged" />
+                                    <Border Margin="0,8,0,0"
+                                            Padding="10"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="#668C5224"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9">
+                                        <StackPanel>
+                                            <DockPanel>
+                                                <Border DockPanel.Dock="Right"
+                                                        Padding="7,2"
+                                                        Background="#33619E7A"
+                                                        BorderBrush="#99619E7A"
+                                                        BorderThickness="0.7"
+                                                        CornerRadius="8">
+                                                    <TextBlock x:Name="AbilityRecipeValidityText"
+                                                               Style="{StaticResource BG3Caption}"
+                                                               FontWeight="Bold"
+                                                               Foreground="{StaticResource BG3SuccessBrush}" />
+                                                </Border>
+                                                <StackPanel>
+                                                    <TextBlock x:Name="AbilityRecipeLabelText"
+                                                               Style="{StaticResource BG3Overline}" />
+                                                    <TextBlock x:Name="AbilityRecipeInstructionText"
+                                                               Style="{StaticResource BG3Caption}" />
+                                                </StackPanel>
+                                            </DockPanel>
+                                            <Border Margin="0,8,0,0"
+                                                    Padding="7"
+                                                    Background="#800E0C09"
+                                                    BorderBrush="#4D8C5224"
+                                                    BorderThickness="0.7"
+                                                    CornerRadius="8">
+                                                <StackPanel>
+                                                    <TextBlock x:Name="AbilityPointBuyText"
+                                                               Style="{StaticResource BG3Caption}" />
+                                                    <TextBlock x:Name="AbilityBonusText"
+                                                               Margin="0,5,0,0"
+                                                               Style="{StaticResource BG3Caption}" />
+                                                    <TextBlock x:Name="AbilityFinalText"
+                                                               Margin="0,5,0,0"
+                                                               Style="{StaticResource BG3RowTitle}"
+                                                               Foreground="{StaticResource BG3GoldBrush}" />
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock x:Name="AbilityClassOrderText"
+                                                       Margin="0,7,0,0"
+                                                       Style="{StaticResource BG3Body}"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock x:Name="AbilityReasonText"
+                                                       Margin="0,5,0,0"
+                                                       Style="{StaticResource BG3Caption}"
+                                                       TextWrapping="Wrap" />
+                                            <Button x:Name="ApplyAbilitySetupButton"
+                                                    Margin="0,8,0,0"
+                                                    Style="{StaticResource BG3SuccessActionButton}"
+                                                    Click="OnApplyAbilitySetupClick"
+                                                    Content="Mark these values applied in BG3" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Margin="0,8,0,0"
+                                            Padding="10"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="#4D8C5224"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource BG3Overline}"
+                                                       Text="RECORDED NOW / BUILD GOAL" />
+                                            <TextBlock x:Name="AbilityRecordedScoresText"
+                                                       Margin="0,7,0,0"
+                                                       Style="{StaticResource BG3Body}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Margin="0,8,0,0"
+                                            Padding="10"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="#4D8C5224"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource BG3Overline}"
+                                                       Text="WHERE EVERY BOOST COMES FROM" />
+                                            <TextBlock x:Name="AbilitySourcesEmptyText"
+                                                       Margin="0,7,0,0"
+                                                       Style="{StaticResource BG3Caption}"
+                                                       Text="This setup reaches its goal without additional recorded sources." />
+                                            <ListBox x:Name="AbilitySourceList"
+                                                     Margin="0,4,0,0"
+                                                     Background="Transparent"
+                                                     BorderThickness="0">
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                        <Setter Property="Padding" Value="0" />
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                        <Setter Property="BorderThickness" Value="0" />
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,5,0,0">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="34" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <Border Width="30"
+                                                                    Height="24"
+                                                                    Background="#99619E7A"
+                                                                    CornerRadius="6">
+                                                                <TextBlock HorizontalAlignment="Center"
+                                                                           VerticalAlignment="Center"
+                                                                           FontWeight="Bold"
+                                                                           Text="{Binding Ability}" />
+                                                            </Border>
+                                                            <StackPanel Grid.Column="1">
+                                                                <TextBlock Style="{StaticResource BG3Caption}"
+                                                                           FontWeight="Bold"
+                                                                           Text="{Binding Label}" />
+                                                                <TextBlock Style="{StaticResource BG3Caption}"
+                                                                           Text="{Binding Detail}"
+                                                                           TextWrapping="Wrap" />
+                                                            </StackPanel>
+                                                            <Button Grid.Column="2"
+                                                                    Margin="5,0,0,0"
+                                                                    Style="{StaticResource BG3ActionButton}"
+                                                                    IsEnabled="{Binding CanAct}"
+                                                                    Click="OnAbilitySourceActionClick"
+                                                                    Content="{Binding Action}" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+</UserControl>

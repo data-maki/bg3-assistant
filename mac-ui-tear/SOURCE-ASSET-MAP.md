@@ -47,15 +47,15 @@
 
 | Asset | Used by | What it controls |
 | --- | --- | --- |
-| [`Resources/twilight-cleric.webp`](../mac/BG3Assistant/Resources/twilight-cleric.webp) | [`PetSpriteView.swift`](../mac/BG3Assistant/PetSpriteView.swift#L4), [`PetAnimationModel.swift`](../mac/BG3Assistant/PetAnimationModel.swift#L4) | Assistant sprite sheet, frame coordinates, animation states |
-| [`Resources/CompanionPortraits/`](../mac/BG3Assistant/Resources/CompanionPortraits/) | [`PartyRosterRow.swift`](../mac/BG3Assistant/PartyRosterRow.swift#L91) | Astarion, Shadowheart, Lae'zel, Gale, Wyll, Karlach, and other portrait art |
-| [`Resources/ItemIcons/`](../mac/BG3Assistant/Resources/ItemIcons/) | [`GearDetailView.swift`](../mac/BG3Assistant/GearDetailView.swift#L126) | Bundled loadout and gear icons |
+| [`Resources/twilight-cleric.webp`](../Resources/twilight-cleric.webp) | [`PetSpriteView.swift`](../mac/BG3Assistant/PetSpriteView.swift#L4), [`PetAnimationModel.swift`](../mac/BG3Assistant/PetAnimationModel.swift#L4) | Assistant sprite sheet, frame coordinates, animation states |
+| [`Resources/CompanionPortraits/`](../Resources/CompanionPortraits/) | [`PartyRosterRow.swift`](../mac/BG3Assistant/PartyRosterRow.swift#L91) | Astarion, Shadowheart, Lae'zel, Gale, Wyll, Karlach, and other portrait art |
+| [`Resources/ItemIcons/`](../Resources/ItemIcons/) | [`GearDetailView.swift`](../mac/BG3Assistant/GearDetailView.swift#L126) | Bundled loadout and gear icons |
 | [`data/item_icons.json`](../data/item_icons.json) | guide export plus `GearItemIcon` | Item-key to icon metadata |
-| [`Resources/AppIcon.icns`](../mac/BG3Assistant/Resources/AppIcon.icns), [`Resources/AppIcon.png`](../mac/BG3Assistant/Resources/AppIcon.png) | [`Info.plist`](../mac/BG3Assistant/Resources/Info.plist) | Dock/Finder app icon |
-| [`Resources/Data/guide-bundle.json`](../mac/BG3Assistant/Resources/Data/guide-bundle.json) | [`GuideRepository.swift`](../mac/BG3Assistant/GuideRepository.swift#L9) | Released route, walkthrough, build, gear, and item-catalog snapshot |
+| [`Resources/AppIcon.icns`](../Resources/AppIcon.icns), [`Resources/AppIcon.png`](../Resources/AppIcon.png) | [`Info.plist`](../Resources/Info.plist) | Dock/Finder app icon |
+| [`Resources/Data/guide-bundle.json`](../Resources/Data/guide-bundle.json) | [`GuideRepository.swift`](../mac/BG3Assistant/GuideRepository.swift#L9) | Released route, walkthrough, build, gear, and item-catalog snapshot |
 | [`BG3SpellCatalog.generated.swift`](../mac/BG3Assistant/BG3SpellCatalog.generated.swift#L5) | [`ManualBuild.swift`](../mac/BG3Assistant/ManualBuild.swift#L180) | Class spell and cantrip options in manual builds |
-| [`Resources/PrivacyInfo.xcprivacy`](../mac/BG3Assistant/Resources/PrivacyInfo.xcprivacy), [`Resources/BG3HonorAssistant.entitlements`](../mac/BG3Assistant/Resources/BG3HonorAssistant.entitlements) | packaging/runtime | Privacy declaration and macOS capabilities |
-| [`Resources/THIRD_PARTY_NOTICES.md`](../mac/BG3Assistant/Resources/THIRD_PARTY_NOTICES.md) | [`SettingsView.swift`](../mac/BG3Assistant/SettingsView.swift#L137) | Legal & Credits disclosure |
+| [`Resources/PrivacyInfo.xcprivacy`](../Resources/PrivacyInfo.xcprivacy), [`Resources/BG3HonorAssistant.entitlements`](../Resources/BG3HonorAssistant.entitlements) | packaging/runtime | Privacy declaration and macOS capabilities |
+| [`Resources/THIRD_PARTY_NOTICES.md`](../Resources/THIRD_PARTY_NOTICES.md) | [`SettingsView.swift`](../mac/BG3Assistant/SettingsView.swift#L137) | Legal & Credits disclosure |
 
 ## Source data that changes visible guidance
 

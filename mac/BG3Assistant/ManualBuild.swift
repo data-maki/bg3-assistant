@@ -142,6 +142,8 @@ enum BG3BuildArtwork {
         if let cached = cache.object(forKey: filename as NSString) { return cached }
         let sourceDirectory = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
             .appending(path: "Resources/BuildOptionIcons", directoryHint: .isDirectory)
         let candidates = [
             Bundle.main.resourceURL?.appending(path: "BuildOptionIcons/\(filename)"),

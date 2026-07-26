@@ -40,7 +40,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $publishRoot 'Assets') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $packageRoot 'Package.appxmanifest') `
         -Destination (Join-Path $publishRoot 'AppxManifest.xml')
-    Copy-Item -LiteralPath (Join-Path $windowsRoot '..\mac\BG3Assistant\Resources\AppIcon.png') `
+    Copy-Item -LiteralPath (Join-Path $windowsRoot '..\Resources\AppIcon.png') `
         -Destination (Join-Path $publishRoot 'Assets\AppIcon.png')
 
     $manifestPath = Join-Path $publishRoot 'AppxManifest.xml'

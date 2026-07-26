@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 
 namespace BG3HonorAssistant.Windows.Shell;
 
@@ -24,6 +25,28 @@ public sealed class GameLauncher
         }
 
         Process.Start(new ProcessStartInfo(uri.AbsoluteUri)
+        {
+            UseShellExecute = true,
+        });
+    }
+
+    public void OpenSupportEmail()
+    {
+        Process.Start(new ProcessStartInfo(
+            "mailto:jcllobet@gmail.com?subject=BG3%20Overlay%20bug%20report")
+        {
+            UseShellExecute = true,
+        });
+    }
+
+    public void OpenLocalFile(string path)
+    {
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("The bundled file was not found.", path);
+        }
+
+        Process.Start(new ProcessStartInfo(path)
         {
             UseShellExecute = true,
         });

@@ -29,8 +29,10 @@ Relevant production code:
 - [`../../src/BG3HonorAssistant.Infrastructure/Networking/AssistantHttpClient.cs`](../../src/BG3HonorAssistant.Infrastructure/Networking/AssistantHttpClient.cs)
 - [`../../src/BG3HonorAssistant.Infrastructure/OpenRouter/OpenRouterClient.cs`](../../src/BG3HonorAssistant.Infrastructure/OpenRouter/OpenRouterClient.cs)
 - [`../../src/BG3HonorAssistant.Core/Chat/ChatPromptBuilder.cs`](../../src/BG3HonorAssistant.Core/Chat/ChatPromptBuilder.cs)
-- [`../../src/BG3HonorAssistant.App/MainWindow.xaml`](../../src/BG3HonorAssistant.App/MainWindow.xaml)
-- [`../../src/BG3HonorAssistant.App/MainWindow.xaml.cs`](../../src/BG3HonorAssistant.App/MainWindow.xaml.cs)
+- [`../../src/BG3HonorAssistant.App/Screens/Chat/ChatView.xaml`](../../src/BG3HonorAssistant.App/Screens/Chat/ChatView.xaml)
+- [`../../src/BG3HonorAssistant.App/Screens/Chat/MainWindow.Chat.cs`](../../src/BG3HonorAssistant.App/Screens/Chat/MainWindow.Chat.cs)
+- [`../../src/BG3HonorAssistant.App/Screens/Party/Components/BuildImportView.xaml`](../../src/BG3HonorAssistant.App/Screens/Party/Components/BuildImportView.xaml)
+- [`../../src/BG3HonorAssistant.App/Screens/Party/MainWindow.BuildImport.cs`](../../src/BG3HonorAssistant.App/Screens/Party/MainWindow.BuildImport.cs)
 
 ## Typed chat behavior
 

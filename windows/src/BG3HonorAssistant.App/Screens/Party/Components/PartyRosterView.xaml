@@ -1,0 +1,85 @@
+<UserControl x:Class="BG3HonorAssistant.App.Screens.Party.Components.PartyRosterView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:BG3HonorAssistant.App.UI"
+        xmlns:models="clr-namespace:BG3HonorAssistant.Core.Models;assembly=BG3HonorAssistant.Core">
+<Grid x:Name="PartyRosterPanel"
+                              Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Left"
+                                            Style="{StaticResource BG3ActionButton}"
+                                            Click="OnPartyBackClick"
+                                            Content="‹  Party" />
+                                    <TextBlock x:Name="PartyRosterActiveCountText"
+                                               DockPanel.Dock="Right"
+                                               Style="{StaticResource BG3Caption}"
+                                               FontWeight="Bold" />
+                                </DockPanel>
+                                <TextBlock Margin="0,7,0,0"
+                                           Style="{StaticResource BG3Overline}"
+                                           Text="MANAGE PARTY MEMBERS" />
+                                <TextBlock Margin="0,2,0,7"
+                                           Style="{StaticResource BG3Caption}"
+                                           Text="Choose Active, Camp, or Not recruited" />
+                            </StackPanel>
+                            <ListBox x:Name="PartyRosterList"
+                                     Grid.Row="1"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0,0,0,6" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="9,7"
+                                                Background="{StaticResource BG3InsetBrush}"
+                                                BorderBrush="#4D8C5224"
+                                                BorderThickness="0.7"
+                                                CornerRadius="9">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="27" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="126" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="27"
+                                                        Height="27"
+                                                        CornerRadius="7">
+                                                    <Image Stretch="UniformToFill"
+                                                           Source="{Binding Name, Converter={StaticResource CompanionPortraitConverter}}" />
+                                                </Border>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Style="{StaticResource BG3RowTitle}"
+                                                               Text="{Binding Name}" />
+                                                    <TextBlock Style="{StaticResource BG3Caption}"
+                                                               Text="{Binding ClassName}" />
+                                                </StackPanel>
+                                                <ComboBox Grid.Column="3"
+                                                          Tag="{Binding Id}"
+                                                          SelectedValue="{Binding RosterStatus, Mode=OneWay}"
+                                                          SelectedValuePath="Tag"
+                                                          SelectionChanged="OnRosterStatusChanged">
+                                                    <ComboBoxItem Content="Active" Tag="Active" />
+                                                    <ComboBoxItem Content="Camp" Tag="Camp" />
+                                                    <ComboBoxItem Content="Not recruited" Tag="Unrecruited" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+</UserControl>
