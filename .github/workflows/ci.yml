@@ -33,10 +33,12 @@ jobs:
           - architecture: x64
             runner: windows-latest
             expected_os_architecture: X64
+            expected_dotnet_architecture: x64
             evidence_label: x64 Windows CI (not native-x64 hardware)
           - architecture: arm64
             runner: windows-11-arm
             expected_os_architecture: Arm64
+            expected_dotnet_architecture: arm64
             evidence_label: ARM64 Windows CI
     runs-on: ${{ matrix.runner }}
     defaults:
@@ -46,16 +48,33 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
-      - name: Verify runner architecture
+          dotnet-version: 10.0.302
+          global-json-file: windows/global.json
+      - name: Verify OS, PowerShell, SDK and .NET host architecture
         shell: pwsh
         run: |
-          $actual = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
-          if ($actual -ne '${{ matrix.expected_os_architecture }}') {
-            throw "Expected ${{ matrix.expected_os_architecture }} runner; found $actual."
+          $runtime = [System.Runtime.InteropServices.RuntimeInformation]
+          $osArchitecture = $runtime::OSArchitecture
+          $powerShellArchitecture = $runtime::ProcessArchitecture
+          if ($osArchitecture -ne '${{ matrix.expected_os_architecture }}') {
+            throw "Expected ${{ matrix.expected_os_architecture }} OS; found $osArchitecture."
+          }
+          if ($powerShellArchitecture -ne '${{ matrix.expected_os_architecture }}') {
+            throw "Expected ${{ matrix.expected_os_architecture }} PowerShell; found $powerShellArchitecture."
+          }
+          $sdkVersion = (dotnet --version).Trim()
+          if ($sdkVersion -ne '10.0.302') {
+            throw "Expected .NET SDK 10.0.302; found $sdkVersion."
+          }
+          $dotnetInfo = dotnet --info | Out-String
+          $hostBlock = [regex]::Match(
+            $dotnetInfo,
+            '(?ms)^Host:\s*\r?\n(?<body>.*?)(?:\r?\n\r?\n|\z)').Groups['body'].Value
+          if ($hostBlock -notmatch "(?im)^\s*Architecture:\s*${{ matrix.expected_dotnet_architecture }}\s*$") {
+            throw "Expected ${{ matrix.expected_dotnet_architecture }} .NET host.`n$dotnetInfo"
           }
           "Evidence context: ${{ matrix.evidence_label }}"
-          dotnet --info
+          "OS=$osArchitecture; PowerShell=$powerShellArchitecture; SDK=$sdkVersion; .NET=${{ matrix.expected_dotnet_architecture }}"
       - name: Restore locked dependencies
         run: >
           dotnet restore BG3HonorAssistant.slnx
@@ -70,25 +89,64 @@ jobs:
       - name: Test on matching-architecture Windows runner
         shell: pwsh
         run: |
-          Get-ChildItem tests -Recurse -Filter '*.Tests.csproj' |
-            Sort-Object FullName |
-            ForEach-Object {
-              dotnet test $_.FullName `
+          $projects = @(Get-ChildItem tests -Recurse -Filter '*.Tests.csproj' |
+            Sort-Object FullName)
+          if ($projects.Count -eq 0) {
+            throw 'No explicit Windows test projects were discovered.'
+          }
+          foreach ($project in $projects) {
+              [xml]$projectXml = Get-Content -Raw -LiteralPath $project.FullName
+              $isTestProject = @($projectXml.Project.PropertyGroup.IsTestProject)
+              if ($isTestProject -notcontains 'true') {
+                throw "$($project.FullName) must explicitly set IsTestProject=true."
+              }
+
+              $resultsDirectory = "artifacts/test-results/${{ matrix.architecture }}"
+              $resultPath = Join-Path $resultsDirectory "$($project.BaseName).trx"
+              Remove-Item -LiteralPath $resultPath -Force -ErrorAction SilentlyContinue
+              dotnet test $project.FullName `
                 --configuration Release `
                 --no-build `
                 --no-restore `
-                --logger "trx;LogFileName=$($_.BaseName).trx" `
-                --results-directory "artifacts/test-results/${{ matrix.architecture }}" `
+                --logger "trx;LogFileName=$($project.BaseName).trx" `
+                --results-directory $resultsDirectory `
                 -p:BG3Architecture=${{ matrix.architecture }}
               if ($LASTEXITCODE -ne 0) {
-                throw "Tests failed for $($_.FullName)."
+                throw "Tests failed for $($project.FullName)."
               }
-            }
+              if (-not (Test-Path -LiteralPath $resultPath)) {
+                throw "Test project $($project.FullName) did not produce $resultPath."
+              }
+              [xml]$trx = Get-Content -Raw -LiteralPath $resultPath
+              $executed = [int]$trx.TestRun.ResultSummary.Counters.executed
+              if ($executed -le 0) {
+                throw "Test project $($project.FullName) executed zero tests."
+              }
+              "$($project.BaseName): executed=$executed; testhost=${{ matrix.architecture }}"
+          }
       - name: Publish self-contained application
         shell: pwsh
         run: >
           ./tools/build-release.ps1
           -Architecture ${{ matrix.architecture }}
+      - name: Verify packaging architecture interface
+        shell: pwsh
+        run: |
+          $command = Get-Command ./tools/build-development-msix.ps1
+          $architecture = $command.Parameters['Architecture']
+          if ($null -eq $architecture) {
+            throw 'Packaging script must expose a mandatory -Architecture parameter.'
+          }
+          $validateSet = $architecture.Attributes |
+            Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] } |
+            Select-Object -First 1
+          if ($null -eq $validateSet -or
+              (@($validateSet.ValidValues | Sort-Object) -join ',') -ne 'arm64,x64') {
+            throw 'Packaging -Architecture must accept exactly arm64 and x64.'
+          }
+          if ($null -eq $command.Parameters['Version']) {
+            throw 'Packaging script must expose the expected -Version parameter.'
+          }
       - name: Build architecture-specific development MSIX
         shell: pwsh
         run: >
