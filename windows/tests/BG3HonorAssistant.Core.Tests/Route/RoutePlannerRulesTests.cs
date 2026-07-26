@@ -50,7 +50,7 @@ public sealed class RoutePlannerRulesTests
                    row.Label == "Unknown");
         Assert.Equal(
             "NOW",
-            Assert.Single(result.Rows.Where(row => row.Step?.Id == "first")).Status);
+            Assert.Single(result.Rows, row => row.Step?.Id == "first").Status);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class RoutePlannerRulesTests
             steps[0],
             lowestPartyLevel: 1);
 
-        Assert.Single(result.Rows.Where(row => row.Step is not null));
+        Assert.Single(result.Rows, row => row.Step is not null);
         Assert.DoesNotContain(result.Rows, row => row.Pickup is not null);
     }
 

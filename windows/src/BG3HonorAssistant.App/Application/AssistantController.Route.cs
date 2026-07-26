@@ -79,6 +79,11 @@ public sealed partial class AssistantController
     {
         if (TargetContext is not { } target)
         {
+            if (CurrentStep?.Decision is not null)
+            {
+                return false;
+            }
+
             return await SetCurrentDispositionAsync(
                 CheckpointDisposition.Completed,
                 cancellationToken: cancellationToken);

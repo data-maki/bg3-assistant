@@ -37,6 +37,11 @@ public sealed partial class AssistantController
         Run.NormalizeRoster();
         for (var index = 0; index < Run.Roster!.Count; index++)
         {
+            if (Run.Roster[index].RosterStatus != RosterStatus.Active)
+            {
+                continue;
+            }
+
             Run.Roster[index] = PartyPlanningRules.AtLevel(
                 Run.Roster[index],
                 Math.Clamp(level, 1, 12),
@@ -278,7 +283,9 @@ public sealed partial class AssistantController
         var plan = selection.Member.ManualBuild!;
         var level = plan.Levels.FirstOrDefault(
             candidate => candidate.CharacterLevel == characterLevel);
-        if (level is null || group.Options.All(candidate => candidate.Name != option))
+        if (level is null ||
+            !plan.ChoiceIsAvailable(group, level) ||
+            group.Options.All(candidate => candidate.Name != option))
         {
             return false;
         }

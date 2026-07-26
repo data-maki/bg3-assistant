@@ -30,6 +30,9 @@ public partial class LoadoutView : System.Windows.Controls.UserControl
     private void OnGearTargetClick(object sender, RoutedEventArgs eventArgs) =>
         Host.OnGearTargetClick(sender, eventArgs);
 
+    private void OnGiveLoadoutGearClick(object sender, RoutedEventArgs eventArgs) =>
+        Host.OnGiveLoadoutGearClick(sender, eventArgs);
+
     private void OnLoadoutBackClick(object sender, RoutedEventArgs eventArgs) =>
         Host.OnLoadoutBackClick(sender, eventArgs);
 
@@ -38,4 +41,10 @@ public partial class LoadoutView : System.Windows.Controls.UserControl
 
     private void OnLoadoutMemberClick(object sender, RoutedEventArgs eventArgs) =>
         Host.OnLoadoutMemberClick(sender, eventArgs);
+
+    private void OnRevertLoadoutPickClick(object sender, RoutedEventArgs eventArgs) =>
+        Host.OnRevertLoadoutPickClick(sender, eventArgs);
+
+    private void OnUseLoadoutPickClick(object sender, RoutedEventArgs eventArgs) =>
+        Host.OnUseLoadoutPickClick(sender, eventArgs);
 }

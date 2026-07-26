@@ -109,6 +109,86 @@ public sealed class ManualBuildTests
     }
 
     [Fact]
+    public void FeatsExposeEveryLiveMacConditionalChoice()
+    {
+        var wizard = RequireDefinition("Wizard");
+        var groups = wizard.Levels[4].Choices.ToDictionary(
+            group => group.Id,
+            StringComparer.Ordinal);
+        var expected = new Dictionary<string, (int Maximum, string Requirement)>
+        {
+            ["ability-improvement-4"] = (1, "Ability Improvement"),
+            ["athlete-ability-4"] = (1, "Athlete"),
+            ["elemental-adept-4"] = (1, "Elemental Adept"),
+            ["moderately-armoured-4"] = (1, "Moderately Armoured"),
+            ["resilient-4"] = (1, "Resilient"),
+            ["skilled-4"] = (3, "Skilled"),
+            ["tavern-brawler-4"] = (1, "Tavern Brawler"),
+            ["martial-adept-4"] = (2, "Martial Adept"),
+            ["ritual-caster-4"] = (2, "Ritual Caster"),
+            ["spell-sniper-4"] = (1, "Spell Sniper"),
+            ["weapon-master-ability-4"] = (1, "Weapon Master"),
+            ["weapon-master-proficiencies-4"] = (4, "Weapon Master"),
+        };
+
+        Assert.All(
+            expected,
+            pair =>
+            {
+                var group = groups[pair.Key];
+                Assert.Equal(pair.Value.Maximum, group.MaximumSelections);
+                Assert.Equal(pair.Value.Requirement, group.RequiredSelection);
+                Assert.True(group.RequiresSelectionAtSameLevel);
+                Assert.NotEmpty(group.Options);
+            });
+    }
+
+    [Fact]
+    public void ConditionalChoicesRequireTheReviewedSelectionScope()
+    {
+        var plan = ManualBuildPlan.Empty("Conditional", AbilityScores.CustomDefault);
+        plan.SetClass("Wizard", 1);
+        var level = plan.Levels[3];
+        var definition = RequireDefinition("Wizard").Levels[4];
+        var allocation = Assert.Single(
+            definition.Choices,
+            group => group.Id == "ability-improvement-4");
+
+        Assert.False(plan.ChoiceIsAvailable(allocation, level));
+
+        level.Selections["feat-4"] = ["Ability Improvement"];
+
+        Assert.True(plan.ChoiceIsAvailable(allocation, level));
+        var futureLevel = plan.Levels[7];
+        Assert.False(plan.ChoiceIsAvailable(allocation, futureLevel));
+    }
+
+    [Fact]
+    public void EveryClassKeepsItsLiveMacFeaturesAndSpecialChoices()
+    {
+        Assert.Contains(
+            RequireDefinition("Barbarian").Levels[6].Features,
+            option => option.Name == "Additional Rage Charge");
+        RequireChoice("Barbarian", 10, "animal-aspect-10", "Wildheart");
+
+        RequireChoice("Bard", 6, "lore-magical-secrets", "College of Lore");
+        RequireChoice("Cleric", 10, "divine-intervention");
+        RequireChoice("Druid", 9, "land-9", "Circle of the Land");
+        RequireChoice("Fighter", 10, "arcane-shots-10", "Arcane Archer");
+        RequireChoice("Fighter", 11, "eldritch-knight-spell-11", "Eldritch Knight");
+        RequireChoice("Monk", 11, "disciplines-11", "Way of the Four Elements");
+        RequireChoice("Paladin", 2, "fighting-style");
+        RequireChoice("Ranger", 10, "natural-explorer-10");
+        RequireChoice("Ranger", 3, "swarm", "Swarmkeeper");
+        RequireChoice("Rogue", 11, "arcane-trickster-spell-11", "Arcane Trickster");
+        RequireChoice("Sorcerer", 1, "draconic-ancestry", "Draconic Bloodline");
+        RequireChoice("Warlock", 11, "mystic-arcanum");
+        Assert.Contains(
+            RequireDefinition("Wizard").Levels[1].Features,
+            option => option.Name == "Scroll Transcription");
+    }
+
+    [Fact]
     public void TankBuildSpellsAreInCurrentClassLists()
     {
         Assert.Contains("Armour of Agathys", SpellCatalog.Spells("Warlock", 1));
@@ -196,17 +276,7 @@ public sealed class ManualBuildTests
     [Fact]
     public void EveryCatalogChoiceHasBundledArtwork()
     {
-        var iconDirectory = FindRepositoryRoot()
-            .Parent!
-            .GetDirectories("mac")
-            .Single()
-            .GetDirectories("BG3Assistant")
-            .Single()
-            .GetDirectories("Resources")
-            .Single()
-            .GetDirectories("BuildOptionIcons")
-            .Single()
-            .FullName;
+        var iconDirectory = FindBuildArtworkDirectory(AppContext.BaseDirectory);
         var missing = AllOptions()
             .Select(option => option.ArtworkFilename)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -249,19 +319,53 @@ public sealed class ManualBuildTests
         return definition!;
     }
 
-    private static DirectoryInfo FindRepositoryRoot()
+    private static BuildChoiceGroup RequireChoice(
+        string className,
+        int level,
+        string id,
+        string? requiredSelection = null)
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        var choice = Assert.Single(
+            RequireDefinition(className).Levels[level].Choices,
+            group => group.Id == id);
+        Assert.Equal(requiredSelection, choice.RequiredSelection);
+        Assert.NotEmpty(choice.Options);
+        return choice;
+    }
+
+    [Fact]
+    public void BuildArtworkLookupDoesNotDependOnAWindowsOutputDepth()
+    {
+        var artwork = FindBuildArtworkDirectory(
+            Path.Combine(
+                AppContext.BaseDirectory,
+                "architecture",
+                "configuration",
+                "framework",
+                "rid",
+                "publish"));
+
+        Assert.Equal("BuildOptionIcons", Path.GetFileName(artwork));
+    }
+
+    private static string FindBuildArtworkDirectory(string startPath)
+    {
+        var directory = new DirectoryInfo(startPath);
         while (directory is not null)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "BG3HonorAssistant.slnx")))
+            var candidate = Path.Combine(
+                directory.FullName,
+                "Resources",
+                "BuildOptionIcons");
+            if (Directory.Exists(candidate))
             {
-                return directory;
+                return candidate;
             }
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate the Windows solution root.");
+        throw new DirectoryNotFoundException(
+            "Could not locate the shared build artwork directory.");
     }
 }

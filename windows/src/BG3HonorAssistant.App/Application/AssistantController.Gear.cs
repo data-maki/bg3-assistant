@@ -9,6 +9,65 @@ namespace BG3HonorAssistant.App;
 
 public sealed partial class AssistantController
 {
+    public async Task<bool> SetSlotOverrideAsync(
+        string memberId,
+        DollCell cell,
+        string? itemKey,
+        CancellationToken cancellationToken = default)
+    {
+        var member = ActiveParty.FirstOrDefault(candidate => candidate.Id == memberId);
+        if (member is null)
+        {
+            return false;
+        }
+
+        if (itemKey is not null)
+        {
+            var item = Guide.Items.FirstOrDefault(candidate => candidate.ItemKey == itemKey);
+            if (item is null ||
+                item.Act > (Run.SelectedAct ?? 1) ||
+                LoadoutSlotClassifier.Classify(item.Slot, item.Name) != cell.Slot)
+            {
+                return false;
+            }
+        }
+
+        PartyPlanningRules.SetSlotOverride(
+            Run,
+            member,
+            cell,
+            itemKey,
+            Guide.Items);
+        _ = PartyPlanningRules.ValidateGearTarget(Run, Builds, Guide.Items);
+        await SaveAsync(cancellationToken);
+        Notify();
+        return true;
+    }
+
+    public async Task<bool> SetGearAssignmentOverrideAsync(
+        BuildGear gear,
+        string memberId,
+        CancellationToken cancellationToken = default)
+    {
+        var member = ActiveParty.FirstOrDefault(candidate => candidate.Id == memberId);
+        if (member is null ||
+            !PartyPlanningRules.WantedGear(
+                    Run,
+                    member,
+                    Run.SelectedAct ?? 1,
+                    Builds,
+                    Guide.Items)
+                .Any(candidate => candidate.ItemKey == gear.ItemKey))
+        {
+            return false;
+        }
+
+        PartyPlanningRules.SetGearAssignmentOverride(Run, gear, memberId);
+        await SaveAsync(cancellationToken);
+        Notify();
+        return true;
+    }
+
     public async Task<bool> SetGearTargetAsync(
         string memberId,
         BuildGear gear,

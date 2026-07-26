@@ -191,6 +191,7 @@ public partial class MainWindow
         }
 
         var rows = levelDefinition.Choices
+            .Where(group => plan.ChoiceIsAvailable(group, saved))
             .SelectMany(
                 group => group.Options.Select(
                     option => new ManualChoiceRow(
