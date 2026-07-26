@@ -22,6 +22,7 @@ using BG3HonorAssistant.Windows.Shell;
 using BG3HonorAssistant.Windows.Startup;
 using Application = System.Windows.Application;
 using Brush = System.Windows.Media.Brush;
+using ComboBox = System.Windows.Controls.ComboBox;
 using Button = System.Windows.Controls.Button;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MessageBox = System.Windows.MessageBox;

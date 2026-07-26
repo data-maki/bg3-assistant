@@ -23,6 +23,8 @@ using BG3HonorAssistant.Windows.Startup;
 using Application = System.Windows.Application;
 using Brush = System.Windows.Media.Brush;
 using Button = System.Windows.Controls.Button;
+using CheckBox = System.Windows.Controls.CheckBox;
+using ComboBox = System.Windows.Controls.ComboBox;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MessageBox = System.Windows.MessageBox;
 

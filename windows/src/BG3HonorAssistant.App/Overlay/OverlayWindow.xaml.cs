@@ -7,6 +7,8 @@ using BG3HonorAssistant.Core.Models;
 using BG3HonorAssistant.Core.Overlay;
 using BG3HonorAssistant.Core.Route;
 using BG3HonorAssistant.Windows.Overlay;
+using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
 using WpfMouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace BG3HonorAssistant.App;
