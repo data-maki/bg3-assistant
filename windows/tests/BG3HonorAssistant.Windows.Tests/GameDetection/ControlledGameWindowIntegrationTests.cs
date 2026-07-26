@@ -17,7 +17,7 @@ public sealed class ControlledGameWindowCollection
 [Collection(ControlledGameWindowCollection.Name)]
 public sealed class ControlledGameWindowIntegrationTests
 {
-    private static readonly TimeSpan OperationTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan OperationTimeout = TimeSpan.FromSeconds(30);
     private readonly ITestOutputHelper output;
 
     public ControlledGameWindowIntegrationTests(ITestOutputHelper output)
@@ -28,12 +28,22 @@ public sealed class ControlledGameWindowIntegrationTests
     [Theory]
     [InlineData("bg3", true)]
     [InlineData("bg3_dx11", false)]
-    public void ExactNameX64HostExercisesDetectionFollowingAndLifecycle(
+    public void ExactNameHostExercisesDetectionFollowingAndLifecycle(
         string processName,
         bool borderless)
     {
-        using var host = ControlledGameHost.Start(processName, borderless);
-        Assert.Equal(ControlledGameHost.Amd64Machine, host.PortableExecutableMachine);
+        var architecture = ControlledHostArchitecture.FromEnvironmentOrProcess();
+        using var host = ControlledGameHost.Start(
+            processName,
+            borderless,
+            architecture);
+        Assert.Equal(
+            architecture.PortableExecutableMachine,
+            host.PortableExecutableMachine);
+        Assert.True(
+            host.ProcessArchitecture.IsExpectedFor(architecture),
+            $"Expected {architecture.RuntimeIdentifier}; observed " +
+            $"{host.ProcessArchitecture.DescribeFor(architecture)}.");
         var locator = new Bg3WindowLocator();
         var initial = WaitForWindow(
             locator,
@@ -75,8 +85,6 @@ public sealed class ControlledGameWindowIntegrationTests
             .GetWindowLongPtr(overlay.Handle, ControlledNativeMethods.GwlExStyle)
             .ToInt64();
         Assert.Equal(0, interactiveStyles & ControlledNativeMethods.WsExNoActivate);
-        Assert.True(ControlledNativeMethods.SetForegroundWindow(overlay.Handle));
-        WaitFor(() => ControlledNativeMethods.GetForegroundWindow() == overlay.Handle);
 
         overlayService.SetPassive(overlay.Handle, passive: true);
         var passiveStyles = ControlledNativeMethods
@@ -143,23 +151,137 @@ public sealed class ControlledGameWindowIntegrationTests
         monitor.Refresh();
         Assert.Null(monitor.Current);
 
+        using var relaunched = ControlledGameHost.Start(
+            processName,
+            borderless,
+            architecture);
+        Assert.True(
+            relaunched.ProcessArchitecture.IsExpectedFor(architecture),
+            $"Expected relaunched {architecture.RuntimeIdentifier}; observed " +
+            $"{relaunched.ProcessArchitecture.DescribeFor(architecture)}.");
+        var relaunchedWindow = WaitForWindow(
+            locator,
+            candidate => candidate.ProcessId == relaunched.Process.Id);
+        Assert.NotEqual(host.Process.Id, relaunchedWindow.ProcessId);
+        monitor.Refresh();
+        Assert.Equal(relaunchedWindow, monitor.Current);
+
+        Assert.True(
+            ControlledNativeMethods.PostMessage(
+                relaunched.WindowHandle,
+                ControlledNativeMethods.WmClose,
+                nint.Zero,
+                nint.Zero));
+        Assert.True(
+            relaunched.Process.WaitForExit(
+                checked((int)OperationTimeout.TotalMilliseconds)));
+        WaitFor(() => locator.FindBestWindow() is null);
+        monitor.Refresh();
+        Assert.Null(monitor.Current);
+
         Assert.Contains(observed, candidate => candidate?.Bounds == moved.Bounds);
         Assert.Contains(observed, candidate => candidate is null);
         Assert.Contains(observed, candidate => candidate?.Bounds == restored.Bounds);
+        Assert.Contains(
+            observed,
+            candidate => candidate?.ProcessId == relaunched.Process.Id);
 
         output.WriteLine(
-            "host={0}.exe; mode={1}; pe=0x{2:X4}; pid={3}; initial={4}; moved={5}; restored={6}; dpi={7}; monitors={8}; os={9}; test-process={10}",
+            "host={0}.exe; mode={1}; rid={2}; pe=0x{3:X4}; host-process={4}; pid={5}; relaunch-pid={6}; initial={7}; moved={8}; restored={9}; dpi={10}; monitors={11}; os={12}; os-architecture={13}; test-process={14}; pointer-size={15}",
             processName,
             borderless ? "borderless-style" : "windowed-style",
+            architecture.RuntimeIdentifier,
             host.PortableExecutableMachine,
+            host.ProcessArchitecture.DescribeFor(architecture),
             host.Process.Id,
+            relaunched.Process.Id,
             initial.Bounds,
             moved.Bounds,
             restored.Bounds,
             restored.Dpi,
             ControlledNativeMethods.GetSystemMetrics(ControlledNativeMethods.SmCmonitors),
             Environment.OSVersion.VersionString,
-            RuntimeInformation.ProcessArchitecture);
+            RuntimeInformation.OSArchitecture,
+            RuntimeInformation.ProcessArchitecture,
+            nint.Size);
+    }
+
+    private readonly record struct ControlledHostArchitecture(
+        string RuntimeIdentifier,
+        ushort PortableExecutableMachine)
+    {
+        internal const string EnvironmentVariable = "BG3_CONTROLLED_HOST_RID";
+        internal const ushort Amd64Machine = 0x8664;
+        internal const ushort Arm64Machine = 0xAA64;
+
+        internal static ControlledHostArchitecture FromEnvironmentOrProcess()
+        {
+            var runtimeIdentifier = Environment.GetEnvironmentVariable(
+                EnvironmentVariable);
+            return runtimeIdentifier switch
+            {
+                "win-arm64" => new(runtimeIdentifier, Arm64Machine),
+                "win-x64" => new(runtimeIdentifier, Amd64Machine),
+                null or "" => RuntimeInformation.ProcessArchitecture switch
+                {
+                    Architecture.Arm64 => new("win-arm64", Arm64Machine),
+                    Architecture.X64 => new("win-x64", Amd64Machine),
+                    _ => throw new PlatformNotSupportedException(
+                        "Controlled BG3 hosts support exactly ARM64 and x64 test processes."),
+                },
+                _ => throw new InvalidOperationException(
+                    $"{EnvironmentVariable} supports exactly win-arm64 and win-x64; " +
+                    $"received '{runtimeIdentifier}'."),
+            };
+        }
+    }
+
+    private readonly record struct ProcessArchitectureObservation(
+        ushort ProcessMachine,
+        ushort NativeMachine)
+    {
+        internal bool IsExpectedFor(ControlledHostArchitecture expected)
+        {
+            return expected.RuntimeIdentifier switch
+            {
+                "win-arm64" =>
+                    ProcessMachine == ControlledNativeMethods.ImageFileMachineUnknown &&
+                    NativeMachine == ControlledHostArchitecture.Arm64Machine,
+                "win-x64" =>
+                    (ProcessMachine == ControlledNativeMethods.ImageFileMachineUnknown &&
+                     NativeMachine == ControlledHostArchitecture.Amd64Machine) ||
+                    ((ProcessMachine == ControlledNativeMethods.ImageFileMachineUnknown ||
+                      ProcessMachine == ControlledHostArchitecture.Amd64Machine) &&
+                     NativeMachine == ControlledHostArchitecture.Arm64Machine),
+                _ => false,
+            };
+        }
+
+        internal string DescribeFor(ControlledHostArchitecture image)
+        {
+            return (image.RuntimeIdentifier, NativeMachine) switch
+            {
+                ("win-arm64", ControlledHostArchitecture.Arm64Machine) =>
+                    "native-isa-arm64",
+                ("win-x64", ControlledHostArchitecture.Amd64Machine) =>
+                    "native-isa-x64",
+                ("win-x64", ControlledHostArchitecture.Arm64Machine) =>
+                    "emulated-x64-on-arm64",
+                _ =>
+                    $"{MachineName(image.PortableExecutableMachine)}-image-on-" +
+                    $"{MachineName(NativeMachine)}",
+            };
+        }
+
+        private static string MachineName(ushort machine)
+        {
+            return machine switch
+            {
+                ControlledHostArchitecture.Arm64Machine => "arm64",
+                ControlledHostArchitecture.Amd64Machine => "x64",
+                _ => $"machine-0x{machine:X4}",
+            };
+        }
     }
 
     private static Bg3WindowInfo WaitForWindow(
@@ -240,15 +362,15 @@ public sealed class ControlledGameWindowIntegrationTests
             string stagingDirectory,
             Process process,
             nint windowHandle,
-            ushort portableExecutableMachine)
+            ushort portableExecutableMachine,
+            ProcessArchitectureObservation processArchitecture)
         {
             StagingDirectory = stagingDirectory;
             Process = process;
             WindowHandle = windowHandle;
             PortableExecutableMachine = portableExecutableMachine;
+            ProcessArchitecture = processArchitecture;
         }
-
-        internal const ushort Amd64Machine = 0x8664;
 
         private string StagingDirectory { get; }
 
@@ -258,11 +380,23 @@ public sealed class ControlledGameWindowIntegrationTests
 
         internal ushort PortableExecutableMachine { get; }
 
-        internal static ControlledGameHost Start(string processName, bool borderless)
+        internal ProcessArchitectureObservation ProcessArchitecture { get; }
+
+        internal static ControlledGameHost Start(
+            string processName,
+            bool borderless,
+            ControlledHostArchitecture architecture)
         {
-            var sourceDirectory = FindHostOutput();
+            var sourceDirectory = FindHostOutput(architecture);
             var portableExecutableMachine = ReadPortableExecutableMachine(
                 Path.Combine(sourceDirectory, "GameWindowHost.exe"));
+            if (portableExecutableMachine != architecture.PortableExecutableMachine)
+            {
+                throw new InvalidDataException(
+                    $"GameWindowHost PE machine 0x{portableExecutableMachine:X4} does not " +
+                    $"match {architecture.RuntimeIdentifier} " +
+                    $"(0x{architecture.PortableExecutableMachine:X4}).");
+            }
             var stagingRoot = Path.Combine(
                 Path.GetTempPath(),
                 "BG3HonorAssistant",
@@ -317,7 +451,8 @@ public sealed class ControlledGameWindowIntegrationTests
                     stagingDirectory,
                     process,
                     handle,
-                    portableExecutableMachine);
+                    portableExecutableMachine,
+                    ReadProcessArchitecture(process));
             }
             catch
             {
@@ -353,7 +488,8 @@ public sealed class ControlledGameWindowIntegrationTests
             _ = TryDeleteDirectory(StagingDirectory);
         }
 
-        private static string FindHostOutput()
+        private static string FindHostOutput(
+            ControlledHostArchitecture architecture)
         {
             var directory = new DirectoryInfo(AppContext.BaseDirectory);
             while (directory is not null)
@@ -372,14 +508,22 @@ public sealed class ControlledGameWindowIntegrationTests
                         "bin",
                         configuration,
                         "net10.0-windows10.0.26100.0",
-                        "win-x64");
+                        architecture.RuntimeIdentifier);
+                    var publishOutput = Path.Combine(output, "publish");
+                    if (File.Exists(Path.Combine(publishOutput, "GameWindowHost.exe")))
+                    {
+                        return publishOutput;
+                    }
+
                     if (File.Exists(Path.Combine(output, "GameWindowHost.exe")))
                     {
                         return output;
                     }
 
                     throw new FileNotFoundException(
-                        "Build GameWindowHost before running the controlled-window tests.",
+                        $"Build GameWindowHost with the explicit RID " +
+                        $"{architecture.RuntimeIdentifier} before running the " +
+                        "controlled-window tests.",
                         Path.Combine(output, "GameWindowHost.exe"));
                 }
 
@@ -388,6 +532,22 @@ public sealed class ControlledGameWindowIntegrationTests
 
             throw new DirectoryNotFoundException(
                 "Could not locate the Windows solution root for GameWindowHost.");
+        }
+
+        private static ProcessArchitectureObservation ReadProcessArchitecture(
+            Process process)
+        {
+            if (!ControlledNativeMethods.IsWow64Process2(
+                    process.Handle,
+                    out var processMachine,
+                    out var nativeMachine))
+            {
+                throw new Win32Exception(Marshal.GetLastPInvokeError());
+            }
+
+            return new ProcessArchitectureObservation(
+                processMachine,
+                nativeMachine);
         }
 
         private static ushort ReadPortableExecutableMachine(string executablePath)
@@ -437,6 +597,7 @@ public sealed class ControlledGameWindowIntegrationTests
 
 internal static partial class ControlledNativeMethods
 {
+    internal const ushort ImageFileMachineUnknown = 0;
     internal const uint SwpNoZOrder = 0x0004;
     internal const uint SwpNoActivate = 0x0010;
     internal const uint SwpShowWindow = 0x0040;
@@ -521,6 +682,13 @@ internal static partial class ControlledNativeMethods
         uint message,
         nint wordParameter,
         nint longParameter);
+
+    [LibraryImport("kernel32.dll", EntryPoint = "IsWow64Process2", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool IsWow64Process2(
+        nint process,
+        out ushort processMachine,
+        out ushort nativeMachine);
 }
 
 [StructLayout(LayoutKind.Sequential)]

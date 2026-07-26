@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using BG3HonorAssistant.Windows.GameDetection;
 using BG3HonorAssistant.Windows.Interop;
 
@@ -10,7 +11,7 @@ public sealed class OverlayWindowService
     {
         ArgumentOutOfRangeException.ThrowIfZero(overlayWindow);
 
-        var styles = NativeMethods.GetWindowLongPtr(overlayWindow, NativeMethods.GwlExStyle).ToInt64();
+        var styles = GetExtendedStyles(overlayWindow).ToInt64();
         // WS_EX_TOPMOST is z-order state owned by SetWindowPos. Writing that
         // bit directly can make Windows treat the following HWND_TOPMOST call
         // as a no-op while the HWND is still in the non-topmost band.
@@ -19,10 +20,11 @@ public sealed class OverlayWindowService
             ? styles | NativeMethods.WsExNoActivate
             : styles & ~NativeMethods.WsExNoActivate;
 
-        NativeMethods.SetWindowLongPtr(
+        var previousStyles = NativeMethods.SetWindowLongPtr(
             overlayWindow,
             NativeMethods.GwlExStyle,
             new nint(styles));
+        ThrowIfZeroWithError(previousStyles);
 
         if (!NativeMethods.SetWindowPos(
                 overlayWindow,
@@ -138,5 +140,24 @@ public sealed class OverlayWindowService
     {
         _ = NativeMethods.SetProcessDpiAwarenessContext(
             NativeMethods.DpiAwarenessContextPerMonitorAwareV2);
+    }
+
+    private static nint GetExtendedStyles(nint window)
+    {
+        var styles = NativeMethods.GetWindowLongPtr(
+            window,
+            NativeMethods.GwlExStyle);
+        ThrowIfZeroWithError(styles);
+        return styles;
+    }
+
+    private static void ThrowIfZeroWithError(nint result)
+    {
+        if (result == nint.Zero &&
+            Marshal.GetLastPInvokeError() is var error &&
+            error != 0)
+        {
+            throw new Win32Exception(error);
+        }
     }
 }

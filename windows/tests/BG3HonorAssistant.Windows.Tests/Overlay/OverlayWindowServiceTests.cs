@@ -40,6 +40,17 @@ public sealed class OverlayWindowServiceTests
     }
 
     [Fact]
+    public void ConfigureRejectsAnInvalidPointerSizedWindowHandle()
+    {
+        var service = new OverlayWindowService();
+
+        var exception = Assert.Throws<Win32Exception>(
+            () => service.Configure(new nint(0x1234), passive: true));
+
+        Assert.Equal(1400, exception.NativeErrorCode);
+    }
+
+    [Fact]
     public void PositionRelativeToUsesPhysicalDpiCoordinatesWithoutTakingForeground()
     {
         using var window = TestWindow.Create();
