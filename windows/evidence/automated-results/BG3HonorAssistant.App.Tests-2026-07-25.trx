@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="38b9e8a1-b899-4021-8238-31682e13531e" name="jcarbs@JANCARBONELB5E7 2026-07-25 21:00:10" runUser="JANCARBONELB5E7\jcarbs" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-07-25T21:00:10.6246253-07:00" queuing="2026-07-25T21:00:10.6246257-07:00" start="2026-07-25T20:59:40.6186976-07:00" finish="2026-07-25T21:00:11.4474800-07:00" />
+  <TestSettings name="default" id="65838929-85b3-47c2-bf06-7b6986110df6">
+    <Deployment runDeploymentRoot="jcarbs_JANCARBONELB5E7_2026-07-25_21_00_10" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="69dcc4ab-00b7-42b2-a816-2b53446b661c" testId="e95a9fea-b1e0-a0ef-9193-ca186c6772ce" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.RunCreationAndSwitchingPreserveIndependentSnapshots" computerName="JANCARBONELB5E7" duration="00:00:00.0964031" startTime="2026-07-25T21:00:10.8835067-07:00" endTime="2026-07-25T21:00:10.9802784-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="69dcc4ab-00b7-42b2-a816-2b53446b661c" />
+    <UnitTestResult executionId="faa0b5d6-0e0f-46ba-8b46-dfc290793cb1" testId="905bb2a8-a4cb-36d1-d505-61ead9b746b3" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.FirstStartCreatesNormalizedRecoverableRunFromSharedGuide" computerName="JANCARBONELB5E7" duration="00:00:00.0602783" startTime="2026-07-25T21:00:10.9807965-07:00" endTime="2026-07-25T21:00:11.0418685-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="faa0b5d6-0e0f-46ba-8b46-dfc290793cb1" />
+    <UnitTestResult executionId="5888cc70-f97b-4e2b-b73f-40e9e99db4bd" testId="222ccff8-ad76-644f-3130-9e074c33589b" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.RouteMutationSurvivesControllerAndRepositoryRestart" computerName="JANCARBONELB5E7" duration="00:00:13.3588269" startTime="2026-07-25T20:59:57.1711642-07:00" endTime="2026-07-25T21:00:10.5021050-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5888cc70-f97b-4e2b-b73f-40e9e99db4bd" />
+    <UnitTestResult executionId="b10aeba0-d9cd-4b8a-b0c4-487215052df2" testId="158cfc5b-61a7-fe5e-bbb4-b31dc142cfa5" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.ImportedBuildPersistsGloballyAndCanBeAssigned" computerName="JANCARBONELB5E7" duration="00:00:00.2356706" startTime="2026-07-25T21:00:10.5720645-07:00" endTime="2026-07-25T21:00:10.7464030-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b10aeba0-d9cd-4b8a-b0c4-487215052df2" />
+    <UnitTestResult executionId="f689516b-b123-4c2c-a7a6-6161af72964f" testId="5ffcdc81-905b-5e45-22c3-7726d8172e7e" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate" computerName="JANCARBONELB5E7" duration="00:00:00.0657580" startTime="2026-07-25T21:00:11.1487067-07:00" endTime="2026-07-25T21:00:11.2151777-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f689516b-b123-4c2c-a7a6-6161af72964f" />
+    <UnitTestResult executionId="9b097b11-a0d2-4adb-bd9a-f091da7b9c72" testId="54d3532b-5775-59f6-21df-ffbac77f8059" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.FightPinSnoozeAndMuteRemainExplicitSessionAndRunState" computerName="JANCARBONELB5E7" duration="00:00:00.1053365" startTime="2026-07-25T21:00:11.0423157-07:00" endTime="2026-07-25T21:00:11.1482796-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9b097b11-a0d2-4adb-bd9a-f091da7b9c72" />
+    <UnitTestResult executionId="c0955d95-b4be-4d70-99ab-13934f22961b" testId="3d0ff132-359e-21d0-e8a4-f6ca3f51d1f5" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.PreferencesAndActTwoGapSurviveRestart" computerName="JANCARBONELB5E7" duration="00:00:00.1179346" startTime="2026-07-25T21:00:11.2155870-07:00" endTime="2026-07-25T21:00:11.3342504-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c0955d95-b4be-4d70-99ab-13934f22961b" />
+    <UnitTestResult executionId="89091e14-8eb6-4caf-86a6-fcb41177bd65" testId="ed3f121c-fb23-78af-67b6-b0932d0ca645" testName="BG3HonorAssistant.App.Tests.AssistantControllerTests.GearTargetReplacesNowGoalAndCompletionRecordsOwnership" computerName="JANCARBONELB5E7" duration="00:00:00.1345719" startTime="2026-07-25T21:00:10.7502204-07:00" endTime="2026-07-25T21:00:10.8823836-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="89091e14-8eb6-4caf-86a6-fcb41177bd65" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="5ffcdc81-905b-5e45-22c3-7726d8172e7e">
+      <Execution id="f689516b-b123-4c2c-a7a6-6161af72964f" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="ActAdvanceRequiresConsequenceConsentAndActTwoCannotInventAGate" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.PreferencesAndActTwoGapSurviveRestart" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="3d0ff132-359e-21d0-e8a4-f6ca3f51d1f5">
+      <Execution id="c0955d95-b4be-4d70-99ab-13934f22961b" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="PreferencesAndActTwoGapSurviveRestart" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.RunCreationAndSwitchingPreserveIndependentSnapshots" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="e95a9fea-b1e0-a0ef-9193-ca186c6772ce">
+      <Execution id="69dcc4ab-00b7-42b2-a816-2b53446b661c" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="RunCreationAndSwitchingPreserveIndependentSnapshots" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.GearTargetReplacesNowGoalAndCompletionRecordsOwnership" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="ed3f121c-fb23-78af-67b6-b0932d0ca645">
+      <Execution id="89091e14-8eb6-4caf-86a6-fcb41177bd65" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="GearTargetReplacesNowGoalAndCompletionRecordsOwnership" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.FirstStartCreatesNormalizedRecoverableRunFromSharedGuide" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="905bb2a8-a4cb-36d1-d505-61ead9b746b3">
+      <Execution id="faa0b5d6-0e0f-46ba-8b46-dfc290793cb1" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="FirstStartCreatesNormalizedRecoverableRunFromSharedGuide" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.ImportedBuildPersistsGloballyAndCanBeAssigned" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="158cfc5b-61a7-fe5e-bbb4-b31dc142cfa5">
+      <Execution id="b10aeba0-d9cd-4b8a-b0c4-487215052df2" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="ImportedBuildPersistsGloballyAndCanBeAssigned" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.RouteMutationSurvivesControllerAndRepositoryRestart" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="222ccff8-ad76-644f-3130-9e074c33589b">
+      <Execution id="5888cc70-f97b-4e2b-b73f-40e9e99db4bd" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="RouteMutationSurvivesControllerAndRepositoryRestart" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.App.Tests.AssistantControllerTests.FightPinSnoozeAndMuteRemainExplicitSessionAndRunState" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.app.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.app.tests.dll" id="54d3532b-5775-59f6-21df-ffbac77f8059">
+      <Execution id="9b097b11-a0d2-4adb-bd9a-f091da7b9c72" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.App.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.App.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.App.Tests.AssistantControllerTests" name="FightPinSnoozeAndMuteRemainExplicitSessionAndRunState" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="e95a9fea-b1e0-a0ef-9193-ca186c6772ce" executionId="69dcc4ab-00b7-42b2-a816-2b53446b661c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="905bb2a8-a4cb-36d1-d505-61ead9b746b3" executionId="faa0b5d6-0e0f-46ba-8b46-dfc290793cb1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="222ccff8-ad76-644f-3130-9e074c33589b" executionId="5888cc70-f97b-4e2b-b73f-40e9e99db4bd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="158cfc5b-61a7-fe5e-bbb4-b31dc142cfa5" executionId="b10aeba0-d9cd-4b8a-b0c4-487215052df2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5ffcdc81-905b-5e45-22c3-7726d8172e7e" executionId="f689516b-b123-4c2c-a7a6-6161af72964f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="54d3532b-5775-59f6-21df-ffbac77f8059" executionId="9b097b11-a0d2-4adb-bd9a-f091da7b9c72" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3d0ff132-359e-21d0-e8a4-f6ca3f51d1f5" executionId="c0955d95-b4be-4d70-99ab-13934f22961b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed3f121c-fb23-78af-67b6-b0932d0ca645" executionId="89091e14-8eb6-4caf-86a6-fcb41177bd65" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="8" executed="8" passed="8" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.10)&#xD;
+[xUnit.net 00:00:02.17]   Discovering: BG3HonorAssistant.App.Tests&#xD;
+[xUnit.net 00:00:02.25]   Discovered:  BG3HonorAssistant.App.Tests&#xD;
+[xUnit.net 00:00:02.29]   Starting:    BG3HonorAssistant.App.Tests&#xD;
+[xUnit.net 00:00:16.56]   Finished:    BG3HonorAssistant.App.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

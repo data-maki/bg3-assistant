@@ -88,6 +88,16 @@ backend/*.spec
 
 Carthage/Build/
 
+# Windows/.NET local output
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+TestResults/
+windows/artifacts/
+windows/qa/
+
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo.

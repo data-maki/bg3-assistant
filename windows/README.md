@@ -1,7 +1,7 @@
 # BG3 Honor Assistant for Windows
 
-> **Status: research and implementation plan only. There is no Windows binary to download yet.**
-> Every installation or usage step below is labeled **Planned** until a signed build has passed the Windows/BG3 release gates.
+> **Status: implementation in progress. There is no signed Windows release to download yet.**
+> The repository can produce an unsigned development MSIX, but every public installation or usage step below remains **Planned** until a signed build passes the controlled Windows release gates.
 
 BG3 Honor Assistant is planned as an overlay-only Honor Mode companion for Baldur’s Gate 3. It will show route guidance, party/build/loadout planning, act progress, and optional OpenRouter chat while you play.
 
@@ -13,7 +13,6 @@ It will not install a BG3 mod, inject into the game, read or edit saves, inspect
 - The 64-bit Windows version of Baldur’s Gate 3.
 - BG3 in **Windowed** or **Borderless Windowed** mode. True exclusive full-screen is not supported by the planned non-injected overlay.
 - Internet only for OpenRouter chat, build imports, external links, and updates.
-- Optional microphone for speech-to-text.
 
 “x86” in the port request is interpreted as x86-64/AMD64. A 32-bit build is not planned or needed for BG3.
 
@@ -65,12 +64,11 @@ First launch will ask you to:
 
 Windows permission behavior:
 
-- **Screen capture:** no prompt at launch. The Windows capture picker appears only after you select **Attach BG3 screenshot** in chat. You choose the BG3 window, Windows shows a capture border, and the app captures one frame.
-- **Microphone:** no prompt at launch. Windows may request microphone access only after you press the mic button. Dictation may also require Windows Online speech recognition.
 - **Startup:** disabled by default. Windows remains in control if you enable it.
 - **Administrator:** not required and will not be requested.
 
-If you deny capture or microphone access, typed chat and all local guide/planning features will remain available.
+The Windows MVP has no screenshot capture, clipboard-image ingestion, microphone,
+speech-recognition, or dictation feature and requests none of those permissions.
 
 ## Starting the overlay with BG3
 
@@ -91,7 +89,7 @@ The planned overlay includes:
 - Now and Route guidance with completion/skip/revisit state;
 - multiple runs and mid-run catch-up;
 - Party, reviewed/manual Builds, Loadout/Gear, and Act ledgers;
-- optional grounded OpenRouter chat, screenshot attachment, and speech-to-text;
+- optional grounded, typed OpenRouter chat;
 - Settings, diagnostics, startup control, legal notices, and external map/wiki links.
 
 The current shared guide has Act 1 and Act 3 route content but no Act 2 checkpoints/walkthrough. The Windows app will label that gap; it will not invent Act 2 guidance.
@@ -123,7 +121,7 @@ The app will not leave a BG3 mod, service, driver, scheduled task, firewall rule
 
 ### There is no download
 
-That is the current expected state. This repository contains research and a build plan, not a Windows release.
+That is the current expected state. This repository contains research, implementation source, tests, and development packaging, but not a signed Windows release.
 
 ### The planned overlay does not appear
 
@@ -132,20 +130,6 @@ That is the current expected state. This repository contains research and a buil
 - Open the tray menu and select **Show Overlay**.
 - Do not run BG3 as administrator.
 - Check Diagnostics for a detected `bg3.exe` or `bg3_dx11.exe` window.
-
-### Screenshot attachment is unavailable
-
-- Make sure BG3 is visible and not minimized.
-- Select the BG3 window in the Windows capture picker.
-- Confirm Windows supports screen capture and that enterprise policy has not blocked it.
-- HDR capture will be release-tested, but disabling HDR is a reasonable diagnostic—not a permanent requirement.
-
-### Speech-to-text is unavailable
-
-- Check **Settings > Privacy & security > Microphone**.
-- Check **Settings > Privacy & security > Speech** for Online speech recognition.
-- Confirm a supported microphone and Windows speech language are installed.
-- Type your message instead; speech is optional.
 
 ### OpenRouter chat fails
 
@@ -166,22 +150,21 @@ Planned local data:
 
 - runs, routes, party, builds, gear, acts, and settings in a local SQLite database;
 - OpenRouter key in Windows Credential Manager;
-- short redacted diagnostics logs with no key, prompt, or screenshot content.
+- short redacted diagnostics logs with no key or prompt content.
 
 Planned network data:
 
-- chat text, selected guide context, recent in-memory chat history, and an optional attached screenshot go directly to OpenRouter when you press Send;
+- typed chat text, selected guide context, and recent in-memory chat history go directly to OpenRouter when you press Send;
 - build-import URLs are fetched only after you request an import;
 - maps, wiki, legal, mail, and release links open in your default apps;
 - Windows/Store/App Installer handles package updates.
-
-Screenshots will be player-triggered, previewed, kept in memory, sent with one message, and then discarded. They will not be captured in the background or written to disk. Speech audio will use the Windows speech service to produce a draft and will not be sent to OpenRouter by this application. If Windows Online speech recognition is enabled, Microsoft may process that audio under its Windows privacy terms.
 
 BG3 Honor Assistant will not:
 
 - install or communicate with a BG3 mod;
 - inspect process memory or inject code;
 - read/edit saves or game files;
+- capture screenshots, read clipboard images, or request microphone access;
 - install a driver/service or listen on a network port;
 - require administrator access;
 - download/run an AI model or local model server.
@@ -198,11 +181,11 @@ The implementation plan is in:
 - [`research/packaging-installation.md`](research/packaging-installation.md)
 - [`research/implementation-plan.md`](research/implementation-plan.md)
 
-Useful contributions before implementation starts:
+Useful contributions during implementation:
 
 - review a parity row against the current `/mac` source;
-- test the planned overlay/capture harness on Windows 11 x64 with BG3 DirectX 11 or Vulkan;
-- improve Windows accessibility, DPI, HDR, signing, or packaging test cases;
+- test the controlled overlay host on Windows 11 x64 across supported display/DPI configurations;
+- improve Windows accessibility, DPI, signing, or packaging test cases;
 - report a missing requirement without proposing mod/injection integration.
 
 Do not submit a Windows build that bundles Ollama, Python, Node, a local model/server, an unsigned public installer, or a BG3 mod.

@@ -8,7 +8,7 @@ Reviewed: 2026-07-25
 
 A normal player downloads or Store-installs one packaged application. The package contains the x64 desktop executable, .NET runtime, SQLite native library, guide, images, generated catalogs, and notices. The player does **not** install Visual Studio, the .NET runtime, Python, Node, Ollama, a local model, a server, or a BG3 mod.
 
-Use a self-contained `.NET 10` `win-x64` publish inside MSIX. MSIX gives the app a stable identity, clean install/uninstall, update support, and access to packaged startup/speech APIs ([MSIX overview](https://learn.microsoft.com/en-us/windows/msix/overview)). An MSIX package can contain multiple runtime files; current Microsoft packaging guidance notes that MSIX does not support .NET `PublishSingleFile`, which is irrelevant to the one-action player install ([packaging overview](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/)).
+Use a self-contained `.NET 10` `win-x64` publish inside MSIX. MSIX gives the app a stable identity, clean install/uninstall, update support, and access to the packaged startup API ([MSIX overview](https://learn.microsoft.com/en-us/windows/msix/overview)). An MSIX package can contain multiple runtime files; current Microsoft packaging guidance notes that MSIX does not support .NET `PublishSingleFile`, which is irrelevant to the one-action player install ([packaging overview](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/)).
 
 ## Distribution channels
 
@@ -163,10 +163,7 @@ First launch is a normal WPF onboarding window, not an elevated installer step:
 
 Permission timing:
 
-- No screen-capture prompt during install or onboarding.
-- No microphone prompt during install or onboarding.
-- Screenshot picker appears only after **Attach BG3 screenshot**.
-- Microphone consent appears only after the mic button.
+- No screen-capture or microphone prompt ever appears; those features, controls, services, and capabilities are excluded from the Windows MVP.
 - Startup enablement is requested only after the player turns on its toggle.
 
 If the player adds an OpenRouter key, write it directly to Credential Manager and read it back to confirm local storage. A separate **Test connection** makes a small explicit OpenRouter request; saving a key does not silently spend credits.

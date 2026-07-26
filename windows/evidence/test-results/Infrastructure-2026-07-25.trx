@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c8bf5cdb-43ee-4404-90f4-be0e11c9931c" name="jcarbs@JANCARBONELB5E7 2026-07-25 19:27:49" runUser="JANCARBONELB5E7\jcarbs" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-07-25T19:27:49.4336539-07:00" queuing="2026-07-25T19:27:49.4336546-07:00" start="2026-07-25T19:27:42.6681330-07:00" finish="2026-07-25T19:27:49.5300086-07:00" />
+  <TestSettings name="default" id="834a946c-fee9-4bcf-98dc-214ad96ad52e">
+    <Deployment runDeploymentRoot="jcarbs_JANCARBONELB5E7_2026-07-25_19_27_49" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="c9226638-5170-4287-850c-e66bdf65bf2b" testId="08328e30-f5de-bda9-be54-cafc24052710" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.PersistsImportedBuildsInTheSameDatabase" computerName="JANCARBONELB5E7" duration="00:00:00.0166314" startTime="2026-07-25T19:27:49.3518326-07:00" endTime="2026-07-25T19:27:49.3679811-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c9226638-5170-4287-850c-e66bdf65bf2b" />
+    <UnitTestResult executionId="4eab0d3c-2e13-44c4-b174-59e45acbb025" testId="8efe7926-b3a6-66da-537c-7e4681b59239" testName="BG3HonorAssistant.Infrastructure.Tests.Resources.GuideRepositoryTests.LoadsAuditedSharedGuideWithoutDuplicatingIt" computerName="JANCARBONELB5E7" duration="00:00:00.0484081" startTime="2026-07-25T19:27:49.3168397-07:00" endTime="2026-07-25T19:27:49.3666098-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4eab0d3c-2e13-44c4-b174-59e45acbb025" />
+    <UnitTestResult executionId="0d6a003d-858a-4f5e-a022-3d796765ed97" testId="f95aff2a-8c83-7bac-00b7-4dfde864f2d2" testName="BG3HonorAssistant.Infrastructure.Tests.Resources.GuideRepositoryTests.SharedGuideRoundTripsWithoutDroppingTypedOracleData" computerName="JANCARBONELB5E7" duration="00:00:01.4976176" startTime="2026-07-25T19:27:47.8010086-07:00" endTime="2026-07-25T19:27:49.3127150-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0d6a003d-858a-4f5e-a022-3d796765ed97" />
+    <UnitTestResult executionId="9ba5faaf-2434-4fc5-b5b5-6dac3e31aed4" testId="8f765c93-5ce5-4432-bfa6-820d81691d3e" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.PersistsJsonSettings" computerName="JANCARBONELB5E7" duration="00:00:01.2179180" startTime="2026-07-25T19:27:47.7946800-07:00" endTime="2026-07-25T19:27:49.0349282-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ba5faaf-2434-4fc5-b5b5-6dac3e31aed4" />
+    <UnitTestResult executionId="30ee02d6-cdb1-4951-9674-4c432b41a274" testId="19e08358-e6f6-2c82-20eb-7748f3aeed8d" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.FallsBackToNewestValidRevisionWhenActiveSnapshotCannotDecode" computerName="JANCARBONELB5E7" duration="00:00:00.0180653" startTime="2026-07-25T19:27:49.4108599-07:00" endTime="2026-07-25T19:27:49.4289127-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="30ee02d6-cdb1-4951-9674-4c432b41a274" />
+    <UnitTestResult executionId="1b355c6d-7075-4baf-a5ab-3ee406f513dc" testId="c2d15cf8-a148-546e-93e0-bd7efe9bd2a7" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.FailedMigrationRollsBackAndLeavesRecoveryCopy" computerName="JANCARBONELB5E7" duration="00:00:00.0592710" startTime="2026-07-25T19:27:49.2789203-07:00" endTime="2026-07-25T19:27:49.3368034-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1b355c6d-7075-4baf-a5ab-3ee406f513dc" />
+    <UnitTestResult executionId="7b1eabaf-bf70-433b-835e-535f6a2eee74" testId="eb602b2a-cb95-e482-9466-8f428f2a114a" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.RetainsOnlyTwentyTransactionalRevisions" computerName="JANCARBONELB5E7" duration="00:00:00.1291419" startTime="2026-07-25T19:27:49.1501248-07:00" endTime="2026-07-25T19:27:49.2771388-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7b1eabaf-bf70-433b-835e-535f6a2eee74" />
+    <UnitTestResult executionId="ca6acaa2-299e-4d60-a181-aa131815e223" testId="6203aabe-112a-13df-6b6c-37985f4b0a5e" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.MigratesVersionOneTransactionallyAndCreatesRecoveryCopy" computerName="JANCARBONELB5E7" duration="00:00:00.0838117" startTime="2026-07-25T19:27:49.0895911-07:00" endTime="2026-07-25T19:27:49.1470927-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ca6acaa2-299e-4d60-a181-aa131815e223" />
+    <UnitTestResult executionId="713bccf3-e450-49db-beb9-6b35fe2d6875" testId="67b2d14c-e7b8-f0ed-510d-fce61cf4ea1e" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.RejectsInvalidSnapshotBeforeOpeningTransaction" computerName="JANCARBONELB5E7" duration="00:00:00.0186042" startTime="2026-07-25T19:27:49.0818945-07:00" endTime="2026-07-25T19:27:49.0832534-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="713bccf3-e450-49db-beb9-6b35fe2d6875" />
+    <UnitTestResult executionId="c604788f-1048-4a64-bf51-9c604830049e" testId="97544255-84ad-2fa3-c995-8ff159de706a" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.SavesAndRestoresExactlyOneActiveRun" computerName="JANCARBONELB5E7" duration="00:00:00.0289001" startTime="2026-07-25T19:27:49.3931846-07:00" endTime="2026-07-25T19:27:49.4002736-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c604788f-1048-4a64-bf51-9c604830049e" />
+    <UnitTestResult executionId="281bf1a9-fbd5-48a2-a06a-34c39c865b7a" testId="9c6c57e2-0046-37d1-8d9f-afaee7907459" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.UsesPatchedSqliteBuild" computerName="JANCARBONELB5E7" duration="00:00:00.0136200" startTime="2026-07-25T19:27:49.3373564-07:00" endTime="2026-07-25T19:27:49.3508208-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="281bf1a9-fbd5-48a2-a06a-34c39c865b7a" />
+    <UnitTestResult executionId="9ecd6254-d292-4b17-8ada-45ecfca6c651" testId="9e749223-926b-44f9-c69e-e0be72d555f9" testName="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.CorruptDatabaseIsPreservedForExplicitRecovery" computerName="JANCARBONELB5E7" duration="00:00:00.0123827" startTime="2026-07-25T19:27:49.4018429-07:00" endTime="2026-07-25T19:27:49.4104967-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ecd6254-d292-4b17-8ada-45ecfca6c651" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.FailedMigrationRollsBackAndLeavesRecoveryCopy" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="c2d15cf8-a148-546e-93e0-bd7efe9bd2a7">
+      <Execution id="1b355c6d-7075-4baf-a5ab-3ee406f513dc" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="FailedMigrationRollsBackAndLeavesRecoveryCopy" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.UsesPatchedSqliteBuild" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="9c6c57e2-0046-37d1-8d9f-afaee7907459">
+      <Execution id="281bf1a9-fbd5-48a2-a06a-34c39c865b7a" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="UsesPatchedSqliteBuild" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Resources.GuideRepositoryTests.SharedGuideRoundTripsWithoutDroppingTypedOracleData" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="f95aff2a-8c83-7bac-00b7-4dfde864f2d2">
+      <Execution id="0d6a003d-858a-4f5e-a022-3d796765ed97" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Resources.GuideRepositoryTests" name="SharedGuideRoundTripsWithoutDroppingTypedOracleData" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Resources.GuideRepositoryTests.LoadsAuditedSharedGuideWithoutDuplicatingIt" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="8efe7926-b3a6-66da-537c-7e4681b59239">
+      <Execution id="4eab0d3c-2e13-44c4-b174-59e45acbb025" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Resources.GuideRepositoryTests" name="LoadsAuditedSharedGuideWithoutDuplicatingIt" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.PersistsJsonSettings" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="8f765c93-5ce5-4432-bfa6-820d81691d3e">
+      <Execution id="9ba5faaf-2434-4fc5-b5b5-6dac3e31aed4" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="PersistsJsonSettings" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.PersistsImportedBuildsInTheSameDatabase" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="08328e30-f5de-bda9-be54-cafc24052710">
+      <Execution id="c9226638-5170-4287-850c-e66bdf65bf2b" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="PersistsImportedBuildsInTheSameDatabase" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.RetainsOnlyTwentyTransactionalRevisions" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="eb602b2a-cb95-e482-9466-8f428f2a114a">
+      <Execution id="7b1eabaf-bf70-433b-835e-535f6a2eee74" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="RetainsOnlyTwentyTransactionalRevisions" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.CorruptDatabaseIsPreservedForExplicitRecovery" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="9e749223-926b-44f9-c69e-e0be72d555f9">
+      <Execution id="9ecd6254-d292-4b17-8ada-45ecfca6c651" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="CorruptDatabaseIsPreservedForExplicitRecovery" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.SavesAndRestoresExactlyOneActiveRun" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="97544255-84ad-2fa3-c995-8ff159de706a">
+      <Execution id="c604788f-1048-4a64-bf51-9c604830049e" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="SavesAndRestoresExactlyOneActiveRun" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.MigratesVersionOneTransactionallyAndCreatesRecoveryCopy" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="6203aabe-112a-13df-6b6c-37985f4b0a5e">
+      <Execution id="ca6acaa2-299e-4d60-a181-aa131815e223" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="MigratesVersionOneTransactionallyAndCreatesRecoveryCopy" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.FallsBackToNewestValidRevisionWhenActiveSnapshotCannotDecode" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="19e08358-e6f6-2c82-20eb-7748f3aeed8d">
+      <Execution id="30ee02d6-cdb1-4951-9674-4c432b41a274" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="FallsBackToNewestValidRevisionWhenActiveSnapshotCannotDecode" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests.RejectsInvalidSnapshotBeforeOpeningTransaction" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.infrastructure.tests\bin\release\net10.0\bg3honorassistant.infrastructure.tests.dll" id="67b2d14c-e7b8-f0ed-510d-fce61cf4ea1e">
+      <Execution id="713bccf3-e450-49db-beb9-6b35fe2d6875" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Infrastructure.Tests\bin\Release\net10.0\BG3HonorAssistant.Infrastructure.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Infrastructure.Tests.Persistence.RunRepositoryTests" name="RejectsInvalidSnapshotBeforeOpeningTransaction" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="08328e30-f5de-bda9-be54-cafc24052710" executionId="c9226638-5170-4287-850c-e66bdf65bf2b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8efe7926-b3a6-66da-537c-7e4681b59239" executionId="4eab0d3c-2e13-44c4-b174-59e45acbb025" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f95aff2a-8c83-7bac-00b7-4dfde864f2d2" executionId="0d6a003d-858a-4f5e-a022-3d796765ed97" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f765c93-5ce5-4432-bfa6-820d81691d3e" executionId="9ba5faaf-2434-4fc5-b5b5-6dac3e31aed4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="19e08358-e6f6-2c82-20eb-7748f3aeed8d" executionId="30ee02d6-cdb1-4951-9674-4c432b41a274" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c2d15cf8-a148-546e-93e0-bd7efe9bd2a7" executionId="1b355c6d-7075-4baf-a5ab-3ee406f513dc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb602b2a-cb95-e482-9466-8f428f2a114a" executionId="7b1eabaf-bf70-433b-835e-535f6a2eee74" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6203aabe-112a-13df-6b6c-37985f4b0a5e" executionId="ca6acaa2-299e-4d60-a181-aa131815e223" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="67b2d14c-e7b8-f0ed-510d-fce61cf4ea1e" executionId="713bccf3-e450-49db-beb9-6b35fe2d6875" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="97544255-84ad-2fa3-c995-8ff159de706a" executionId="c604788f-1048-4a64-bf51-9c604830049e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c6c57e2-0046-37d1-8d9f-afaee7907459" executionId="281bf1a9-fbd5-48a2-a06a-34c39c865b7a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9e749223-926b-44f9-c69e-e0be72d555f9" executionId="9ecd6254-d292-4b17-8ada-45ecfca6c651" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="12" executed="12" passed="12" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.10)&#xD;
+[xUnit.net 00:00:00.18]   Discovering: BG3HonorAssistant.Infrastructure.Tests&#xD;
+[xUnit.net 00:00:00.25]   Discovered:  BG3HonorAssistant.Infrastructure.Tests&#xD;
+[xUnit.net 00:00:00.30]   Starting:    BG3HonorAssistant.Infrastructure.Tests&#xD;
+[xUnit.net 00:00:01.99]   Finished:    BG3HonorAssistant.Infrastructure.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

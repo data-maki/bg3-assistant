@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="b607f9f7-2c74-4699-ba5b-7d62c16b9379" name="jcarbs@JANCARBONELB5E7 2026-07-25 18:27:30" runUser="JANCARBONELB5E7\jcarbs" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-07-25T18:27:30.1003929-07:00" queuing="2026-07-25T18:27:30.1003942-07:00" start="2026-07-25T18:27:26.1304951-07:00" finish="2026-07-25T18:27:31.5384170-07:00" />
+  <TestSettings name="default" id="617572f8-ab78-419d-98c1-1015f1a0bafe">
+    <Deployment runDeploymentRoot="jcarbs_JANCARBONELB5E7_2026-07-25_18_27_30" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="fdf3284d-f71b-4828-8377-4c760e307acd" testId="7c28e8e0-653c-f6cc-3dd8-ec58894c08ec" testName="BG3HonorAssistant.Windows.Tests.GameDetection.ControlledGameWindowIntegrationTests.ExactNameX64HostExercisesDetectionFollowingAndLifecycle(processName: &quot;bg3&quot;, borderless: True)" computerName="JANCARBONELB5E7" duration="00:00:01.9154525" startTime="2026-07-25T18:27:29.4126448-07:00" endTime="2026-07-25T18:27:31.2968415-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fdf3284d-f71b-4828-8377-4c760e307acd">
+      <Output>
+        <StdOut>host=bg3.exe; mode=borderless-style; pe=0x8664; pid=2580; initial=WindowBounds { Left = 250, Top = 240, Right = 2790, Bottom = 1670, Width = 2540, Height = 1430, IsUsable = True }; moved=WindowBounds { Left = -1790, Top = 128, Right = 110, Bottom = 1198, Width = 1900, Height = 1070, IsUsable = True }; restored=WindowBounds { Left = -1790, Top = 128, Right = 110, Bottom = 1198, Width = 1900, Height = 1070, IsUsable = True }; dpi=192; monitors=1; os=Microsoft Windows NT 10.0.26200.0; test-process=X64</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6187d88f-78c1-472c-8c88-4b7831d3340c" testId="0f2a17f1-2885-0a69-a570-e7590fde4642" testName="BG3HonorAssistant.Windows.Tests.GameDetection.ControlledGameWindowIntegrationTests.ExactNameX64HostExercisesDetectionFollowingAndLifecycle(processName: &quot;bg3_dx11&quot;, borderless: False)" computerName="JANCARBONELB5E7" duration="00:00:01.6763771" startTime="2026-07-25T18:27:27.6696176-07:00" endTime="2026-07-25T18:27:29.3765600-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6187d88f-78c1-472c-8c88-4b7831d3340c">
+      <Output>
+        <StdOut>host=bg3_dx11.exe; mode=windowed-style; pe=0x8664; pid=8352; initial=WindowBounds { Left = 251, Top = 240, Right = 2789, Bottom = 1669, Width = 2538, Height = 1429, IsUsable = True }; moved=WindowBounds { Left = -1789, Top = 128, Right = 109, Bottom = 1197, Width = 1898, Height = 1069, IsUsable = True }; restored=WindowBounds { Left = -1789, Top = 128, Right = 109, Bottom = 1197, Width = 1898, Height = 1069, IsUsable = True }; dpi=192; monitors=1; os=Microsoft Windows NT 10.0.26200.0; test-process=X64</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="BG3HonorAssistant.Windows.Tests.GameDetection.ControlledGameWindowIntegrationTests.ExactNameX64HostExercisesDetectionFollowingAndLifecycle(processName: &quot;bg3_dx11&quot;, borderless: False)" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.windows.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.windows.tests.dll" id="0f2a17f1-2885-0a69-a570-e7590fde4642">
+      <Execution id="6187d88f-78c1-472c-8c88-4b7831d3340c" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Windows.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.Windows.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Windows.Tests.GameDetection.ControlledGameWindowIntegrationTests" name="ExactNameX64HostExercisesDetectionFollowingAndLifecycle" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Windows.Tests.GameDetection.ControlledGameWindowIntegrationTests.ExactNameX64HostExercisesDetectionFollowingAndLifecycle(processName: &quot;bg3&quot;, borderless: True)" storage="c:\mac\home\documents\bg3_windows\windows\tests\bg3honorassistant.windows.tests\bin\release\net10.0-windows10.0.26100.0\bg3honorassistant.windows.tests.dll" id="7c28e8e0-653c-f6cc-3dd8-ec58894c08ec">
+      <Execution id="fdf3284d-f71b-4828-8377-4c760e307acd" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows\windows\tests\BG3HonorAssistant.Windows.Tests\bin\Release\net10.0-windows10.0.26100.0\BG3HonorAssistant.Windows.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Windows.Tests.GameDetection.ControlledGameWindowIntegrationTests" name="ExactNameX64HostExercisesDetectionFollowingAndLifecycle" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="7c28e8e0-653c-f6cc-3dd8-ec58894c08ec" executionId="fdf3284d-f71b-4828-8377-4c760e307acd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f2a17f1-2885-0a69-a570-e7590fde4642" executionId="6187d88f-78c1-472c-8c88-4b7831d3340c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.10)&#xD;
+[xUnit.net 00:00:00.29]   Discovering: BG3HonorAssistant.Windows.Tests&#xD;
+[xUnit.net 00:00:00.44]   Discovered:  BG3HonorAssistant.Windows.Tests&#xD;
+[xUnit.net 00:00:00.53]   Starting:    BG3HonorAssistant.Windows.Tests&#xD;
+[xUnit.net 00:00:04.26]   Finished:    BG3HonorAssistant.Windows.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

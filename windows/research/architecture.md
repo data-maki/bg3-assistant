@@ -1,6 +1,6 @@
 # Windows Architecture Recommendation
 
-Status: implementation-ready recommendation; no Windows application has been built yet
+Status: active Windows MVP architecture
 
 Decision date: 2026-07-25
 
@@ -40,7 +40,7 @@ Costs:
 
 - Some low-level APIs require generated P/Invoke/COM bindings.
 - WPF visual styling must be intentionally matched to the macOS overlay.
-- Capture needs a short Direct3D 11/WinRT adapter, contained behind one service.
+- Screenshot/capture and microphone/speech adapters are intentionally absent from the Windows MVP.
 
 ### Option B — WinUI 3 + Windows App SDK
 
@@ -72,7 +72,7 @@ Use only if the overlay spike finds a WPF rendering defect that cannot be resolv
           |
      IPC bridge
           |
- [Rust host: HWND/capture/SQLite/OpenRouter]
+ [Rust host: HWND/SQLite/OpenRouter]
 ```
 
 Advantages:
@@ -103,9 +103,7 @@ The main surface hierarchy stays the same. Three Windows-specific changes are vi
  ├─ Now | Route | Party | Loadout | Act
  ├─ Chat
  │  ├─ Scope: Current | Route | Party
- │  ├─ [Attach BG3 screenshot]  <- explicit Windows picker; never automatic
- │  ├─ [Mic]                    <- prompts only on use
- │  └─ Draft / Send / Sources
+ │  └─ Typed draft / Send / Sources
  └─ Settings
     └─ AI: OpenRouter key status / Test / Remove / fixed release model
        (no provider picker, Ollama, or local-model controls)
@@ -125,8 +123,8 @@ Keep four production projects and two test projects. Do not recreate the macOS g
    run/route/party/build/gear/act models and pure decisions
           |                         |
  BG3HonorAssistant.Infrastructure   BG3HonorAssistant.Windows
- SQLite, resources, OpenRouter,     HWND, process/window, capture,
- import parsing                     speech, credentials, startup
+ SQLite, resources, OpenRouter,     HWND, process/window,
+ import parsing                     credentials, startup
 ```
 
 Responsibilities:
@@ -134,7 +132,7 @@ Responsibilities:
 - **App:** WPF views, view models, commands, dialogs, tray menu, and app lifetime. It owns no SQL, HTTP, or P/Invoke.
 - **Core:** immutable/serializable models and deterministic operations for current goal, route ledger, readiness, run creation, party rules, build validation, gear ownership, and act locking.
 - **Infrastructure:** `RunRepository`, schema migrations, resource loader, `OpenRouterClient`, import fetch/parser, diagnostics redaction.
-- **Windows:** `OverlayWindowService`, `Bg3WindowLocator`, `GameLauncher`, `ScreenCaptureService`, `SpeechInputService`, `CredentialStore`, `StartupTaskService`, `SingleInstanceService`, `ShellLinkService`.
+- **Windows:** `OverlayWindowService`, `Bg3WindowLocator`, `GameLauncher`, `CredentialStore`, `StartupTaskService`, `SingleInstanceService`, `ShellLinkService`. No capture or speech service is part of the shipped graph.
 
 Use constructor injection in the composition root, but no dependency-injection framework initially. The graph is small enough to construct directly and tests can pass fakes.
 
@@ -157,7 +155,7 @@ The UI calls one application command at a time. The command validates preconditi
 ### Direct OpenRouter chat
 
 ```text
- chat draft + selected scope + optional in-memory JPEG
+ typed chat draft + selected scope
                          |
               prompt/context builder
                          |
@@ -171,11 +169,11 @@ The UI calls one application command at a time. The command validates preconditi
 Rules:
 
 - Read the Bearer key from Credential Manager immediately before a request.
-- Send only the selected bundled guide context, recent session history, user text, and optional screenshot.
+- Send only the selected bundled guide context, recent session history, and user text.
 - Use `System.Text.Json`; do not ship an OpenAI/OpenRouter SDK.
 - One timeout/cancellation policy, bounded response size, and explicit HTTP/provider errors.
 - No deterministic chat fallback, proxy, telemetry service, or hidden retry to another model.
-- Default model is `google/gemini-3.6-flash` as verified on 2026-07-25; one release constant controls it, and release CI rechecks text, image, and structured-output capabilities against OpenRouter’s models endpoint ([OpenRouter quickstart](https://openrouter.ai/docs/quickstart), [current model](https://openrouter.ai/google/gemini-3.6-flash)).
+- Default model is `google/gemini-3.6-flash` as verified on 2026-07-25; one release constant controls it, and release CI rechecks text and structured-output capabilities against OpenRouter’s models endpoint ([OpenRouter quickstart](https://openrouter.ai/docs/quickstart), [current model](https://openrouter.ai/google/gemini-3.6-flash)).
 
 ### Overlay lifecycle
 
@@ -202,29 +200,9 @@ The WPF window starts with `WindowStyle=None`, `AllowsTransparency=true`, `Topmo
 
 When the player clicks a text box, deliberately activate the overlay and restore passive behavior after editing. Do not use keyboard/mouse hooks.
 
-### Optional screenshot
+### Approved Windows MVP exclusions
 
-```text
- Attach screenshot
-        |
- Windows GraphicsCapturePicker -> player chooses BG3
-        |
- one Direct3D11 frame -> SoftwareBitmap -> JPEG bytes
-        |
- preview / remove -> next OpenRouter message -> zero memory
-```
-
-Use `Windows.Graphics.Capture` with the secure picker, initialized to the WPF HWND. Create a D3D11 device, bridge it to `IDirect3DDevice`, create a one-frame pool/session, then call `SoftwareBitmap.CreateCopyFromSurfaceAsync` and encode through `BitmapEncoder`. Close the session after one frame. Keep the Windows capture border; do not declare `graphicsCaptureProgrammatic` or `graphicsCaptureWithoutBorder`. The official API supports window snapshots and requires callers to check `GraphicsCaptureSession.IsSupported()` ([screen capture](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/screen-capture)).
-
-### Optional speech
-
-```text
- mic button -> Windows microphone consent/privacy check
-            -> SpeechRecognizer hypotheses/results
-            -> chat draft only
-```
-
-Use `Windows.Media.SpeechRecognition.SpeechRecognizer`, its hypothesis event, and continuous session results. It is available to desktop apps with MSIX package identity. The feature must handle absent microphone, denied microphone, disabled Online speech recognition, unsupported language, and quality degradation without blocking text chat ([SpeechRecognizer](https://learn.microsoft.com/en-us/uwp/api/windows.media.speechrecognition.speechrecognizer?view=winrt-26100)).
+Screenshot capture, image attachments, clipboard-image ingestion, microphone access, speech recognition, and dictation are not implemented. No related WPF controls, Windows adapters, package capabilities, dependencies, or OpenRouter image payloads may ship. Historical feasibility notes belong only in non-shipping research history and are not part of this architecture.
 
 ## Persistence and ownership
 
@@ -258,7 +236,7 @@ Runtime packages are deliberately few:
 - `AngleSharp` for HTML-to-text during reviewed-build imports.
 - `PdfPig` for PDF-to-text during reviewed-build imports.
 
-Use the .NET Windows target framework for WinRT projections and generated `LibraryImport`/Microsoft CsWin32 bindings for the narrow Win32 surface. CsWin32 is a build-time source generator and adds no large runtime assembly ([Microsoft CsWin32](https://github.com/microsoft/CsWin32)). Avoid CommunityToolkit, MVVM frameworks, HTTP SDKs, embedded browsers, and native capture libraries until a measured need exists.
+Use the .NET Windows target framework and generated `LibraryImport`/Microsoft CsWin32 bindings for the narrow Win32 surface. CsWin32 is a build-time source generator and adds no large runtime assembly ([Microsoft CsWin32](https://github.com/microsoft/CsWin32)). Avoid CommunityToolkit, MVVM frameworks, HTTP SDKs, embedded browsers, and capture/speech libraries.
 
 Pin all NuGet versions through central package management and a committed lock file. Produce an SBOM and update `THIRD_PARTY_NOTICES.md` in release CI. AngleSharp is MIT and .NET Foundation supported; PdfPig is Apache-2.0 ([AngleSharp](https://github.com/AngleSharp/AngleSharp), [PdfPig](https://github.com/UglyToad/PdfPig)).
 
@@ -266,9 +244,8 @@ Pin all NuGet versions through central package management and a committed lock f
 
 - A separately installed server is **not required**. All work is in one desktop process.
 - A player-installed .NET runtime is **not required**. The publish is self-contained.
-- Windows App SDK/WinUI is **not required** for WPF, Win32, or the selected WinRT APIs.
-- Screen capture is optional, picker-mediated, visible, and needs no programmatic/borderless capture capability.
-- Speech is optional and does require MSIX package identity plus microphone capability and user privacy settings.
+- Windows App SDK/WinUI is **not required** for WPF or the selected Win32/WinRT APIs.
+- Screen capture, image attachment/clipboard ingestion, microphone access, speech recognition, and dictation are approved exclusions and must be absent from shipped bytes.
 - Outbound OpenRouter HTTPS needs no inbound listener or Windows Firewall rule.
 - True exclusive full-screen is not a supported overlay mode; BG3 Windowed/Borderless Windowed is.
 - The assistant never requires administrator, UIAccess, game injection, save access, or a BG3 mod.

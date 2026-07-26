@@ -1,0 +1,626 @@
+{
+    "source":  "mac/BG3Assistant/BG3SpellCatalog.generated.swift",
+    "sourceSha256":  "7EB85795C5B2DD02D2344606F6BB60E10BBDCE781CC177CA62044631AD72962A",
+    "classes":  {
+                    "Bard":  {
+                                 "0":  [
+                                           "Blade Ward",
+                                           "Dancing Lights",
+                                           "Friends",
+                                           "Light",
+                                           "Mage Hand",
+                                           "Minor Illusion",
+                                           "True Strike",
+                                           "Vicious Mockery"
+                                       ],
+                                 "1":  [
+                                           "Animal Friendship",
+                                           "Bane",
+                                           "Charm Person",
+                                           "Cure Wounds",
+                                           "Disguise Self",
+                                           "Dissonant Whispers",
+                                           "Faerie Fire",
+                                           "Feather Fall",
+                                           "Healing Word",
+                                           "Heroism",
+                                           "Longstrider",
+                                           "Sleep",
+                                           "Speak with Animals",
+                                           "Tasha\u0027s Hideous Laughter",
+                                           "Thunderwave"
+                                       ],
+                                 "2":  [
+                                           "Blindness",
+                                           "Calm Emotions",
+                                           "Cloud of Daggers",
+                                           "Crown of Madness",
+                                           "Detect Thoughts",
+                                           "Enhance Ability",
+                                           "Enthrall",
+                                           "Heat Metal",
+                                           "Hold Person",
+                                           "Invisibility",
+                                           "Knock",
+                                           "Lesser Restoration",
+                                           "Phantasmal Force",
+                                           "See Invisibility",
+                                           "Shatter",
+                                           "Silence"
+                                       ],
+                                 "3":  [
+                                           "Bestow Curse",
+                                           "Fear",
+                                           "Feign Death",
+                                           "Glyph of Warding",
+                                           "Hypnotic Pattern",
+                                           "Plant Growth",
+                                           "Speak with Dead",
+                                           "Stinking Cloud"
+                                       ],
+                                 "4":  [
+                                           "Confusion",
+                                           "Dimension Door",
+                                           "Freedom of Movement",
+                                           "Greater Invisibility",
+                                           "Polymorph"
+                                       ],
+                                 "5":  [
+                                           "Dominate Person",
+                                           "Greater Restoration",
+                                           "Hold Monster",
+                                           "Mass Cure Wounds",
+                                           "Planar Binding",
+                                           "Seeming"
+                                       ],
+                                 "6":  [
+                                           "Eyebite",
+                                           "Otto\u0027s Irresistible Dance"
+                                       ]
+                             },
+                    "Cleric":  {
+                                   "0":  [
+                                             "Blade Ward",
+                                             "Bursting Sinew",
+                                             "Guidance",
+                                             "Light",
+                                             "Produce Flame",
+                                             "Resistance",
+                                             "Sacred Flame",
+                                             "Thaumaturgy",
+                                             "Toll the Dead"
+                                         ],
+                                   "1":  [
+                                             "Bane",
+                                             "Bless",
+                                             "Command",
+                                             "Create or Destroy Water",
+                                             "Cure Wounds",
+                                             "Guiding Bolt",
+                                             "Healing Word",
+                                             "Inflict Wounds",
+                                             "Protection from Evil and Good",
+                                             "Sanctuary",
+                                             "Shield of Faith"
+                                         ],
+                                   "2":  [
+                                             "Aid",
+                                             "Blindness",
+                                             "Calm Emotions",
+                                             "Enhance Ability",
+                                             "Hold Person",
+                                             "Lesser Restoration",
+                                             "Prayer of Healing",
+                                             "Protection from Poison",
+                                             "Silence",
+                                             "Spiritual Weapon",
+                                             "Warding Bond"
+                                         ],
+                                   "3":  [
+                                             "Animate Dead",
+                                             "Beacon of Hope",
+                                             "Bestow Curse",
+                                             "Daylight",
+                                             "Feign Death",
+                                             "Glyph of Warding",
+                                             "Mass Healing Word",
+                                             "Protection from Energy",
+                                             "Remove Curse",
+                                             "Revivify",
+                                             "Speak with Dead",
+                                             "Spirit Guardians"
+                                         ],
+                                   "4":  [
+                                             "Banishment",
+                                             "Death Ward",
+                                             "Freedom of Movement",
+                                             "Guardian of Faith"
+                                         ],
+                                   "5":  [
+                                             "Contagion",
+                                             "Dispel Evil And Good",
+                                             "Flame Strike",
+                                             "Greater Restoration",
+                                             "Insect Plague",
+                                             "Mass Cure Wounds",
+                                             "Planar Binding"
+                                         ],
+                                   "6":  [
+                                             "Blade Barrier",
+                                             "Create Undead",
+                                             "Harm",
+                                             "Heal",
+                                             "Heroes\u0027 Feast",
+                                             "Planar Ally"
+                                         ]
+                               },
+                    "Druid":  {
+                                  "0":  [
+                                            "Guidance",
+                                            "Poison Spray",
+                                            "Produce Flame",
+                                            "Resistance",
+                                            "Shillelagh",
+                                            "Thorn Whip"
+                                        ],
+                                  "1":  [
+                                            "Animal Friendship",
+                                            "Charm Person",
+                                            "Create or Destroy Water",
+                                            "Cure Wounds",
+                                            "Enhance Leap",
+                                            "Entangle",
+                                            "Faerie Fire",
+                                            "Fog Cloud",
+                                            "Goodberry",
+                                            "Healing Word",
+                                            "Ice Knife",
+                                            "Longstrider",
+                                            "Speak with Animals",
+                                            "Thunderwave"
+                                        ],
+                                  "2":  [
+                                            "Barkskin",
+                                            "Darkvision",
+                                            "Enhance Ability",
+                                            "Flame Blade",
+                                            "Flaming Sphere",
+                                            "Gust of Wind",
+                                            "Heat Metal",
+                                            "Hold Person",
+                                            "Lesser Restoration",
+                                            "Moonbeam",
+                                            "Pass Without Trace",
+                                            "Protection from Poison",
+                                            "Spike Growth"
+                                        ],
+                                  "3":  [
+                                            "Call Lightning",
+                                            "Daylight",
+                                            "Feign Death",
+                                            "Plant Growth",
+                                            "Protection from Energy",
+                                            "Sleet Storm"
+                                        ],
+                                  "4":  [
+                                            "Blight",
+                                            "Confusion",
+                                            "Conjure Minor Elemental",
+                                            "Conjure Woodland Being",
+                                            "Dominate Beast",
+                                            "Freedom of Movement",
+                                            "Grasping Vine",
+                                            "Ice Storm",
+                                            "Polymorph",
+                                            "Stoneskin",
+                                            "Wall of Fire"
+                                        ],
+                                  "5":  [
+                                            "Conjure Elemental",
+                                            "Contagion",
+                                            "Greater Restoration",
+                                            "Insect Plague",
+                                            "Mass Cure Wounds",
+                                            "Planar Binding",
+                                            "Wall of Stone"
+                                        ],
+                                  "6":  [
+                                            "Heal",
+                                            "Heroes\u0027 Feast",
+                                            "Sunbeam",
+                                            "Wall of Thorns",
+                                            "Wind Walk"
+                                        ]
+                              },
+                    "Paladin":  {
+                                    "0":  [
+
+                                          ],
+                                    "1":  [
+                                              "Bless",
+                                              "Command",
+                                              "Compelled Duel",
+                                              "Cure Wounds",
+                                              "Divine Favour",
+                                              "Heroism",
+                                              "Protection from Evil and Good",
+                                              "Searing Smite",
+                                              "Shield of Faith",
+                                              "Thunderous Smite",
+                                              "Wrathful Smite"
+                                          ],
+                                    "2":  [
+                                              "Aid",
+                                              "Branding Smite",
+                                              "Lesser Restoration",
+                                              "Magic Weapon",
+                                              "Protection from Poison"
+                                          ],
+                                    "3":  [
+                                              "Blinding Smite",
+                                              "Crusader\u0027s Mantle",
+                                              "Daylight",
+                                              "Elemental Weapon",
+                                              "Remove Curse",
+                                              "Revivify",
+                                              "Warden of Vitality"
+                                          ],
+                                    "4":  [
+
+                                          ],
+                                    "5":  [
+
+                                          ],
+                                    "6":  [
+
+                                          ]
+                                },
+                    "Ranger":  {
+                                   "0":  [
+
+                                         ],
+                                   "1":  [
+                                             "Animal Friendship",
+                                             "Cure Wounds",
+                                             "Enhance Leap",
+                                             "Ensnaring Strike",
+                                             "Fog Cloud",
+                                             "Goodberry",
+                                             "Hail of Thorns",
+                                             "Hunter\u0027s Mark",
+                                             "Longstrider",
+                                             "Speak with Animals"
+                                         ],
+                                   "2":  [
+                                             "Barkskin",
+                                             "Darkvision",
+                                             "Lesser Restoration",
+                                             "Pass Without Trace",
+                                             "Protection from Poison",
+                                             "Silence",
+                                             "Spike Growth"
+                                         ],
+                                   "3":  [
+                                             "Conjure Barrage",
+                                             "Daylight",
+                                             "Lightning Arrow",
+                                             "Plant Growth",
+                                             "Protection from Energy"
+                                         ],
+                                   "4":  [
+
+                                         ],
+                                   "5":  [
+
+                                         ],
+                                   "6":  [
+
+                                         ]
+                               },
+                    "Sorcerer":  {
+                                     "0":  [
+                                               "Acid Splash",
+                                               "Blade Ward",
+                                               "Bone Chill",
+                                               "Booming Blade",
+                                               "Bursting Sinew",
+                                               "Dancing Lights",
+                                               "Fire Bolt",
+                                               "Friends",
+                                               "Light",
+                                               "Mage Hand",
+                                               "Minor Illusion",
+                                               "Poison Spray",
+                                               "Ray of Frost",
+                                               "Shocking Grasp",
+                                               "True Strike"
+                                           ],
+                                     "1":  [
+                                               "Burning Hands",
+                                               "Charm Person",
+                                               "Chromatic Orb",
+                                               "Colour Spray",
+                                               "Disguise Self",
+                                               "Enhance Leap",
+                                               "Expeditious Retreat",
+                                               "False Life",
+                                               "Feather Fall",
+                                               "Fog Cloud",
+                                               "Ice Knife",
+                                               "Mage Armour",
+                                               "Magic Missile",
+                                               "Ray of Sickness",
+                                               "Shield",
+                                               "Sleep",
+                                               "Thunderwave",
+                                               "Witch Bolt"
+                                           ],
+                                     "2":  [
+                                               "Blindness",
+                                               "Blur",
+                                               "Cloud of Daggers",
+                                               "Crown of Madness",
+                                               "Darkness",
+                                               "Darkvision",
+                                               "Detect Thoughts",
+                                               "Enhance Ability",
+                                               "Enlarge/Reduce",
+                                               "Gust of Wind",
+                                               "Hold Person",
+                                               "Invisibility",
+                                               "Knock",
+                                               "Mirror Image",
+                                               "Misty Step",
+                                               "Phantasmal Force",
+                                               "Scorching Ray",
+                                               "See Invisibility",
+                                               "Shadow Blade",
+                                               "Shatter",
+                                               "Web"
+                                           ],
+                                     "3":  [
+                                               "Blink",
+                                               "Counterspell",
+                                               "Daylight",
+                                               "Fear",
+                                               "Fireball",
+                                               "Gaseous Form",
+                                               "Grant Flight",
+                                               "Haste",
+                                               "Hypnotic Pattern",
+                                               "Lightning Bolt",
+                                               "Protection from Energy",
+                                               "Sleet Storm",
+                                               "Slow",
+                                               "Stinking Cloud"
+                                           ],
+                                     "4":  [
+                                               "Banishment",
+                                               "Blight",
+                                               "Confusion",
+                                               "Dimension Door",
+                                               "Dominate Beast",
+                                               "Greater Invisibility",
+                                               "Ice Storm",
+                                               "Polymorph",
+                                               "Stoneskin",
+                                               "Wall of Fire"
+                                           ],
+                                     "5":  [
+                                               "Cloudkill",
+                                               "Cone of Cold",
+                                               "Dominate Person",
+                                               "Hold Monster",
+                                               "Insect Plague",
+                                               "Seeming",
+                                               "Telekinesis",
+                                               "Wall of Stone"
+                                           ],
+                                     "6":  [
+                                               "Arcane Gate",
+                                               "Chain Lightning",
+                                               "Circle of Death",
+                                               "Disintegrate",
+                                               "Eyebite",
+                                               "Globe of Invulnerability",
+                                               "Sunbeam"
+                                           ]
+                                 },
+                    "Warlock":  {
+                                    "0":  [
+                                              "Blade Ward",
+                                              "Bone Chill",
+                                              "Booming Blade",
+                                              "Eldritch Blast",
+                                              "Friends",
+                                              "Mage Hand",
+                                              "Minor Illusion",
+                                              "Poison Spray",
+                                              "Toll the Dead",
+                                              "True Strike"
+                                          ],
+                                    "1":  [
+                                              "Armour of Agathys",
+                                              "Arms of Hadar",
+                                              "Charm Person",
+                                              "Expeditious Retreat",
+                                              "Hellish Rebuke",
+                                              "Hex",
+                                              "Protection from Evil and Good",
+                                              "Witch Bolt"
+                                          ],
+                                    "2":  [
+                                              "Cloud of Daggers",
+                                              "Crown of Madness",
+                                              "Darkness",
+                                              "Enthrall",
+                                              "Hold Person",
+                                              "Invisibility",
+                                              "Mirror Image",
+                                              "Misty Step",
+                                              "Ray of Enfeeblement",
+                                              "Shadow Blade",
+                                              "Shatter"
+                                          ],
+                                    "3":  [
+                                              "Counterspell",
+                                              "Fear",
+                                              "Gaseous Form",
+                                              "Grant Flight",
+                                              "Hunger of Hadar",
+                                              "Hypnotic Pattern",
+                                              "Remove Curse",
+                                              "Vampiric Touch"
+                                          ],
+                                    "4":  [
+                                              "Banishment",
+                                              "Blight",
+                                              "Dimension Door"
+                                          ],
+                                    "5":  [
+                                              "Hold Monster"
+                                          ],
+                                    "6":  [
+                                              "Arcane Gate",
+                                              "Circle of Death",
+                                              "Create Undead",
+                                              "Eyebite",
+                                              "Flesh to Stone"
+                                          ]
+                                },
+                    "Wizard":  {
+                                   "0":  [
+                                             "Acid Splash",
+                                             "Blade Ward",
+                                             "Bone Chill",
+                                             "Booming Blade",
+                                             "Bursting Sinew",
+                                             "Dancing Lights",
+                                             "Fire Bolt",
+                                             "Friends",
+                                             "Light",
+                                             "Mage Hand",
+                                             "Minor Illusion",
+                                             "Poison Spray",
+                                             "Ray of Frost",
+                                             "Shocking Grasp",
+                                             "Toll the Dead",
+                                             "True Strike"
+                                         ],
+                                   "1":  [
+                                             "Burning Hands",
+                                             "Charm Person",
+                                             "Chromatic Orb",
+                                             "Colour Spray",
+                                             "Disguise Self",
+                                             "Enhance Leap",
+                                             "Expeditious Retreat",
+                                             "False Life",
+                                             "Feather Fall",
+                                             "Find Familiar",
+                                             "Fog Cloud",
+                                             "Grease",
+                                             "Ice Knife",
+                                             "Longstrider",
+                                             "Mage Armour",
+                                             "Magic Missile",
+                                             "Protection from Evil and Good",
+                                             "Ray of Sickness",
+                                             "Shield",
+                                             "Sleep",
+                                             "Tasha\u0027s Hideous Laughter",
+                                             "Thunderwave",
+                                             "Witch Bolt"
+                                         ],
+                                   "2":  [
+                                             "Arcane Lock",
+                                             "Blindness",
+                                             "Blur",
+                                             "Cloud of Daggers",
+                                             "Crown of Madness",
+                                             "Darkness",
+                                             "Darkvision",
+                                             "Detect Thoughts",
+                                             "Enlarge/Reduce",
+                                             "Flaming Sphere",
+                                             "Gust of Wind",
+                                             "Hold Person",
+                                             "Invisibility",
+                                             "Knock",
+                                             "Magic Weapon",
+                                             "Melf\u0027s Acid Arrow",
+                                             "Mirror Image",
+                                             "Misty Step",
+                                             "Phantasmal Force",
+                                             "Ray of Enfeeblement",
+                                             "Scorching Ray",
+                                             "See Invisibility",
+                                             "Shadow Blade",
+                                             "Shatter",
+                                             "Web"
+                                         ],
+                                   "3":  [
+                                             "Animate Dead",
+                                             "Bestow Curse",
+                                             "Blink",
+                                             "Counterspell",
+                                             "Fear",
+                                             "Feign Death",
+                                             "Fireball",
+                                             "Gaseous Form",
+                                             "Glyph of Warding",
+                                             "Grant Flight",
+                                             "Haste",
+                                             "Hypnotic Pattern",
+                                             "Lightning Bolt",
+                                             "Protection from Energy",
+                                             "Remove Curse",
+                                             "Sleet Storm",
+                                             "Slow",
+                                             "Stinking Cloud",
+                                             "Vampiric Touch"
+                                         ],
+                                   "4":  [
+                                             "Banishment",
+                                             "Blight",
+                                             "Confusion",
+                                             "Conjure Minor Elemental",
+                                             "Dimension Door",
+                                             "Evard\u0027s Black Tentacles",
+                                             "Fire Shield",
+                                             "Greater Invisibility",
+                                             "Ice Storm",
+                                             "Otiluke\u0027s Resilient Sphere",
+                                             "Phantasmal Killer",
+                                             "Polymorph",
+                                             "Stoneskin",
+                                             "Wall of Fire"
+                                         ],
+                                   "5":  [
+                                             "Cloudkill",
+                                             "Cone of Cold",
+                                             "Conjure Elemental",
+                                             "Dominate Person",
+                                             "Hold Monster",
+                                             "Planar Binding",
+                                             "Seeming",
+                                             "Telekinesis",
+                                             "Wall of Stone"
+                                         ],
+                                   "6":  [
+                                             "Arcane Gate",
+                                             "Chain Lightning",
+                                             "Circle of Death",
+                                             "Create Undead",
+                                             "Disintegrate",
+                                             "Eyebite",
+                                             "Flesh to Stone",
+                                             "Globe of Invulnerability",
+                                             "Otiluke\u0027s Freezing Sphere",
+                                             "Otto\u0027s Irresistible Dance",
+                                             "Sunbeam",
+                                             "Wall of Ice"
+                                         ]
+                               }
+                }
+}
