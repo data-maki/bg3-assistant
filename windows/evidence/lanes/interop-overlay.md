@@ -91,7 +91,9 @@
   mismatches before launch, and records the live OS process observation. Spike
   project/lock configuration was deliberately left to the build/RID lane.
 - Regression test: both exact-name theory rows run against each explicit RID.
-- Reviewer result: pending independent reviewer invalidation.
+- Reviewer result: invalidated by independent review `e88f445` because the first
+  lookup omitted the integrated `bin/<architecture>/...` segment; corrected in
+  the follow-up described below.
 - Residual risk: build-lane integration must produce both RID directories and set
   the environment input in CI/VM jobs.
 
@@ -107,7 +109,9 @@
   and `bg3_dx11.exe`.
 - Regression test: exact documented forms pass; full paths, whitespace, double
   extensions, launcher, Steam, mod-like names, and empty input fail.
-- Reviewer result: pending independent reviewer invalidation.
+- Reviewer result: invalidated by independent review `REV-INT-001`; the direct
+  matcher was strict but the production locator stripped an arbitrary final
+  extension before calling it. Corrected at the trusted image-name boundary below.
 - Residual risk: none known; the locator already extracts a basename from the
   trusted full process image path before calling this matcher.
 
@@ -124,7 +128,8 @@
   is zero and `Marshal.GetLastPInvokeError()` is nonzero.
 - Regression test: invalid pointer-sized HWND deterministically reports Win32
   error 1400 while a valid zero-style window still configures successfully.
-- Reviewer result: pending independent reviewer invalidation.
+- Reviewer result: resisted independent invalidation; pointer-sized declarations
+  and the valid-zero/error distinction were confirmed.
 - Residual risk: no 32-bit x86 path is supported or tested, by design.
 
 ### WIN-INT-004: `IsWow64Process2` alone mislabeled x64 emulation on ARM64
@@ -141,7 +146,8 @@
   native ARM64 is `native-isa-arm64`.
 - Regression test: the controlled host rejects PE/RID contamination before launch
   and validates the combined live observation for both RIDs.
-- Reviewer result: pending independent reviewer invalidation.
+- Reviewer result: resisted independent invalidation; PE plus native-machine
+  classification and unsupported-RID rejection were confirmed.
 - Residual risk: native-x64 physical hardware remains untested and must not be
   inferred from x64 CI or this emulation result.
 
@@ -156,7 +162,8 @@
 - Fix: increase the controlled-operation bound to 30 seconds; polling remains at
   50 ms and no product retry/sleep behavior was added.
 - Regression test: final x64-emulated windowed and borderless lifecycle cases pass.
-- Reviewer result: pending independent reviewer invalidation.
+- Reviewer result: no further defect reported by independent review; bounded
+  emulated startup remained explicit.
 - Residual risk: CI load can still cause bounded infrastructure timeouts; failures
   remain explicit rather than silently passing.
 
@@ -175,9 +182,76 @@
   positioning never changes it.
 - Regression test: both controlled modes cover interactive/passive style bits and
   no-focus overlay placement.
-- Reviewer result: pending independent reviewer invalidation.
+- Reviewer result: no further defect reported by independent review; the reviewer
+  confirmed the later strict foreground-preservation assertion remained useful.
 - Residual risk: packaged UI click activation remains part of product-flow QA,
   outside this deterministic native window harness.
+
+## Independent review corrections
+
+Independent review commit `e88f44586b3f55b1489e85fab008bd3768c19235`
+invalidated worker commit `0f23459` with three reproducible integration defects.
+The follow-up dispositions are:
+
+### REV-INT-001: production locator accepted alternate/double extensions
+
+- Architecture: both; reviewer reproduced under x64-on-ARM64 emulation.
+- Severity: high.
+- Reproduction: run a visible controlled host as `bg3.exe.exe`; the old locator
+  stripped the final `.exe`, passed `bg3.exe` to the strict matcher, and returned
+  the lookalike HWND. `bg3.scr` similarly normalized to the accepted bare name.
+- Root cause: exact matching occurred after `Path.GetFileNameWithoutExtension`,
+  outside the trusted full-image-name boundary.
+- Fix: `QueryFullProcessImageNameW` output is reduced only to its full file name,
+  which must case-insensitively equal exactly `bg3.exe` or `bg3_dx11.exe`. Only
+  after that succeeds is the known `.exe` suffix removed for presentation.
+- Regression tests: strict filename unit cases plus real visible controlled hosts
+  named `bg3.exe.exe`, `bg3.scr`, and `bg3_dx11.com`; all three production-locator
+  false positives are rejected.
+- Reviewer result: original commit invalidated; correction implemented and worker
+  regression matrix passed. Coordinator re-review remains the acceptance step.
+- Residual risk: access-denied and process-exit races remain intentionally treated
+  as non-candidates.
+
+### REV-INT-002: cross-thread disposal silently leaked WinEvent hooks
+
+- Architecture: both; reviewer reproduced under x64-on-ARM64 emulation.
+- Severity: high.
+- Reproduction: call `Start` on one OS thread and `Dispose` on another. Windows
+  rejects cross-thread `UnhookWinEvent`, while the old monitor ignored both
+  failures and discarded both handles.
+- Root cause: hook ownership thread was not recorded; disposal treated unhook as
+  best-effort.
+- Fix: record the installing OS thread with `GetCurrentThreadId`; reject
+  cross-thread disposal without changing state; dispose on the owner thread;
+  verify both unhook calls; retain any handle whose unhook fails; surface
+  aggregated cleanup errors; and prevent restart while cleanup is incomplete.
+- Regression test: real `Start` installs hooks on a dedicated thread, cross-thread
+  `Dispose` throws, and disposal on the original installing thread succeeds.
+- Reviewer result: original commit invalidated; correction implemented and the
+  real-hook regression passed. Coordinator re-review remains the acceptance step.
+- Residual risk: product lifecycle must continue disposing the monitor on its WPF
+  UI/start thread; violations now fail visibly instead of leaking silently.
+
+### REV-INT-003: host lookup missed integrated architecture-first output
+
+- Architecture: arm64 and x64.
+- Severity: high (matrix blocker).
+- Reproduction: integrated build output exists under
+  `bin/<architecture>/<configuration>/<TFM>/<RID>`, while the first worker lookup
+  searched only `bin/<configuration>/<TFM>/<RID>`.
+- Root cause: the test helper did not share the build lane's explicit platform
+  directory contract.
+- Fix: search architecture-first output before the temporary legacy layout,
+  including optional `publish` directories. Inspect every existing candidate and
+  reject any PE machine conflict instead of silently selecting a clean-looking
+  neighbor.
+- Regression tests: a synthetic `bin/arm64/Debug/.../win-arm64` layout resolves;
+  an ARM64 integrated candidate plus a stale x64 legacy candidate is rejected.
+- Reviewer result: original commit invalidated; correction implemented and both
+  layout tests passed. Coordinator re-review remains the acceptance step.
+- Residual risk: the build lane remains responsible for actually emitting both
+  explicit platform/RID outputs.
 
 ## Results and reflection
 
@@ -193,6 +267,11 @@
 - Focused unit/WPF run:
   `Bg3ProcessNamesTests`, `Bg3WindowMonitorTests`, `OverlayPlacementTests`, and
   `OverlayWindowServiceTests`: 29 passed, 0 failed.
+- Post-review focused run expanded to 42 passed, 0 failed, covering strict image
+  filenames, real hook ownership/cleanup, architecture-first host lookup, and
+  conflicting-PE rejection.
+- Post-review end-to-end false-positive run under x64-on-ARM64 emulation:
+  `bg3.exe.exe`, `bg3.scr`, and `bg3_dx11.com`: 3 passed, 0 failed.
 - Explicit `win-arm64` self-contained controlled host:
   PE `0xAA64`; Windows live observation `native-isa-arm64`; exact-name
   `bg3.exe` borderless and `bg3_dx11.exe` windowed cases: 2 passed, 0 failed.
@@ -201,11 +280,15 @@
   overlay placement without foreground change, interactive/passive style
   transition, minimize/restore, close, exact-name relaunch, and final close.
   Final source-state rerun: 2 passed, 0 failed in 1 minute 4 seconds.
+- Post-review native-ISA ARM64 VM exact-name rerun: 2 passed, 0 failed in
+  23 seconds. The xUnit driver remained x64-emulated.
 - Explicit `win-x64` self-contained controlled host on ARM64:
   PE `0x8664`; labeled `emulated-x64-on-arm64`; the same two cases passed 2/2
   after the evidence-classification and timeout corrections. Final explicit/local
   source-state runs passed 2/2; the final local architecture-derived run completed
   in 1 minute 57 seconds.
+- Post-review x64-on-ARM64 emulated exact-name rerun: 2 passed, 0 failed in
+  53 seconds.
 - Multi-monitor count was 1, so no real multi-monitor transition was available.
 - BG3 itself was not used; no BG3 process architecture claim is made.
 - All temporary project/lock changes needed to make pre-integration experiments

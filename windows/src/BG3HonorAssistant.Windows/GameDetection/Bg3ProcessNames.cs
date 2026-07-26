@@ -16,4 +16,13 @@ public static class Bg3ProcessNames
                 processName,
                 StringComparison.OrdinalIgnoreCase));
     }
+
+    public static bool IsSupportedExecutableFileName(string? executableFileName)
+    {
+        return All.Any(candidate =>
+            string.Equals(
+                $"{candidate}.exe",
+                executableFileName,
+                StringComparison.OrdinalIgnoreCase));
+    }
 }

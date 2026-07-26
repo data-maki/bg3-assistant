@@ -206,6 +206,128 @@ public sealed class ControlledGameWindowIntegrationTests
             nint.Size);
     }
 
+    [Theory]
+    [InlineData("bg3.exe.exe")]
+    [InlineData("bg3.scr")]
+    [InlineData("bg3_dx11.com")]
+    public void LookalikeImageNamesAreRejectedEndToEnd(string executableFileName)
+    {
+        var architecture = ControlledHostArchitecture.FromEnvironmentOrProcess();
+        using var host = ControlledGameHost.StartExecutable(
+            executableFileName,
+            borderless: false,
+            architecture);
+
+        var located = new Bg3WindowLocator().FindBestWindow();
+
+        Assert.NotEqual(host.Process.Id, located?.ProcessId);
+    }
+
+    [Fact]
+    public void HostLookupUsesIntegratedArchitectureDirectory()
+    {
+        var architecture = new ControlledHostArchitecture(
+            "win-arm64",
+            ControlledHostArchitecture.Arm64Machine);
+        var windowsRoot = CreateHostLayoutRoot();
+        try
+        {
+            var integratedOutput = Path.Combine(
+                windowsRoot,
+                "spikes",
+                "GameWindowHost",
+                "bin",
+                "arm64",
+                "Debug",
+                "net10.0-windows10.0.26100.0",
+                architecture.RuntimeIdentifier);
+            WritePortableExecutable(
+                integratedOutput,
+                architecture.PortableExecutableMachine);
+
+            Assert.Equal(
+                integratedOutput,
+                ControlledGameHost.FindHostOutput(
+                    windowsRoot,
+                    architecture,
+                    "Debug"));
+        }
+        finally
+        {
+            Assert.True(ControlledGameHost.TryDeleteDirectory(windowsRoot));
+        }
+    }
+
+    [Fact]
+    public void HostLookupRejectsConflictingArchitectureOutputs()
+    {
+        var architecture = new ControlledHostArchitecture(
+            "win-arm64",
+            ControlledHostArchitecture.Arm64Machine);
+        var windowsRoot = CreateHostLayoutRoot();
+        try
+        {
+            WritePortableExecutable(
+                Path.Combine(
+                    windowsRoot,
+                    "spikes",
+                    "GameWindowHost",
+                    "bin",
+                    "arm64",
+                    "Debug",
+                    "net10.0-windows10.0.26100.0",
+                    architecture.RuntimeIdentifier),
+                architecture.PortableExecutableMachine);
+            WritePortableExecutable(
+                Path.Combine(
+                    windowsRoot,
+                    "spikes",
+                    "GameWindowHost",
+                    "bin",
+                    "Debug",
+                    "net10.0-windows10.0.26100.0",
+                    architecture.RuntimeIdentifier),
+                ControlledHostArchitecture.Amd64Machine);
+
+            var exception = Assert.Throws<InvalidDataException>(
+                () => ControlledGameHost.FindHostOutput(
+                    windowsRoot,
+                    architecture,
+                    "Debug"));
+            Assert.Contains("conflicting PE machine", exception.Message);
+        }
+        finally
+        {
+            Assert.True(ControlledGameHost.TryDeleteDirectory(windowsRoot));
+        }
+    }
+
+    private static string CreateHostLayoutRoot()
+    {
+        var root = Path.Combine(
+            Path.GetTempPath(),
+            "BG3HonorAssistant",
+            "host-layout",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        return root;
+    }
+
+    private static void WritePortableExecutable(
+        string outputDirectory,
+        ushort machine)
+    {
+        Directory.CreateDirectory(outputDirectory);
+        var bytes = new byte[256];
+        BitConverter.GetBytes(128).CopyTo(bytes, 0x3C);
+        bytes[128] = (byte)'P';
+        bytes[129] = (byte)'E';
+        BitConverter.GetBytes(machine).CopyTo(bytes, 132);
+        File.WriteAllBytes(
+            Path.Combine(outputDirectory, "GameWindowHost.exe"),
+            bytes);
+    }
+
     private readonly record struct ControlledHostArchitecture(
         string RuntimeIdentifier,
         ushort PortableExecutableMachine)
@@ -213,6 +335,14 @@ public sealed class ControlledGameWindowIntegrationTests
         internal const string EnvironmentVariable = "BG3_CONTROLLED_HOST_RID";
         internal const ushort Amd64Machine = 0x8664;
         internal const ushort Arm64Machine = 0xAA64;
+
+        internal string ArchitectureDirectory => RuntimeIdentifier switch
+        {
+            "win-arm64" => "arm64",
+            "win-x64" => "x64",
+            _ => throw new InvalidOperationException(
+                $"Unsupported controlled-host RID '{RuntimeIdentifier}'."),
+        };
 
         internal static ControlledHostArchitecture FromEnvironmentOrProcess()
         {
@@ -387,6 +517,27 @@ public sealed class ControlledGameWindowIntegrationTests
             bool borderless,
             ControlledHostArchitecture architecture)
         {
+            return StartExecutable(
+                $"{processName}.exe",
+                borderless,
+                architecture);
+        }
+
+        internal static ControlledGameHost StartExecutable(
+            string executableFileName,
+            bool borderless,
+            ControlledHostArchitecture architecture)
+        {
+            if (!string.Equals(
+                    Path.GetFileName(executableFileName),
+                    executableFileName,
+                    StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    "The controlled executable must be a file name, not a path.",
+                    nameof(executableFileName));
+            }
+
             var sourceDirectory = FindHostOutput(architecture);
             var portableExecutableMachine = ReadPortableExecutableMachine(
                 Path.Combine(sourceDirectory, "GameWindowHost.exe"));
@@ -419,7 +570,9 @@ public sealed class ControlledGameWindowIntegrationTests
                     Path.Combine(stagingDirectory, Path.GetFileName(sourcePath)));
             }
 
-            var executablePath = Path.Combine(stagingDirectory, $"{processName}.exe");
+            var executablePath = Path.Combine(
+                stagingDirectory,
+                executableFileName);
             File.Copy(
                 Path.Combine(stagingDirectory, "GameWindowHost.exe"),
                 executablePath);
@@ -501,30 +654,10 @@ public sealed class ControlledGameWindowIntegrationTests
 #else
                     const string configuration = "Release";
 #endif
-                    var output = Path.Combine(
+                    return FindHostOutput(
                         directory.FullName,
-                        "spikes",
-                        "GameWindowHost",
-                        "bin",
-                        configuration,
-                        "net10.0-windows10.0.26100.0",
-                        architecture.RuntimeIdentifier);
-                    var publishOutput = Path.Combine(output, "publish");
-                    if (File.Exists(Path.Combine(publishOutput, "GameWindowHost.exe")))
-                    {
-                        return publishOutput;
-                    }
-
-                    if (File.Exists(Path.Combine(output, "GameWindowHost.exe")))
-                    {
-                        return output;
-                    }
-
-                    throw new FileNotFoundException(
-                        $"Build GameWindowHost with the explicit RID " +
-                        $"{architecture.RuntimeIdentifier} before running the " +
-                        "controlled-window tests.",
-                        Path.Combine(output, "GameWindowHost.exe"));
+                        architecture,
+                        configuration);
                 }
 
                 directory = directory.Parent;
@@ -532,6 +665,62 @@ public sealed class ControlledGameWindowIntegrationTests
 
             throw new DirectoryNotFoundException(
                 "Could not locate the Windows solution root for GameWindowHost.");
+        }
+
+        internal static string FindHostOutput(
+            string windowsRoot,
+            ControlledHostArchitecture architecture,
+            string configuration)
+        {
+            var hostRoot = Path.Combine(
+                windowsRoot,
+                "spikes",
+                "GameWindowHost",
+                "bin");
+            var integratedOutput = Path.Combine(
+                hostRoot,
+                architecture.ArchitectureDirectory,
+                configuration,
+                "net10.0-windows10.0.26100.0",
+                architecture.RuntimeIdentifier);
+            var legacyOutput = Path.Combine(
+                hostRoot,
+                configuration,
+                "net10.0-windows10.0.26100.0",
+                architecture.RuntimeIdentifier);
+            var candidates = new[]
+            {
+                Path.Combine(integratedOutput, "publish"),
+                integratedOutput,
+                Path.Combine(legacyOutput, "publish"),
+                legacyOutput,
+            };
+            var existing = candidates
+                .Where(candidate =>
+                    File.Exists(Path.Combine(candidate, "GameWindowHost.exe")))
+                .ToList();
+            foreach (var candidate in existing)
+            {
+                var executablePath = Path.Combine(
+                    candidate,
+                    "GameWindowHost.exe");
+                var machine = ReadPortableExecutableMachine(executablePath);
+                if (machine != architecture.PortableExecutableMachine)
+                {
+                    throw new InvalidDataException(
+                        $"Controlled-host output '{executablePath}' has conflicting PE " +
+                        $"machine 0x{machine:X4}; expected " +
+                        $"0x{architecture.PortableExecutableMachine:X4} for " +
+                        $"{architecture.RuntimeIdentifier}.");
+                }
+            }
+
+            return existing.FirstOrDefault() ??
+                   throw new FileNotFoundException(
+                       $"Build GameWindowHost with the explicit RID " +
+                       $"{architecture.RuntimeIdentifier} before running the " +
+                       "controlled-window tests.",
+                       Path.Combine(integratedOutput, "GameWindowHost.exe"));
         }
 
         private static ProcessArchitectureObservation ReadProcessArchitecture(
@@ -560,7 +749,7 @@ public sealed class ControlledGameWindowIntegrationTests
             return reader.ReadUInt16();
         }
 
-        private static bool TryDeleteDirectory(string directory)
+        internal static bool TryDeleteDirectory(string directory)
         {
             const int attempts = 20;
             for (var attempt = 0; attempt < attempts; attempt++)

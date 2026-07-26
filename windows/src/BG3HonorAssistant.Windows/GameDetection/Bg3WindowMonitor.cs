@@ -23,6 +23,7 @@ public sealed class Bg3WindowMonitor : IDisposable
     private Timer? recoveryTimer;
     private nint foregroundHook;
     private nint locationHook;
+    private uint hookThreadId;
     private bool disposed;
 
     public Bg3WindowMonitor(IBg3WindowLocator? locator = null)
@@ -45,10 +46,17 @@ public sealed class Bg3WindowMonitor : IDisposable
                 return;
             }
 
+            if (foregroundHook != nint.Zero || locationHook != nint.Zero)
+            {
+                throw new InvalidOperationException(
+                    "WinEvent hook cleanup must complete before the monitor can restart.");
+            }
+
             synchronizationContext ??= SynchronizationContext.Current;
-            foregroundHook = CreateHook(NativeMethods.EventSystemForeground);
+            hookThreadId = NativeMethods.GetCurrentThreadId();
             try
             {
+                foregroundHook = CreateHook(NativeMethods.EventSystemForeground);
                 locationHook = CreateHook(NativeMethods.EventObjectLocationChange);
                 recoveryTimer = new Timer(
                     _ => Refresh(),
@@ -56,11 +64,20 @@ public sealed class Bg3WindowMonitor : IDisposable
                     TimeSpan.Zero,
                     RecoveryInterval);
             }
-            catch
+            catch (Exception startException)
             {
-                _ = NativeMethods.UnhookWinEvent(foregroundHook);
-                foregroundHook = nint.Zero;
-                throw;
+                recoveryTimer?.Dispose();
+                recoveryTimer = null;
+                var cleanupErrors = UnhookAll();
+                if (cleanupErrors.Count == 0)
+                {
+                    hookThreadId = 0;
+                    throw;
+                }
+
+                throw new AggregateException(
+                    "WinEvent hook startup failed and cleanup was incomplete.",
+                    [startException, .. cleanupErrors]);
             }
         }
     }
@@ -101,11 +118,25 @@ public sealed class Bg3WindowMonitor : IDisposable
                 return;
             }
 
-            disposed = true;
+            if (hookThreadId != 0 &&
+                hookThreadId != NativeMethods.GetCurrentThreadId())
+            {
+                throw new InvalidOperationException(
+                    "Bg3WindowMonitor must be disposed on the OS thread that called Start.");
+            }
+
             recoveryTimer?.Dispose();
             recoveryTimer = null;
-            Unhook(ref locationHook);
-            Unhook(ref foregroundHook);
+            var cleanupErrors = UnhookAll();
+            if (cleanupErrors.Count > 0)
+            {
+                throw new AggregateException(
+                    "One or more WinEvent hooks could not be removed.",
+                    cleanupErrors);
+            }
+
+            hookThreadId = 0;
+            disposed = true;
         }
     }
 
@@ -179,14 +210,29 @@ public sealed class Bg3WindowMonitor : IDisposable
             (this, handler, args));
     }
 
-    private static void Unhook(ref nint hook)
+    private List<Exception> UnhookAll()
+    {
+        var errors = new List<Exception>(capacity: 2);
+        Unhook(ref locationHook, errors);
+        Unhook(ref foregroundHook, errors);
+        return errors;
+    }
+
+    private static void Unhook(
+        ref nint hook,
+        ICollection<Exception> errors)
     {
         if (hook == nint.Zero)
         {
             return;
         }
 
-        _ = NativeMethods.UnhookWinEvent(hook);
-        hook = nint.Zero;
+        if (NativeMethods.UnhookWinEvent(hook))
+        {
+            hook = nint.Zero;
+            return;
+        }
+
+        errors.Add(new Win32Exception());
     }
 }
