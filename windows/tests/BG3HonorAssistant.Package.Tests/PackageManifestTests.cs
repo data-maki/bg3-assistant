@@ -101,7 +101,7 @@ public sealed class PackageManifestTests
             validator,
             StringComparison.Ordinal);
         Assert.Contains(
-            "exactly one Application",
+            "exactly one namespaced product Application",
             validator,
             StringComparison.Ordinal);
         Assert.DoesNotContain(

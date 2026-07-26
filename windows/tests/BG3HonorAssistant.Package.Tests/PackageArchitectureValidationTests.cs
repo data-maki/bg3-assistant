@@ -157,7 +157,90 @@ public sealed class PackageArchitectureValidationTests
     }
 
     [Fact]
-    public async Task ManifestRejectsAdditionalApplicationAndExecutableReferences()
+    public async Task ValidNativePeWithShortDataDirectoryTableIsAccepted()
+    {
+        var root = CreateLayout("x64", ImageFileMachineAmd64);
+        try
+        {
+            File.WriteAllBytes(
+                Path.Combine(root, "NativeWithoutCliDirectory.dll"),
+                CreateNativePe(
+                    ImageFileMachineAmd64,
+                    numberOfDataDirectories: 0,
+                    compactOptionalHeader: true));
+
+            var result = await RunValidatorAsync(root, "x64");
+            Assert.Equal(0, result.ExitCode);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task MainExecutableRequiresLaunchableNativeHostStructure()
+    {
+        var root = CreateLayout("x64", ImageFileMachineAmd64);
+        try
+        {
+            var pe32Header = CreateNativePe(ImageFileMachineAmd64);
+            WriteUInt16(pe32Header, 0x80 + 24, 0x010B);
+            var cases = new[]
+            {
+                new FixtureCase(
+                    "PE32-optional-header",
+                    pe32Header,
+                    "must use a PE32+ optional header"),
+                new FixtureCase(
+                    "missing-entry-point",
+                    CreateNativePe(
+                        ImageFileMachineAmd64,
+                        addressOfEntryPoint: 0),
+                    "has no native entry point"),
+                new FixtureCase(
+                    "unmapped-entry-point",
+                    CreateNativePe(
+                        ImageFileMachineAmd64,
+                        addressOfEntryPoint: 0x5000),
+                    "Application entry point"),
+                new FixtureCase(
+                    "non-executable-entry-section",
+                    CreateNativePe(
+                        ImageFileMachineAmd64,
+                        sectionCharacteristics: 0x40000040),
+                    "entry point must map to exactly one executable"),
+                new FixtureCase(
+                    "dll-image",
+                    CreateNativePe(
+                        ImageFileMachineAmd64,
+                        coffCharacteristics: 0x2002),
+                    "must be an executable image"),
+            };
+
+            var executablePath = Path.Combine(root, "BG3HonorAssistant.exe");
+            foreach (var fixture in cases)
+            {
+                File.WriteAllBytes(executablePath, fixture.Payload);
+                var result = await RunValidatorAsync(root, "x64");
+                Assert.True(
+                    result.ExitCode != 0,
+                    $"{fixture.Name} unexpectedly passed.{Environment.NewLine}" +
+                    result.CombinedOutput);
+                Assert.Contains(
+                    fixture.ExpectedError,
+                    result.CombinedOutput,
+                    StringComparison.Ordinal);
+            }
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ManifestRejectsAdditionalOrForeignApplicationAndExecutableReferences()
     {
         var root = CreateLayout("x64", ImageFileMachineAmd64);
         try
@@ -176,8 +259,25 @@ public sealed class PackageArchitectureValidationTests
             var extraApplication = await RunValidatorAsync(root, "x64");
             Assert.NotEqual(0, extraApplication.ExitCode);
             Assert.Contains(
-                "exactly one Application",
+                "exactly one namespaced product Application",
                 extraApplication.CombinedOutput,
+                StringComparison.Ordinal);
+
+            WriteManifest(root, "x64");
+            manifest = XDocument.Load(manifestPath);
+            applications = Assert.Single(
+                manifest.Descendants(foundation + "Applications"));
+            applications.Add(
+                new XElement(
+                    XName.Get("Application", "urn:bg3-test-foreign"),
+                    new XAttribute("Executable", "BG3HonorAssistant.exe")));
+            manifest.Save(manifestPath);
+
+            var foreignApplication = await RunValidatorAsync(root, "x64");
+            Assert.NotEqual(0, foreignApplication.ExitCode);
+            Assert.Contains(
+                "deceptive foreign-namespace Application",
+                foreignApplication.CombinedOutput,
                 StringComparison.Ordinal);
 
             WriteManifest(root, "x64");
@@ -254,7 +354,13 @@ public sealed class PackageArchitectureValidationTests
         manifest.Save(Path.Combine(root, "AppxManifest.xml"));
     }
 
-    private static byte[] CreateNativePe(ushort machine)
+    private static byte[] CreateNativePe(
+        ushort machine,
+        uint addressOfEntryPoint = 0x2000,
+        ushort coffCharacteristics = 0x0002,
+        uint sectionCharacteristics = 0x60000020,
+        uint numberOfDataDirectories = 16,
+        bool compactOptionalHeader = false)
     {
         return CreatePe(
             machine,
@@ -262,7 +368,12 @@ public sealed class PackageArchitectureValidationTests
             cliSize: 0,
             corFlags: 0,
             validMetadata: false,
-            hasManagedNativeHeader: false);
+            hasManagedNativeHeader: false,
+            addressOfEntryPoint: addressOfEntryPoint,
+            coffCharacteristics: coffCharacteristics,
+            sectionCharacteristics: sectionCharacteristics,
+            numberOfDataDirectories: numberOfDataDirectories,
+            compactOptionalHeader: compactOptionalHeader);
     }
 
     private static byte[] CreateManagedPe(
@@ -287,13 +398,20 @@ public sealed class PackageArchitectureValidationTests
         uint cliSize,
         uint corFlags,
         bool validMetadata,
-        bool hasManagedNativeHeader)
+        bool hasManagedNativeHeader,
+        uint addressOfEntryPoint = 0x2000,
+        ushort coffCharacteristics = 0x0002,
+        uint sectionCharacteristics = 0x60000020,
+        uint numberOfDataDirectories = 16,
+        bool compactOptionalHeader = false)
     {
         const int peOffset = 0x80;
         var pe32Plus = machine != ImageFileMachineI386;
-        var optionalHeaderSize = pe32Plus ? 240 : 224;
-        var optionalHeaderOffset = peOffset + 24;
         var dataDirectoryOffset = pe32Plus ? 112 : 96;
+        var optionalHeaderSize = compactOptionalHeader
+            ? dataDirectoryOffset
+            : pe32Plus ? 240 : 224;
+        var optionalHeaderOffset = peOffset + 24;
         var sectionHeaderOffset = optionalHeaderOffset + optionalHeaderSize;
         var bytes = new byte[0x600];
 
@@ -303,22 +421,31 @@ public sealed class PackageArchitectureValidationTests
         WriteUInt16(bytes, peOffset + 4, machine);
         WriteUInt16(bytes, peOffset + 6, 1);
         WriteUInt16(bytes, peOffset + 20, (ushort)optionalHeaderSize);
+        WriteUInt16(bytes, peOffset + 22, coffCharacteristics);
         WriteUInt16(
             bytes,
             optionalHeaderOffset,
             pe32Plus ? (ushort)0x020B : (ushort)0x010B);
+        WriteUInt32(bytes, optionalHeaderOffset + 16, addressOfEntryPoint);
+        WriteUInt16(
+            bytes,
+            optionalHeaderOffset + 68,
+            2);
         WriteUInt32(
             bytes,
             optionalHeaderOffset + (pe32Plus ? 108 : 92),
-            16);
-        WriteUInt32(
-            bytes,
-            optionalHeaderOffset + dataDirectoryOffset + (14 * 8),
-            cliRva);
-        WriteUInt32(
-            bytes,
-            optionalHeaderOffset + dataDirectoryOffset + (14 * 8) + 4,
-            cliSize);
+            numberOfDataDirectories);
+        if (numberOfDataDirectories >= 15 && !compactOptionalHeader)
+        {
+            WriteUInt32(
+                bytes,
+                optionalHeaderOffset + dataDirectoryOffset + (14 * 8),
+                cliRva);
+            WriteUInt32(
+                bytes,
+                optionalHeaderOffset + dataDirectoryOffset + (14 * 8) + 4,
+                cliSize);
+        }
 
         bytes[sectionHeaderOffset] = (byte)'.';
         bytes[sectionHeaderOffset + 1] = (byte)'t';
@@ -329,6 +456,7 @@ public sealed class PackageArchitectureValidationTests
         WriteUInt32(bytes, sectionHeaderOffset + 12, 0x2000);
         WriteUInt32(bytes, sectionHeaderOffset + 16, 0x400);
         WriteUInt32(bytes, sectionHeaderOffset + 20, 0x200);
+        WriteUInt32(bytes, sectionHeaderOffset + 36, sectionCharacteristics);
 
         if (cliRva == 0x2000 && cliSize >= 72)
         {

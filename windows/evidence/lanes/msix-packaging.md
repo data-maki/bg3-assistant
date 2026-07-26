@@ -130,7 +130,7 @@ Commands and results:
    passed.
 3. Package tests:
    `dotnet test windows/tests/BG3HonorAssistant.Package.Tests/BG3HonorAssistant.Package.Tests.csproj --configuration Release --no-restore`
-   passed 14/14, skipped 0 after the reviewer follow-up.
+   passed 16/16, skipped 0 after the second reviewer follow-up.
 4. Rejection input:
    `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File windows/tools/build-development-msix.ps1 -Architecture x86`
    failed during parameter binding because x86 is outside `arm64,x64`.
@@ -149,6 +149,22 @@ Commands and results:
    allowed to pack the deliberately contaminated ARM64 fixture without the normal
    pre-pack gate; the hardened validator rejected the real x86 assembly both before
    packing and after unpacking (exit 1 in each position).
+7. Second reviewer follow-up (`0a1c153`):
+   rereview invalidated three residual assumptions. A matching PE machine alone did
+   not prove `BG3HonorAssistant.exe` was structurally launchable; local-name XPath
+   could treat a foreign-namespace `Application` as the product entry; and native
+   PEs declaring fewer than 15 data directories were rejected even when they
+   legitimately had no CLI directory. The corrected validator now requires a PE32+
+   native executable image (not a DLL), a Windows subsystem, and a nonzero entry
+   point mapping to exactly one executable file-backed section. It selects the one
+   product Application through the exact foundation namespace and rejects every
+   foreign-namespace Application. It reads `NumberOfRvaAndSizes` first and treats a
+   shorter valid table as native instead of assuming a complete CLI entry. Regression
+   fixtures cover missing/unmapped entry points, non-executable sections, DLL and
+   PE32 app-host forms, deceptive foreign namespace, and a valid native PE with zero
+   data directories. All 16 package tests passed. Native ARM64 MakeAppx clean ARM64
+   and AMD64 fixtures passed pre-pack/post-unpack validation; the real x86-contaminated
+   ARM64 fixture failed both gates.
 
 The synthetic fixtures prove packaging inspection/tool behavior only. They are not
 BG3 Honor Assistant product builds, installation tests, or runtime proof. Full

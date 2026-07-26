@@ -98,6 +98,8 @@ function Get-PePayload {
 
         $machine = Read-UInt16 -Reader $reader -Offset ([uint64]$peOffset + 4) -Path $Path
         $sectionCount = Read-UInt16 -Reader $reader -Offset ([uint64]$peOffset + 6) -Path $Path
+        $coffCharacteristics =
+            Read-UInt16 -Reader $reader -Offset ([uint64]$peOffset + 22) -Path $Path
         $optionalHeaderSize =
             Read-UInt16 -Reader $reader -Offset ([uint64]$peOffset + 20) -Path $Path
         $optionalHeaderOffset = [uint64]$peOffset + 24
@@ -116,16 +118,22 @@ function Get-PePayload {
             default { throw "Unknown PE optional-header format in $Path." }
         }
         $numberOfDirectoriesOffset = if ($optionalMagic -eq 0x010B) { 92 } else { 108 }
-        if ($optionalHeaderSize -lt ($dataDirectoryOffset + (15 * 8))) {
-            throw "PE optional header has no complete CLI data-directory entry in $Path."
+        $subsystemOffset = 68
+        if ($optionalHeaderSize -lt $dataDirectoryOffset) {
+            throw "PE optional header is truncated before NumberOfRvaAndSizes in $Path."
         }
+        $addressOfEntryPoint = Read-UInt32 `
+            -Reader $reader `
+            -Offset ($optionalHeaderOffset + 16) `
+            -Path $Path
+        $subsystem = Read-UInt16 `
+            -Reader $reader `
+            -Offset ($optionalHeaderOffset + $subsystemOffset) `
+            -Path $Path
         $numberOfDirectories = Read-UInt32 `
             -Reader $reader `
             -Offset ($optionalHeaderOffset + $numberOfDirectoriesOffset) `
             -Path $Path
-        if ($numberOfDirectories -lt 15) {
-            throw "PE optional header declares no CLI data-directory entry in $Path."
-        }
 
         $sectionTableOffset = $optionalHeaderOffset + [uint64]$optionalHeaderSize
         if ($sectionCount -eq 0 -or
@@ -136,13 +144,34 @@ function Get-PePayload {
         for ($index = 0; $index -lt $sectionCount; $index++) {
             $sectionOffset = $sectionTableOffset + ([uint64]$index * 40)
             $sections += [pscustomobject]@{
+                VirtualSize = Read-UInt32 `
+                    -Reader $reader -Offset ($sectionOffset + 8) -Path $Path
                 VirtualAddress = Read-UInt32 `
                     -Reader $reader -Offset ($sectionOffset + 12) -Path $Path
                 RawSize = Read-UInt32 `
                     -Reader $reader -Offset ($sectionOffset + 16) -Path $Path
                 RawPointer = Read-UInt32 `
                     -Reader $reader -Offset ($sectionOffset + 20) -Path $Path
+                Characteristics = Read-UInt32 `
+                    -Reader $reader -Offset ($sectionOffset + 36) -Path $Path
             }
+        }
+
+        if ($numberOfDirectories -lt 15) {
+            return [pscustomobject]@{
+                Path = $Path
+                Machine = $machine
+                CoffCharacteristics = $coffCharacteristics
+                OptionalMagic = $optionalMagic
+                AddressOfEntryPoint = $addressOfEntryPoint
+                Subsystem = $subsystem
+                Sections = $sections
+                IsManaged = $false
+                IsArchitectureNeutralIl = $false
+            }
+        }
+        if ($optionalHeaderSize -lt ($dataDirectoryOffset + (15 * 8))) {
+            throw "PE optional header declares a CLI directory outside its bounds in $Path."
         }
 
         $cliDirectoryOffset =
@@ -154,6 +183,11 @@ function Get-PePayload {
             return [pscustomobject]@{
                 Path = $Path
                 Machine = $machine
+                CoffCharacteristics = $coffCharacteristics
+                OptionalMagic = $optionalMagic
+                AddressOfEntryPoint = $addressOfEntryPoint
+                Subsystem = $subsystem
+                Sections = $sections
                 IsManaged = $false
                 IsArchitectureNeutralIl = $false
             }
@@ -226,6 +260,11 @@ function Get-PePayload {
         [pscustomobject]@{
             Path = $Path
             Machine = $machine
+            CoffCharacteristics = $coffCharacteristics
+            OptionalMagic = $optionalMagic
+            AddressOfEntryPoint = $addressOfEntryPoint
+            Subsystem = $subsystem
+            Sections = $sections
             IsManaged = $true
             IsArchitectureNeutralIl = $isArchitectureNeutralIl
         }
@@ -284,6 +323,44 @@ function Assert-PePayloadArchitecture {
     ) {
         throw "BG3HonorAssistant.exe is not a native $expectedMachineName app host."
     }
+    if ($appExecutable.OptionalMagic -ne 0x020B) {
+        throw "BG3HonorAssistant.exe must use a PE32+ optional header."
+    }
+    if (
+        ($appExecutable.CoffCharacteristics -band 0x0002) -eq 0 -or
+        ($appExecutable.CoffCharacteristics -band 0x2000) -ne 0
+    ) {
+        throw (
+            "BG3HonorAssistant.exe must be an executable image and must not " +
+            "have the DLL characteristic.")
+    }
+    if ($appExecutable.Subsystem -notin @(2, 3)) {
+        throw "BG3HonorAssistant.exe has no launchable Windows subsystem."
+    }
+    if ($appExecutable.AddressOfEntryPoint -eq 0) {
+        throw "BG3HonorAssistant.exe has no native entry point."
+    }
+    [void](Resolve-Rva `
+        -Sections $appExecutable.Sections `
+        -Rva $appExecutable.AddressOfEntryPoint `
+        -Size 1 `
+        -FileLength ([uint64](Get-Item -LiteralPath $appExecutable.Path).Length) `
+        -Path $appExecutable.Path `
+        -FieldName 'Application entry point')
+    $entryPoint = [uint64]$appExecutable.AddressOfEntryPoint
+    $entrySections = @($appExecutable.Sections | Where-Object {
+        $sectionStart = [uint64]$_.VirtualAddress
+        $sectionEnd = $sectionStart + [uint64]$_.RawSize
+        $entryPoint -ge $sectionStart -and $entryPoint -lt $sectionEnd
+    })
+    if (
+        $entrySections.Count -ne 1 -or
+        ($entrySections[0].Characteristics -band 0x20000000) -eq 0
+    ) {
+        throw (
+            "BG3HonorAssistant.exe entry point must map to exactly one " +
+            "executable, file-backed section.")
+    }
 }
 
 function Assert-PackageManifest {
@@ -315,12 +392,18 @@ function Assert-PackageManifest {
     }
 
     $applications = @($Manifest.SelectNodes(
-        '//*[local-name() = "Application"]',
+        '/foundation:Package/foundation:Applications/foundation:Application',
         $namespaceManager))
     if ($applications.Count -ne 1) {
         throw (
-            "Package manifest must contain exactly one Application; " +
+            "Package manifest must contain exactly one namespaced product Application; " +
             "found $($applications.Count).")
+    }
+    $allApplicationElements = @($Manifest.SelectNodes(
+        '//*[local-name() = "Application"]',
+        $namespaceManager))
+    if ($allApplicationElements.Count -ne $applications.Count) {
+        throw "Package manifest contains a deceptive foreign-namespace Application."
     }
     if (
         -not [string]::Equals(
