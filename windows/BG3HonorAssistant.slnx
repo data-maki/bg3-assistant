@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/spikes/">
+    <Project Path="spikes/GameWindowHost/GameWindowHost.csproj" />
+    <Project Path="spikes/OverlayHarness/OverlayHarness.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/BG3HonorAssistant.App/BG3HonorAssistant.App.csproj" />
+    <Project Path="src/BG3HonorAssistant.Core/BG3HonorAssistant.Core.csproj" />
+    <Project Path="src/BG3HonorAssistant.Infrastructure/BG3HonorAssistant.Infrastructure.csproj" />
+    <Project Path="src/BG3HonorAssistant.Windows/BG3HonorAssistant.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BG3HonorAssistant.App.Tests/BG3HonorAssistant.App.Tests.csproj" />
+    <Project Path="tests/BG3HonorAssistant.Core.Tests/BG3HonorAssistant.Core.Tests.csproj" />
+    <Project Path="tests/BG3HonorAssistant.Infrastructure.Tests/BG3HonorAssistant.Infrastructure.Tests.csproj" />
+    <Project Path="tests/BG3HonorAssistant.Package.Tests/BG3HonorAssistant.Package.Tests.csproj" />
+    <Project Path="tests/BG3HonorAssistant.Windows.Tests/BG3HonorAssistant.Windows.Tests.csproj" />
+  </Folder>
+</Solution>

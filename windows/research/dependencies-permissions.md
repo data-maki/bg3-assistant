@@ -14,7 +14,7 @@ Reviewed: 2026-07-25
 
 The OS floor is support policy, not a technical limitation of each API. Microsoft currently lists 24H2, 25H2, and 26H1 as serviced Windows 11 lines, with 24H2 Home/Pro support ending in October 2026 ([Windows 11 release information](https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information)). Re-evaluate the floor at the first release candidate.
 
-There is no 32-bit requirement. If one appears later, it requires a separate `win-x86` runtime publish and x86 MSIX plus x86 native dependencies and full platform testing. A single “Any CPU” binary is specifically rejected because process/window/capture interop and packaging should be deterministic.
+There is no 32-bit requirement. If one appears later, it requires a separate `win-x86` runtime publish and x86 MSIX plus x86 native dependencies and full platform testing. A single “Any CPU” binary is specifically rejected because process/window interop and packaging should be deterministic.
 
 ## macOS-to-Windows framework replacements
 
@@ -23,8 +23,8 @@ There is no 32-bit requirement. If one appears later, it requires a separate `wi
 | SwiftUI | WPF XAML, controls, data binding, commands | Port behavior and view hierarchy, not Swift types. |
 | AppKit `NSPanel`, `NSWorkspace`, status item | WPF `Window`, HWND/Win32 styles, shell execution, `NotifyIcon` | `HwndSource` is the boundary for messages/styles. |
 | CoreGraphics window list/bounds | `EnumWindows`, `GetWindowThreadProcessId`, `DwmGetWindowAttribute`, `SetWindowPos` | No game-memory access. |
-| ScreenCaptureKit/CoreGraphics capture | `Windows.Graphics.Capture` secure picker, Direct3D 11 frame pool, `SoftwareBitmap`, JPEG encoder | One player-triggered frame; visible Windows border. |
-| AVFoundation + Speech | `Windows.Media.SpeechRecognition.SpeechRecognizer` and microphone privacy controls | Requires package identity and microphone declaration. |
+| ScreenCaptureKit/CoreGraphics capture | None | Approved Windows MVP exclusion; no screenshot, image attachment, clipboard-image, capture service, or capability ships. |
+| AVFoundation + Speech | None | Approved Windows MVP exclusion; no microphone, recognition, dictation, service, or capability ships. |
 | Security/Keychain | Win32 Credential Manager: `CredWriteW`, `CredReadW`, `CredDeleteW`, `CredFree` | Generic, device-local user credential. |
 | ServiceManagement `SMAppService` | MSIX `windows.startupTask` + `StartupTask` | User-controlled and disabled by default. |
 | Foundation `URLSession` | one long-lived .NET `HttpClient` | Direct OpenRouter plus explicitly approved external imports. |
@@ -61,7 +61,7 @@ Do not add:
 - a dependency-injection or MVVM framework before a measured need.
 - WebView2, Electron, Node, Python, Ollama, a local model, or an application server.
 - a keyboard/mouse hook library, process inspection library, or game integration.
-- a native capture package: Windows SDK/WinRT plus generated interop is the selected path.
+- capture, image/clipboard, audio, microphone, speech-recognition, or dictation packages.
 
 Release CI runs `dotnet list package --vulnerable --include-transitive`, produces an SBOM, and fails if the lock file changes unexpectedly. Dependency updates are separate reviewed changes with unit/package smoke tests.
 
@@ -72,7 +72,6 @@ The packaged WPF process uses `uap10:TrustLevel="mediumIL"` and `uap10:RuntimeBe
 Required declarations:
 
 - `rescap:Capability Name="runFullTrust"` — required for the normal packaged desktop process. It does not mean administrator elevation.
-- `DeviceCapability Name="microphone"` — only for the player-invoked speech button and Windows privacy control.
 - `desktop:Extension Category="windows.startupTask"` — disabled by default, with the packaged executable and one stable task ID.
 
 `runFullTrust` is a restricted manifest capability, so the Store submission must explain that it is used for the normal WPF desktop/overlay process and Win32 integrations, not elevation or background service access. Partner Center review of that declaration is a release prerequisite.
@@ -81,12 +80,13 @@ Not declared:
 
 - `graphicsCaptureProgrammatic`
 - `graphicsCaptureWithoutBorder`
+- `DeviceCapability Name="microphone"`
 - camera, location, documents/pictures/music libraries
 - `privateNetworkClientServer`
 - `internetClientServer`
 - UIAccess, broad file-system access, packaged service, driver, app capture services
 
-A medium-integrity desktop app already has the current user’s normal outbound network rights, so an AppContainer `internetClient` declaration is not required. Microsoft distinguishes mediumIL/full-trust desktop apps from AppContainer capability grants and still recommends declaring privacy-sensitive device access such as microphone ([app capability declarations](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/app-capability-declarations)).
+A medium-integrity desktop app already has the current user’s normal outbound network rights, so an AppContainer `internetClient` declaration is not required. No privacy-sensitive device access is used.
 
 ## Permission and consent matrix
 
@@ -95,33 +95,15 @@ A medium-integrity desktop app already has the current user’s normal outbound 
 | Overlay/topmost window | None beyond normal desktop execution | No prompt | If enterprise policy blocks the app, it cannot run. |
 | BG3 process/window detection | None | No prompt | Show “BG3 not detected” and retain manual overlay/planner access. |
 | Direct OpenRouter HTTPS | None for mediumIL | No OS prompt; onboarding explicitly explains network use | Guide stays available; chat shows a precise offline/proxy/provider error. |
-| Secure screenshot | No graphics-capture capability because the system picker is used | Picker appears only after “Attach BG3 screenshot”; Windows shows a colored capture border | Cancel/unsupported/minimized/HDR conversion failure leaves chat text-only and stores no image. |
-| Microphone/speech | `microphone` device capability; MSIX identity | First mic use can trigger microphone consent; dictation also depends on Online speech recognition | Explain Settings paths and keep text chat fully functional. |
+| Screenshot/image input | None; feature absent | Never | Typed chat remains available. Package tests reject capture/image UI, services, APIs, and capabilities. |
+| Microphone/speech | None; feature absent | Never | Typed chat remains available. Package tests reject microphone/speech UI, services, APIs, and capabilities. |
 | Start at login | `windows.startupTask`, disabled | Only after the player turns on the setting; Windows may retain final control | Respect `DisabledByUser`; link to Settings > Apps > Startup. |
 | OpenRouter key | None | App dialog only, not a Windows permission prompt | Guide works without AI; chat asks for a key. |
 | External URLs | None | Default browser/mail app may ask its own questions | Show an open failure; no embedded browser fallback. |
 
-### Screen capture
+### Approved capture and speech exclusions
 
-`GraphicsCapturePicker` is the consent surface. It is initialized with the owner HWND, the user selects the BG3 window, and Windows marks the captured item with its standard border. The session lasts only long enough to get one frame. The app checks `GraphicsCaptureSession.IsSupported()` and keeps `IsBorderRequired=true`. Microsoft’s current capture documentation explicitly describes the secure picker, notification border, Direct3D 11 frame pool, and HDR format/tone-mapping concern ([screen capture](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/screen-capture)).
-
-The optional capture spike must prove:
-
-- DirectX 11 and Vulkan BG3 window selection/capture.
-- SDR and Windows HDR, with explicit HDR-to-SDR tone mapping for JPEG.
-- minimized, occluded, resized, and closed-window failures.
-- 100%, 150%, and 200% DPI on one and multiple monitors.
-- overlay exclusion because it is a separate HWND.
-
-No screenshot is written to disk, logged, cached across messages, or captured in the background.
-
-### Microphone and speech
-
-`Windows.Media.SpeechRecognition` requires package identity, which MSIX supplies. A microphone must be present and enabled, the player must grant microphone access, and free-form dictation may require Online speech recognition. Windows lets the player revoke either setting at any time, so every mic start rechecks availability ([speech recognition setup](https://learn.microsoft.com/en-us/windows/apps/develop/input/speech-recognition), [package-identity requirement](https://learn.microsoft.com/en-us/windows/apps/develop/input/manage-issues-with-audio-input)).
-
-Audio is consumed by the Windows speech runtime and is never sent to OpenRouter by this application. The final transcript only populates the unsent chat draft.
-
-When free-form dictation uses Windows Online speech recognition, Microsoft may process the audio under Windows/Microsoft privacy terms. Onboarding and the microphone help text must disclose that distinction from OpenRouter.
+Screenshot capture, image attachments, clipboard-image ingestion, microphone access, speech recognition, and dictation are excluded from the Windows MVP. The shipped application therefore needs no capture or microphone consent flow. Source, manifest, dependency, and unpacked-package tests enforce the absence of these surfaces.
 
 ### Credential storage
 
@@ -217,9 +199,7 @@ If Defender flags a clean release, stop rollout and submit the exact signed file
 | BG3 runs as administrator | Tell player to run BG3 normally; do not elevate the assistant. |
 | Package publisher/certificate mismatch | CI compares manifest Publisher with signing identity before signing. |
 | Direct-install SmartScreen reputation | Store stable channel; signed beta; consistent publisher; clear source/hash. |
-| Enterprise blocks sideload, capture, mic, speech, or OpenRouter | Detect and explain policy-limited state; guide features remain local. |
-| HDR screenshot is washed out | Capture spike and explicit float/HDR-to-SDR conversion path. |
-| Speech service/language unavailable | Hide/disable mic with reason; never block typed chat. |
+| Enterprise blocks sideload or OpenRouter | Detect and explain policy-limited state; guide features remain local. |
 | Credential survives uninstall | Settings Remove key plus README uninstall step. |
 | Package update changes schema | transactional migration, pre-migration database copy, rollback test. |
 | Native x64 asset omitted | clean-VM install/package-content test and x64-only CI assertion. |
@@ -231,8 +211,8 @@ The Windows build cannot leave platform validation until:
 
 - the manifest contains only the declared minimum surface;
 - a clean x64 Windows 11 VM can install and run without admin or developer mode;
-- capture and mic prompts happen only after their buttons are pressed;
-- denying every optional permission leaves runs/routes/party/builds/gear/acts usable;
+- capture and microphone prompts never occur because the features and capabilities are absent;
+- denying startup or Credential Manager access leaves runs/routes/party/builds/gear/acts usable;
 - outbound chat works with no inbound firewall rule or local listener;
 - Credential Manager contains the key while SQLite/logs/package do not;
 - process-monitor evidence shows no BG3 file, memory, save, or injection access;

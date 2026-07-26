@@ -1,0 +1,182 @@
+<Window x:Class="BG3HonorAssistant.App.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BG3 Honor Assistant overlay"
+        Width="340"
+        Height="190"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowActivated="False"
+        ShowInTaskbar="False"
+        Topmost="True"
+        SourceInitialized="OnSourceInitialized"
+        Deactivated="OnDeactivated">
+    <Border Padding="14"
+            Cursor="SizeAll"
+            MouseLeftButtonDown="OnDragMouseLeftButtonDown"
+            Background="{DynamicResource PanelBrush}"
+            BorderBrush="{DynamicResource AccentBrush}"
+            BorderThickness="1"
+            CornerRadius="12">
+        <Grid>
+            <Grid x:Name="MinimalPanel"
+                  MouseEnter="OnPetMouseEnter"
+                  MouseLeave="OnPetMouseLeave"
+                  MouseMove="OnPetMouseMove">
+                <Image x:Name="PetImage"
+                       Width="62"
+                       Height="67"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Stretch="Uniform"
+                       AutomationProperties.Name="Twilight Cleric companion"
+                       AutomationProperties.HelpText="Hover to wake the companion" />
+                <TextBlock x:Name="PetFallbackText"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AccentBrush}"
+                           Text="H" />
+                <Button Width="22"
+                        Height="20"
+                        Padding="0"
+                        Margin="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        AutomationProperties.Name="Open BG3 Honor Assistant"
+                        Click="OnOpenPlannerClick"
+                        Content="+"
+                        FontSize="12"
+                        Foreground="{DynamicResource PrimaryTextBrush}"
+                        Background="{DynamicResource PanelRaisedBrush}" />
+            </Grid>
+
+            <Grid x:Name="FocusPanel">
+                <Grid.ContextMenu>
+                    <ContextMenu AutomationProperties.Name="Overlay actions">
+                        <MenuItem Header="Snooze warnings for 10 minutes"
+                                  Click="OnSnoozeClick" />
+                        <MenuItem Header="Mute or unmute current warnings"
+                                  Click="OnMuteClick" />
+                        <MenuItem Header="Pin or unpin current fight"
+                                  Click="OnPinClick" />
+                        <Separator />
+                        <MenuItem Header="Density">
+                            <MenuItem Header="Minimal pet"
+                                      Click="OnMinimalDensityClick" />
+                            <MenuItem Header="Focus card"
+                                      Click="OnFocusDensityClick" />
+                            <MenuItem Header="Reference card"
+                                      Click="OnReferenceDensityClick" />
+                        </MenuItem>
+                    </ContextMenu>
+                </Grid.ContextMenu>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <DockPanel>
+                    <TextBlock Text="HONOR ASSISTANT"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock x:Name="LevelText"
+                               DockPanel.Dock="Right"
+                               HorizontalAlignment="Right"
+                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                </DockPanel>
+                <StackPanel Grid.Row="1" Margin="0,8,0,8">
+                    <TextBlock x:Name="GoalText"
+                               FontSize="19"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="AreaText"
+                               Margin="0,3,0,0"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="AvoidText"
+                               Margin="0,7,0,0"
+                               MaxHeight="45"
+                               Foreground="{DynamicResource AccentBrush}"
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                    <Button Padding="10,5"
+                            MinHeight="28"
+                            Margin="0,0,6,0"
+                            AutomationProperties.Name="Open route"
+                            Click="OnOpenRouteClick"
+                            Content="Route" />
+                    <Button Padding="10,5"
+                            MinHeight="28"
+                            Margin="0,0,6,0"
+                            AutomationProperties.Name="Ask typed chat"
+                            Click="OnOpenChatClick"
+                            Content="Ask" />
+                    <Button Padding="10,5"
+                            MinHeight="28"
+                            Margin="0,0,6,0"
+                            AutomationProperties.Name="Mark current task complete"
+                            Click="OnTaskDoneClick"
+                            Content="Task done" />
+                    <Button Padding="10,5"
+                            MinHeight="28"
+                            Margin="0"
+                            AutomationProperties.Name="Collapse overlay"
+                            Click="OnCollapseClick"
+                            Content="Collapse" />
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ReferencePanel">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="HONOR ASSISTANT · REFERENCE"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource AccentBrush}" />
+                <StackPanel Grid.Row="1" Margin="0,8,0,10">
+                    <TextBlock x:Name="ReferenceGoalText"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               TextWrapping="Wrap" />
+                    <TextBlock x:Name="ReferenceMetaText"
+                               Margin="0,3,0,0"
+                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                </StackPanel>
+                <Border Grid.Row="2"
+                        Padding="10"
+                        Background="{DynamicResource PanelRaisedBrush}"
+                        CornerRadius="7">
+                    <TextBlock x:Name="ReferenceAvoidText"
+                               Foreground="{DynamicResource AccentBrush}"
+                               TextWrapping="Wrap" />
+                </Border>
+                <StackPanel Grid.Row="3" Margin="0,10,0,0" Orientation="Horizontal">
+                    <Button Padding="10,5"
+                            MinHeight="28"
+                            Margin="0,0,6,0"
+                            Click="OnOpenPlannerClick"
+                            Content="Open planner" />
+                    <Button Padding="10,5"
+                            MinHeight="28"
+                            Margin="0"
+                            Click="OnCollapseClick"
+                            Content="Collapse" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
