@@ -28,6 +28,18 @@ I kept leaving Baldur's Gate 3 to check guides, a spreadsheet, build pages, and 
 
 > **Current beta coverage:** Act 1 route guidance is available. Act 3 is available for runs started or caught up there. Act 2 includes equipment and a public map handoff, but its route is not ready, so normal progression from Act 2 to Act 3 remains locked.
 
+## See it in game
+
+Keep the overlay tucked away as a companion, expand the current objective when you need it, or open the full planner for route, party, loadout, and act details.
+
+| Companion only | Current objective |
+| --- | --- |
+| <img src="docs/images/in-game-companion.webp" alt="Baldur's Gate 3 gameplay with the BG3 Overlay companion tucked against the right edge"> | <img src="docs/images/in-game-current-task.webp" alt="Baldur's Gate 3 gameplay with the BG3 Overlay current objective expanded"> |
+
+<p align="center">
+  <img src="docs/images/in-game-planner.webp" width="840" alt="Baldur's Gate 3 gameplay with the BG3 Overlay party planner open beside the game">
+</p>
+
 ## Quick start
 
 The app works on Apple silicon Macs running macOS 14 or later. The first install takes about 5 to 10 minutes and needs an internet connection and about 3 GB of free space. A local model needs another 2.5 GB for Qwen or 7.6 GB for Gemma.

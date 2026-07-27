@@ -17,9 +17,9 @@ struct ChatTabView: View {
                             VStack(spacing: 6) {
                                 Image(systemName: "bubble.left.and.text.bubble.right")
                                     .font(.system(size: 26)).foregroundStyle(.secondary)
-                                Text("Ask about this run state.")
+                                Text("Ask anything about Baldur's Gate 3.")
                                     .font(.caption).foregroundStyle(.secondary)
-                                Text("Action first. Guide facts and unknowns stay labelled.")
+                                Text("Run context is used only when it helps.")
                                     .font(.caption2).foregroundStyle(.tertiary)
                             }
                             .frame(maxWidth: .infinity).padding(.top, 36)
@@ -57,7 +57,7 @@ struct ChatTabView: View {
                 }
                 .buttonStyle(.plain)
                 .help(speech.isRecording ? "Stop dictation" : "Dictate your question")
-                TextField(speech.isRecording ? "Listening…" : "Ask about this checkpoint…", text: $appState.chatDraft)
+                TextField(speech.isRecording ? "Listening…" : "Ask anything about BG3…", text: $appState.chatDraft)
                     .textFieldStyle(.plain)
                     .font(.system(size: 12.5))
                     .onSubmit { Task { await appState.sendChat() } }
