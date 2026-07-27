@@ -199,13 +199,16 @@ public partial class MainWindow
         Onboarding.OnboardingNextButton.IsEnabled = !explorer;
     }
 
-    internal void OnCloseExplorerOverlayClick(
+    internal async void OnCloseExplorerOverlayClick(
         object sender,
         RoutedEventArgs eventArgs)
     {
         _ = sender;
         _ = eventArgs;
-        Hide();
+        await controller.UpdateRunSettingsAsync(
+            RunDifficulty.Explorer,
+            onboardingReveal);
+        (Application.Current as App)?.ExitApplication();
     }
 
     internal void OnOnboardingSpoilerClick(

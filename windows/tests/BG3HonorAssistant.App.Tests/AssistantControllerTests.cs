@@ -1,7 +1,10 @@
 using System.IO;
+using System.Text.Json;
 using BG3HonorAssistant.Core.Models;
+using BG3HonorAssistant.Core.Serialization;
 using BG3HonorAssistant.Infrastructure.Persistence;
 using BG3HonorAssistant.Infrastructure.Resources;
+using Microsoft.Data.Sqlite;
 
 namespace BG3HonorAssistant.App.Tests;
 
@@ -72,6 +75,212 @@ public sealed class AssistantControllerTests : IDisposable
         Assert.True(await controller.SwitchRunAsync(secondId));
         Assert.Equal(RunDifficulty.Tactician, controller.Run.Difficulty);
         Assert.Equal(RouteRevealPolicy.NextThree, controller.Run.RouteRevealPolicy);
+    }
+
+    [Fact]
+    public async Task CreateAndSwitchClearFightPinButKeepSessionSnooze()
+    {
+        var controller = CreateController();
+        await controller.InitializeAsync(FindGuidePath());
+        var firstId = controller.Run.Id;
+        Assert.True(controller.PinCurrentFight());
+        controller.SnoozeWarnings();
+        var snoozedUntil = controller.SnoozedUntil;
+
+        await controller.CreateRunAsync(
+            "Second",
+            RunDifficulty.Honour,
+            RouteRevealPolicy.Everything);
+
+        Assert.False(controller.CombatCardPinned);
+        Assert.Equal(snoozedUntil, controller.SnoozedUntil);
+        Assert.True(controller.PinCurrentFight());
+        Assert.True(await controller.SwitchRunAsync(firstId));
+        Assert.False(controller.CombatCardPinned);
+        Assert.Equal(snoozedUntil, controller.SnoozedUntil);
+    }
+
+    [Fact]
+    public async Task OrderedPersistenceFlushKeepsLastInvokedRunAndPreferenceWrites()
+    {
+        var controller = CreateController();
+        await controller.InitializeAsync(FindGuidePath());
+        var writes = new List<Task>();
+        for (var index = 0; index < 32; index++)
+        {
+            controller.Run.Name = $"Run {index:D2}";
+            writes.Add(controller.SaveAsync());
+            writes.Add(
+                controller.UpdatePreferencesAsync(
+                    controller.Preferences with
+                    {
+                        OverlayAnchorX = index,
+                    }));
+        }
+
+        await controller.FlushAsync();
+        await Task.WhenAll(writes);
+
+        var restarted = CreateController();
+        await restarted.InitializeAsync(FindGuidePath());
+        Assert.Equal("Run 31", restarted.Run.Name);
+        Assert.Equal(31D, restarted.Preferences.OverlayAnchorX);
+    }
+
+    [Fact]
+    public async Task SaveInvokedDuringSwitchCannotReactivatePreviousRun()
+    {
+        var repository = new RunRepository(
+            Path.Combine(temporaryDirectory, "state.sqlite3"));
+        var controller = new AssistantController(repository, new GuideRepository());
+        await controller.InitializeAsync(FindGuidePath());
+        var firstId = controller.Run.Id;
+        await controller.CreateRunAsync(
+            "Second",
+            RunDifficulty.Honour,
+            RouteRevealPolicy.Everything);
+
+        var switchTask = controller.SwitchRunAsync(firstId);
+        var saveTask = controller.SaveAsync();
+        await Task.WhenAll(switchTask, saveTask);
+
+        Assert.True(await switchTask);
+        Assert.Equal(firstId, controller.Run.Id);
+        Assert.Equal(firstId, (await repository.LoadActiveAsync())?.Id);
+    }
+
+    [Fact]
+    public async Task FlushSurfacesFailedWritesAndSealRejectsNewProducers()
+    {
+        var controller = CreateController();
+        await controller.InitializeAsync(FindGuidePath());
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => controller.UpdatePreferencesAsync(
+                controller.Preferences with { OverlayAnchorX = 0.75D },
+                cancellation.Token));
+        await Assert.ThrowsAsync<AggregateException>(() => controller.FlushAsync());
+
+        var clean = new AssistantController(
+            new RunRepository(Path.Combine(temporaryDirectory, "sealed.sqlite3")),
+            new GuideRepository());
+        await clean.InitializeAsync(FindGuidePath());
+        await clean.SealAndFlushAsync();
+        await Assert.ThrowsAsync<InvalidOperationException>(() => clean.SaveAsync());
+    }
+
+    [Fact]
+    public async Task IncoherentRowAndPayloadIdentityAreNotActivated()
+    {
+        var repository = new RunRepository(
+            Path.Combine(temporaryDirectory, "state.sqlite3"));
+        var guide = await new GuideRepository().LoadAsync(FindGuidePath());
+        var payload = new HonorRun
+        {
+            Name = "Payload",
+            GuideVersion = guide.GuideVersion,
+        };
+        payload.NormalizeRoster();
+        await repository.SaveAsync(
+            "row-id",
+            "Row",
+            guide.GuideVersion,
+            JsonSerializer.Serialize(payload, JsonDefaults.Create()));
+
+        var controller = new AssistantController(repository, new GuideRepository());
+        await controller.InitializeAsync(FindGuidePath());
+
+        Assert.NotEqual("row-id", controller.Run.Id);
+        Assert.NotEqual(payload.Id, controller.Run.Id);
+        Assert.Contains(
+            "all retained revisions were unreadable",
+            controller.RecoveryNotice,
+            StringComparison.Ordinal);
+        var preserved = await repository.LoadAsync("row-id");
+        Assert.NotNull(preserved);
+        Assert.False(preserved.IsActive);
+        Assert.False(await controller.SwitchRunAsync("row-id"));
+    }
+
+    [Fact]
+    public async Task GuideUpgradePreservesPriorRunAndCreatesCompatibleActiveRun()
+    {
+        var databasePath = Path.Combine(temporaryDirectory, "state.sqlite3");
+        var repository = new RunRepository(databasePath);
+        var oldRun = new HonorRun
+        {
+            Name = "Legacy",
+            GuideVersion = "old-guide",
+        };
+        oldRun.NormalizeRoster();
+        oldRun.Roster![0] = oldRun.Roster[0] with { Level = 7 };
+        oldRun.SyncActivePartyProjection();
+        await repository.SaveAsync(
+            oldRun.Id,
+            oldRun.Name,
+            oldRun.GuideVersion,
+            JsonSerializer.Serialize(oldRun, JsonDefaults.Create()));
+
+        var controller = new AssistantController(repository, new GuideRepository());
+        await controller.InitializeAsync(FindGuidePath());
+
+        Assert.NotEqual(oldRun.Id, controller.Run.Id);
+        Assert.Equal(controller.Guide.GuideVersion, controller.Run.GuideVersion);
+        Assert.Equal(1, controller.ActiveParty[0].Level);
+        Assert.Contains("old-guide", controller.RecoveryNotice, StringComparison.Ordinal);
+        var preserved = await repository.LoadAsync(oldRun.Id);
+        Assert.NotNull(preserved);
+        Assert.False(preserved.IsActive);
+        Assert.Equal(2, controller.Runs.Count);
+        Assert.Single(controller.Runs, run => run.IsActive);
+
+        Assert.True(await controller.SwitchRunAsync(oldRun.Id));
+        Assert.NotEqual(oldRun.Id, controller.Run.Id);
+        Assert.Equal(controller.Guide.GuideVersion, controller.Run.GuideVersion);
+        Assert.Equal(3, controller.Runs.Count);
+    }
+
+    [Fact]
+    public async Task RecoveredRevisionRepairsActiveSnapshotOnlyOnce()
+    {
+        var first = CreateController();
+        await first.InitializeAsync(FindGuidePath());
+        var runId = first.Run.Id;
+        await ReplaceActiveAndRevisionSnapshotsAsync(
+            corruptActiveOnly: true);
+
+        var recovered = CreateController();
+        await recovered.InitializeAsync(FindGuidePath());
+        Assert.Equal(runId, recovered.Run.Id);
+        Assert.Contains("repaired", recovered.RecoveryNotice, StringComparison.Ordinal);
+        var repository = new RunRepository(
+            Path.Combine(temporaryDirectory, "state.sqlite3"));
+        Assert.Equal(["{invalid"], await repository.ListRecoveryEvidenceAsync(runId));
+
+        var restarted = CreateController();
+        await restarted.InitializeAsync(FindGuidePath());
+        Assert.Equal(runId, restarted.Run.Id);
+        Assert.Null(restarted.RecoveryNotice);
+    }
+
+    [Fact]
+    public async Task NoValidSnapshotCreatesExplicitlyNoticedFreshRunAndKeepsOldRow()
+    {
+        var first = CreateController();
+        await first.InitializeAsync(FindGuidePath());
+        var oldRunId = first.Run.Id;
+        await ReplaceActiveAndRevisionSnapshotsAsync(
+            corruptActiveOnly: false);
+
+        var recovered = CreateController();
+        await recovered.InitializeAsync(FindGuidePath());
+
+        Assert.NotEqual(oldRunId, recovered.Run.Id);
+        Assert.Contains("all retained revisions were unreadable", recovered.RecoveryNotice);
+        Assert.Equal(2, recovered.Runs.Count);
+        Assert.Contains(recovered.Runs, run => run.Id == oldRunId && !run.IsActive);
     }
 
     [Fact]
@@ -243,24 +452,33 @@ public sealed class AssistantControllerTests : IDisposable
 
     private static string FindGuidePath()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(
-                directory.FullName,
-                "mac",
-                "BG3Assistant",
-                "Resources",
-                "Data",
-                "guide-bundle.json");
-            if (File.Exists(candidate))
+        var path = Path.Combine(
+            AppContext.BaseDirectory,
+            "Resources",
+            "Data",
+            "guide-bundle.json");
+        Assert.True(File.Exists(path), $"Bundled guide was not copied to {path}.");
+        return path;
+    }
+
+    private async Task ReplaceActiveAndRevisionSnapshotsAsync(bool corruptActiveOnly)
+    {
+        var databasePath = Path.Combine(temporaryDirectory, "state.sqlite3");
+        await using var connection = new SqliteConnection(
+            new SqliteConnectionStringBuilder
             {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new FileNotFoundException("Could not locate the shared guide bundle.");
+                DataSource = databasePath,
+                Mode = SqliteOpenMode.ReadWrite,
+                Pooling = false,
+            }.ToString());
+        await connection.OpenAsync();
+        using var command = connection.CreateCommand();
+        command.CommandText = corruptActiveOnly
+            ? "UPDATE runs SET snapshot_json = '{invalid' WHERE is_active = 1;"
+            : """
+              UPDATE runs SET snapshot_json = '{invalid' WHERE is_active = 1;
+              UPDATE run_revisions SET snapshot_json = '{invalid';
+              """;
+        await command.ExecuteNonQueryAsync();
     }
 }

@@ -93,6 +93,10 @@ public sealed class ActTransitionRulesTests
                 gear,
                 2,
                 ActGearReviewStatus.Missed));
+        Assert.Null(run.EquipmentOwnerId(gear.ItemKey));
+        Assert.Equal(
+            ActGearReviewStatus.Missed,
+            ActTransitionRules.ReviewStatus(run, gear, 2));
     }
 
     [Fact]

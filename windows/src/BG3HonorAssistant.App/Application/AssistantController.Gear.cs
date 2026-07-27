@@ -144,8 +144,7 @@ public sealed partial class AssistantController
         BuildGear gear,
         CancellationToken cancellationToken = default)
     {
-        if (!gear.IsMapObjective ||
-            ActiveParty.All(member => member.Id != memberId) ||
+        if (ActiveParty.All(member => member.Id != memberId) ||
             !Run.ToggleEquipment(gear.ItemKey, memberId))
         {
             return false;

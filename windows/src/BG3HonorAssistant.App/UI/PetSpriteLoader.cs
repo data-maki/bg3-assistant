@@ -62,7 +62,7 @@ public static class PetSpriteLoader
         var path = Path.Combine(
             AppContext.BaseDirectory,
             "Resources",
-            "twilight-cleric.webp");
+            "twilight-cleric.png");
         if (!File.Exists(path))
         {
             return null;

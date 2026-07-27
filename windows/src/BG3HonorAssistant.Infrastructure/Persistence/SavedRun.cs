@@ -8,3 +8,9 @@ public sealed record SavedRun(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
     bool IsActive);
+
+public sealed record RecoverableRunResult(
+    SavedRun? Run,
+    bool HadActiveRun,
+    bool UsedRevision,
+    string? UnreadableActiveSnapshot = null);

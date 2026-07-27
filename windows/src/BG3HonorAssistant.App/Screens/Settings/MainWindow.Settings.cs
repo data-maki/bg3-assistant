@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.IO;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +13,7 @@ using BG3HonorAssistant.Core.Chat;
 using BG3HonorAssistant.Core.Models;
 using BG3HonorAssistant.Core.Overlay;
 using BG3HonorAssistant.Core.Route;
+using BG3HonorAssistant.Core.Serialization;
 using BG3HonorAssistant.Infrastructure.BuildImport;
 using BG3HonorAssistant.Infrastructure.Networking;
 using BG3HonorAssistant.Infrastructure.OpenRouter;
@@ -34,13 +36,13 @@ public partial class MainWindow
         _ = sender;
         _ = eventArgs;
         if (refreshing ||
-            SettingsScreen.RunPicker.SelectedItem is not SavedRun selected ||
-            selected.Id == controller.Run.Id)
+            SettingsScreen.RunPicker.SelectedItem is not SavedRunPickerRow selected ||
+            selected.Run.Id == controller.Run.Id)
         {
             return;
         }
 
-        if (!await controller.SwitchRunAsync(selected.Id))
+        if (!await controller.SwitchRunAsync(selected.Run.Id))
         {
             ShowError("That run could not be loaded. Its stored bytes were left unchanged.");
         }
@@ -145,13 +147,13 @@ public partial class MainWindow
         _ = sender;
         _ = eventArgs;
         if (refreshing ||
-            SettingsScreen.RunDifficultyPicker.SelectedItem is not RunDifficulty difficulty ||
-            SettingsScreen.RunRevealPicker.SelectedItem is not RouteRevealPolicy reveal)
+            SettingsScreen.RunDifficultyPicker.SelectedItem is not DifficultyPickerRow difficulty ||
+            SettingsScreen.RunRevealPicker.SelectedItem is not RevealPickerRow reveal)
         {
             return;
         }
 
-        await controller.UpdateRunSettingsAsync(difficulty, reveal);
+        await controller.UpdateRunSettingsAsync(difficulty.Value, reveal.Value);
     }
 
     internal void OnReplayTourClick(object sender, RoutedEventArgs eventArgs)
@@ -200,6 +202,7 @@ public partial class MainWindow
             return;
         }
 
+        CancelProviderOperations();
         try
         {
             credentialStore.Save(key);
@@ -233,6 +236,10 @@ public partial class MainWindow
         _ = eventArgs;
         if (keyTestCancellation is not null)
         {
+            SettingsScreen.OpenRouterKeyStatusText.Text =
+                "Cancelling OpenRouter connection test…";
+            keyTestOperationVersion++;
+            keyTestCancellation.Cancel();
             return;
         }
 
@@ -256,7 +263,9 @@ public partial class MainWindow
             return;
         }
 
-        keyTestCancellation = new CancellationTokenSource();
+        var cancellation = new CancellationTokenSource();
+        keyTestCancellation = cancellation;
+        var operationVersion = ++keyTestOperationVersion;
         SettingsScreen.OpenRouterKeyStatusText.Text =
             $"Testing the pinned {OpenRouterClient.ModelDisplayName} model…";
         UpdateNetworkButtons();
@@ -273,25 +282,39 @@ public partial class MainWindow
                 ChatPromptBuilder.ResponseSchema,
                 "connection_test",
                 512,
-                keyTestCancellation.Token);
+                cancellation.Token);
             _ = ChatPromptBuilder.DecodeAnswer(result);
-            openRouterKeyConfigured = true;
-            SettingsScreen.OpenRouterKeyStatusText.Text =
-                $"Connected successfully to {OpenRouterClient.Model}.";
+            if (operationVersion == keyTestOperationVersion)
+            {
+                openRouterKeyConfigured = true;
+                SettingsScreen.OpenRouterKeyStatusText.Text =
+                    $"Connected successfully to {OpenRouterClient.Model}.";
+            }
         }
         catch (OperationCanceledException)
         {
-            SettingsScreen.OpenRouterKeyStatusText.Text = "OpenRouter connection test cancelled.";
+            if (operationVersion == keyTestOperationVersion)
+            {
+                SettingsScreen.OpenRouterKeyStatusText.Text =
+                    "OpenRouter connection test cancelled.";
+            }
         }
         catch (Exception exception)
         {
-            SettingsScreen.OpenRouterKeyStatusText.Text =
-                $"OpenRouter connection test failed: {exception.Message}";
+            if (operationVersion == keyTestOperationVersion)
+            {
+                SettingsScreen.OpenRouterKeyStatusText.Text =
+                    $"OpenRouter connection test failed: {exception.Message}";
+            }
         }
         finally
         {
-            keyTestCancellation.Dispose();
-            keyTestCancellation = null;
+            cancellation.Dispose();
+            if (ReferenceEquals(keyTestCancellation, cancellation))
+            {
+                keyTestCancellation = null;
+            }
+
             UpdateNetworkButtons();
         }
     }
@@ -300,6 +323,7 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
+        CancelProviderOperations();
         try
         {
             var removed = credentialStore.Delete();
@@ -348,6 +372,16 @@ public partial class MainWindow
         SettingsScreen.OpenRouterEntryPanel.Visibility = openRouterKeyConfigured
             ? Visibility.Collapsed
             : Visibility.Visible;
+    }
+
+    private void CancelProviderOperations()
+    {
+        chatOperationVersion++;
+        importOperationVersion++;
+        keyTestOperationVersion++;
+        chatCancellation?.Cancel();
+        importCancellation?.Cancel();
+        keyTestCancellation?.Cancel();
     }
 
     internal void OnReportBugClick(object sender, RoutedEventArgs eventArgs)
@@ -410,35 +444,61 @@ public partial class MainWindow
 
         ChatScreen.SendChatButton.IsEnabled =
             openRouterKeyConfigured &&
-            controller.Payload.RouteAvailable &&
-            chatCancellation is null;
+            controller.Payload.RouteAvailable;
+        ChatScreen.SendChatButton.Content =
+            chatCancellation is null ? "↑" : "×";
+        ChatScreen.SendChatButton.ToolTip =
+            chatCancellation is null
+                ? "Send typed question"
+                : "Cancel chat request";
         PartyScreen.BuildImport.PartyImportBuildButton.IsEnabled =
-            openRouterKeyConfigured &&
-            importCancellation is null;
+            openRouterKeyConfigured;
+        PartyScreen.BuildImport.PartyImportBuildButton.Content =
+            importCancellation is null ? "⇩  Import" : "×  Cancel";
         SettingsScreen.TestOpenRouterButton.IsEnabled =
-            openRouterKeyConfigured &&
-            keyTestCancellation is null;
+            openRouterKeyConfigured;
+        SettingsScreen.TestOpenRouterButton.Content =
+            keyTestCancellation is null ? "Test" : "Cancel";
     }
     private void RefreshSettingsScreen()
     {
-        SettingsScreen.RunPicker.ItemsSource = controller.Runs;
-        SettingsScreen.RunPicker.SelectedItem = controller.Runs.FirstOrDefault(run => run.IsActive);
+        var runRows = controller.Runs.Select(
+                run =>
+                {
+                    var level = TryReadRunLevel(run);
+                    return new SavedRunPickerRow(
+                        run,
+                        level is null ? run.Name : $"{run.Name} · L{level}");
+                })
+            .ToList();
+        SettingsScreen.RunPicker.ItemsSource = runRows;
+        SettingsScreen.RunPicker.SelectedItem =
+            runRows.FirstOrDefault(row => row.Run.IsActive);
         if (!SettingsScreen.RunNameTextBox.IsKeyboardFocusWithin)
         {
             SettingsScreen.RunNameTextBox.Text = controller.Run.Name ?? "Honor Run";
         }
         SettingsScreen.RunDifficultyPicker.SelectedItem =
-            controller.Run.Difficulty ?? RunDifficulty.Honour;
+            SettingsScreen.RunDifficultyPicker.Items
+                .OfType<DifficultyPickerRow>()
+                .FirstOrDefault(
+                    row => row.Value ==
+                           (controller.Run.Difficulty ?? RunDifficulty.Honour));
         SettingsScreen.RunRevealPicker.SelectedItem =
-            controller.Run.RouteRevealPolicy ?? RouteRevealPolicy.Everything;
+            SettingsScreen.RunRevealPicker.Items
+                .OfType<RevealPickerRow>()
+                .FirstOrDefault(
+                    row => row.Value ==
+                           (controller.Run.RouteRevealPolicy ??
+                            RouteRevealPolicy.Everything));
+        SettingsScreen.OpenRouterModelText.Text = OpenRouterClient.Model;
 
         SettingsScreen.ShowOverlayCheckBox.IsChecked =
             controller.Preferences.ShowOverlayWhileGameRuns;
         SettingsScreen.OverlayDensityPicker.SelectedItem = controller.Preferences.OverlayDensity;
 
         SettingsScreen.TestOpenRouterButton.IsEnabled =
-            openRouterKeyConfigured &&
-            keyTestCancellation is null;
+            openRouterKeyConfigured;
 
         SettingsScreen.DiagnosticsText.Text =
             $"Guide version: {controller.Guide.GuideVersion}\n" +
@@ -450,6 +510,24 @@ public partial class MainWindow
             $"Recovery: {controller.RecoveryNotice ?? "not needed"}\n" +
             $"OpenRouter: {(openRouterKeyConfigured ? "key configured" : "not configured")} · {OpenRouterClient.Model}\n" +
             "Game memory, files, saves, injection, hooks, services, and elevation: unused";
+    }
+
+    private static int? TryReadRunLevel(SavedRun saved)
+    {
+        try
+        {
+            var run = JsonSerializer.Deserialize<HonorRun>(
+                saved.SnapshotJson,
+                JsonDefaults.Create());
+            run?.NormalizeRoster();
+            return run?.Party.Count == 0
+                ? null
+                : run?.Party.Min(member => member.Level);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 
 }

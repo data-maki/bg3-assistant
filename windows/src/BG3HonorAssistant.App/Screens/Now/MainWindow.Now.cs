@@ -49,16 +49,32 @@ public partial class MainWindow
 
     private async Task CompleteCurrentTaskAsync()
     {
-        if (controller.CurrentStep?.Decision is not null)
+        if (controller.CurrentStep is { Decision: not null } decisionStep)
         {
-            PlannerTabs.SelectedIndex = 1;
-            RouteScreen.RouteList.SelectedItem = controller.CurrentStep;
-            RouteScreen.RouteStepOutcomeText.Text =
-                "Choose the reviewed outcome below before marking this step done.";
+            OpenRouteOutcomePicker(decisionStep);
             return;
         }
 
         await controller.CompleteCurrentGoalAsync();
+    }
+
+    private void OpenRouteOutcomePicker(WalkthroughStep step)
+    {
+        routeFilter = RouteContentFilter.All;
+        PlannerTabs.SelectedIndex = 1;
+        RefreshRouteScreen();
+        var row = RouteScreen.RouteList.Items
+            .OfType<RoutePlannerRow>()
+            .FirstOrDefault(candidate => candidate.Step?.Id == step.Id);
+        if (row is not null)
+        {
+            RouteScreen.RouteList.SelectedItem = null;
+            RouteScreen.RouteList.SelectedItem = row;
+            RouteScreen.RouteList.ScrollIntoView(row);
+        }
+
+        RouteScreen.RouteStepOutcomeText.Text =
+            "Choose the reviewed outcome below before marking this step done.";
     }
 
     private void OnOverlayOpenRouteRequested(object? sender, EventArgs eventArgs)

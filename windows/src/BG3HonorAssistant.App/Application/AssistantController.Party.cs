@@ -9,6 +9,37 @@ namespace BG3HonorAssistant.App;
 
 public sealed partial class AssistantController
 {
+    public async Task RestorePartyPlanAsync(
+        PartyPlan plan,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        Run.ApplyPartyPlan(plan);
+        SyncRegion();
+        await SaveAsync(cancellationToken);
+        Notify();
+    }
+
+    public async Task<bool> SwapActivePartyAsync(
+        string incomingMemberId,
+        string outgoingMemberId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = PartyPlanningRules.SwapIntoActive(
+            Run,
+            incomingMemberId,
+            outgoingMemberId);
+        if (!result.Applied)
+        {
+            return false;
+        }
+
+        SyncRegion();
+        await SaveAsync(cancellationToken);
+        Notify();
+        return true;
+    }
+
     public async Task SetPartyLevelAsync(
         string memberId,
         int level,

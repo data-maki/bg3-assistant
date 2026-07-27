@@ -14,12 +14,18 @@ public sealed partial class AssistantController
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(imported);
-        await runRepository.SaveImportedBuildAsync(
-            imported.Id,
-            imported.Name,
-            JsonSerializer.Serialize(imported, json),
+        var value = JsonSerializer.Serialize(imported, json);
+        await EnqueuePersistenceAsync(
+            async token =>
+            {
+                await runRepository.SaveImportedBuildAsync(
+                    imported.Id,
+                    imported.Name,
+                    value,
+                    token).ConfigureAwait(false);
+                await RefreshImportedBuildsAsync(token).ConfigureAwait(false);
+            },
             cancellationToken);
-        await RefreshImportedBuildsAsync(cancellationToken);
         Notify();
     }
 
@@ -32,10 +38,22 @@ public sealed partial class AssistantController
             return false;
         }
 
-        var deleted = await runRepository.DeleteImportedBuildAsync(id, cancellationToken);
+        var deleted = await EnqueuePersistenceAsync(
+            async token =>
+            {
+                var result = await runRepository.DeleteImportedBuildAsync(
+                    id,
+                    token).ConfigureAwait(false);
+                if (result)
+                {
+                    await RefreshImportedBuildsAsync(token).ConfigureAwait(false);
+                }
+
+                return result;
+            },
+            cancellationToken);
         if (deleted)
         {
-            await RefreshImportedBuildsAsync(cancellationToken);
             Notify();
         }
 

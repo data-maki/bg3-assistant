@@ -25,6 +25,7 @@ public partial class App : System.Windows.Application
     private AssistantController? controller;
     private MainWindow? plannerWindow;
     private bool trayNoticeShown;
+    private bool runtimeDisposed;
 
     public bool ExitRequested { get; private set; }
 
@@ -89,7 +90,14 @@ public partial class App : System.Windows.Application
             window.SourceInitialized += (_, _) => AttachActivationHook(window);
             CreateTrayIcon();
             overlay.Start();
-            window.Show();
+            if (AppLaunchPolicy.ShouldShowPlanner(controller.Preferences))
+            {
+                window.Show();
+            }
+            else
+            {
+                InitializeHiddenPlanner(window);
+            }
         }
         catch (Exception exception)
         {
@@ -144,6 +152,65 @@ public partial class App : System.Windows.Application
         }
 
         ExitRequested = true;
+        _ = ExitApplicationAsync();
+    }
+
+    protected override void OnSessionEnding(SessionEndingCancelEventArgs eventArgs)
+    {
+        ExitRequested = true;
+        try
+        {
+            _ = controller?.SealAndFlushAsync().Wait(TimeSpan.FromSeconds(5));
+        }
+        catch (AggregateException)
+        {
+            // SQLite transactions remain atomic if Windows ends the session
+            // after the bounded flush attempt.
+        }
+
+        DisposeRuntime();
+        base.OnSessionEnding(eventArgs);
+    }
+
+    private async Task ExitApplicationAsync()
+    {
+        try
+        {
+            if (controller is not null)
+            {
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await controller.SealAndFlushAsync(timeout.Token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Do not trap the user in the process indefinitely. Every
+            // individual SQLite write remains transactional.
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(
+                $"The latest durable state could not be fully saved before exit.\n\n" +
+                $"{exception.GetBaseException().Message}",
+                "BG3 Honor Assistant",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+        finally
+        {
+            DisposeRuntime();
+            Shutdown();
+        }
+    }
+
+    private void DisposeRuntime()
+    {
+        if (runtimeDisposed)
+        {
+            return;
+        }
+
+        runtimeDisposed = true;
         overlay?.Dispose();
         overlay = null;
         trayIcon?.Dispose();
@@ -155,16 +222,27 @@ public partial class App : System.Windows.Application
         plannerWindow?.Close();
         plannerWindow = null;
         controller = null;
-        Shutdown();
     }
 
     protected override void OnExit(ExitEventArgs eventArgs)
     {
-        overlay?.Dispose();
-        trayIcon?.Dispose();
-        trayMenu?.Dispose();
-        singleInstance?.Dispose();
+        DisposeRuntime();
         base.OnExit(eventArgs);
+    }
+
+    private static void InitializeHiddenPlanner(Window window)
+    {
+        var showActivated = window.ShowActivated;
+        var showInTaskbar = window.ShowInTaskbar;
+        var opacity = window.Opacity;
+        window.ShowActivated = false;
+        window.ShowInTaskbar = false;
+        window.Opacity = 0D;
+        window.Show();
+        window.Hide();
+        window.Opacity = opacity;
+        window.ShowInTaskbar = showInTaskbar;
+        window.ShowActivated = showActivated;
     }
 
     private void AttachActivationHook(Window window)

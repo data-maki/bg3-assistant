@@ -47,6 +47,7 @@ public partial class MainWindow
             $"LOADOUT · ACT {controller.Run.SelectedAct ?? 1}";
         if (member is null)
         {
+            ResetLoadoutDetail();
             LoadoutScreen.LoadoutMemberSummaryText.Text = "No active party members";
             LoadoutScreen.LoadoutGearGrid.ItemsSource = null;
             LoadoutScreen.LoadoutEmptyText.Text = "Add an active character in Party first.";
@@ -62,6 +63,7 @@ public partial class MainWindow
                 : $"L{member.Level} · {build.Name}";
         if (build is null)
         {
+            ResetLoadoutDetail();
             LoadoutScreen.LoadoutGearGrid.ItemsSource = null;
             LoadoutScreen.LoadoutEmptyText.Text = $"{member.Name} has no build yet.";
             LoadoutScreen.LoadoutEmptyPanel.Visibility = Visibility.Visible;
@@ -112,6 +114,10 @@ public partial class MainWindow
             if (selectedLoadoutGear is not null)
             {
                 RenderGearDetail();
+            }
+            else
+            {
+                ResetLoadoutDetail();
             }
         }
     }
@@ -344,9 +350,14 @@ public partial class MainWindow
 
     private void CloseLoadoutDetailAfterPlanChange()
     {
+        ResetLoadoutDetail();
+        RenderLoadout();
+    }
+
+    private void ResetLoadoutDetail()
+    {
         selectedLoadoutGear = null;
         selectedLoadoutCell = null;
-        RenderLoadout();
         LoadoutScreen.LoadoutDetailColumn.Width = new GridLength(0D);
         LoadoutScreen.LoadoutMainColumn.Width = new GridLength(1D, GridUnitType.Star);
     }

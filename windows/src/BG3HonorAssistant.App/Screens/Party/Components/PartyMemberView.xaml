@@ -145,7 +145,7 @@
                                             </DockPanel>
                                             <ComboBox x:Name="PartyBuildPicker"
                                                       Margin="0,7,0,0"
-                                                      DisplayMemberPath="Name"
+                                                      DisplayMemberPath="Label"
                                                       SelectionChanged="OnPartyBuildChanged" />
                                             <Button Margin="0,7,0,0"
                                                     HorizontalAlignment="Left"

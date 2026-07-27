@@ -48,6 +48,9 @@ public partial class MainWindow : Window
     private CancellationTokenSource? chatCancellation;
     private CancellationTokenSource? importCancellation;
     private CancellationTokenSource? keyTestCancellation;
+    private int chatOperationVersion;
+    private int importOperationVersion;
+    private int keyTestOperationVersion;
     private Func<Task>? pendingConfirmationAction;
     private Action? pendingConfirmationCancel;
     private string? chatRunId;
@@ -67,6 +70,9 @@ public partial class MainWindow : Window
     private GearPickup? routeDetailPickup;
     private string? selectedPartyMemberId;
     private string? selectedAbilitySetupId;
+    private PartyPlan? partyUndoPlan;
+    private string? partyUndoExpectedSignature;
+    private string? partyUndoRunId;
     private int selectedManualLevel = 1;
     private string? selectedLoadoutMemberId;
     private BuildGear? selectedLoadoutGear;

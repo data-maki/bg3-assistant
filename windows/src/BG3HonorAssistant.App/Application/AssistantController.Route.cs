@@ -89,11 +89,6 @@ public sealed partial class AssistantController
                 cancellationToken: cancellationToken);
         }
 
-        if (!target.Gear.IsMapObjective)
-        {
-            return false;
-        }
-
         if (Run.EquipmentOwnerId(target.Gear.ItemKey) == target.Member.Id)
         {
             Run.GearTarget = null;

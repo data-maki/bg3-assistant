@@ -35,10 +35,11 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Style="{StaticResource BG3Body}"
                                                Text="Model" />
-                                    <TextBlock Grid.Column="1"
+                                    <TextBlock x:Name="OpenRouterModelText"
+                                               Grid.Column="1"
                                                Style="{StaticResource BG3Caption}"
                                                Foreground="{StaticResource BG3ParchmentBrush}"
-                                               Text="google/gemini-3.6-flash" />
+                                               Text="Pinned OpenRouter model" />
                                 </Grid>
                                 <Border Margin="0,7" BorderBrush="#357D9194" BorderThickness="0,0,0,0.7" />
                                 <TextBlock x:Name="OpenRouterKeyStatusText"
@@ -161,7 +162,7 @@
                                                Text="Active run" />
                                     <ComboBox x:Name="RunPicker"
                                               Grid.Column="1"
-                                              DisplayMemberPath="Name"
+                                              DisplayMemberPath="Label"
                                               SelectionChanged="OnRunSelectionChanged" />
                                 </Grid>
                                 <Border Margin="0,7" BorderBrush="#357D9194" BorderThickness="0,0,0,0.7" />
@@ -193,6 +194,7 @@
                                                Text="Difficulty" />
                                     <ComboBox x:Name="RunDifficultyPicker"
                                               Grid.Column="1"
+                                              DisplayMemberPath="Label"
                                               SelectionChanged="OnRunSettingChanged" />
                                 </Grid>
                                 <TextBlock Margin="0,6,0,0"
@@ -211,6 +213,7 @@
                                                Text="Route spoilers" />
                                     <ComboBox x:Name="RunRevealPicker"
                                               Grid.Column="1"
+                                              DisplayMemberPath="Label"
                                               SelectionChanged="OnRunSettingChanged" />
                                 </Grid>
                                 <Border Margin="0,12,0,7" BorderBrush="#357D9194" BorderThickness="0,0,0,0.7" />
@@ -263,12 +266,18 @@
                                             Click="OnOpenLegalLinkClick"
                                             Content="Baldur's Gate 3 Fan Content Terms"
                                             Tag="https://baldursgate3.game/bg3-fan-content-terms/" />
+                                     <Button Margin="0,5,0,0"
+                                            HorizontalAlignment="Left"
+                                            Style="{StaticResource BG3ActionButton}"
+                                            Click="OnOpenLegalLinkClick"
+                                             Content="Wizards Fan Content Policy"
+                                             Tag="https://company.wizards.com/en/legal/fancontentpolicy" />
                                     <Button Margin="0,5,0,0"
                                             HorizontalAlignment="Left"
                                             Style="{StaticResource BG3ActionButton}"
                                             Click="OnOpenLegalLinkClick"
-                                            Content="Wizards Fan Content Policy"
-                                            Tag="https://company.wizards.com/en/legal/fancontentpolicy" />
+                                            Content="Bg3.wiki Copyrights"
+                                            Tag="https://bg3.wiki/wiki/bg3wiki:Copyrights" />
                                     <Button Margin="0,5,0,0"
                                             HorizontalAlignment="Left"
                                             Style="{StaticResource BG3ActionButton}"

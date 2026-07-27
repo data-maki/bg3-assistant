@@ -51,12 +51,15 @@ public partial class MainWindow
         var locked = controller.Run.ActLedgerIsLocked(viewedAct);
         var active = viewedAct == activeAct;
         var gear = controller.ActGear(viewedAct);
-        var reviewed = gear.Where(
+        var reviewedGear = gear.Where(
                 item =>
                     ActTransitionRules.ReviewStatus(
                         controller.Run,
                         item,
                         viewedAct) is not null)
+            .ToList();
+        var reviewed = reviewedGear
+            .Select(item => new ActGearRow(item, !locked))
             .ToList();
         var pending = gear.Where(
                 item =>
@@ -113,10 +116,11 @@ public partial class MainWindow
         ActScreen.ActEmptyReviewText.Text = gear.Count == 0
             ? "Assign reviewed builds on Party to create an equipment checklist."
             : "All equipment reviewed.";
-        ActScreen.ActReviewedSummaryText.Visibility = reviewed.Count == 0
+        ActScreen.ActReviewedExpander.Visibility = reviewed.Count == 0
             ? Visibility.Collapsed
             : Visibility.Visible;
-        ActScreen.ActReviewedSummaryText.Text = $"●  Reviewed ({reviewed.Count})";
+        ActScreen.ActReviewedExpander.Header = $"●  Reviewed ({reviewed.Count})";
+        ActScreen.ActReviewedGearList.ItemsSource = reviewed;
 
         var consequences = active
             ? controller.CurrentActConsequences

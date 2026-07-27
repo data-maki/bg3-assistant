@@ -14,6 +14,11 @@
     <ProjectReference Include="..\..\src\BG3HonorAssistant.Infrastructure\BG3HonorAssistant.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\..\Resources\Data\guide-bundle.json"
+             Link="Resources\Data\guide-bundle.json"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>

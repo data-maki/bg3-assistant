@@ -34,6 +34,15 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
+        if (chatCancellation is not null)
+        {
+            ChatScreen.ChatStatusText.Text = "Cancelling chat request…";
+            ChatScreen.ChatStatusText.Visibility = Visibility.Visible;
+            chatOperationVersion++;
+            chatCancellation.Cancel();
+            return;
+        }
+
         await SendChatAsync();
     }
 
@@ -92,6 +101,7 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
+        chatOperationVersion++;
         chatCancellation?.Cancel();
         chatLines.Clear();
         ChatScreen.ChatStatusText.Text = "Session chat cleared.";
@@ -174,7 +184,9 @@ public partial class MainWindow
         chatLines.Add(new ChatLineRow("user", question, [], IsError: false));
         ChatScreen.ChatDraftTextBox.Clear();
         RenderChatHistory();
-        chatCancellation = new CancellationTokenSource();
+        var cancellation = new CancellationTokenSource();
+        chatCancellation = cancellation;
+        var operationVersion = ++chatOperationVersion;
         ChatScreen.ChatStatusText.Text =
             $"Waiting for {OpenRouterClient.ModelDisplayName}…";
         ChatScreen.ChatStatusText.Visibility = Visibility.Visible;
@@ -189,9 +201,10 @@ public partial class MainWindow
                 ChatPromptBuilder.ResponseSchema,
                 "bg3_guide_answer",
                 1_200,
-                chatCancellation.Token);
+                cancellation.Token);
             var answer = ChatPromptBuilder.DecodeAnswer(structured);
-            if (controller.Run.Id == requestedRunId &&
+            if (operationVersion == chatOperationVersion &&
+                controller.Run.Id == requestedRunId &&
                 (controller.Run.SelectedAct ?? 1) == requestedAct)
             {
                 chatLines.Add(
@@ -208,21 +221,34 @@ public partial class MainWindow
         }
         catch (OperationCanceledException)
         {
-            ChatScreen.ChatStatusText.Text = "Chat request cancelled.";
-            ChatScreen.ChatStatusText.Visibility = Visibility.Visible;
+            if (operationVersion == chatOperationVersion)
+            {
+                ChatScreen.ChatStatusText.Text = "Chat request cancelled.";
+                ChatScreen.ChatStatusText.Visibility = Visibility.Visible;
+            }
         }
         catch (OpenRouterException exception)
         {
-            AddChatError(exception.Message);
+            if (operationVersion == chatOperationVersion)
+            {
+                AddChatError(exception.Message);
+            }
         }
         catch (InvalidOperationException exception)
         {
-            AddChatError(exception.Message);
+            if (operationVersion == chatOperationVersion)
+            {
+                AddChatError(exception.Message);
+            }
         }
         finally
         {
-            chatCancellation.Dispose();
-            chatCancellation = null;
+            cancellation.Dispose();
+            if (ReferenceEquals(chatCancellation, cancellation))
+            {
+                chatCancellation = null;
+            }
+
             UpdateNetworkButtons();
         }
     }
@@ -244,7 +270,11 @@ public partial class MainWindow
             return;
         }
 
-        chatCancellation?.Cancel();
+        if (chatCancellation is not null)
+        {
+            chatOperationVersion++;
+            chatCancellation.Cancel();
+        }
         chatLines.Clear();
         chatRunId = controller.Run.Id;
         chatAct = act;
@@ -386,8 +416,7 @@ public partial class MainWindow
         RenderChatHistory();
         ChatScreen.SendChatButton.IsEnabled =
             controller.Payload.RouteAvailable &&
-            openRouterKeyConfigured &&
-            chatCancellation is null;
+            openRouterKeyConfigured;
     }
 
 }

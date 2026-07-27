@@ -32,8 +32,8 @@
              Link="Resources\BuildOptionIcons\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\..\Resources\twilight-cleric.webp"
-             Link="Resources\twilight-cleric.webp"
+    <Content Include="..\..\..\Resources\twilight-cleric.png"
+             Link="Resources\twilight-cleric.png"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
     <Content Include="..\..\..\Resources\THIRD_PARTY_NOTICES.md"
