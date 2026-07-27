@@ -5,6 +5,23 @@ namespace BG3HonorAssistant.Core.Tests.Models;
 public sealed class ManualBuildTests
 {
     [Fact]
+    public void EveryDefaultCharacterProfileProducesALegalPointBuyBase()
+    {
+        var profiles = ClassCatalog.Definitions
+            .Select(definition => AbilityScores.ForClass(definition.Name))
+            .Append(AbilityScores.CustomDefault)
+            .Distinct()
+            .ToList();
+
+        Assert.All(
+            profiles,
+            profile =>
+                Assert.Equal(
+                    27,
+                    AbilityProgression.PointBuyCost(profile.PointBuyBase)));
+    }
+
+    [Fact]
     public void CatalogCoversEveryClassThroughLevelTwelve()
     {
         Assert.Equal(12, ClassCatalog.Definitions.Count);

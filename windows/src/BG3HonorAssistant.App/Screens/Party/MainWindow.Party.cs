@@ -117,6 +117,7 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
+        PartyScreen.Landing.PartyGrid.SelectedItem = null;
         PartyScreen.PartyDetailColumn.Width = new GridLength(0D);
         PartyScreen.PartyGuidanceColumn.Width = new GridLength(1D, GridUnitType.Star);
         PartyScreen.BuildImport.PartyBuildImportPopover.Visibility = Visibility.Collapsed;

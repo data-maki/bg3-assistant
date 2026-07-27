@@ -4,6 +4,18 @@ namespace BG3HonorAssistant.Core.Tests.Models;
 
 public sealed class AbilityProgressionTests
 {
+    [Fact]
+    public void RecordFormattingDoesNotRecurseThroughComputedAbilityScores()
+    {
+        var scores = new AbilityScores(17, 13, 15, 10, 12, 8);
+        var member = Member(1) with { AbilityScores = scores };
+
+        Assert.Equal(
+            "STR 17 / DEX 13 / CON 15 / INT 10 / WIS 12 / CHA 8",
+            scores.ToString());
+        Assert.Contains("STR 17", member.ToString(), StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(7, -2)]
     [InlineData(8, -1)]

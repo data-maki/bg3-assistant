@@ -35,9 +35,37 @@ public sealed record AbilityScores(
             Math.Clamp(Charisma, 8, 15));
 
     [JsonIgnore]
+    public AbilityScores PointBuyBase
+    {
+        get
+        {
+            var abilities = Enum.GetValues<Ability>()
+                .OrderByDescending(Get)
+                .ThenBy(ability => ability)
+                .ToArray();
+            foreach (var bonusTwo in abilities)
+            {
+                foreach (var bonusOne in abilities.Where(
+                             ability => ability != bonusTwo))
+                {
+                    var candidate = Add(-2, bonusTwo).Add(-1, bonusOne);
+                    if (AbilityProgression.PointBuyCost(candidate) == 27)
+                    {
+                        return candidate;
+                    }
+                }
+            }
+
+            return ClampedForPointBuy;
+        }
+    }
+
+    [JsonIgnore]
     public string Summary =>
         $"STR {Strength} / DEX {Dexterity} / CON {Constitution} / " +
         $"INT {Intelligence} / WIS {Wisdom} / CHA {Charisma}";
+
+    public override string ToString() => Summary;
 
     public int Get(Ability ability) =>
         ability switch

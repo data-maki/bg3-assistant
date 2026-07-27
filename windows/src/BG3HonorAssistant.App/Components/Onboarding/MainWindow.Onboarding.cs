@@ -492,6 +492,11 @@ public partial class MainWindow
                 OnboardingVersion = OnboardingFlow.Version,
             });
         Onboarding.OnboardingPanel.Visibility = Visibility.Collapsed;
+        // The custom TabControl template does not materialize its initial
+        // SelectedContent while the onboarding layer owns the first layout.
+        // Re-select Now after removing that layer so the first planner open
+        // cannot show an empty shell until the player changes tabs.
+        MaterializePlannerTab(0);
         UpdatePlannerShell();
         RefreshView();
         overlay.ShowPreview();

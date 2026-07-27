@@ -61,6 +61,7 @@ public partial class MainWindow
         SettingsScreen.StoragePathText.Text = $"Local state: {paths.Root}";
         RefreshCredentialStatus();
         await RefreshStartupAsync();
+        MaterializePlannerTab(0);
         RefreshView();
         if (controller.Preferences.OnboardingVersion < OnboardingFlow.Version)
         {

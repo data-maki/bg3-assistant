@@ -76,7 +76,7 @@ public partial class OverlayWindow : Window
         MinimalPanel.Visibility =
             density == OverlayDensity.Minimal ? Visibility.Visible : Visibility.Collapsed;
         FocusPanel.Visibility =
-            density == OverlayDensity.Focus ? Visibility.Visible : Visibility.Collapsed;
+            ShowsFocusPanel(density) ? Visibility.Visible : Visibility.Collapsed;
         (Width, Height) = density switch
         {
             OverlayDensity.Minimal => (126, 98),
@@ -102,6 +102,9 @@ public partial class OverlayWindow : Window
         lastGoalTitle = goal.Title;
         UpdatePetFrame();
     }
+
+    internal static bool ShowsFocusPanel(OverlayDensity density) =>
+        density != OverlayDensity.Minimal;
 
     private static System.Windows.Media.Brush DangerBrush(string danger)
     {

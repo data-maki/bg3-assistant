@@ -410,15 +410,9 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
-        if (RouteScreen.ArchivedRouteList.SelectedItem is ArchivedRouteRow archivedRow)
+        if (SelectedRouteStep() is { } step)
         {
-            await controller.FocusStepAsync(archivedRow.Step);
-            await controller.SetCurrentDispositionAsync(CheckpointDisposition.Pending);
-        }
-        else if ((RouteScreen.RouteList.SelectedItem as RoutePlannerRow)?.Step is { } step)
-        {
-            await controller.FocusStepAsync(step);
-            await controller.SetCurrentDispositionAsync(CheckpointDisposition.Pending);
+            await controller.RevisitStepAsync(step);
         }
     }
 

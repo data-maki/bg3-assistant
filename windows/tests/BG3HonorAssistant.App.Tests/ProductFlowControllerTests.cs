@@ -66,6 +66,28 @@ public sealed class ProductFlowControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task RevisitRestoresTheArchivedStepInsteadOfTheAdvancedCurrentStep()
+    {
+        var controller = CreateController();
+        await controller.InitializeAsync(FindGuidePath());
+        var skipped = controller.CurrentStep!;
+
+        Assert.True(
+            await controller.SetCurrentDispositionAsync(
+                CheckpointDisposition.Skipped));
+        Assert.NotEqual(skipped.Id, controller.CurrentStep?.Id);
+
+        Assert.True(await controller.RevisitStepAsync(skipped));
+        Assert.Equal(skipped.Id, controller.CurrentStep?.Id);
+        Assert.Equal(
+            CheckpointDisposition.Pending,
+            RunSafety.WalkthroughDisposition(
+                skipped,
+                controller.Run.WalkthroughProgress ??
+                new Dictionary<string, CheckpointDisposition>()));
+    }
+
+    [Fact]
     public async Task ManualBuildFlowRecordsClassFeatAndConditionalChoice()
     {
         var controller = CreateController();

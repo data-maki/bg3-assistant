@@ -176,7 +176,7 @@ public sealed partial class AssistantController
 
         var plan = ManualBuildPlan.Empty(
             $"{member.Name}'s Build",
-            member.EffectiveAbilityScores.ClampedForPointBuy);
+            member.EffectiveAbilityScores.PointBuyBase);
         var startingClass = ClassCatalog.Definitions.FirstOrDefault(
             definition =>
                 string.Equals(

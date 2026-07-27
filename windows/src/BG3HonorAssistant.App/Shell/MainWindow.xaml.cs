@@ -162,6 +162,13 @@ public partial class MainWindow : Window
         overlay.ShowPreview();
     }
 
+    private void MaterializePlannerTab(int index)
+    {
+        PlannerTabs.SelectedIndex = -1;
+        PlannerTabs.SelectedIndex = index;
+        PlannerTabs.UpdateLayout();
+    }
+
     public void LaunchGame()
     {
         try

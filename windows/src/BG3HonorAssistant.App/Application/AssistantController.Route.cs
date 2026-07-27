@@ -74,6 +74,36 @@ public sealed partial class AssistantController
         return true;
     }
 
+    public async Task<bool> RevisitStepAsync(
+        WalkthroughStep step,
+        CancellationToken cancellationToken = default)
+    {
+        var applied = step.CheckpointId is { } checkpointId &&
+                      Route.FirstOrDefault(checkpoint => checkpoint.Id == checkpointId) is
+                          { } checkpoint
+            ? RunProgressRules.SetCheckpointDisposition(
+                Run,
+                checkpoint,
+                Walkthrough,
+                CheckpointDisposition.Pending,
+                string.Empty,
+                DateTimeOffset.UtcNow)
+            : RunProgressRules.SetWalkthroughDisposition(
+                Run,
+                step,
+                CheckpointDisposition.Pending);
+        if (!applied)
+        {
+            return false;
+        }
+
+        Run.FocusRoute(step.Id, step.CheckpointId);
+        Run.MapRegion = step.Region;
+        await SaveAsync(cancellationToken);
+        Notify();
+        return true;
+    }
+
     public async Task<bool> CompleteCurrentGoalAsync(
         CancellationToken cancellationToken = default)
     {
