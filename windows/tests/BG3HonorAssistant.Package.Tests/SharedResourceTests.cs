@@ -16,6 +16,7 @@ public sealed class SharedResourceTests
         Assert.Equal(51, CountFiles("ItemIcons"));
         Assert.Equal(697, CountFiles("BuildOptionIcons"));
         Assert.True(File.Exists(Path.Combine(ResourceRoot, "twilight-cleric.webp")));
+        Assert.True(File.Exists(Path.Combine(ResourceRoot, "twilight-cleric.png")));
     }
 
     [Fact]

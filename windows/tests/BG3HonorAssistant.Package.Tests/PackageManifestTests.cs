@@ -166,17 +166,33 @@ public sealed class PackageManifestTests
     public void TypedNetworkSurfaceUsesOneTextOnlyClientAndNoSqliteCredentialPath()
     {
         var sourceRoot = Path.Combine(RepositoryRoot, "windows", "src");
-        var productSources = Directory
+        var productSourcePaths = Directory
             .EnumerateFiles(sourceRoot, "*.*", SearchOption.AllDirectories)
             .Where(path => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            .Select(File.ReadAllText)
             .ToList();
+        var productSources = productSourcePaths.Select(File.ReadAllText).ToList();
         var appXaml = ReadAppXaml();
-        var persistence = File.ReadAllText(Path.Combine(
+        var persistence = string.Join(
+            Environment.NewLine,
+            productSourcePaths
+                .Where(path => path.Contains(
+                    $"{Path.DirectorySeparatorChar}Persistence{Path.DirectorySeparatorChar}",
+                    StringComparison.OrdinalIgnoreCase))
+                .Select(File.ReadAllText));
+        var openRouterClient = File.ReadAllText(Path.Combine(
             sourceRoot,
             "BG3HonorAssistant.Infrastructure",
-            "Persistence",
-            "RunRepository.cs"));
+            "OpenRouter",
+            "OpenRouterClient.cs"));
+        var credentialStore = File.ReadAllText(Path.Combine(
+            sourceRoot,
+            "BG3HonorAssistant.Windows",
+            "Credentials",
+            "CredentialStore.cs"));
+        var appProject = File.ReadAllText(Path.Combine(
+            sourceRoot,
+            "BG3HonorAssistant.App",
+            "BG3HonorAssistant.App.csproj"));
 
         Assert.Single(
             productSources.SelectMany(
@@ -199,6 +215,241 @@ public sealed class PackageManifestTests
         Assert.DoesNotContain("dictation", appXaml, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("apiKey", persistence, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("OpenRouter", persistence, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(
+            "https://openrouter.ai/api/v1/chat/completions",
+            openRouterClient,
+            StringComparison.Ordinal);
+        Assert.Contains("CredWrite", credentialStore, StringComparison.Ordinal);
+        Assert.Contains("CredRead", credentialStore, StringComparison.Ordinal);
+        Assert.Contains("CredDelete", credentialStore, StringComparison.Ordinal);
+        Assert.DoesNotContain("Environment.", credentialStore, StringComparison.Ordinal);
+        Assert.DoesNotContain("File.", credentialStore, StringComparison.Ordinal);
+        Assert.DoesNotContain(".env", appProject, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("python", appProject, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("node", appProject, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("ollama", appProject, StringComparison.OrdinalIgnoreCase);
+
+        foreach (var forbiddenApi in new[]
+                 {
+                     "HttpListener",
+                     "TcpListener",
+                     "UdpClient",
+                     "ReadProcessMemory",
+                     "WriteProcessMemory",
+                     "CreateRemoteThread",
+                     "VirtualAllocEx",
+                 })
+        {
+            Assert.DoesNotContain(
+                productSources,
+                source => source.Contains(
+                    forbiddenApi,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    [Fact]
+    public void LiveCanaryAndPackageGateCannotPersistOrShipExternalSecretsAndRuntimes()
+    {
+        var canary = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "tests",
+            "BG3HonorAssistant.Windows.Tests",
+            "Credentials",
+            "LiveOpenRouterCanaryTests.cs"));
+        var validator = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "package",
+            "validate-package-architecture.ps1"));
+        var boundaryValidator = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "package",
+            "validate-product-boundary.ps1"));
+        var settingsXaml = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "src",
+            "BG3HonorAssistant.App",
+            "Screens",
+            "Settings",
+            "SettingsView.xaml"));
+        var settingsCode = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "src",
+            "BG3HonorAssistant.App",
+            "Screens",
+            "Settings",
+            "MainWindow.Settings.cs"));
+
+        Assert.DoesNotContain("OPENROUTER_API_KEY", canary, StringComparison.Ordinal);
+        Assert.DoesNotContain("store.Save", canary, StringComparison.Ordinal);
+        Assert.DoesNotContain("store.Delete", canary, StringComparison.Ordinal);
+        Assert.Contains("store.Read", canary, StringComparison.Ordinal);
+        Assert.Contains(
+            "CancellationTokenSource(TimeSpan.FromSeconds(30))",
+            canary,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "validate-product-boundary.ps1",
+            validator,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "BG3HonorAssistant.deps.json",
+            boundaryValidator,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "$allowedRootDlls",
+            boundaryValidator,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Executable content is not allowed under Resources",
+            boundaryValidator,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Payload is not present in the delivered dependency/resource allowlist",
+            boundaryValidator,
+            StringComparison.Ordinal);
+
+        Assert.DoesNotContain(
+            "google/",
+            settingsXaml,
+            StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(
+            "OpenRouterModelText.Text = OpenRouterClient.Model",
+            settingsCode,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProductBoundaryRejectsRenamedNativeRuntimeNotInDependencyInventory()
+    {
+        var temporaryRoot = Path.Combine(
+            Path.GetTempPath(),
+            $"BG3HonorAssistant-boundary-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(temporaryRoot);
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(temporaryRoot, "Assets"));
+            Directory.CreateDirectory(Path.Combine(temporaryRoot, "Resources", "Data"));
+            File.WriteAllText(
+                Path.Combine(temporaryRoot, "BG3HonorAssistant.deps.json"),
+                """
+                {
+                  "runtimeTarget": {
+                    "name": ".NETCoreApp,Version=v10.0/win-arm64"
+                  },
+                  "targets": {
+                    ".NETCoreApp,Version=v10.0/win-arm64": {
+                      "BG3HonorAssistant/1.0.0": {
+                        "runtime": {
+                          "BG3HonorAssistant.dll": {},
+                          "BG3HonorAssistant.Core.dll": {},
+                          "BG3HonorAssistant.Infrastructure.dll": {},
+                          "BG3HonorAssistant.Windows.dll": {}
+                        }
+                      }
+                    }
+                  }
+                }
+                """);
+            foreach (var relativePath in new[]
+                     {
+                         "AppxManifest.xml",
+                         "Assets/AppIcon.png",
+                         "BG3HonorAssistant.exe",
+                         "BG3HonorAssistant.dll",
+                         "BG3HonorAssistant.Core.dll",
+                         "BG3HonorAssistant.Infrastructure.dll",
+                         "BG3HonorAssistant.Windows.dll",
+                         "BG3HonorAssistant.runtimeconfig.json",
+                         "Resources/Data/guide-bundle.json",
+                         "Resources/THIRD_PARTY_NOTICES.md",
+                     })
+            {
+                var path = Path.Combine(
+                    temporaryRoot,
+                    relativePath.Replace('/', Path.DirectorySeparatorChar));
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllText(path, "fixture");
+            }
+
+            var accepted = RunProductBoundaryValidator(temporaryRoot);
+            Assert.Equal(0, accepted.ExitCode);
+
+            Assert.NotNull(Environment.ProcessPath);
+            File.Copy(
+                Environment.ProcessPath!,
+                Path.Combine(temporaryRoot, "pythonw.exe"));
+
+            var rejected = RunProductBoundaryValidator(temporaryRoot);
+            Assert.NotEqual(0, rejected.ExitCode);
+            Assert.Contains(
+                "not present in the delivered dependency/resource allowlist",
+                rejected.Output,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(temporaryRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void ProviderCancellationAndCredentialReplacementInvalidatePendingOperations()
+    {
+        static string Normalize(string path) =>
+            File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal);
+
+        var appRoot = Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "src",
+            "BG3HonorAssistant.App");
+        var chat = Normalize(Path.Combine(
+            appRoot,
+            "Screens",
+            "Chat",
+            "MainWindow.Chat.cs"));
+        var party = Normalize(Path.Combine(
+            appRoot,
+            "Screens",
+            "Party",
+            "MainWindow.Party.cs"));
+        var settings = Normalize(Path.Combine(
+            appRoot,
+            "Screens",
+            "Settings",
+            "MainWindow.Settings.cs"));
+        var lifecycle = Normalize(Path.Combine(
+            appRoot,
+            "Shell",
+            "MainWindow.Lifecycle.cs"));
+
+        Assert.Contains(
+            "chatOperationVersion++;\n            chatCancellation.Cancel();",
+            chat,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "chatOperationVersion++;\n        chatCancellation?.Cancel();\n        chatLines.Clear();",
+            chat,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "importOperationVersion++;\n            importCancellation.Cancel();",
+            party,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "keyTestOperationVersion++;\n            keyTestCancellation.Cancel();",
+            settings,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "CancelProviderOperations();\n        try\n        {\n            credentialStore.Save(key);",
+            settings,
+            StringComparison.Ordinal);
+        Assert.Contains("CancelProviderOperations();", lifecycle, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -310,5 +561,44 @@ public sealed class PackageManifestTests
         {
             yield return offset;
         }
+    }
+
+    private static (int ExitCode, string Output) RunProductBoundaryValidator(
+        string payloadRoot)
+    {
+        var script = Path.Combine(
+            RepositoryRoot,
+            "windows",
+            "package",
+            "validate-product-boundary.ps1");
+        var start = new System.Diagnostics.ProcessStartInfo("powershell.exe")
+        {
+            CreateNoWindow = true,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+        };
+        foreach (var argument in new[]
+                 {
+                     "-NoProfile",
+                     "-NonInteractive",
+                     "-ExecutionPolicy",
+                     "Bypass",
+                     "-File",
+                     script,
+                     "-Root",
+                     payloadRoot,
+                     "-ExpectedArchitecture",
+                     "arm64",
+                 })
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        using var process = System.Diagnostics.Process.Start(start)!;
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+        return (process.ExitCode, output + error);
     }
 }

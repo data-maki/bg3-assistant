@@ -341,7 +341,58 @@ public sealed class PackageArchitectureValidationTests
         File.WriteAllBytes(
             Path.Combine(root, "BG3HonorAssistant.exe"),
             CreateNativePe(mainMachine));
+        Directory.CreateDirectory(Path.Combine(root, "Assets"));
+        Directory.CreateDirectory(Path.Combine(root, "Resources", "Data"));
+        File.WriteAllText(Path.Combine(root, "Assets", "AppIcon.png"), "fixture");
+        File.WriteAllText(
+            Path.Combine(root, "BG3HonorAssistant.runtimeconfig.json"),
+            "{}");
+        File.WriteAllText(
+            Path.Combine(root, "Resources", "Data", "guide-bundle.json"),
+            "{}");
+        File.WriteAllText(
+            Path.Combine(root, "Resources", "THIRD_PARTY_NOTICES.md"),
+            "fixture");
+        foreach (var productAssembly in new[]
+                 {
+                     "BG3HonorAssistant.dll",
+                     "BG3HonorAssistant.Core.dll",
+                     "BG3HonorAssistant.Infrastructure.dll",
+                     "BG3HonorAssistant.Windows.dll",
+                 })
+        {
+            File.WriteAllText(Path.Combine(root, productAssembly), "fixture");
+        }
+        WriteDependencyManifest(root, architecture);
         return root;
+    }
+
+    private static void WriteDependencyManifest(string root, string architecture)
+    {
+        var runtimeTarget = $".NETCoreApp,Version=v10.0/win-{architecture}";
+        var runtimeAssets = Directory
+            .EnumerateFiles(root, "*.dll", SearchOption.TopDirectoryOnly)
+            .ToDictionary(
+                path => Path.GetFileName(path)!,
+                _ => new Dictionary<string, object?>(),
+                StringComparer.Ordinal);
+        var document = new
+        {
+            runtimeTarget = new { name = runtimeTarget },
+            targets = new Dictionary<string, object?>
+            {
+                [runtimeTarget] = new Dictionary<string, object?>
+                {
+                    ["BG3HonorAssistant.PackageFixture/1.0.0"] = new
+                    {
+                        runtime = runtimeAssets,
+                    },
+                },
+            },
+        };
+        File.WriteAllText(
+            Path.Combine(root, "BG3HonorAssistant.deps.json"),
+            System.Text.Json.JsonSerializer.Serialize(document));
     }
 
     private static void WriteManifest(string root, string architecture)
@@ -495,6 +546,7 @@ public sealed class PackageArchitectureValidationTests
         string root,
         string architecture)
     {
+        WriteDependencyManifest(root, architecture);
         var startInfo = new ProcessStartInfo
         {
             FileName = GetNativePowerShellPath(),

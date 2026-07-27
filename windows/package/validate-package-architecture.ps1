@@ -437,6 +437,9 @@ if (-not (Test-Path -LiteralPath $manifestPath)) {
 
 $manifest = [xml](Get-Content -Raw -LiteralPath $manifestPath)
 Assert-PackageManifest -Manifest $manifest -Architecture $ExpectedArchitecture
+& (Join-Path $PSScriptRoot 'validate-product-boundary.ps1') `
+    -Root $resolvedRoot `
+    -ExpectedArchitecture $ExpectedArchitecture
 Assert-PePayloadArchitecture `
     -PayloadRoot $resolvedRoot `
     -Architecture $ExpectedArchitecture
