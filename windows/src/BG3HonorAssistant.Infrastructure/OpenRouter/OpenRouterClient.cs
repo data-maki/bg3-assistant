@@ -39,7 +39,7 @@ public sealed class OpenRouterClient : IOpenRouterClient
         TimeSpan? timeout = null)
     {
         this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        this.endpoint = endpoint ?? ProductionEndpoint;
+        this.endpoint = ValidateEndpoint(endpoint ?? ProductionEndpoint);
         this.timeout = timeout ?? TimeSpan.FromSeconds(90);
     }
 
@@ -266,15 +266,16 @@ public sealed class OpenRouterClient : IOpenRouterClient
 
     private static OpenRouterException CreateProviderFailure(HttpStatusCode statusCode)
     {
-        var failure = (int)statusCode switch
+        var status = (int)statusCode;
+        var failure = status switch
         {
             401 => OpenRouterFailure.Authentication,
             402 => OpenRouterFailure.Credits,
             403 => OpenRouterFailure.Forbidden,
-            408 => OpenRouterFailure.Timeout,
+            408 or 504 => OpenRouterFailure.Timeout,
             429 => OpenRouterFailure.RateLimited,
             404 => OpenRouterFailure.ModelUnavailable,
-            502 or 503 => OpenRouterFailure.Provider,
+            >= 500 and <= 599 => OpenRouterFailure.Provider,
             _ => OpenRouterFailure.Request,
         };
         var fallback = failure switch
@@ -293,13 +294,42 @@ public sealed class OpenRouterClient : IOpenRouterClient
                 $"The pinned model {Model} is unavailable.",
             OpenRouterFailure.Provider =>
                 "OpenRouter could not route the pinned model to an available provider.",
-            _ => $"OpenRouter rejected the request with HTTP {(int)statusCode}.",
+            _ => $"OpenRouter rejected the request with HTTP {status}.",
         };
 
         return new OpenRouterException(
             failure,
             fallback,
             statusCode);
+    }
+
+    private static Uri ValidateEndpoint(Uri endpoint)
+    {
+        ArgumentNullException.ThrowIfNull(endpoint);
+        if (!endpoint.IsAbsoluteUri ||
+            !string.Equals(
+                endpoint.Scheme,
+                Uri.UriSchemeHttps,
+                StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(
+                endpoint.IdnHost,
+                ProductionEndpoint.IdnHost,
+                StringComparison.OrdinalIgnoreCase) ||
+            endpoint.Port != 443 ||
+            !string.IsNullOrEmpty(endpoint.UserInfo) ||
+            !string.Equals(
+                endpoint.AbsolutePath,
+                ProductionEndpoint.AbsolutePath,
+                StringComparison.Ordinal) ||
+            !string.IsNullOrEmpty(endpoint.Query) ||
+            !string.IsNullOrEmpty(endpoint.Fragment))
+        {
+            throw new ArgumentException(
+                "OpenRouter requests must use the pinned direct HTTPS production endpoint.",
+                nameof(endpoint));
+        }
+
+        return endpoint;
     }
 
     private static async Task<byte[]> ReadBoundedAsync(

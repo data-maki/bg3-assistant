@@ -1,26 +1,42 @@
 param(
+    [Parameter(Mandatory)]
+    [ValidateSet('arm64', 'x64')]
+    [string]$Architecture,
     [string]$Version = '0.1.0.0',
     [string]$Publisher = 'CN=BG3HonorAssistant Development'
 )
 
 $ErrorActionPreference = 'Stop'
+$runtimeIdentifier = "win-$Architecture"
 $windowsRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $artifactRoot = Join-Path $windowsRoot 'artifacts'
 $packageRoot = Join-Path $windowsRoot 'package'
-$outputPath = Join-Path $artifactRoot "BG3HonorAssistant_${Version}_x64_unsigned.msix"
+$outputPath = Join-Path $artifactRoot "BG3HonorAssistant_${Version}_${Architecture}_unsigned.msix"
 $temporaryBase = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $temporaryRoot = Join-Path $temporaryBase (
     'BG3HonorAssistant-msix-' + [Guid]::NewGuid().ToString('N'))
 $publishRoot = Join-Path $temporaryRoot 'publish'
 $temporaryPackage = Join-Path $temporaryRoot 'package.msix'
+$inspectionRoot = Join-Path $temporaryRoot 'inspection'
 $buildToolsVersion = '10.0.28000.2270'
 $buildToolsRoot = Join-Path $env:USERPROFILE ".nuget\packages\microsoft.windows.sdk.buildtools\$buildToolsVersion"
+$toolArchitecture = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()) {
+    'Arm64' { 'arm64' }
+    'X64' { 'x64' }
+    default {
+        throw "MSIX packaging requires a native ARM64 or x64 Windows SDK tool host."
+    }
+}
 $makeAppx = Get-ChildItem -LiteralPath $buildToolsRoot -Recurse -Filter 'makeappx.exe' |
-    Where-Object { $_.FullName -match '\\x64\\makeappx\.exe$' } |
+    Where-Object {
+        $_.FullName.EndsWith(
+            "\$toolArchitecture\makeappx.exe",
+            [StringComparison]::OrdinalIgnoreCase)
+    } |
     Select-Object -First 1
 
 if ($null -eq $makeAppx) {
-    throw "MakeAppx.exe was not found. Restore the solution first."
+    throw "Native $toolArchitecture MakeAppx.exe was not found. Restore the solution first."
 }
 
 $resolvedTemporaryRoot = [System.IO.Path]::GetFullPath($temporaryRoot)
@@ -35,7 +51,9 @@ if (
 
 New-Item -ItemType Directory -Path $publishRoot -Force | Out-Null
 try {
-    & (Join-Path $PSScriptRoot 'build-release.ps1') -OutputPath $publishRoot
+    & (Join-Path $PSScriptRoot 'build-release.ps1') `
+        -Architecture $Architecture `
+        -OutputPath $publishRoot
 
     New-Item -ItemType Directory -Path (Join-Path $publishRoot 'Assets') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $packageRoot 'Package.appxmanifest') `
@@ -45,8 +63,15 @@ try {
 
     $manifestPath = Join-Path $publishRoot 'AppxManifest.xml'
     $manifest = [xml](Get-Content -Raw -LiteralPath $manifestPath)
+    if (
+        [string]$manifest.Package.Identity.ProcessorArchitecture -ne
+        'ARCHITECTURE_PLACEHOLDER'
+    ) {
+        throw 'The source package manifest must use the architecture placeholder.'
+    }
     $manifest.Package.Identity.Version = $Version
     $manifest.Package.Identity.Publisher = $Publisher
+    $manifest.Package.Identity.ProcessorArchitecture = $Architecture
     $manifest.Save($manifestPath)
 
     $debugPayloads = Get-ChildItem -LiteralPath $publishRoot -Recurse -File -Filter '*.pdb'
@@ -62,13 +87,29 @@ try {
         Remove-Item -LiteralPath $createdump -Force
     }
 
+    & (Join-Path $packageRoot 'validate-package-architecture.ps1') `
+        -Root $publishRoot `
+        -ExpectedArchitecture $Architecture
+
     $packOutput = & $makeAppx.FullName pack /d $publishRoot /p $temporaryPackage /o 2>&1
     if ($LASTEXITCODE -ne 0) {
         throw "MakeAppx failed with exit code $LASTEXITCODE.`n$($packOutput -join [Environment]::NewLine)"
     }
     $packOutput | Select-Object -Last 5
+
+    $unpackOutput = & $makeAppx.FullName unpack /p $temporaryPackage /d $inspectionRoot /o 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw (
+            "MakeAppx validation unpack failed with exit code $LASTEXITCODE.`n" +
+            ($unpackOutput -join [Environment]::NewLine))
+    }
+    & (Join-Path $packageRoot 'validate-package-architecture.ps1') `
+        -Root $inspectionRoot `
+        -ExpectedArchitecture $Architecture
+
     Copy-Item -LiteralPath $temporaryPackage -Destination $outputPath -Force
 
+    Write-Output "Validated $Architecture MSIX built from $runtimeIdentifier payloads."
     Write-Output $outputPath
 }
 finally {

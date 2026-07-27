@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup Condition="'$(BG3Architecture)' == '' and ('$(Platform)' == 'x64' or '$(Platform)' == 'arm64')">
+    <BG3Architecture>$(Platform)</BG3Architecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(BG3Architecture)' == 'x64' or '$(BG3Architecture)' == 'arm64'">
+    <Platform>$(BG3Architecture)</Platform>
+  </PropertyGroup>
+</Project>

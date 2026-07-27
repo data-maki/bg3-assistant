@@ -145,6 +145,22 @@ public partial class MainWindow
         string Detail,
         bool Selected);
 
+    private sealed record BuildPickerRow(
+        string? BuildId,
+        string Label);
+
+    private sealed record DifficultyPickerRow(
+        RunDifficulty Value,
+        string Label);
+
+    private sealed record RevealPickerRow(
+        RouteRevealPolicy Value,
+        string Label);
+
+    private sealed record SavedRunPickerRow(
+        SavedRun Run,
+        string Label);
+
     private sealed record OnboardingLandmarkRow(
         string? CheckpointId,
         string Name,

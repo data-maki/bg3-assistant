@@ -23,4 +23,7 @@ public partial class PartyRosterView : System.Windows.Controls.UserControl
 
     private void OnRosterStatusChanged(object sender, SelectionChangedEventArgs eventArgs) =>
         Host.OnRosterStatusChanged(sender, eventArgs);
+
+    private void OnSwapActivePartyClick(object sender, RoutedEventArgs eventArgs) =>
+        Host.OnSwapActivePartyClick(sender, eventArgs);
 }

@@ -138,7 +138,12 @@ public sealed partial class AssistantController
                        Walkthrough,
                        Run.WalkthroughProgress ?? EmptyProgress,
                        Run.WalkthroughOutcomes,
-                       LowestPartyLevel);
+                       LowestPartyLevel) ??
+                   RunProgressRules.ActiveSteps(
+                           Walkthrough,
+                           Run.WalkthroughProgress)
+                       .OrderBy(step => step.Order)
+                       .FirstOrDefault();
         }
     }
 
@@ -146,17 +151,11 @@ public sealed partial class AssistantController
     {
         get
         {
-            if (Run.SelectedCheckpointId is { } selected &&
-                Route.FirstOrDefault(checkpoint => checkpoint.Id == selected) is { } checkpoint)
+            if (CurrentStep is { } step)
             {
-                return checkpoint;
-            }
-
-            if (CurrentStep?.CheckpointId is { } stepCheckpoint &&
-                Route.FirstOrDefault(checkpoint => checkpoint.Id == stepCheckpoint) is
-                    { } owned)
-            {
-                return owned;
+                return step.CheckpointId is { } stepCheckpoint
+                    ? Route.FirstOrDefault(checkpoint => checkpoint.Id == stepCheckpoint)
+                    : null;
             }
 
             return RunSafety.NextCheckpoint(

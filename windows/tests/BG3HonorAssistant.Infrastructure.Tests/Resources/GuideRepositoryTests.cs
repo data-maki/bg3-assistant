@@ -83,24 +83,12 @@ public sealed class GuideRepositoryTests
 
     private static string FindGuidePath()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(
-                directory.FullName,
-                "mac",
-                "BG3Assistant",
-                "Resources",
-                "Data",
-                "guide-bundle.json");
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new FileNotFoundException("Could not locate the shared guide bundle.");
+        var path = Path.Combine(
+            AppContext.BaseDirectory,
+            "Resources",
+            "Data",
+            "guide-bundle.json");
+        Assert.True(File.Exists(path), $"Bundled guide was not copied to {path}.");
+        return path;
     }
 }

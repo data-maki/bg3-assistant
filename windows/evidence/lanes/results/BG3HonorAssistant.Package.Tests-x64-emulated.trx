@@ -1,0 +1,311 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="0e6d18ce-5903-4b48-a68a-283460f8ee5d" name="jcarbs@JANCARBONELB5E7 2026-07-26 03:41:30" runUser="JANCARBONELB5E7\jcarbs" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-07-26T03:41:30.4280947-07:00" queuing="2026-07-26T03:41:30.4280957-07:00" start="2026-07-26T03:41:18.6104437-07:00" finish="2026-07-26T03:41:30.4428603-07:00" />
+  <TestSettings name="default" id="317c0bcb-a283-445c-9479-b6acba958faa">
+    <Deployment runDeploymentRoot="jcarbs_JANCARBONELB5E7_2026-07-26_03_41_30" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="95fdee39-7b84-44fb-946f-0c7b3931f053" testId="21e18ffe-a78a-f35a-7b3d-014bc2c9c378" testName="BG3HonorAssistant.Package.Tests.SharedResourceTests.SharedMediaInventoryMatchesAuditedCounts" computerName="JANCARBONELB5E7" duration="00:00:00.0642868" startTime="2026-07-26T03:41:29.3335563-07:00" endTime="2026-07-26T03:41:29.3356951-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="95fdee39-7b84-44fb-946f-0c7b3931f053">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.SharedResourceTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.SharedResourceTests.CountFiles(String directory) in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs:line 43&#xD;
+   at BG3HonorAssistant.Package.Tests.SharedResourceTests.SharedMediaInventoryMatchesAuditedCounts() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs:line 15&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.SharedResourceTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs:line 63&#xD;
+   at BG3HonorAssistant.Package.Tests.SharedResourceTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5765a043-6f9f-4556-af73-ef007c2548e3" testId="63e75ad1-1e9d-6597-48a7-ab3841526fbb" testName="BG3HonorAssistant.Package.Tests.SharedResourceTests.GuideHasExpectedVersionAndExplicitActTwoDataGap" computerName="JANCARBONELB5E7" duration="00:00:00.0051665" startTime="2026-07-26T03:41:29.4844441-07:00" endTime="2026-07-26T03:41:29.5485965-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5765a043-6f9f-4556-af73-ef007c2548e3">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.SharedResourceTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.SharedResourceTests.GuideHasExpectedVersionAndExplicitActTwoDataGap() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs:line 24&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.SharedResourceTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs:line 63&#xD;
+   at BG3HonorAssistant.Package.Tests.SharedResourceTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="92b1f6f7-df2a-4233-96c6-55c2f5d56e5f" testId="69945195-55db-75df-be7f-baa2fd741245" testName="BG3HonorAssistant.Package.Tests.PackageManifestTests.MvpExcludesCaptureAndMicrophoneProductSurface" computerName="JANCARBONELB5E7" duration="00:00:00.0773013" startTime="2026-07-26T03:41:29.3302847-07:00" endTime="2026-07-26T03:41:29.4846503-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="92b1f6f7-df2a-4233-96c6-55c2f5d56e5f">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.PackageManifestTests.MvpExcludesCaptureAndMicrophoneProductSurface() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 76&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 202&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6fda43ba-18df-4ae8-be81-baf4513bd187" testId="559192cf-259a-5249-c127-7e281d2dcbb9" testName="BG3HonorAssistant.Package.Tests.PackageManifestTests.TraySurfaceContainsEveryMacOracleCommand" computerName="JANCARBONELB5E7" duration="00:00:00.0016040" startTime="2026-07-26T03:41:29.5899922-07:00" endTime="2026-07-26T03:41:29.5901490-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6fda43ba-18df-4ae8-be81-baf4513bd187">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.PackageManifestTests.TraySurfaceContainsEveryMacOracleCommand() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 139&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 202&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="eb0b0988-7d2c-4ba3-bb83-085f4bb532f4" testId="232c7680-1d7b-aa7c-3fab-040ae5dbcada" testName="BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestDeclaresOnlyReviewedCapabilities" computerName="JANCARBONELB5E7" duration="00:00:00.0024692" startTime="2026-07-26T03:41:29.5537533-07:00" endTime="2026-07-26T03:41:29.5554712-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eb0b0988-7d2c-4ba3-bb83-085f4bb532f4">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestDeclaresOnlyReviewedCapabilities() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 44&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 202&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="60f880ac-760d-4408-9cfc-6a0f4dcbb2a5" testId="7cb12182-f74b-4908-71d2-48f2f29c4a5f" testName="BG3HonorAssistant.Package.Tests.PackageManifestTests.ExecutableManifestForbidsElevationAndUsesPerMonitorDpi" computerName="JANCARBONELB5E7" duration="00:00:00.0010230" startTime="2026-07-26T03:41:29.5832586-07:00" endTime="2026-07-26T03:41:29.5851044-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="60f880ac-760d-4408-9cfc-6a0f4dcbb2a5">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.PackageManifestTests.ExecutableManifestForbidsElevationAndUsesPerMonitorDpi() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 175&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 202&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8b3f73ad-6f57-494e-8006-df7f250fff67" testId="1a2d6900-061f-ec67-4bda-8dcf54bc7888" testName="BG3HonorAssistant.Package.Tests.PackageManifestTests.TypedNetworkSurfaceUsesOneTextOnlyClientAndNoSqliteCredentialPath" computerName="JANCARBONELB5E7" duration="00:00:00.0023973" startTime="2026-07-26T03:41:29.5413219-07:00" endTime="2026-07-26T03:41:29.5414478-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8b3f73ad-6f57-494e-8006-df7f250fff67">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.PackageManifestTests.TypedNetworkSurfaceUsesOneTextOnlyClientAndNoSqliteCredentialPath() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 97&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 202&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b05a8c65-c8ae-49b9-9182-3fcb387a6f94" testId="459fbbfe-86bd-592b-91e6-b1b1118318d1" testName="BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestTargetsOnlySupportedWindowsDesktopArchitecture" computerName="JANCARBONELB5E7" duration="00:00:00.0019156" startTime="2026-07-26T03:41:29.5605397-07:00" endTime="2026-07-26T03:41:29.5667285-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b05a8c65-c8ae-49b9-9182-3fcb387a6f94">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestTargetsOnlySupportedWindowsDesktopArchitecture() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 23&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 202&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="eba960a4-7127-4f6b-a76a-ea3d1e9d6a52" testId="bffcc70e-77ff-9da6-4266-5a74d4c0ef22" testName="BG3HonorAssistant.Package.Tests.PackageManifestTests.StartupTaskIsPackagedButDisabledByDefault" computerName="JANCARBONELB5E7" duration="00:00:00.0005203" startTime="2026-07-26T03:41:29.5927388-07:00" endTime="2026-07-26T03:41:29.5928168-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eba960a4-7127-4f6b-a76a-ea3d1e9d6a52">
+      <Output>
+        <ErrorInfo>
+          <Message>System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+---- System.IO.DirectoryNotFoundException : Could not locate the repository root.</Message>
+          <StackTrace>   at BG3HonorAssistant.Package.Tests.PackageManifestTests.StartupTaskIsPackagedButDisabledByDefault() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 66&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+----- Inner Stack Trace -----&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 202&#xD;
+   at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor() in C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs:line 7</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestDeclaresOnlyReviewedCapabilities" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="232c7680-1d7b-aa7c-3fab-040ae5dbcada">
+      <Execution id="eb0b0988-7d2c-4ba3-bb83-085f4bb532f4" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.PackageManifestTests" name="ManifestDeclaresOnlyReviewedCapabilities" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.PackageManifestTests.MvpExcludesCaptureAndMicrophoneProductSurface" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="69945195-55db-75df-be7f-baa2fd741245">
+      <Execution id="92b1f6f7-df2a-4233-96c6-55c2f5d56e5f" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.PackageManifestTests" name="MvpExcludesCaptureAndMicrophoneProductSurface" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.PackageManifestTests.ExecutableManifestForbidsElevationAndUsesPerMonitorDpi" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="7cb12182-f74b-4908-71d2-48f2f29c4a5f">
+      <Execution id="60f880ac-760d-4408-9cfc-6a0f4dcbb2a5" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.PackageManifestTests" name="ExecutableManifestForbidsElevationAndUsesPerMonitorDpi" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.SharedResourceTests.GuideHasExpectedVersionAndExplicitActTwoDataGap" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="63e75ad1-1e9d-6597-48a7-ab3841526fbb">
+      <Execution id="5765a043-6f9f-4556-af73-ef007c2548e3" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.SharedResourceTests" name="GuideHasExpectedVersionAndExplicitActTwoDataGap" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.PackageManifestTests.TraySurfaceContainsEveryMacOracleCommand" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="559192cf-259a-5249-c127-7e281d2dcbb9">
+      <Execution id="6fda43ba-18df-4ae8-be81-baf4513bd187" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.PackageManifestTests" name="TraySurfaceContainsEveryMacOracleCommand" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.PackageManifestTests.StartupTaskIsPackagedButDisabledByDefault" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="bffcc70e-77ff-9da6-4266-5a74d4c0ef22">
+      <Execution id="eba960a4-7127-4f6b-a76a-ea3d1e9d6a52" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.PackageManifestTests" name="StartupTaskIsPackagedButDisabledByDefault" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.PackageManifestTests.TypedNetworkSurfaceUsesOneTextOnlyClientAndNoSqliteCredentialPath" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="1a2d6900-061f-ec67-4bda-8dcf54bc7888">
+      <Execution id="8b3f73ad-6f57-494e-8006-df7f250fff67" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.PackageManifestTests" name="TypedNetworkSurfaceUsesOneTextOnlyClientAndNoSqliteCredentialPath" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestTargetsOnlySupportedWindowsDesktopArchitecture" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="459fbbfe-86bd-592b-91e6-b1b1118318d1">
+      <Execution id="b05a8c65-c8ae-49b9-9182-3fcb387a6f94" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.PackageManifestTests" name="ManifestTargetsOnlySupportedWindowsDesktopArchitecture" />
+    </UnitTest>
+    <UnitTest name="BG3HonorAssistant.Package.Tests.SharedResourceTests.SharedMediaInventoryMatchesAuditedCounts" storage="c:\mac\home\documents\bg3_windows_lanes\build-rids\windows\tests\bg3honorassistant.package.tests\bin\x64\release\net10.0-windows10.0.26100.0\win-x64\bg3honorassistant.package.tests.dll" id="21e18ffe-a78a-f35a-7b3d-014bc2c9c378">
+      <Execution id="95fdee39-7b84-44fb-946f-0c7b3931f053" />
+      <TestMethod codeBase="C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\bin\x64\Release\net10.0-windows10.0.26100.0\win-x64\BG3HonorAssistant.Package.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="BG3HonorAssistant.Package.Tests.SharedResourceTests" name="SharedMediaInventoryMatchesAuditedCounts" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="21e18ffe-a78a-f35a-7b3d-014bc2c9c378" executionId="95fdee39-7b84-44fb-946f-0c7b3931f053" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="63e75ad1-1e9d-6597-48a7-ab3841526fbb" executionId="5765a043-6f9f-4556-af73-ef007c2548e3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="69945195-55db-75df-be7f-baa2fd741245" executionId="92b1f6f7-df2a-4233-96c6-55c2f5d56e5f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="559192cf-259a-5249-c127-7e281d2dcbb9" executionId="6fda43ba-18df-4ae8-be81-baf4513bd187" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="232c7680-1d7b-aa7c-3fab-040ae5dbcada" executionId="eb0b0988-7d2c-4ba3-bb83-085f4bb532f4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7cb12182-f74b-4908-71d2-48f2f29c4a5f" executionId="60f880ac-760d-4408-9cfc-6a0f4dcbb2a5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1a2d6900-061f-ec67-4bda-8dcf54bc7888" executionId="8b3f73ad-6f57-494e-8006-df7f250fff67" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="459fbbfe-86bd-592b-91e6-b1b1118318d1" executionId="b05a8c65-c8ae-49b9-9182-3fcb387a6f94" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bffcc70e-77ff-9da6-4266-5a74d4c0ef22" executionId="eba960a4-7127-4f6b-a76a-ea3d1e9d6a52" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="9" executed="9" passed="0" failed="9" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.10)&#xD;
+[xUnit.net 00:00:01.34]   Discovering: BG3HonorAssistant.Package.Tests&#xD;
+[xUnit.net 00:00:01.71]   Discovered:  BG3HonorAssistant.Package.Tests&#xD;
+[xUnit.net 00:00:02.03]   Starting:    BG3HonorAssistant.Package.Tests&#xD;
+[xUnit.net 00:00:02.52]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.SharedResourceTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.52]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.53]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.55]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs(43,0): at BG3HonorAssistant.Package.Tests.SharedResourceTests.CountFiles(String directory)&#xD;
+[xUnit.net 00:00:02.55]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs(15,0): at BG3HonorAssistant.Package.Tests.SharedResourceTests.SharedMediaInventoryMatchesAuditedCounts()&#xD;
+[xUnit.net 00:00:02.55]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.55]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.55]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.55]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs(63,0): at BG3HonorAssistant.Package.Tests.SharedResourceTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.55]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs(7,0): at BG3HonorAssistant.Package.Tests.SharedResourceTests..cctor()&#xD;
+[xUnit.net 00:00:02.58]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.58]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.58]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.58]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(76,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.MvpExcludesCaptureAndMicrophoneProductSurface()&#xD;
+[xUnit.net 00:00:02.58]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.58]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.58]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.58]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(202,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.58]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(7,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor()&#xD;
+[xUnit.net 00:00:02.64]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.64]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.64]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.64]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(97,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.TypedNetworkSurfaceUsesOneTextOnlyClientAndNoSqliteCredentialPath()&#xD;
+[xUnit.net 00:00:02.64]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.64]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.64]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.65]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(202,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.65]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(7,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor()&#xD;
+[xUnit.net 00:00:02.65]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.SharedResourceTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.65]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.65]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.65]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs(24,0): at BG3HonorAssistant.Package.Tests.SharedResourceTests.GuideHasExpectedVersionAndExplicitActTwoDataGap()&#xD;
+[xUnit.net 00:00:02.65]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.65]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.65]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.65]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs(63,0): at BG3HonorAssistant.Package.Tests.SharedResourceTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.65]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\SharedResourceTests.cs(7,0): at BG3HonorAssistant.Package.Tests.SharedResourceTests..cctor()&#xD;
+[xUnit.net 00:00:02.65]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.66]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.66]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.66]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(44,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestDeclaresOnlyReviewedCapabilities()&#xD;
+[xUnit.net 00:00:02.66]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.66]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.66]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.66]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(202,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.66]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(7,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor()&#xD;
+[xUnit.net 00:00:02.67]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.67]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.67]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.67]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(23,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestTargetsOnlySupportedWindowsDesktopArchitecture()&#xD;
+[xUnit.net 00:00:02.67]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.67]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.67]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.68]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(202,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.68]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(7,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor()&#xD;
+[xUnit.net 00:00:02.68]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.68]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.68]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(175,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.ExecutableManifestForbidsElevationAndUsesPerMonitorDpi()&#xD;
+[xUnit.net 00:00:02.69]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.69]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.69]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(202,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(7,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor()&#xD;
+[xUnit.net 00:00:02.69]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.69]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.69]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(139,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.TraySurfaceContainsEveryMacOracleCommand()&#xD;
+[xUnit.net 00:00:02.69]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.69]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.69]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(202,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(7,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor()&#xD;
+[xUnit.net 00:00:02.69]       System.TypeInitializationException : The type initializer for 'BG3HonorAssistant.Package.Tests.PackageManifestTests' threw an exception.&#xD;
+[xUnit.net 00:00:02.69]       ---- System.IO.DirectoryNotFoundException : Could not locate the repository root.&#xD;
+[xUnit.net 00:00:02.69]       Stack Trace:&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(66,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.StartupTaskIsPackagedButDisabledByDefault()&#xD;
+[xUnit.net 00:00:02.69]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+[xUnit.net 00:00:02.69]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+[xUnit.net 00:00:02.69]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(202,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests.FindRepositoryRoot()&#xD;
+[xUnit.net 00:00:02.69]         C:\Mac\Home\Documents\bg3_windows_lanes\build-rids\windows\tests\BG3HonorAssistant.Package.Tests\PackageManifestTests.cs(7,0): at BG3HonorAssistant.Package.Tests.PackageManifestTests..cctor()&#xD;
+[xUnit.net 00:00:02.70]   Finished:    BG3HonorAssistant.Package.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.4680804-07:00">
+        <Text>[xUnit.net 00:00:02.44]     BG3HonorAssistant.Package.Tests.SharedResourceTests.SharedMediaInventoryMatchesAuditedCounts [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.4854893-07:00">
+        <Text>[xUnit.net 00:00:02.58]     BG3HonorAssistant.Package.Tests.PackageManifestTests.MvpExcludesCaptureAndMicrophoneProductSurface [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.5422061-07:00">
+        <Text>[xUnit.net 00:00:02.64]     BG3HonorAssistant.Package.Tests.PackageManifestTests.TypedNetworkSurfaceUsesOneTextOnlyClientAndNoSqliteCredentialPath [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.5491621-07:00">
+        <Text>[xUnit.net 00:00:02.65]     BG3HonorAssistant.Package.Tests.SharedResourceTests.GuideHasExpectedVersionAndExplicitActTwoDataGap [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.5566621-07:00">
+        <Text>[xUnit.net 00:00:02.65]     BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestDeclaresOnlyReviewedCapabilities [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.5678737-07:00">
+        <Text>[xUnit.net 00:00:02.67]     BG3HonorAssistant.Package.Tests.PackageManifestTests.ManifestTargetsOnlySupportedWindowsDesktopArchitecture [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.5856946-07:00">
+        <Text>[xUnit.net 00:00:02.68]     BG3HonorAssistant.Package.Tests.PackageManifestTests.ExecutableManifestForbidsElevationAndUsesPerMonitorDpi [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.5906685-07:00">
+        <Text>[xUnit.net 00:00:02.69]     BG3HonorAssistant.Package.Tests.PackageManifestTests.TraySurfaceContainsEveryMacOracleCommand [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="JANCARBONELB5E7" outcome="Error" timestamp="2026-07-26T03:41:29.5931002-07:00">
+        <Text>[xUnit.net 00:00:02.69]     BG3HonorAssistant.Package.Tests.PackageManifestTests.StartupTaskIsPackagedButDisabledByDefault [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

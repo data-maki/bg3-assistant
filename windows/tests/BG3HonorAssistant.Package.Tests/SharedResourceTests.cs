@@ -16,6 +16,7 @@ public sealed class SharedResourceTests
         Assert.Equal(51, CountFiles("ItemIcons"));
         Assert.Equal(697, CountFiles("BuildOptionIcons"));
         Assert.True(File.Exists(Path.Combine(ResourceRoot, "twilight-cleric.webp")));
+        Assert.True(File.Exists(Path.Combine(ResourceRoot, "twilight-cleric.png")));
     }
 
     [Fact]
@@ -51,8 +52,11 @@ public sealed class SharedResourceTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            if (Directory.Exists(Path.Combine(directory.FullName, ".git")) &&
-                Directory.Exists(Path.Combine(directory.FullName, "mac")))
+            if (File.Exists(Path.Combine(
+                    directory.FullName,
+                    "windows",
+                    "BG3HonorAssistant.slnx")) &&
+                Directory.Exists(Path.Combine(directory.FullName, "Resources")))
             {
                 return directory.FullName;
             }

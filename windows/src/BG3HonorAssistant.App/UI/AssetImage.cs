@@ -26,14 +26,24 @@ internal static class AssetImage
             return null;
         }
 
-        var image = new BitmapImage();
-        image.BeginInit();
-        image.CacheOption = BitmapCacheOption.OnLoad;
-        image.UriSource = new Uri(fullPath, UriKind.Absolute);
-        image.EndInit();
-        image.Freeze();
-        Cache[fullPath] = image;
-        return image;
+        try
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.UriSource = new Uri(fullPath, UriKind.Absolute);
+            image.EndInit();
+            image.Freeze();
+            Cache[fullPath] = image;
+            return image;
+        }
+        catch (Exception)
+        {
+            // Artwork is optional presentation data. A missing Windows Imaging
+            // Component or a damaged asset must not terminate a player flow.
+            Cache[fullPath] = null;
+            return null;
+        }
     }
 }
 
@@ -96,7 +106,7 @@ internal sealed class ItemIconConverter : IValueConverter
         };
         var filename = string.IsNullOrWhiteSpace(path)
             ? null
-            : Path.GetFileName(path);
+            : Path.ChangeExtension(Path.GetFileName(path), ".png");
         return string.IsNullOrWhiteSpace(filename)
             ? null
             : AssetImage.Load("ItemIcons", filename);
@@ -124,7 +134,7 @@ internal sealed class BuildOptionIconConverter : IValueConverter
         return value is string name
             ? AssetImage.Load(
                 "BuildOptionIcons",
-                BuildArtwork.Slug(name) + ".webp")
+                BuildArtwork.Slug(name) + ".png")
             : null;
     }
 

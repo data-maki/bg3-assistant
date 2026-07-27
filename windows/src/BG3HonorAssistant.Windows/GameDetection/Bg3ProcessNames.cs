@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace BG3HonorAssistant.Windows.GameDetection;
 
 public static class Bg3ProcessNames
@@ -11,8 +9,20 @@ public static class Bg3ProcessNames
 
     public static bool IsSupported(string? processName)
     {
-        var normalized = Path.GetFileNameWithoutExtension(processName);
         return All.Any(candidate =>
-            string.Equals(candidate, normalized, StringComparison.OrdinalIgnoreCase));
+            string.Equals(candidate, processName, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(
+                $"{candidate}.exe",
+                processName,
+                StringComparison.OrdinalIgnoreCase));
+    }
+
+    public static bool IsSupportedExecutableFileName(string? executableFileName)
+    {
+        return All.Any(candidate =>
+            string.Equals(
+                $"{candidate}.exe",
+                executableFileName,
+                StringComparison.OrdinalIgnoreCase));
     }
 }

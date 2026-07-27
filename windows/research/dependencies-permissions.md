@@ -6,15 +6,15 @@ Reviewed: 2026-07-25
 
 ## Target platform
 
-- Windows 11 x86-64/AMD64 only.
-- Initial OS floor: Windows 11 24H2, build 26100; test 24H2, 25H2, and 26H1 x64 while each is serviced.
+- Windows 11 ARM64 and x64/AMD64 only; 32-bit x86 is unsupported.
+- Initial OS floor: Windows 11 24H2, build 26100; test serviced releases on both architectures where runners/devices are available.
 - Target framework: `net10.0-windows10.0.26100.0`.
-- Runtime/package: `win-x64`, `PlatformTarget=x64`, MSIX processor architecture `x64`.
+- Runtime/package pairs: `win-arm64`/`arm64` and `win-x64`/`x64`; matching `PlatformTarget` and MSIX processor architecture are mandatory.
 - WPF application runs at normal user/medium integrity. `requestedExecutionLevel` is `asInvoker`.
 
 The OS floor is support policy, not a technical limitation of each API. Microsoft currently lists 24H2, 25H2, and 26H1 as serviced Windows 11 lines, with 24H2 Home/Pro support ending in October 2026 ([Windows 11 release information](https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information)). Re-evaluate the floor at the first release candidate.
 
-There is no 32-bit requirement. If one appears later, it requires a separate `win-x86` runtime publish and x86 MSIX plus x86 native dependencies and full platform testing. A single “Any CPU” binary is specifically rejected because process/window interop and packaging should be deterministic.
+There is no 32-bit requirement. The product supports exactly ARM64 and x64/AMD64 with separate RIDs, native dependencies, and MSIX identities. A neutral/AnyCPU native package and Arm64EC are rejected because process/window interop and packaging must be deterministic.
 
 ## macOS-to-Windows framework replacements
 
@@ -29,7 +29,7 @@ There is no 32-bit requirement. If one appears later, it requires a separate `wi
 | ServiceManagement `SMAppService` | MSIX `windows.startupTask` + `StartupTask` | User-controlled and disabled by default. |
 | Foundation `URLSession` | one long-lived .NET `HttpClient` | Direct OpenRouter plus explicitly approved external imports. |
 | `Codable` / JSONSerialization | `System.Text.Json` | Shared fixtures pin serialization semantics. |
-| `SQLite3` C API | `Microsoft.Data.Sqlite` | Bundles SQLite native x64 runtime. |
+| `SQLite3` C API | `Microsoft.Data.Sqlite` | Restores the matching ARM64 or AMD64 native SQLite asset. |
 | PDFKit | PdfPig | Text extraction only; no renderer/runtime install. |
 | HTML text extraction | AngleSharp | Parse downloaded HTML; scripts never execute. |
 | `UserDefaults` | SQLite `settings` table | One durable store. |
@@ -47,7 +47,7 @@ Pin these audited baselines in `Directory.Packages.props` and commit `packages.l
 
 | Package | Baseline on 2026-07-25 | Runtime purpose | License/control |
 |---|---:|---|---|
-| `Microsoft.Data.Sqlite` | 10.0.10 | SQLite ADO.NET provider and native x64 SQLite | Microsoft; exact transitive native files included in SBOM |
+| `Microsoft.Data.Sqlite` | 10.0.10 | SQLite ADO.NET provider and distinct native ARM64/AMD64 SQLite assets | Microsoft; exact transitive native files included in SBOM |
 | `AngleSharp` | 1.5.2 | HTML-to-text for build imports | MIT |
 | `PdfPig` | 0.1.15 | PDF-to-text for build imports | Apache-2.0; pre-1.0 API, so version stays locked |
 | `Microsoft.Windows.CsWin32` | 0.3.298 | Build-time generation for the small Win32 surface | MIT; `PrivateAssets=all`, no runtime dependency |
@@ -202,15 +202,15 @@ If Defender flags a clean release, stop rollout and submit the exact signed file
 | Enterprise blocks sideload or OpenRouter | Detect and explain policy-limited state; guide features remain local. |
 | Credential survives uninstall | Settings Remove key plus README uninstall step. |
 | Package update changes schema | transactional migration, pre-migration database copy, rollback test. |
-| Native x64 asset omitted | clean-VM install/package-content test and x64-only CI assertion. |
-| 32-bit/ARM request appears | Treat as a separately estimated port; do not relabel x64 output. |
+| Native ARM64/AMD64 asset omitted or contaminated | dual-RID locked restore, recursive publish/MSIX PE inspection, and loaded-module architecture tests. |
+| Unsupported 32-bit/Arm64EC request appears | Reject it; never relabel either supported artifact. |
 
 ## Permission acceptance gate
 
 The Windows build cannot leave platform validation until:
 
 - the manifest contains only the declared minimum surface;
-- a clean x64 Windows 11 VM can install and run without admin or developer mode;
+- a clean architecture-matching Windows 11 environment can install and run without admin or developer mode;
 - capture and microphone prompts never occur because the features and capabilities are absent;
 - denying startup or Credential Manager access leaves runs/routes/party/builds/gear/acts usable;
 - outbound chat works with no inbound firewall rule or local listener;

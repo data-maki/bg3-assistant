@@ -75,8 +75,10 @@ public sealed class OpenRouterClientTests
     [InlineData(HttpStatusCode.RequestTimeout, OpenRouterFailure.Timeout)]
     [InlineData(HttpStatusCode.TooManyRequests, OpenRouterFailure.RateLimited)]
     [InlineData(HttpStatusCode.NotFound, OpenRouterFailure.ModelUnavailable)]
+    [InlineData(HttpStatusCode.InternalServerError, OpenRouterFailure.Provider)]
     [InlineData(HttpStatusCode.BadGateway, OpenRouterFailure.Provider)]
     [InlineData(HttpStatusCode.ServiceUnavailable, OpenRouterFailure.Provider)]
+    [InlineData(HttpStatusCode.GatewayTimeout, OpenRouterFailure.Timeout)]
     [InlineData(HttpStatusCode.BadRequest, OpenRouterFailure.Request)]
     public async Task MapsProviderStatusToExplicitFailure(
         HttpStatusCode statusCode,
@@ -124,6 +126,119 @@ public sealed class OpenRouterClientTests
     }
 
     [Fact]
+    public async Task MapsSuccessfulErrorObjectToProviderFailureWithoutLeakingIt()
+    {
+        const string secret = "provider-secret-never-show";
+        var handler = new RecordingHandler(
+            _ => JsonResponse(
+                JsonSerializer.Serialize(
+                    new { error = new { message = secret } })));
+        var client = CreateClient(handler);
+
+        var exception = await Assert.ThrowsAsync<OpenRouterException>(
+            () => client.CompleteAsync(
+                "key",
+                [new OpenRouterMessage("user", "question")]));
+
+        Assert.Equal(OpenRouterFailure.Provider, exception.Failure);
+        Assert.DoesNotContain(secret, exception.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task MapsOfflineTransportFailureToNetworkFailure()
+    {
+        var handler = new RecordingHandler(
+            (_, _) => Task.FromException<HttpResponseMessage>(
+                new HttpRequestException("No network route.")));
+        var client = CreateClient(handler);
+
+        var exception = await Assert.ThrowsAsync<OpenRouterException>(
+            () => client.CompleteAsync(
+                "key",
+                [new OpenRouterMessage("user", "question")]));
+
+        Assert.Equal(OpenRouterFailure.Network, exception.Failure);
+        Assert.Contains(
+            "internet connection",
+            exception.Message,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task CallerCancellationPropagatesWithoutBecomingTimeout()
+    {
+        var handler = new RecordingHandler(
+            async (_, cancellationToken) =>
+            {
+                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                throw new InvalidOperationException();
+            });
+        var client = CreateClient(handler, TimeSpan.FromSeconds(5));
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => client.CompleteAsync(
+                "key",
+                [new OpenRouterMessage("user", "question")],
+                cancellationToken: cancellation.Token));
+
+        Assert.IsNotType<OpenRouterException>(exception);
+    }
+
+    [Fact]
+    public async Task RejectsResponseLargerThanBound()
+    {
+        var handler = new RecordingHandler(
+            _ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(new byte[1_000_001]),
+            });
+        var client = CreateClient(handler);
+
+        var exception = await Assert.ThrowsAsync<OpenRouterException>(
+            () => client.CompleteAsync(
+                "key",
+                [new OpenRouterMessage("user", "question")]));
+
+        Assert.Equal(OpenRouterFailure.InvalidResponse, exception.Failure);
+    }
+
+    [Fact]
+    public async Task ReportsOutputLimitAsProviderFailure()
+    {
+        var handler = new RecordingHandler(
+            _ => JsonResponse(
+                """
+                {"choices":[{"message":{"content":""},"finish_reason":"length"}]}
+                """));
+        var client = CreateClient(handler);
+
+        var exception = await Assert.ThrowsAsync<OpenRouterException>(
+            () => client.CompleteAsync(
+                "key",
+                [new OpenRouterMessage("user", "question")]));
+
+        Assert.Equal(OpenRouterFailure.Provider, exception.Failure);
+        Assert.Contains("output limit", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData("http://openrouter.ai/api/v1/chat/completions")]
+    [InlineData("https://localhost/api/v1/chat/completions")]
+    [InlineData("https://openrouter.ai/other")]
+    [InlineData("https://openrouter.ai/api/v1/chat/completions?proxy=1")]
+    public void RejectsNonProductionOrNonHttpsEndpoint(string rawEndpoint)
+    {
+        using var httpClient = new HttpClient(new RecordingHandler(_ => JsonResponse("{}")));
+
+        var exception = Assert.Throws<ArgumentException>(
+            () => new OpenRouterClient(httpClient, new Uri(rawEndpoint)));
+
+        Assert.Contains("direct HTTPS", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ReportsTimeoutWithoutFallbackAnswer()
     {
         var handler = new RecordingHandler(
@@ -148,7 +263,7 @@ public sealed class OpenRouterClientTests
         TimeSpan? timeout = null) =>
         new(
             new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan },
-            new Uri("https://openrouter.test/api/v1/chat/completions"),
+            new Uri(OpenRouterClient.Endpoint),
             timeout);
 
     private static HttpResponseMessage JsonResponse(string body) =>

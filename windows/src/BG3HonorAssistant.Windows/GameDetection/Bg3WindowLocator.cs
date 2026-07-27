@@ -115,8 +115,14 @@ public sealed class Bg3WindowLocator : IBg3WindowLocator
             }
 
             var executablePath = new string(pathBuffer[..checked((int)pathLength)]);
-            processName = Path.GetFileNameWithoutExtension(executablePath);
-            return Bg3ProcessNames.IsSupported(processName);
+            var executableFileName = Path.GetFileName(executablePath);
+            if (!Bg3ProcessNames.IsSupportedExecutableFileName(executableFileName))
+            {
+                return false;
+            }
+
+            processName = executableFileName[..^".exe".Length];
+            return true;
         }
         finally
         {

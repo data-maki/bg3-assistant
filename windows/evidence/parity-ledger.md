@@ -3,6 +3,20 @@
 > Generated from `research/feature-parity.md`. Update Status and Evidence as tests are completed;
 > rerunning this generator intentionally resets rows to Pending.
 
+## 2026-07-27 ARM64 completion checkpoint
+
+This checkpoint supersedes stale `Pending` notes below where the newer evidence
+directly covers the row. It applies only to `arm64`/`win-arm64`; no x64/AMD64
+build, review, package, or test was performed in this milestone.
+
+| Area | Status | Current evidence |
+|---|---|---|
+| Fresh onboarding, shell, overlay, tray, Now, Route, Party, Loadout, Act, Settings | Manual pass plus automated pass | Signed MSIX iterations through 0.2.0.11 were exercised at 200% DPI. The 57-capture packaged matrix, clean first launch, and action index are in `evidence/arm64-completion/`. Controller/UI tests cover routing, roster/build/gear/act actions and transient undo. |
+| Mid-run catch-up, multiple runs, revisions, persistence | Manual pass plus automated pass | Fresh/Act 1/2/3 onboarding, landmark catch-up, two runs, switching, rename, and upgrade persistence were exercised. App/infrastructure tests cover serialized transitions, revisions, recovery, and SQLite durability. Final uninstall removed LocalState; reinstall reproduced clean onboarding. |
+| Credential Manager and direct OpenRouter | Automated pass plus packaged UI observation | Settings exposed only configured/not-configured state, replace/test/remove, and the pinned model. The key value was never read or printed. HTTP stubs cover success, cancellation, authentication, rate limit, timeout, provider, malformed response, offline, and response limits. Live canary remains opt-in and disabled by default. |
+| ARM64 package/product boundary | Automated pass plus manual package pass | Exact signed 0.2.0.11 passed signature verification, native ARM64 MakeAppx unpack, recursive pre/post validation, install, native-process probe, upgrades, uninstall, and reinstall. Architecture evidence reports 487 publish PEs and 486 packaged PEs with no foreign native payload; the package contains 695 build PNGs, 51 item PNGs, and zero WebPs. |
+| Full final-state visual matrix | Manual pass with recorded limitation | All 57 non-provider oracle rows have real packaged captures and an action index. Row 15 is absent from the oracle. Rows 49/50 require an unapproved live request; they have deterministic client/decode coverage and source/action review, not runtime screenshots. See `evidence/arm64-completion/defects.md` (`WIN-QA-001`). |
+
 | Row | Gate | Status | Evidence |
 |---|---|---|---|
 | O-01 | G2 | Pending | Partial automated pass: the production `NotifyIcon` command model now contains Show Overlay, Planner, Map, dynamic run switcher, Steam launch, Hide/Show Pet, Settings, and Quit; action invocation and state refresh tests pass. Visible clean-VM tray interaction remains outstanding. See `evidence/G2/overlay-shell-anchor-pet-2026-07-25.md`. |

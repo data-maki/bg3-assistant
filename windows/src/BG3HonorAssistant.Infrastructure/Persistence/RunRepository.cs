@@ -6,7 +6,7 @@ namespace BG3HonorAssistant.Infrastructure.Persistence;
 public sealed class RunRepository
 {
     public const int MaximumRevisionsPerRun = 20;
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
 
     private readonly string databasePath;
     private readonly TimeProvider timeProvider;
@@ -186,6 +186,23 @@ public sealed class RunRepository
 
     public async Task<SavedRun?> LoadRecoverableActiveAsync(
         Func<string, bool> snapshotIsValid,
+        CancellationToken cancellationToken = default) =>
+        (await LoadRecoverableActiveWithStatusAsync(
+            snapshotIsValid,
+            cancellationToken)).Run;
+
+    public async Task<RecoverableRunResult> LoadRecoverableActiveWithStatusAsync(
+        Func<string, bool> snapshotIsValid,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(snapshotIsValid);
+        return await LoadRecoverableActiveWithStatusAsync(
+            (_, snapshot) => snapshotIsValid(snapshot),
+            cancellationToken);
+    }
+
+    public async Task<RecoverableRunResult> LoadRecoverableActiveWithStatusAsync(
+        Func<SavedRun, string, bool> snapshotIsValid,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(snapshotIsValid);
@@ -202,14 +219,14 @@ public sealed class RunRepository
         await using var activeReader = await activeCommand.ExecuteReaderAsync(cancellationToken);
         if (!await activeReader.ReadAsync(cancellationToken))
         {
-            return null;
+            return new RecoverableRunResult(null, HadActiveRun: false, UsedRevision: false);
         }
 
         var active = ReadRun(activeReader);
         await activeReader.DisposeAsync();
-        if (snapshotIsValid(active.SnapshotJson))
+        if (snapshotIsValid(active, active.SnapshotJson))
         {
-            return active;
+            return new RecoverableRunResult(active, HadActiveRun: true, UsedRevision: false);
         }
 
         using var revisions = connection.CreateCommand();
@@ -227,13 +244,67 @@ public sealed class RunRepository
         while (await revisionReader.ReadAsync(cancellationToken))
         {
             var snapshot = revisionReader.GetString(0);
-            if (snapshotIsValid(snapshot))
+            if (snapshotIsValid(active, snapshot))
             {
-                return active with { SnapshotJson = snapshot };
+                return new RecoverableRunResult(
+                    active with { SnapshotJson = snapshot },
+                    HadActiveRun: true,
+                    UsedRevision: true,
+                    UnreadableActiveSnapshot: active.SnapshotJson);
             }
         }
 
-        return null;
+        return new RecoverableRunResult(null, HadActiveRun: true, UsedRevision: false);
+    }
+
+    public async Task SaveRecoveryEvidenceAsync(
+        string runId,
+        string snapshot,
+        string reason,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(runId);
+        ArgumentNullException.ThrowIfNull(snapshot);
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        await using var connection = await OpenInitializedConnectionAsync(cancellationToken);
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            INSERT INTO recovery_evidence(run_id, reason, snapshot_text, created_at)
+            VALUES($runId, $reason, $snapshot, $now);
+            """;
+        command.Parameters.AddWithValue("$runId", runId);
+        command.Parameters.AddWithValue("$reason", reason);
+        command.Parameters.AddWithValue("$snapshot", snapshot);
+        command.Parameters.AddWithValue(
+            "$now",
+            timeProvider.GetUtcNow().ToUnixTimeMilliseconds());
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<string>> ListRecoveryEvidenceAsync(
+        string runId,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(runId);
+        await using var connection = await OpenInitializedConnectionAsync(cancellationToken);
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT snapshot_text
+            FROM recovery_evidence
+            WHERE run_id = $runId
+            ORDER BY id;
+            """;
+        command.Parameters.AddWithValue("$runId", runId);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var snapshots = new List<string>();
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            snapshots.Add(reader.GetString(0));
+        }
+
+        return snapshots;
     }
 
     public async Task<IReadOnlyList<SavedRun>> ListAsync(
@@ -586,6 +657,34 @@ public sealed class RunRepository
             recordMigration.Transaction = transaction;
             recordMigration.CommandText =
                 "INSERT INTO schema_migrations(version, applied_at) VALUES(2, $now);";
+            recordMigration.Parameters.AddWithValue(
+                "$now",
+                timeProvider.GetUtcNow().ToUnixTimeMilliseconds());
+            await recordMigration.ExecuteNonQueryAsync(cancellationToken);
+        }
+
+        if (version < 3)
+        {
+            await ExecuteAsync(
+                connection,
+                transaction,
+                """
+                CREATE TABLE recovery_evidence(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    run_id TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    snapshot_text TEXT NOT NULL,
+                    created_at INTEGER NOT NULL
+                );
+                CREATE INDEX recovery_evidence_run
+                    ON recovery_evidence(run_id, id);
+                """,
+                cancellationToken);
+
+            using var recordMigration = connection.CreateCommand();
+            recordMigration.Transaction = transaction;
+            recordMigration.CommandText =
+                "INSERT INTO schema_migrations(version, applied_at) VALUES(3, $now);";
             recordMigration.Parameters.AddWithValue(
                 "$now",
                 timeProvider.GetUtcNow().ToUnixTimeMilliseconds());

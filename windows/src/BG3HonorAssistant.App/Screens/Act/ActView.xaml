@@ -176,12 +176,67 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <TextBlock x:Name="ActReviewedSummaryText"
-                                           Margin="0,6,0,0"
-                                           Style="{StaticResource BG3Caption}"
-                                           FontWeight="Bold"
-                                           Foreground="{StaticResource BG3SuccessBrush}"
-                                           Text="●  Reviewed (0)" />
+                                <Expander x:Name="ActReviewedExpander"
+                                          Margin="0,6,0,0"
+                                          Foreground="{StaticResource BG3SuccessBrush}"
+                                          Header="●  Reviewed (0)">
+                                    <ItemsControl x:Name="ActReviewedGearList"
+                                                  Margin="0,5,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,4,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="32" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="28" />
+                                                        <ColumnDefinition Width="28" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Width="27"
+                                                            Height="27"
+                                                            BorderBrush="{StaticResource BG3GoldBrush}"
+                                                            BorderThickness="0.8"
+                                                            CornerRadius="5">
+                                                        <Image Source="{Binding Gear, Converter={StaticResource ItemIconConverter}}"
+                                                               Stretch="UniformToFill" />
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1"
+                                                                Margin="0,0,5,0">
+                                                        <TextBlock Style="{StaticResource BG3Caption}"
+                                                                   FontWeight="Bold"
+                                                                   Text="{Binding Gear.Item}"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Style="{StaticResource BG3Caption}"
+                                                                   FontSize="9"
+                                                                   Text="{Binding Detail}"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                    <Button Grid.Column="2"
+                                                            Width="24"
+                                                            Height="24"
+                                                            Padding="0"
+                                                            Background="Transparent"
+                                                            BorderBrush="Transparent"
+                                                            Foreground="{StaticResource BG3SuccessBrush}"
+                                                            Visibility="{Binding ActionVisibility}"
+                                                            Click="OnActGearObtainedClick"
+                                                            Content="✓"
+                                                            ToolTip="Revise as obtained" />
+                                                    <Button Grid.Column="3"
+                                                            Width="24"
+                                                            Height="24"
+                                                            Padding="0"
+                                                            Background="Transparent"
+                                                            BorderBrush="Transparent"
+                                                            Foreground="{StaticResource BG3DangerBrush}"
+                                                            Visibility="{Binding ActionVisibility}"
+                                                            Click="OnActGearMissedClick"
+                                                            Content="✕"
+                                                            ToolTip="Revise as missed" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Expander>
                             </StackPanel>
                         </Border>
 

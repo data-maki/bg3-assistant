@@ -26,6 +26,28 @@
                                 <TextBlock Margin="0,2,0,7"
                                            Style="{StaticResource BG3Caption}"
                                            Text="Choose Active, Camp, or Not recruited" />
+                                <Grid x:Name="PartySwapPanel"
+                                      Margin="0,0,0,7"
+                                      Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="PartySwapIncomingPicker"
+                                              DisplayMemberPath="Name"
+                                              AutomationProperties.Name="Member joining active party" />
+                                    <ComboBox x:Name="PartySwapOutgoingPicker"
+                                              Grid.Column="2"
+                                              DisplayMemberPath="Name"
+                                              AutomationProperties.Name="Active member returning to camp" />
+                                    <Button Grid.Column="4"
+                                            Style="{StaticResource BG3ActionButton}"
+                                            Click="OnSwapActivePartyClick"
+                                            Content="Swap" />
+                                </Grid>
                             </StackPanel>
                             <ListBox x:Name="PartyRosterList"
                                      Grid.Row="1"

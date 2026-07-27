@@ -239,6 +239,67 @@
                                             </WrapPanel>
                                         </StackPanel>
                                     </Border>
+                                    <Border Margin="0,8,0,0"
+                                            Padding="10"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="#668C5224"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9">
+                                        <StackPanel>
+                                            <DockPanel>
+                                                <Button x:Name="GearRevertPickButton"
+                                                        DockPanel.Dock="Right"
+                                                        Padding="0"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Foreground="{StaticResource BG3WarningBrush}"
+                                                        Click="OnRevertLoadoutPickClick"
+                                                        Content="Revert to build pick" />
+                                                <TextBlock Style="{StaticResource BG3Overline}"
+                                                           Text="CHANGE PICK" />
+                                            </DockPanel>
+                                            <TextBlock Margin="0,5,0,7"
+                                                       Style="{StaticResource BG3Caption}"
+                                                       Text="Choose another reviewed item for this slot through the current act."
+                                                       TextWrapping="Wrap" />
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right"
+                                                        Margin="6,0,0,0"
+                                                        Style="{StaticResource BG3ProminentActionButton}"
+                                                        Click="OnUseLoadoutPickClick"
+                                                        Content="Use" />
+                                                <ComboBox x:Name="GearChangePicker"
+                                                          DisplayMemberPath="Name" />
+                                            </DockPanel>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border x:Name="GearConflictPanel"
+                                            Margin="0,8,0,0"
+                                            Padding="10"
+                                            Background="{StaticResource BG3InsetBrush}"
+                                            BorderBrush="{StaticResource BG3WarningBrush}"
+                                            BorderThickness="0.7"
+                                            CornerRadius="9"
+                                            Visibility="Collapsed">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource BG3Overline}"
+                                                       Foreground="{StaticResource BG3WarningBrush}"
+                                                       Text="PARTY CONFLICT" />
+                                            <TextBlock x:Name="GearConflictText"
+                                                       Margin="0,5,0,7"
+                                                       Style="{StaticResource BG3Caption}"
+                                                       TextWrapping="Wrap" />
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right"
+                                                        Margin="6,0,0,0"
+                                                        Style="{StaticResource BG3ActionButton}"
+                                                        Click="OnGiveLoadoutGearClick"
+                                                        Content="Assign" />
+                                                <ComboBox x:Name="GearGiveToPicker"
+                                                          DisplayMemberPath="Name" />
+                                            </DockPanel>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>

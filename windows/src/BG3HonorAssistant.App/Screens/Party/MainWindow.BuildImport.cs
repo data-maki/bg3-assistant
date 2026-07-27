@@ -65,7 +65,9 @@ public partial class MainWindow
             return false;
         }
 
-        importCancellation = new CancellationTokenSource();
+        var cancellation = new CancellationTokenSource();
+        importCancellation = cancellation;
+        var operationVersion = ++importOperationVersion;
         setStatus(
             "Downloading and validating the public source, then asking the pinned model…");
         UpdateNetworkButtons();
@@ -74,10 +76,15 @@ public partial class MainWindow
             var imported = await buildImporter.ImportAsync(
                 rawUrl,
                 apiKey,
-                importCancellation.Token);
+                cancellation.Token);
+            if (operationVersion != importOperationVersion)
+            {
+                return false;
+            }
+
             await controller.SaveImportedBuildAsync(
                 imported,
-                importCancellation.Token);
+                cancellation.Token);
             var importedBuild = controller.Builds.FirstOrDefault(
                 build => build.Id == imported.Id);
             var status =
@@ -92,7 +99,7 @@ public partial class MainWindow
                     await controller.AssignBuildAsync(
                         member.Id,
                         importedBuild.Id,
-                        importCancellation.Token);
+                        cancellation.Token);
                     status += $" Assigned to {member.Name}.";
                 }
                 else
@@ -119,7 +126,10 @@ public partial class MainWindow
         }
         catch (OperationCanceledException)
         {
-            setStatus("Build import cancelled.");
+            if (operationVersion == importOperationVersion)
+            {
+                setStatus("Build import cancelled.");
+            }
         }
         catch (Exception exception) when (
             exception is
@@ -128,12 +138,19 @@ public partial class MainWindow
                 OpenRouterException or
                 BuildImportProcessingException)
         {
-            setStatus($"Build import failed: {exception.Message}");
+            if (operationVersion == importOperationVersion)
+            {
+                setStatus($"Build import failed: {exception.Message}");
+            }
         }
         finally
         {
-            importCancellation.Dispose();
-            importCancellation = null;
+            cancellation.Dispose();
+            if (ReferenceEquals(importCancellation, cancellation))
+            {
+                importCancellation = null;
+            }
+
             UpdateNetworkButtons();
         }
 

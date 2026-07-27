@@ -100,8 +100,15 @@ public partial class MainWindow
                 ? string.Empty
                 : $"★ {step.Tactics}";
 
-        PartyScreen.Member.PartyBuildPicker.ItemsSource = controller.Builds;
-        PartyScreen.Member.PartyBuildPicker.SelectedItem = build;
+        var buildChoices = new[] { new BuildPickerRow(null, "No reviewed build") }
+            .Concat(
+                controller.Builds.Select(
+                    candidate => new BuildPickerRow(candidate.Id, candidate.Name)))
+            .ToList();
+        PartyScreen.Member.PartyBuildPicker.ItemsSource = buildChoices;
+        PartyScreen.Member.PartyBuildPicker.SelectedItem =
+            buildChoices.FirstOrDefault(choice => choice.BuildId == member.BuildId) ??
+            buildChoices[0];
         PartyScreen.Member.PartyBuildComparisonList.ItemsSource = controller.Builds;
         PartyScreen.Member.PartyBuildComparisonList.SelectedItem = build;
     }
@@ -110,6 +117,7 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
+        PartyScreen.Landing.PartyGrid.SelectedItem = null;
         PartyScreen.PartyDetailColumn.Width = new GridLength(0D);
         PartyScreen.PartyGuidanceColumn.Width = new GridLength(1D, GridUnitType.Star);
         PartyScreen.BuildImport.PartyBuildImportPopover.Visibility = Visibility.Collapsed;
@@ -156,8 +164,8 @@ public partial class MainWindow
 
         var member = (controller.Run.Roster ?? controller.Run.Party)
             .FirstOrDefault(candidate => candidate.Id == selectedPartyMemberId);
-        var selected = PartyScreen.Member.PartyBuildPicker.SelectedItem as BuildSummary;
-        if (member is null || member.BuildId == selected?.Id)
+        var selected = PartyScreen.Member.PartyBuildPicker.SelectedItem as BuildPickerRow;
+        if (member is null || selected is null || member.BuildId == selected.BuildId)
         {
             return;
         }
@@ -168,12 +176,23 @@ public partial class MainWindow
                 $"Replace {member.Name}'s build?",
                 "Permanent rewards stay. Temporary effects and build-specific setup confirmation will be cleared.",
                 "Replace build",
-                () => controller.AssignBuildAsync(member.Id, selected?.Id),
+                async () =>
+                {
+                    var previousPlan = controller.Run.GetPartyPlan();
+                    if (await controller.AssignBuildAsync(member.Id, selected.BuildId))
+                    {
+                        RecordPartyUndo($"Changed {member.Name}'s build", previousPlan);
+                    }
+                },
                 RefreshView);
             return;
         }
 
-        await controller.AssignBuildAsync(member.Id, selected?.Id);
+        var previous = controller.Run.GetPartyPlan();
+        if (await controller.AssignBuildAsync(member.Id, selected.BuildId))
+        {
+            RecordPartyUndo($"Changed {member.Name}'s build", previous);
+        }
     }
 
     internal void OnCompareBuildsClick(object sender, RoutedEventArgs eventArgs)
@@ -200,7 +219,10 @@ public partial class MainWindow
             return;
         }
 
-        PartyScreen.Member.PartyBuildPicker.SelectedItem = selected;
+        PartyScreen.Member.PartyBuildPicker.SelectedItem =
+            PartyScreen.Member.PartyBuildPicker.Items
+                .OfType<BuildPickerRow>()
+                .FirstOrDefault(choice => choice.BuildId == selected.Id);
         await Task.CompletedTask;
     }
 
@@ -220,6 +242,15 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
+        if (importCancellation is not null)
+        {
+            PartyScreen.BuildImport.PartyBuildImportStatusText.Text =
+                "Cancelling build import…";
+            importOperationVersion++;
+            importCancellation.Cancel();
+            return;
+        }
+
         PartyScreen.BuildImport.PartyBuildImportPopover.Visibility = Visibility.Collapsed;
         buildImportAssignMemberId = null;
     }
@@ -230,6 +261,15 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
+        if (importCancellation is not null)
+        {
+            PartyScreen.BuildImport.PartyBuildImportStatusText.Text =
+                "Cancelling build import…";
+            importOperationVersion++;
+            importCancellation.Cancel();
+            return;
+        }
+
         if (await ImportBuildFromUrlAsync(
                 PartyScreen.BuildImport.PartyBuildImportUrlTextBox.Text.Trim(),
                 buildImportAssignMemberId,
@@ -318,7 +358,13 @@ public partial class MainWindow
             return;
         }
 
-        await controller.ResetCharacterPlanAsync(selectedPartyMemberId);
+        var member = SelectedPartyMember();
+        var previousPlan = controller.Run.GetPartyPlan();
+        if (await controller.ResetCharacterPlanAsync(selectedPartyMemberId) &&
+            member is not null)
+        {
+            RecordPartyUndo($"Reset {member.Name}'s character plan", previousPlan);
+        }
         Dialogs.ResetCharacterConfirmationOverlay.Visibility = Visibility.Collapsed;
         OnPartyBackClick(this, new RoutedEventArgs());
     }
@@ -326,6 +372,10 @@ public partial class MainWindow
     private void RefreshPartyScreen()
     {
         var roster = controller.Run.Roster ?? controller.Run.Party;
+        if (partyUndoRunId != controller.Run.Id)
+        {
+            ClearPartyUndo();
+        }
         PartyScreen.Landing.PartyGrid.ItemsSource = controller.ActiveParty;
         PartyScreen.Landing.PartyActiveCountText.Text = $"{controller.ActiveParty.Count}/4 active";
         PartyScreen.Roster.PartyRosterActiveCountText.Text =
@@ -340,6 +390,21 @@ public partial class MainWindow
             })
             .ThenBy(member => member.Name)
             .ToList();
+        var active = roster.Where(member => member.RosterStatus == RosterStatus.Active)
+            .OrderBy(member => member.Name)
+            .ToList();
+        var incoming = roster.Where(
+                member =>
+                    (member.RosterStatus is RosterStatus.Camp or RosterStatus.Unrecruited) &&
+                    member.RosterStatus.CanBeActive())
+            .OrderBy(member => member.Name)
+            .ToList();
+        PartyScreen.Roster.PartySwapIncomingPicker.ItemsSource = incoming;
+        PartyScreen.Roster.PartySwapOutgoingPicker.ItemsSource = active;
+        PartyScreen.Roster.PartySwapPanel.Visibility =
+            active.Count == 4 && incoming.Count > 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         if (selectedPartyMemberId is not null)
         {
             RenderPartyMemberDetail();
@@ -355,8 +420,7 @@ public partial class MainWindow
         }
 
         PartyScreen.BuildImport.PartyImportBuildButton.IsEnabled =
-            openRouterKeyConfigured &&
-            importCancellation is null;
+            openRouterKeyConfigured;
     }
 
 }

@@ -110,6 +110,9 @@ internal static partial class NativeMethods
     [LibraryImport("kernel32.dll", EntryPoint = "CloseHandle", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool CloseHandle(nint handle);
+
+    [LibraryImport("kernel32.dll", EntryPoint = "GetCurrentThreadId")]
+    internal static partial uint GetCurrentThreadId();
 }
 
 [UnmanagedFunctionPointer(CallingConvention.Winapi)]

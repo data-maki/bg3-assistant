@@ -16,15 +16,14 @@ public sealed class LiveOpenRouterCanaryTests
             return;
         }
 
-        var key = Environment.GetEnvironmentVariable("OPENROUTER_API_KEY");
-        Assert.False(string.IsNullOrWhiteSpace(key));
         var store = new CredentialStore();
-        store.Save(key);
-        Assert.Equal(key, store.Read());
+        var key = store.Read();
+        Assert.False(string.IsNullOrWhiteSpace(key));
 
         var client = new OpenRouterClient(AssistantHttpClient.Instance);
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var result = await client.CompleteAsync(
-            key,
+            key!,
             [
                 new OpenRouterMessage(
                     "system",
@@ -34,7 +33,7 @@ public sealed class LiveOpenRouterCanaryTests
             ChatPromptBuilder.ResponseSchema,
             "windows_release_canary",
             512,
-            CancellationToken.None);
+            cancellation.Token);
 
         Assert.Equal(
             "OK",

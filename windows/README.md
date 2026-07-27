@@ -9,12 +9,12 @@ It will not install a BG3 mod, inject into the game, read or edit saves, inspect
 
 ## Planned system requirements
 
-- Windows 11 x86-64/AMD64. Initial target: Windows 11 24H2 or newer; the supported floor will be rechecked before release.
+- Windows 11 ARM64 or x64/AMD64. Initial target: Windows 11 24H2 or newer; the supported floor will be rechecked before release.
 - The 64-bit Windows version of Baldur’s Gate 3.
 - BG3 in **Windowed** or **Borderless Windowed** mode. True exclusive full-screen is not supported by the planned non-injected overlay.
 - Internet only for OpenRouter chat, build imports, external links, and updates.
 
-“x86” in the port request is interpreted as x86-64/AMD64. A 32-bit build is not planned or needed for BG3.
+Windows releases are separate, self-contained `arm64`/`win-arm64` and `x64`/`win-x64` MSIX packages. 32-bit x86, neutral MSIX identities, AnyCPU native payloads, and Arm64EC are unsupported.
 
 The finished installer is intended to include its own .NET runtime and all guide assets. You should not need Visual Studio, developer tools, Python, Node, Ollama, a local model, or a separate server.
 
@@ -187,7 +187,8 @@ The implementation plan is in:
 Useful contributions during implementation:
 
 - review a parity row against the current `/mac` source;
-- test the controlled overlay host on Windows 11 x64 across supported display/DPI configurations;
+- test native ARM64 and x64 controlled overlay hosts across supported display/DPI configurations;
+- label x64 Windows CI, x64-on-ARM64 emulation, physical ARM64, and physical native-x64 evidence separately;
 - improve Windows accessibility, DPI, signing, or packaging test cases;
 - report a missing requirement without proposing mod/injection integration.
 

@@ -7,10 +7,10 @@ Estimate basis: one experienced Windows/.NET engineer, current `/mac` source and
 ## Guardrails
 
 - Preserve `/mac`; it remains the behavioral oracle throughout the port.
-- Windows 11 x86-64/AMD64 only. Do not use “x86” on artifacts because players commonly read it as 32-bit.
+- Windows 11 ARM64 and x64/AMD64 only. 32-bit x86, Arm64EC, and neutral native packages are unsupported.
 - Overlay only: no BG3 mod, plugin, injection, save editing, process memory, game-file access, driver, or administrator requirement.
 - OpenRouter direct from the desktop process. No Ollama, local model, AI runtime, Python/Node runtime, server, proxy, or localhost listener.
-- Production output is one self-contained x64 MSIX install action.
+- Production outputs are separate self-contained ARM64 and x64 MSIX packages; bundle only after both validate.
 - Screenshot capture, clipboard-image ingestion, microphone access, speech recognition, and dictation are approved Windows MVP exclusions. They must have no shipped UI, service, or package capability.
 - Every parity row in `feature-parity.md` needs evidence before release.
 
@@ -110,18 +110,18 @@ Goal: prove the hard OS/GPU/package assumptions before product UI is ported.
 
 Tasks:
 
-1. Create the x64 .NET 10 WPF skeleton, package identity, test project, and self-contained development MSIX.
+1. Keep one .NET 10 WPF source tree with mandatory `arm64|x64` build input, exact RIDs, tests, and separate development MSIX outputs.
 2. Overlay harness: transparent/topmost/tool-window/no-activate behavior, explicit text activation, drag/resize, per-monitor-v2 DPI, and BG3-relative bounds.
 3. Game harness: locate `bg3.exe` and `bg3_dx11.exe`, follow window/foreground changes, and launch the Steam URI without elevation.
-4. Controlled x64 game-window hosts named `bg3.exe` and `bg3_dx11.exe`: movement, resizing, minimize/restore, close/relaunch, foreground changes, negative coordinates, and Windowed/Borderless-style geometry.
+4. Native ARM64 and x64 controlled game-window hosts named `bg3.exe` and `bg3_dx11.exe`: movement, resizing, minimize/restore, close/relaunch, foreground changes, negative coordinates, DPI, and Windowed/Borderless-style geometry.
 5. Package services: Credential Manager round trip/delete, startup-task states, and clean install/uninstall.
 
 Required real-hardware matrix:
 
-- Both controlled exact-name x64 hosts (`bg3.exe` and `bg3_dx11.exe`); no live BG3 installation is required.
+- Both native ARM64 controlled exact-name hosts on physical ARM64 plus x64 hosts in x64 CI and x64-on-ARM64 emulation; no live BG3 installation is required.
 - Windowed and Borderless-style controlled geometry; true exclusive full-screen remains unsupported.
 - one and two monitors at 100%, 150%, and 200% DPI, including negative monitor coordinates and moves between monitors.
-- Windows 11 24H2, 25H2, and 26H1 x64 clean VMs/devices where available.
+- Supported Windows 11 releases on ARM64 and x64 clean environments where available; evidence class must be recorded.
 
 Exit gate G0:
 
@@ -221,7 +221,7 @@ Exit gate G4:
 
 Estimate: 2–3 engineer-weeks plus Store/signing lead time
 
-Goal: produce a player-installable, signed, updateable x64 release candidate.
+Goal: produce player-installable, signed, updateable, architecture-clean ARM64 and x64 release candidates.
 
 Tasks:
 
@@ -234,7 +234,7 @@ Tasks:
 Exit gate G5:
 
 - Parity rows I-02/I-05–I-14 and every prior gate pass.
-- Clean Windows 11 x64 install needs no admin, developer tools, runtime, model, or server.
+- Clean matching-architecture Windows 11 install needs no admin, developer tools, runtime, model, server, or cross-architecture helper.
 - Signature/publisher/timestamp/hash/SBOM/Defender records match the uploaded bytes.
 - Update preserves runs/settings/key; uninstall removes package/app data; external credential cleanup is documented and verified.
 - There are no forbidden files, processes, ports, firewall rules, services, drivers, mods, or BG3 writes.
@@ -261,9 +261,9 @@ Exit gate G5:
 
 | Dimension | Required cases |
 |---|---|
-| Controlled process | exact-name x64 `bg3.exe`, `bg3_dx11.exe` |
+| Controlled process | native ARM64 and x64 exact-name `bg3.exe`, `bg3_dx11.exe` |
 | Display geometry | Windowed-style, Borderless-style |
-| OS | supported Windows 11 x64 release floor, current mainstream release, new-device 26H1 where obtainable |
+| OS | supported Windows 11 ARM64 and x64 releases, with physical/CI/emulated evidence separated |
 | Monitors | single, dual; game on primary and secondary; negative coordinate layout |
 | DPI | 100%, 150%, 200%; move game between monitors |
 | Window state | foreground/background, moved, minimized/restored, resized, closed, relaunched |
@@ -289,7 +289,7 @@ Release requires G0–G5. An optional-feature defect may ship only if the featur
 
 | Risk | Trigger | Control | Exit criterion |
 |---|---|---|---|
-| Overlay disappears/steals focus | controlled host or DPI harness fails | correct HWND styles/events; require borderless/windowed; keep overlay bounds small | both exact-name x64 hosts pass without foreground theft |
+| Overlay disappears/steals focus | controlled host or DPI harness fails | correct HWND styles/events; require borderless/windowed; keep overlay bounds small | both native ARM64 and x64 exact-name hosts pass without foreground theft |
 | WPF transparent rendering defect | high GPU/blur/text issue | simplify visual effects first; only then compare WinUI 3 harness | stable frame/input behavior at all DPIs |
 | macOS state semantics drift | fixture mismatch | port pure rules first; cross-platform golden fixtures | zero unexplained semantic differences |
 | Current source fallback conflicts with provider policy | provider failure returns bundled prose | Windows explicit errors; contract test forbids fallback | real response or explicit failure only |
@@ -298,7 +298,7 @@ Release requires G0–G5. An optional-feature defect may ship only if the featur
 | MSIX credential residue | uninstall leaves key | in-app Remove key plus manual Credential Manager instructions | tested/documented cleanup |
 | Dependency supply-chain issue | vulnerability/advisory | lock, SBOM, audit, minimal packages | zero unreviewed critical/high findings |
 | Model churn | pinned slug removed/capability changes | release-time models check; explicit unavailable error; deliberate version update | live text/structured canary passes |
-| 32-bit/ARM scope pressure | request appears | separate architecture proposal/estimate | x64 artifact remains accurately labeled |
+| Unsupported architecture pressure | request appears | reject 32-bit x86/Arm64EC; keep two supported native packages | artifacts remain accurately labeled |
 
 ## Effort estimate
 
@@ -318,7 +318,7 @@ Two engineers can overlap M2 and M3 after G1, but M0/G1 and final packaging gate
 Estimate exclusions:
 
 - creating missing Act 2 route content;
-- 32-bit x86 or ARM64;
+- 32-bit x86, Arm64EC, or a neutral native package;
 - localization;
 - cloud sync/account system;
 - a new map platform;
@@ -330,8 +330,8 @@ Estimate exclusions:
 The follow-up build goal is complete only when:
 
 1. Every row in `feature-parity.md` has linked test/manual evidence or a still-approved explicit exclusion/data gap.
-2. A clean supported Windows 11 x64 machine installs one signed package without admin, developer tools, or a separate runtime.
-3. The overlay follows both controlled exact-name x64 hosts in Windowed/Borderless-style geometry without stealing foreground input; no live BG3 claim is required or permitted.
+2. Clean supported Windows 11 ARM64 and x64 environments install their matching signed packages without admin, developer tools, or a separate runtime.
+3. The overlay follows native ARM64 exact-name hosts on physical ARM64 and x64 exact-name hosts in x64 CI/emulation without stealing foreground input; evidence classes remain distinct.
 4. Runs, routes, party, builds, gear, acts, onboarding, settings, startup, persistence, and bundled assets match the source behavior.
 5. OpenRouter is the only AI path; a live typed-text request succeeds directly, and all provider failures are explicit.
 6. Screenshot/capture/clipboard-image and microphone/speech features are absent from product UI, services, package capabilities, dependencies, and delivered bytes.

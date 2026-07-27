@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.IO;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +13,7 @@ using BG3HonorAssistant.Core.Chat;
 using BG3HonorAssistant.Core.Models;
 using BG3HonorAssistant.Core.Overlay;
 using BG3HonorAssistant.Core.Route;
+using BG3HonorAssistant.Core.Serialization;
 using BG3HonorAssistant.Infrastructure.BuildImport;
 using BG3HonorAssistant.Infrastructure.Networking;
 using BG3HonorAssistant.Infrastructure.OpenRouter;
@@ -48,6 +50,7 @@ public partial class MainWindow
             return;
         }
 
+        var previousPlan = controller.Run.GetPartyPlan();
         if (!await controller.SetRosterStatusAsync(member.Id, status))
         {
             ShowError(status == RosterStatus.Active
@@ -55,7 +58,97 @@ public partial class MainWindow
                 : $"Could not change {member.Name}'s roster status.");
             RefreshView();
         }
+        else
+        {
+            RecordPartyUndo(
+                $"Moved {member.Name} to " +
+                (status == RosterStatus.Unrecruited ? "Not recruited" : status),
+                previousPlan);
+        }
     }
+
+    internal async void OnSwapActivePartyClick(
+        object sender,
+        RoutedEventArgs eventArgs)
+    {
+        _ = sender;
+        _ = eventArgs;
+        if (PartyScreen.Roster.PartySwapIncomingPicker.SelectedItem is not PartyMember incoming ||
+            PartyScreen.Roster.PartySwapOutgoingPicker.SelectedItem is not PartyMember outgoing)
+        {
+            ShowError("Choose who joins and who returns to camp.");
+            return;
+        }
+
+        var previousPlan = controller.Run.GetPartyPlan();
+        if (await controller.SwapActivePartyAsync(incoming.Id, outgoing.Id))
+        {
+            RecordPartyUndo(
+                $"Swapped {incoming.Name} for {outgoing.Name}",
+                previousPlan);
+        }
+        else
+        {
+            ShowError("That active-party swap could not be applied.");
+        }
+    }
+
+    internal async void OnUndoPartyChangeClick(
+        object sender,
+        RoutedEventArgs eventArgs)
+    {
+        _ = sender;
+        _ = eventArgs;
+        if (partyUndoPlan is null || partyUndoRunId != controller.Run.Id)
+        {
+            ClearPartyUndo();
+            return;
+        }
+
+        var plan = partyUndoPlan;
+        ClearPartyUndo();
+        await controller.RestorePartyPlanAsync(plan);
+    }
+
+    internal void OnDismissPartyUndoClick(
+        object sender,
+        RoutedEventArgs eventArgs)
+    {
+        _ = sender;
+        _ = eventArgs;
+        ClearPartyUndo();
+    }
+
+    private void RecordPartyUndo(string message, PartyPlan previousPlan)
+    {
+        partyUndoPlan = previousPlan;
+        partyUndoExpectedSignature = PartyPlanSignature(
+            controller.Run.GetPartyPlan());
+        partyUndoRunId = controller.Run.Id;
+        PartyScreen.PartyUndoText.Text = message;
+        PartyScreen.PartyUndoBanner.Visibility = Visibility.Visible;
+    }
+
+    private void ClearPartyUndo()
+    {
+        partyUndoPlan = null;
+        partyUndoExpectedSignature = null;
+        partyUndoRunId = null;
+        PartyScreen.PartyUndoBanner.Visibility = Visibility.Collapsed;
+    }
+
+    private void InvalidatePartyUndoIfStateChanged()
+    {
+        if (partyUndoPlan is not null &&
+            partyUndoExpectedSignature != PartyPlanSignature(
+                controller.Run.GetPartyPlan()))
+        {
+            ClearPartyUndo();
+        }
+    }
+
+    private static string PartyPlanSignature(PartyPlan plan) =>
+        JsonSerializer.Serialize(plan, JsonDefaults.Create());
 
     private async void OnLevelDownClick(object sender, RoutedEventArgs eventArgs)
     {

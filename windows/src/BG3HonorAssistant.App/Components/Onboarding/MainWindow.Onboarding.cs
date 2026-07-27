@@ -199,13 +199,16 @@ public partial class MainWindow
         Onboarding.OnboardingNextButton.IsEnabled = !explorer;
     }
 
-    internal void OnCloseExplorerOverlayClick(
+    internal async void OnCloseExplorerOverlayClick(
         object sender,
         RoutedEventArgs eventArgs)
     {
         _ = sender;
         _ = eventArgs;
-        Hide();
+        await controller.UpdateRunSettingsAsync(
+            RunDifficulty.Explorer,
+            onboardingReveal);
+        (Application.Current as App)?.ExitApplication();
     }
 
     internal void OnOnboardingSpoilerClick(
@@ -489,6 +492,11 @@ public partial class MainWindow
                 OnboardingVersion = OnboardingFlow.Version,
             });
         Onboarding.OnboardingPanel.Visibility = Visibility.Collapsed;
+        // The custom TabControl template does not materialize its initial
+        // SelectedContent while the onboarding layer owns the first layout.
+        // Re-select Now after removing that layer so the first planner open
+        // cannot show an empty shell until the player changes tabs.
+        MaterializePlannerTab(0);
         UpdatePlannerShell();
         RefreshView();
         overlay.ShowPreview();

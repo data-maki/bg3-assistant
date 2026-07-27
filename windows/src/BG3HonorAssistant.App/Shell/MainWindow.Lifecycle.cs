@@ -41,14 +41,27 @@ public partial class MainWindow
         loaded = true;
         SettingsScreen.OverlayDensityPicker.ItemsSource = Enum.GetValues<OverlayDensity>();
         SettingsScreen.RunDifficultyPicker.ItemsSource =
-            RunDifficultyExtensions.SelectableOverlayDifficulties;
-        SettingsScreen.RunRevealPicker.ItemsSource = Enum.GetValues<RouteRevealPolicy>();
+            RunDifficultyExtensions.SelectableOverlayDifficulties
+                .Select(
+                    difficulty => new DifficultyPickerRow(
+                        difficulty,
+                        difficulty == RunDifficulty.Honour
+                            ? "Honour Mode"
+                            : difficulty.ToString()))
+                .ToList();
+        SettingsScreen.RunRevealPicker.ItemsSource =
+        new[]
+        {
+            new RevealPickerRow(RouteRevealPolicy.Everything, "Show everything"),
+            new RevealPickerRow(RouteRevealPolicy.NextThree, "Only 3 tasks ahead"),
+        };
         SettingsScreen.PackageStatusText.Text = PackageIdentity.TryGetFullName() is { } fullName
             ? $"Installed package: {fullName}"
             : "Unpackaged development launch. Packaged startup is unavailable.";
         SettingsScreen.StoragePathText.Text = $"Local state: {paths.Root}";
         RefreshCredentialStatus();
         await RefreshStartupAsync();
+        MaterializePlannerTab(0);
         RefreshView();
         if (controller.Preferences.OnboardingVersion < OnboardingFlow.Version)
         {
@@ -71,7 +84,12 @@ public partial class MainWindow
     {
         _ = sender;
         _ = eventArgs;
-        Dispatcher.Invoke(RefreshView);
+        Dispatcher.Invoke(
+            () =>
+            {
+                InvalidatePartyUndoIfStateChanged();
+                RefreshView();
+            });
     }
 
     private void OnOverlayStateChanged(object? sender, EventArgs eventArgs)
@@ -91,9 +109,7 @@ public partial class MainWindow
         overlay.SnoozeRequested -= OnOverlaySnoozeRequested;
         overlay.MuteRequested -= OnOverlayMuteRequested;
         overlay.PinRequested -= OnOverlayPinRequested;
-        chatCancellation?.Cancel();
-        importCancellation?.Cancel();
-        keyTestCancellation?.Cancel();
+        CancelProviderOperations();
         chatLines.Clear();
         base.OnClosed(eventArgs);
     }

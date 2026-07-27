@@ -109,6 +109,12 @@ public static class ActTransitionRules
             run.ActGearReview[act] = review;
         }
 
+        if (status == ActGearReviewStatus.Missed &&
+            run.EquipmentOwnerId(gear.ItemKey) is { } ownerId)
+        {
+            _ = run.ToggleEquipment(gear.ItemKey, ownerId);
+        }
+
         review[gear.ItemKey] = status;
         return true;
     }

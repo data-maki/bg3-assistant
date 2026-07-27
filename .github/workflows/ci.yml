@@ -25,14 +25,162 @@ jobs:
         run: uv run --extra dev pytest -q
 
   windows:
-    name: Windows app build
-    runs-on: windows-latest
+    name: Windows ${{ matrix.architecture }} build, test, publish & package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: arm64
+            runner: windows-11-arm
+            expected_os_architecture: Arm64
+            expected_dotnet_architecture: arm64
+            evidence_label: ARM64 Windows CI
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        working-directory: windows
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.0.302
+          global-json-file: windows/global.json
+      - name: Verify OS, PowerShell, SDK and .NET host architecture
+        shell: pwsh
+        run: |
+          $runtime = [System.Runtime.InteropServices.RuntimeInformation]
+          $osArchitecture = $runtime::OSArchitecture
+          $powerShellArchitecture = $runtime::ProcessArchitecture
+          if ($osArchitecture -ne '${{ matrix.expected_os_architecture }}') {
+            throw "Expected ${{ matrix.expected_os_architecture }} OS; found $osArchitecture."
+          }
+          if ($powerShellArchitecture -ne '${{ matrix.expected_os_architecture }}') {
+            throw "Expected ${{ matrix.expected_os_architecture }} PowerShell; found $powerShellArchitecture."
+          }
+          $sdkVersion = (dotnet --version).Trim()
+          if ($sdkVersion -ne '10.0.302') {
+            throw "Expected .NET SDK 10.0.302; found $sdkVersion."
+          }
+          $dotnetInfo = dotnet --info | Out-String
+          $hostBlock = [regex]::Match(
+            $dotnetInfo,
+            '(?ms)^Host:\s*\r?\n(?<body>.*?)(?:\r?\n\r?\n|\z)').Groups['body'].Value
+          if ($hostBlock -notmatch "(?im)^\s*Architecture:\s*${{ matrix.expected_dotnet_architecture }}\s*$") {
+            throw "Expected ${{ matrix.expected_dotnet_architecture }} .NET host.`n$dotnetInfo"
+          }
+          "Evidence context: ${{ matrix.evidence_label }}"
+          "OS=$osArchitecture; PowerShell=$powerShellArchitecture; SDK=$sdkVersion; .NET=${{ matrix.expected_dotnet_architecture }}"
       - name: Restore locked dependencies
-        run: dotnet restore windows/src/BG3HonorAssistant.App/BG3HonorAssistant.App.csproj --locked-mode
+        run: >
+          dotnet restore BG3HonorAssistant.slnx
+          --locked-mode
+          -p:BG3Architecture=${{ matrix.architecture }}
       - name: Build
-        run: dotnet build windows/src/BG3HonorAssistant.App/BG3HonorAssistant.App.csproj --configuration Release --no-restore
+        run: >
+          dotnet build BG3HonorAssistant.slnx
+          --configuration Release
+          --no-restore
+          -p:BG3Architecture=${{ matrix.architecture }}
+      - name: Test on matching-architecture Windows runner
+        shell: pwsh
+        run: |
+          $projects = @(Get-ChildItem tests -Recurse -Filter '*.Tests.csproj' |
+            Sort-Object FullName)
+          if ($projects.Count -eq 0) {
+            throw 'No explicit Windows test projects were discovered.'
+          }
+          foreach ($project in $projects) {
+              [xml]$projectXml = Get-Content -Raw -LiteralPath $project.FullName
+              $isTestProject = @($projectXml.Project.PropertyGroup.IsTestProject)
+              if ($isTestProject -notcontains 'true') {
+                throw "$($project.FullName) must explicitly set IsTestProject=true."
+              }
+
+              $resultsDirectory = "artifacts/test-results/${{ matrix.architecture }}"
+              $resultPath = Join-Path $resultsDirectory "$($project.BaseName).trx"
+              Remove-Item -LiteralPath $resultPath -Force -ErrorAction SilentlyContinue
+              if ($project.BaseName -eq 'BG3HonorAssistant.Windows.Tests') {
+                # Hosted runners have a desktop but cannot grant foreground
+                # activation. Keep the full interactive assertion for local
+                # Parallels runs and skip only that reacquisition in headless CI.
+                $env:BG3_HEADLESS_CI = '1'
+              }
+
+              try {
+                dotnet test $project.FullName `
+                  --configuration Release `
+                  --no-build `
+                  --no-restore `
+                  --logger "trx;LogFileName=$($project.BaseName).trx" `
+                  --results-directory $resultsDirectory `
+                  -p:BG3Architecture=${{ matrix.architecture }}
+                $testExitCode = $LASTEXITCODE
+              }
+              finally {
+                Remove-Item Env:BG3_HEADLESS_CI -ErrorAction SilentlyContinue
+              }
+              if ($testExitCode -ne 0) {
+                throw "Tests failed for $($project.FullName)."
+              }
+              if (-not (Test-Path -LiteralPath $resultPath)) {
+                throw "Test project $($project.FullName) did not produce $resultPath."
+              }
+              [xml]$trx = Get-Content -Raw -LiteralPath $resultPath
+              $executed = [int]$trx.TestRun.ResultSummary.Counters.executed
+              if ($executed -le 0) {
+                throw "Test project $($project.FullName) executed zero tests."
+              }
+              "$($project.BaseName): executed=$executed; testhost=${{ matrix.architecture }}"
+          }
+      - name: Publish self-contained application
+        shell: pwsh
+        run: >
+          ./tools/build-release.ps1
+          -Architecture ${{ matrix.architecture }}
+      - name: Verify packaging architecture interface
+        shell: pwsh
+        run: |
+          $command = Get-Command ./tools/build-development-msix.ps1
+          $architecture = $command.Parameters['Architecture']
+          if ($null -eq $architecture) {
+            throw 'Packaging script must expose a mandatory -Architecture parameter.'
+          }
+          $validateSet = $architecture.Attributes |
+            Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] } |
+            Select-Object -First 1
+          if ($null -eq $validateSet -or
+              (@($validateSet.ValidValues | Sort-Object) -join ',') -ne 'arm64,x64') {
+            throw 'Packaging -Architecture must accept exactly arm64 and x64.'
+          }
+          if ($null -eq $command.Parameters['Version']) {
+            throw 'Packaging script must expose the expected -Version parameter.'
+          }
+      - name: Build architecture-specific development MSIX
+        shell: pwsh
+        run: >
+          ./tools/build-development-msix.ps1
+          -Architecture ${{ matrix.architecture }}
+          -Version 0.1.0.0
+      - name: Inspect publish and package architecture
+        shell: pwsh
+        run: |
+          $packages = @(Get-ChildItem artifacts `
+            -Filter "BG3HonorAssistant_0.1.0.0_${{ matrix.architecture }}_unsigned.msix" `
+            -File)
+          if ($packages.Count -ne 1) {
+            throw "Expected exactly one ${{ matrix.architecture }} MSIX; found $($packages.Count)."
+          }
+          ./tools/inspect-architecture.ps1 `
+            -Architecture ${{ matrix.architecture }} `
+            -PublishPath "artifacts/publish/win-${{ matrix.architecture }}" `
+            -PackagePath $packages[0].FullName `
+            -EvidencePath "artifacts/architecture-${{ matrix.architecture }}.json"
+      - name: Upload architecture evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.architecture }}-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            windows/artifacts/*.msix
+            windows/artifacts/architecture-${{ matrix.architecture }}.json
+            windows/artifacts/test-results/${{ matrix.architecture }}/*.trx
