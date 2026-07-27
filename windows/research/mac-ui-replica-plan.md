@@ -2,7 +2,9 @@
 
 Status: proposed replacement for the UI portions of `implementation-plan.md`
 
-Reference: `mac-ui-tear/` at commit `4719b56`
+Historical Mac capture reference: commit `4719b56`. The working capture folder is
+local-only; retained Windows runtime captures live under
+`windows/evidence/arm64-completion/screenshots/final-package-matrix/`.
 
 ## Decision
 
@@ -20,11 +22,12 @@ Do not rewrite `BG3HonorAssistant.Core`, `BG3HonorAssistant.Infrastructure`, or
 `BG3HonorAssistant.Windows` for visual parity. Add small controller adapters only
 when an existing domain operation is not yet reachable from a replica screen.
 
-## Two-source oracle
+## Public maintenance oracle
 
-Every Windows screen must be implemented from both Mac references:
+Maintain every Windows screen from both retained sources:
 
-1. `mac-ui-tear/` defines what the screen and each visible state look like.
+1. `windows/evidence/arm64-completion/screenshots/final-package-matrix/` records
+   the packaged Windows screen and visible state.
 2. `mac/BG3Assistant/` defines what every control does, which state it reads, which
    action it calls, what confirmation it requires, and what is persisted.
 
@@ -33,8 +36,8 @@ button labels when the Swift implementation exists.
 
 For each screenshot/state, the implementation sequence is:
 
-1. Find the state in `mac-ui-tear/SCREEN-INVENTORY.md`.
-2. Follow its owners in `mac-ui-tear/SOURCE-ASSET-MAP.md`.
+1. Find the state in `windows/research/ui-replica-ledger.md`.
+2. Open the matching numbered packaged screenshot when one exists.
 3. Read the complete Swift view plus its referenced `AppState`, model, and helper
    functions under `mac/BG3Assistant/`.
 4. Map those functions to the existing Windows controller/Core operation.
@@ -350,11 +353,9 @@ complete only when:
 5. Intentional Windows omissions leave no blank gaps, dead controls, or unreachable
    state.
 
-The `mac-ui-tear/SCREEN-INVENTORY.md` sequence is the build checklist. When a
-Windows machine is available, capture the same numbered states into a separate
-`windows/evidence/ui-replica/` folder for the final human visual correction pass.
-That future screenshot pass is for tuning, not a prerequisite for implementing the
-replica from the existing Mac references.
+The `windows/research/ui-replica-ledger.md` sequence is the build checklist.
+Packaged runtime captures belong under
+`windows/evidence/arm64-completion/screenshots/final-package-matrix/`.
 
 ## Files to preserve
 

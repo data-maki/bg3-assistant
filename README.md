@@ -105,6 +105,23 @@ You can close Terminal after installation. To update the app later, open the pro
 
 Invited TestFlight testers can install through [TestFlight](https://apps.apple.com/app/testflight/id899247664) instead.
 
+## Windows (experimental)
+
+The Windows overlay is implemented, but there is no signed public release yet. It has only been installed and exercised in Windows 11 ARM64 through Parallels on Apple silicon at 200% display scaling. It has not been tested on Intel/AMD hardware or a native Windows PC. BG3 window detection used controlled test windows named `bg3.exe` and `bg3_dx11.exe`; the current evidence does not prove live-game behavior.
+
+Use these settings when testing the overlay:
+
+| Setting | Required value |
+| --- | --- |
+| Package | ARM64 for Windows ARM64 in Parallels. The x64 package still needs native Intel/AMD validation. |
+| BG3 display mode | **Borderless Windowed** or **Windowed**. Exclusive full-screen is unsupported. |
+| Privileges | Run BG3 and BG3 Honor Assistant as a normal user. Do not run BG3 as administrator. |
+| Assistant | Turn on **Show overlay while BG3 is running**. **Start at login** is optional and off by default. |
+| Hidden overlay | Open the system-tray menu and select **Show Overlay** or **Open Planner**. |
+| AI | Optional OpenRouter text chat only. The Windows build has no local model, screenshot, microphone, or speech support. |
+
+The current MSIX is a development package, not a player download. Do not distribute an unsigned or self-signed build. See the [Windows README](windows/README.md) for the exact status, contributor setup, installation behavior, and remaining hardware gates.
+
 ## What the app shows
 
 | Next objective | Route and blockers |

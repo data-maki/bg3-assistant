@@ -49,6 +49,8 @@ artifacts/
 /docs/app-store/METADATA.md
 
 # Internal agent and research notes (kept locally, never published)
+/.claude/
+/mac-ui-tear/
 DESIRES.md
 LABREPORT.md
 LEARNINGS.md
