@@ -6,17 +6,17 @@ Reviewed: 2026-07-25
 
 ## Player-facing outcome
 
-A normal player downloads or Store-installs one packaged application. The package contains the x64 desktop executable, .NET runtime, SQLite native library, guide, images, generated catalogs, and notices. The player does **not** install Visual Studio, the .NET runtime, Python, Node, Ollama, a local model, a server, or a BG3 mod.
+A normal player downloads or Store-installs the package matching the computer: native ARM64 or x64/AMD64. Each package contains only its matching desktop executable, .NET runtime, SQLite native library, guide, images, generated catalogs, and notices. The player does **not** install Visual Studio, the .NET runtime, Python, Node, Ollama, a local model, a server, or a BG3 mod.
 
-Use a self-contained `.NET 10` `win-x64` publish inside MSIX. MSIX gives the app a stable identity, clean install/uninstall, update support, and access to the packaged startup API ([MSIX overview](https://learn.microsoft.com/en-us/windows/msix/overview)). An MSIX package can contain multiple runtime files; current Microsoft packaging guidance notes that MSIX does not support .NET `PublishSingleFile`, which is irrelevant to the one-action player install ([packaging overview](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/)).
+Use separate self-contained `.NET 10` `win-arm64` and `win-x64` publishes inside separately labeled MSIX packages. Validate each package before any optional bundle. MSIX gives stable identity, clean install/uninstall, update support, and the packaged startup API ([MSIX overview](https://learn.microsoft.com/en-us/windows/msix/overview/)).
 
 ## Distribution channels
 
 ### Stable — Microsoft Store (preferred)
 
-- Publish the x64 MSIX through Partner Center.
+- Publish independently validated ARM64 and x64 MSIX packages through Partner Center; bundle only after both validate.
 - Store signs/re-signs the package, provides install/update UX, and avoids SmartScreen download warnings.
-- The listing states Windows 11 x64, OpenRouter key optional for AI chat, no mod integration, no local AI runtime, and Windowed/Borderless Windowed requirement.
+- The listing states Windows 11 ARM64 and x64/AMD64, OpenRouter key optional for AI chat, no mod integration, no local AI runtime, and Windowed/Borderless Windowed requirement.
 
 This is the lowest-friction player path and Microsoft’s recommended option for most new apps ([distribution choice](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/choose-distribution-path), [code-signing options](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options)).
 
@@ -26,7 +26,9 @@ Publish three immutable HTTPS artifacts:
 
 ```text
  releases/windows/<version>/
+   BG3HonorAssistant_<version>_arm64.msix
    BG3HonorAssistant_<version>_x64.msix
+   BG3HonorAssistant_<version>_arm64.msix.sha256
    BG3HonorAssistant_<version>_x64.msix.sha256
    BG3HonorAssistant_<version>.sbom.spdx.json
 
@@ -53,7 +55,7 @@ Reserve one identity before implementation proceeds:
 - Name: `BG3HonorAssistant`
 - Display name: `BG3 Honor Assistant`
 - Publisher: exact Partner Center or signing-certificate subject
-- Architecture: `x64`
+- Architecture: exactly `arm64` or `x64`, matching the payload and filename
 - Version: four-part numeric MSIX version, monotonically increasing
 
 Keep Name and Publisher constant across every update. Direct beta and Store stable should use separate package identities if both may be installed simultaneously; otherwise use one identity/channel to avoid update ownership conflicts.
@@ -62,7 +64,7 @@ The first build milestone must select the real Publisher value. Until then, mani
 
 - the package version is not greater than the previous feed version;
 - manifest Publisher does not match the reserved Store identity or direct-signing certificate subject;
-- runtime identifier or package architecture is not x64;
+- runtime identifier, package architecture, PE headers, native assets, or filename do not all match;
 - a direct release lacks a valid trusted package signature/timestamp or any release contains forbidden runtime content.
 
 ## Installed artifact layout
@@ -70,10 +72,10 @@ The first build milestone must select the real Publisher value. Until then, mani
 Conceptual read-only package:
 
 ```text
- VFS/ProgramFilesX64/BG3HonorAssistant/
+  BG3HonorAssistant/
    BG3HonorAssistant.exe
    BG3HonorAssistant.*.dll
-   Microsoft.Data.Sqlite / SQLite x64 runtime files
+    Microsoft.Data.Sqlite / matching ARM64 or AMD64 SQLite runtime files
    self-contained .NET runtime files
    Data/
      guide-bundle.json
@@ -112,13 +114,13 @@ OpenRouter credentials live in Windows Credential Manager, not this directory.
 
 ### Continuous integration
 
-On a pinned Windows x64 runner:
+Use a two-architecture Windows matrix: native x64 Windows CI executes the x64 tests; ARM64 Windows executes ARM64 tests. Cross-building alone is insufficient.
 
 1. Restore the pinned .NET 10 SDK and locked NuGet graph.
 2. Validate/generate shared guide data with the existing repository pipeline.
-3. Build `Release` x64 and run all unit/integration tests.
-4. `dotnet publish` self-contained `win-x64` with trimming disabled initially.
-5. Build the x64 MSIX and inspect its manifest and complete file inventory.
+3. Build `Release` for the explicit architecture and execute all unit/integration tests on a matching process ISA.
+4. `dotnet publish` self-contained `win-arm64` or `win-x64` with trimming disabled initially.
+5. Build the matching MSIX and recursively inspect its manifest, PE/CLR/native content, and complete file inventory before and after unpack.
 6. Produce SBOM, notices, SHA-256, and unsigned test artifact.
 
 Trimming is disabled because WPF/XAML, serialization, and WinRT interop are reflection-sensitive; package size is a lower risk than a missing runtime path. ReadyToRun can be evaluated only after measuring launch/package impact.
@@ -129,7 +131,7 @@ Trimming is disabled because WPF/XAML, serialization, and WinRT interop are refl
 2. Pass the clean-machine and real-BG3 matrix.
 3. Freeze the candidate. For direct beta, sign/timestamp it with Artifact Signing/OV. For stable, submit it for Microsoft Store certification/signing.
 4. Verify the direct package signature/publisher or the Store-delivered package identity.
-5. Install the exact direct signed artifact or Store-delivered build on a clean non-developer Windows 11 x64 VM.
+5. Install the exact signed artifact on matching Windows 11 architecture. Physical ARM64 is mandatory release evidence; x64 CI and x64-on-ARM64 emulation do not replace the native-x64 physical release gate.
 6. Scan the delivered bytes with current Defender, record hashes/SBOM, then publish the direct feed or complete the Store rollout.
 
 Windows requires deployable MSIX packages to be signed and trusted; timestamping preserves signature validity after certificate expiry ([MSIX signing](https://learn.microsoft.com/en-us/windows/msix/package/signing-package-overview)). Artifact Signing has first-party CI integrations and is the recommended direct-distribution signing service when eligible.
@@ -225,7 +227,7 @@ If Defender flags a release, pause it and submit the signed artifact to Microsof
 
 ## Release acceptance checklist
 
-- Clean Windows 11 x64 VM installs from Store or `.appinstaller` without developer tools/admin.
+- Clean matching-architecture Windows 11 installs from Store or `.appinstaller` without developer tools/admin.
 - Package launches with network disconnected; guide and persistence still work.
 - OpenRouter chat works directly when a valid key/network are available.
 - No process listens on a port and no firewall rule/service/mod/runtime is installed.
@@ -234,4 +236,4 @@ If Defender flags a release, pause it and submit the signed artifact to Microsof
 - Uninstall removes package/app data; documented key-removal path is accurate.
 - Signed publisher, timestamp, hashes, SBOM, and Defender scan are recorded.
 - Package inventory contains every required asset and none of the forbidden runtimes.
-- No 32-bit or ARM64 compatibility claim appears on the x64 artifact.
+- Every artifact claims only its exact architecture; 32-bit x86, Arm64EC, neutral native, and cross-architecture contamination are rejected.

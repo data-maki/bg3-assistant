@@ -6,11 +6,13 @@ Decision date: 2026-07-25
 
 ## Decision
 
-Use a **C# WPF desktop application on .NET 10 LTS**, targeting Windows 11 x86-64, with narrow Win32 and Windows Runtime adapters. Publish it as a self-contained x64 MSIX. Keep route/build/gear logic, SQLite persistence, bundled data, Windows integration, and direct OpenRouter calls in one process.
+Use one **C# WPF desktop application on .NET 10 LTS**, targeting Windows 11 ARM64 and x64/AMD64 with narrow Win32 and Windows Runtime adapters. Architecture is a mandatory build input: publish separate self-contained `win-arm64` and `win-x64` MSIX packages. Do not ship a 32-bit x86, AnyCPU/neutral-native, Arm64EC, or mixed-architecture package. Keep route/build/gear logic, SQLite persistence, bundled data, Windows integration, and direct OpenRouter calls in one process.
 
 This is both the simplest and the best production-capable option. WPF is actively supported in .NET, gives direct control of a transparent topmost HWND, and avoids a browser UI or separately deployed application runtime. .NET 10 is active LTS through November 2028 ([.NET support policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core)); WPF is a Windows-only .NET UI framework with XAML, controls, binding, graphics, and animation ([WPF overview](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/overview/)).
 
-The project targets `net10.0-windows10.0.26100.0`, `RuntimeIdentifier=win-x64`, and `PlatformTarget=x64`. The supported launch baseline is Windows 11 24H2 (build 26100) or later; before the real release, bump the floor if 24H2 Home/Pro is no longer serviced. Microsoft’s current Windows 11 release table is the source for that decision ([Windows 11 release information](https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information)).
+The project targets `net10.0-windows10.0.26100.0`; `BG3Architecture=arm64|x64` derives matching `RuntimeIdentifier=win-arm64|win-x64`, `Platform`, and `PlatformTarget`. The supported launch baseline is Windows 11 24H2 (build 26100) or later; before the real release, bump the floor if 24H2 Home/Pro is no longer serviced. Microsoft's current Windows 11 release table is the source for that decision ([Windows 11 release information](https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information)).
+
+Every architecture carries its own restored native assets, self-contained runtime, PE inspection report, manifest label, artifact name, tests, and package validation. Bundling is allowed only after both individual packages validate. No x64-only helper may be required by the ARM64 product.
 
 ## Options considered
 
