@@ -36,7 +36,11 @@ diagnostic runs passed 65/67 and timed out only at the synthetic host's strict
 foreground assertion. They are retained under
 `results/diagnostic-foreground-lock/`. With real foreground input directed to
 the controlled `bg3.exe`/`bg3_dx11.exe` windows, the unchanged suite passed
-67/67 in four seconds.
+67/67 in four seconds. GitHub's hosted ARM64 runner cannot accept foreground
+activation even with injected input, so CI sets `BG3_HEADLESS_CI=1` to skip
+only the strict foreground reacquisition while retaining the remaining
+geometry, style, detection, movement, resize, minimize/restore, and lifecycle
+assertions. The strict interactive path remains mandatory and green locally.
 
 ## Publish and package
 

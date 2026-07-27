@@ -91,9 +91,20 @@ public sealed class ControlledGameWindowIntegrationTests
             .GetWindowLongPtr(overlay.Handle, ControlledNativeMethods.GwlExStyle)
             .ToInt64();
         Assert.NotEqual(0, passiveStyles & ControlledNativeMethods.WsExNoActivate);
-        _ = ControlledNativeMethods.SetForegroundWindow(host.WindowHandle);
-        WaitFor(() => ControlledNativeMethods.GetForegroundWindow() == host.WindowHandle);
+        var headlessCi = string.Equals(
+            Environment.GetEnvironmentVariable("BG3_HEADLESS_CI"),
+            "1",
+            StringComparison.Ordinal);
+        if (!headlessCi)
+        {
+            _ = ControlledNativeMethods.SetForegroundWindow(host.WindowHandle);
+            WaitFor(() => ControlledNativeMethods.GetForegroundWindow() == host.WindowHandle);
+        }
+
         foregroundBefore = ControlledNativeMethods.GetForegroundWindow();
+        Assert.True(
+            foregroundBefore != nint.Zero,
+            "The controlled-window test requires a live desktop foreground window.");
 
         Assert.True(
             ControlledNativeMethods.SetWindowPos(

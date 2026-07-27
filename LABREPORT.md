@@ -307,7 +307,10 @@ The Windows suite's synthetic foreground cases require actual foreground input
 when launched from the headless executor. Two retained diagnostic runs passed
 65/67 and timed out only at the strict foreground assertion. With input
 directed to the unchanged controlled hosts, the suite passed 67/67 in four
-seconds.
+seconds. GitHub's hosted ARM64 desktop rejected foreground acquisition even
+with injected input; its workflow therefore sets `BG3_HEADLESS_CI=1` to skip
+only that interactive reacquisition while retaining all other controlled-host
+assertions. The strict path remains enabled and green in Parallels.
 
 The final self-contained publish and signed MSIX passed recursive inspection:
 487 publish PEs (167 ARM64 native and 320 architecture-neutral managed), 486

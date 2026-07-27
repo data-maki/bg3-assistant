@@ -99,38 +99,11 @@ jobs:
               $resultsDirectory = "artifacts/test-results/${{ matrix.architecture }}"
               $resultPath = Join-Path $resultsDirectory "$($project.BaseName).trx"
               Remove-Item -LiteralPath $resultPath -Force -ErrorAction SilentlyContinue
-              $foregroundJob = $null
               if ($project.BaseName -eq 'BG3HonorAssistant.Windows.Tests') {
-                # GitHub's desktop is headless, so Windows rejects the synthetic
-                # host's SetForegroundWindow call unless it receives real input.
-                # Keep the strict foreground assertion and drive only the
-                # controlled bg3/bg3_dx11 test windows while this suite runs.
-                $foregroundJob = Start-Job -ScriptBlock {
-                  Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class ControlledFocusDriver { [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left, Top, Right, Bottom; } [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr handle, out Rect rect); [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow(); [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr handle); [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y); [DllImport("user32.dll")] public static extern void mouse_event(uint flags, uint x, uint y, uint data, UIntPtr extra); }'
-                  $deadline = [DateTime]::UtcNow.AddMinutes(3)
-                  while ([DateTime]::UtcNow -lt $deadline) {
-                    $hostProcesses = Get-Process bg3,bg3_dx11,GameWindowHost -ErrorAction SilentlyContinue
-                    foreach ($hostProcess in $hostProcesses) {
-                      $windowHandle = $hostProcess.MainWindowHandle
-                      if ($windowHandle -eq 0 -or
-                          [ControlledFocusDriver]::GetForegroundWindow() -eq $windowHandle) {
-                        continue
-                      }
-
-                      $bounds = [ControlledFocusDriver+Rect]::new()
-                      if ([ControlledFocusDriver]::GetWindowRect($windowHandle, [ref]$bounds)) {
-                        $x = [Math]::Max(20, [Math]::Min($bounds.Right - 20, $bounds.Left + 60))
-                        $y = [Math]::Max(20, [Math]::Min($bounds.Bottom - 20, $bounds.Top + 60))
-                        [void][ControlledFocusDriver]::SetCursorPos($x, $y)
-                        [ControlledFocusDriver]::mouse_event(2, 0, 0, 0, [UIntPtr]::Zero)
-                        [ControlledFocusDriver]::mouse_event(4, 0, 0, 0, [UIntPtr]::Zero)
-                        [void][ControlledFocusDriver]::SetForegroundWindow($windowHandle)
-                      }
-                    }
-
-                    Start-Sleep -Milliseconds 100
-                  }
-                }
+                # Hosted runners have a desktop but cannot grant foreground
+                # activation. Keep the full interactive assertion for local
+                # Parallels runs and skip only that reacquisition in headless CI.
+                $env:BG3_HEADLESS_CI = '1'
               }
 
               try {
@@ -144,10 +117,7 @@ jobs:
                 $testExitCode = $LASTEXITCODE
               }
               finally {
-                if ($null -ne $foregroundJob) {
-                  Stop-Job $foregroundJob
-                  Remove-Job $foregroundJob
-                }
+                Remove-Item Env:BG3_HEADLESS_CI -ErrorAction SilentlyContinue
               }
               if ($testExitCode -ne 0) {
                 throw "Tests failed for $($project.FullName)."
