@@ -73,7 +73,7 @@ public sealed class ProductFlowControllerTests : IDisposable
         var memberId = controller.ActiveParty[0].Id;
 
         Assert.True(await controller.BeginManualBuildAsync(memberId));
-        Assert.True(await controller.SetManualClassAsync(memberId, 4, "Wizard"));
+        Assert.True(await controller.SetManualClassAsync(memberId, 1, "Wizard"));
         var wizard = ClassCatalog.Definition("Wizard")!;
         var feat = Assert.Single(
             wizard.Levels[4].Choices,
@@ -87,6 +87,16 @@ public sealed class ProductFlowControllerTests : IDisposable
                 memberId,
                 4,
                 allocation,
+                "+2 Intelligence"));
+        Assert.False(
+            await controller.ToggleManualChoiceAsync(
+                memberId,
+                4,
+                allocation with
+                {
+                    RequiredSelection = null,
+                    RequiresSelectionAtSameLevel = false,
+                },
                 "+2 Intelligence"));
         Assert.True(
             await controller.ToggleManualChoiceAsync(

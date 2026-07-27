@@ -283,17 +283,26 @@ public sealed partial class AssistantController
         var plan = selection.Member.ManualBuild!;
         var level = plan.Levels.FirstOrDefault(
             candidate => candidate.CharacterLevel == characterLevel);
-        if (level is null ||
-            !plan.ChoiceIsAvailable(group, level) ||
-            group.Options.All(candidate => candidate.Name != option))
+        if (level is null)
         {
             return false;
         }
 
-        var selected = level.Selections.GetValueOrDefault(group.Id)?.ToList() ?? [];
+        var classLevel = plan.ClassLevel(characterLevel);
+        if (ClassCatalog.Definition(level.ClassName) is not { } definition ||
+            !definition.Levels.TryGetValue(classLevel, out var levelDefinition) ||
+            levelDefinition.Choices.FirstOrDefault(
+                candidate => candidate.Id == group.Id) is not { } canonicalGroup ||
+            !plan.ChoiceIsAvailable(canonicalGroup, level) ||
+            canonicalGroup.Options.All(candidate => candidate.Name != option))
+        {
+            return false;
+        }
+
+        var selected = level.Selections.GetValueOrDefault(canonicalGroup.Id)?.ToList() ?? [];
         if (!selected.Remove(option))
         {
-            if (selected.Count >= group.MaximumSelections && selected.Count > 0)
+            if (selected.Count >= canonicalGroup.MaximumSelections && selected.Count > 0)
             {
                 selected.RemoveAt(0);
             }
@@ -301,7 +310,7 @@ public sealed partial class AssistantController
             selected.Add(option);
         }
 
-        level.Selections[group.Id] = selected;
+        level.Selections[canonicalGroup.Id] = selected;
         Run.Roster![selection.Index] = selection.Member with { ManualBuild = plan };
         await SavePartyEditAsync(cancellationToken);
         return true;
