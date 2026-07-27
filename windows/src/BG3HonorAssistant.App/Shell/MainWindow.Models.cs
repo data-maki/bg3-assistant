@@ -32,7 +32,6 @@ public partial class MainWindow
     private sealed record ChatLineRow(
         string Role,
         string Text,
-        IReadOnlyList<ChatSource> Sources,
         bool IsError);
 
     private sealed record ActGearRow(BuildGear Gear, bool CanEdit)

@@ -85,7 +85,7 @@ The overlay includes:
 - Now and Route guidance with completion/skip/revisit state;
 - multiple runs and mid-run catch-up;
 - Party, reviewed/manual Builds, Loadout/Gear, and Act ledgers;
-- optional grounded, typed OpenRouter chat;
+- optional general BG3 chat that uses run and guide context only when relevant;
 - Settings, diagnostics, startup control, legal notices, and external map/wiki links.
 
 The current shared guide has Act 1 and Act 3 route content but no Act 2 checkpoints/walkthrough. The Windows app will label that gap; it will not invent Act 2 guidance.

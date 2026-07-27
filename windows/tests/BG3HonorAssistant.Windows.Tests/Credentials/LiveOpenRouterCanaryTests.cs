@@ -27,16 +27,12 @@ public sealed class LiveOpenRouterCanaryTests
             [
                 new OpenRouterMessage(
                     "system",
-                    "Return strict JSON matching the supplied schema. Put the single word OK in answer."),
+                    "Reply with the single word OK."),
                 new OpenRouterMessage("user", "Windows release canary."),
             ],
-            ChatPromptBuilder.ResponseSchema,
-            "windows_release_canary",
-            512,
-            cancellation.Token);
+            maxTokens: 512,
+            cancellationToken: cancellation.Token);
 
-        Assert.Equal(
-            "OK",
-            ChatPromptBuilder.DecodeAnswer(result).ToUpperInvariant());
+        Assert.Equal("OK", result.Trim().ToUpperInvariant());
     }
 }

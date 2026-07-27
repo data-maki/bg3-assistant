@@ -116,14 +116,6 @@ public partial class MainWindow
             return;
         }
 
-        if (!controller.Payload.RouteAvailable)
-        {
-            ChatScreen.ChatStatusText.Text =
-                $"{CurrentGoalRules.ActTwoUnavailableMessage}. Typed route chat is unavailable.";
-            ChatScreen.ChatStatusText.Visibility = Visibility.Visible;
-            return;
-        }
-
         var question = (quickPrompt ?? ChatScreen.ChatDraftTextBox.Text).Trim();
         if (question.Length == 0)
         {
@@ -162,26 +154,16 @@ public partial class MainWindow
             .Where(line => !line.IsError)
             .Select(line => new ChatMessage(line.Role, line.Text))
             .ToList();
-        ChatPrompt prompt;
-        try
-        {
-            prompt = ChatPromptBuilder.Build(
-                controller.Run,
-                controller.Payload,
-                controller.CurrentStep,
-                controller.ActiveParty,
-                question,
-                chatScope,
-                history);
-        }
-        catch (InvalidOperationException exception)
-        {
-            ChatScreen.ChatStatusText.Text = exception.Message;
-            ChatScreen.ChatStatusText.Visibility = Visibility.Visible;
-            return;
-        }
+        var prompt = ChatPromptBuilder.Build(
+            controller.Run,
+            controller.Payload,
+            controller.CurrentStep,
+            controller.ActiveParty,
+            question,
+            chatScope,
+            history);
 
-        chatLines.Add(new ChatLineRow("user", question, [], IsError: false));
+        chatLines.Add(new ChatLineRow("user", question, IsError: false));
         ChatScreen.ChatDraftTextBox.Clear();
         RenderChatHistory();
         var cancellation = new CancellationTokenSource();
@@ -193,16 +175,13 @@ public partial class MainWindow
         UpdateNetworkButtons();
         try
         {
-            var structured = await openRouter.CompleteAsync(
+            var answer = await openRouter.CompleteAsync(
                 apiKey,
                 prompt.Messages
                     .Select(message => new OpenRouterMessage(message.Role, message.Content))
                     .ToList(),
-                ChatPromptBuilder.ResponseSchema,
-                "bg3_guide_answer",
-                1_200,
-                cancellation.Token);
-            var answer = ChatPromptBuilder.DecodeAnswer(structured);
+                maxTokens: 1_200,
+                cancellationToken: cancellation.Token);
             if (operationVersion == chatOperationVersion &&
                 controller.Run.Id == requestedRunId &&
                 (controller.Run.SelectedAct ?? 1) == requestedAct)
@@ -211,7 +190,6 @@ public partial class MainWindow
                     new ChatLineRow(
                         "assistant",
                         answer,
-                        prompt.Sources,
                         IsError: false));
                 ChatScreen.ChatStatusText.Text =
                     $"Answered by the pinned {OpenRouterClient.ModelDisplayName} model.";
@@ -255,7 +233,7 @@ public partial class MainWindow
 
     private void AddChatError(string message)
     {
-        chatLines.Add(new ChatLineRow("assistant", message, [], IsError: true));
+        chatLines.Add(new ChatLineRow("assistant", message, IsError: true));
         ChatScreen.ChatStatusText.Text =
             "OpenRouter could not answer. The local Now and Route tabs remain available.";
         ChatScreen.ChatStatusText.Visibility = Visibility.Visible;
@@ -315,24 +293,7 @@ public partial class MainWindow
                     : (Brush)FindResource("BG3InsetBrush"),
                 Foreground = (Brush)FindResource("BG3ParchmentBrush"),
             };
-            AppendMarkdown(paragraph, line.Text);
-            if (line.Sources.Count > 0)
-            {
-                paragraph.Inlines.Add(new LineBreak());
-                paragraph.Inlines.Add(new Run("Sources: "));
-                for (var index = 0; index < line.Sources.Count; index++)
-                {
-                    if (index > 0)
-                    {
-                        paragraph.Inlines.Add(new Run(" · "));
-                    }
-
-                    AddLink(
-                        paragraph,
-                        line.Sources[index].Title,
-                        line.Sources[index].Url);
-                }
-            }
+            AppendAnswer(paragraph, line.Text);
 
             if (line.IsError)
             {
@@ -347,59 +308,36 @@ public partial class MainWindow
         ChatScreen.ChatHistoryBox.ScrollToEnd();
     }
 
-    private void AppendMarkdown(Paragraph paragraph, string text)
+    private static void AppendAnswer(Paragraph paragraph, string text)
     {
         var offset = 0;
-        foreach (Match match in MarkdownLinkPattern.Matches(text))
+        while (offset < text.Length)
         {
-            if (match.Index > offset)
+            var start = text.IndexOf("**", offset, StringComparison.Ordinal);
+            if (start < 0)
             {
-                paragraph.Inlines.Add(new Run(text[offset..match.Index]));
+                paragraph.Inlines.Add(new Run(text[offset..]));
+                return;
             }
 
-            AddLink(
-                paragraph,
-                match.Groups["label"].Value,
-                match.Groups["url"].Value);
-            offset = match.Index + match.Length;
-        }
+            var end = text.IndexOf("**", start + 2, StringComparison.Ordinal);
+            if (end < 0)
+            {
+                paragraph.Inlines.Add(new Run(text[offset..]));
+                return;
+            }
 
-        if (offset < text.Length)
-        {
-            paragraph.Inlines.Add(new Run(text[offset..]));
-        }
-    }
+            if (start > offset)
+            {
+                paragraph.Inlines.Add(new Run(text[offset..start]));
+            }
 
-    private void AddLink(Paragraph paragraph, string label, string rawUrl)
-    {
-        if (!Uri.TryCreate(rawUrl, UriKind.Absolute, out var url) ||
-            url.Scheme is not ("http" or "https"))
-        {
-            paragraph.Inlines.Add(new Run(label));
-            return;
-        }
-
-        var hyperlink = new Hyperlink(new Run(label))
-        {
-            NavigateUri = url,
-        };
-        hyperlink.RequestNavigate += OnChatLinkNavigate;
-        paragraph.Inlines.Add(hyperlink);
-    }
-
-    private void OnChatLinkNavigate(
-        object sender,
-        RequestNavigateEventArgs eventArgs)
-    {
-        _ = sender;
-        eventArgs.Handled = true;
-        try
-        {
-            launcher.OpenExternalMap(eventArgs.Uri.AbsoluteUri);
-        }
-        catch (Exception)
-        {
-            ChatScreen.ChatStatusText.Text = "The selected source link could not be opened.";
+            paragraph.Inlines.Add(
+                new Run(text[(start + 2)..end])
+                {
+                    FontWeight = FontWeights.Bold,
+                });
+            offset = end + 2;
         }
     }
     private void RefreshChatScreen()
@@ -415,7 +353,6 @@ public partial class MainWindow
         UpdateChatScopeButtons();
         RenderChatHistory();
         ChatScreen.SendChatButton.IsEnabled =
-            controller.Payload.RouteAvailable &&
             openRouterKeyConfigured;
     }
 

@@ -36,11 +36,14 @@ public sealed class ChatPromptBuilderTests
         Assert.Equal(
             "How do I survive the spectator fight?",
             prompt.Messages[^1].Content);
-        Assert.Equal("https://example.com/source-4", prompt.Sources[0].Url);
+        Assert.Contains(
+            "Optional context is additional information, not a boundary",
+            prompt.Messages[0].Content,
+            StringComparison.Ordinal);
     }
 
     [Fact]
-    public void RouteScopeRanksMatchingFactsAndDeduplicatesSources()
+    public void RouteScopeRanksMatchingGuideContext()
     {
         var shared = Step(1, "First") with
         {
@@ -66,11 +69,14 @@ public sealed class ChatPromptBuilderTests
         Assert.True(
             system.IndexOf("Poison the goblin camp", StringComparison.Ordinal) <
             system.IndexOf("First", StringComparison.Ordinal));
-        Assert.Equal(2, prompt.Sources.Count);
+        Assert.Contains(
+            "Address the main point in the first sentence",
+            system,
+            StringComparison.Ordinal);
     }
 
     [Fact]
-    public void BlocksChatWhenRouteDataIsUnavailable()
+    public void BuildsGeneralPromptWhenRouteDataIsUnavailable()
     {
         var run = Run();
         run.SelectedAct = 2;
@@ -80,35 +86,21 @@ public sealed class ChatPromptBuilderTests
             RouteAvailable = false,
         };
 
-        var exception = Assert.Throws<InvalidOperationException>(
-            () => ChatPromptBuilder.Build(
-                run,
-                payload,
-                currentStep: null,
-                run.Party,
-                "What next?",
-                ChatScope.Current,
-                []));
+        var prompt = ChatPromptBuilder.Build(
+            run,
+            payload,
+            currentStep: null,
+            run.Party,
+            "What is the Dark Amethyst for?",
+            ChatScope.Current,
+            []);
 
-        Assert.Contains("Act 2", exception.Message, StringComparison.Ordinal);
-    }
-
-    [Theory]
-    [InlineData("""{"answer":"Use the bridge."}""", "Use the bridge.")]
-    [InlineData("""{"answer":"  Keep distance.  "}""", "Keep distance.")]
-    public void DecodesStrictAnswer(string content, string expected)
-    {
-        Assert.Equal(expected, ChatPromptBuilder.DecodeAnswer(content));
-    }
-
-    [Theory]
-    [InlineData("{}")]
-    [InlineData("""{"answer":""}""")]
-    [InlineData("not json")]
-    public void RejectsInvalidAnswer(string content)
-    {
-        Assert.Throws<InvalidOperationException>(
-            () => ChatPromptBuilder.DecodeAnswer(content));
+        Assert.Contains("Act: 2", prompt.Messages[0].Content, StringComparison.Ordinal);
+        Assert.Contains(
+            "Use your general game knowledge to answer",
+            prompt.Messages[0].Content,
+            StringComparison.Ordinal);
+        Assert.Equal("What is the Dark Amethyst for?", prompt.Messages[^1].Content);
     }
 
     private static HonorRun Run()

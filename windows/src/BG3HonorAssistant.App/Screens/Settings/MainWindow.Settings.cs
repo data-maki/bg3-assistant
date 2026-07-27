@@ -271,19 +271,16 @@ public partial class MainWindow
         UpdateNetworkButtons();
         try
         {
-            var result = await openRouter.CompleteAsync(
+            _ = await openRouter.CompleteAsync(
                 apiKey,
                 [
                     new OpenRouterMessage(
                         "system",
-                        "Return strict JSON matching the supplied schema. Put the single word OK in answer."),
+                        "Reply with the single word OK."),
                     new OpenRouterMessage("user", "Connection test."),
                 ],
-                ChatPromptBuilder.ResponseSchema,
-                "connection_test",
-                512,
-                cancellation.Token);
-            _ = ChatPromptBuilder.DecodeAnswer(result);
+                maxTokens: 512,
+                cancellationToken: cancellation.Token);
             if (operationVersion == keyTestOperationVersion)
             {
                 openRouterKeyConfigured = true;
