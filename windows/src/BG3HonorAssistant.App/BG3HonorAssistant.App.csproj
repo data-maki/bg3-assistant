@@ -24,11 +24,11 @@
              Link="Resources\CompanionPortraits\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\..\Resources\ItemIcons\**\*"
+    <Content Include="..\..\..\Resources\WindowsPng\ItemIcons\**\*.png"
              Link="Resources\ItemIcons\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\..\Resources\BuildOptionIcons\**\*"
+    <Content Include="..\..\..\Resources\WindowsPng\BuildOptionIcons\**\*.png"
              Link="Resources\BuildOptionIcons\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />

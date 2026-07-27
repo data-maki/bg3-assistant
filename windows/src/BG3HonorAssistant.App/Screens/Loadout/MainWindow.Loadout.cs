@@ -183,7 +183,9 @@ public partial class MainWindow
             controller.TargetContext?.Matches(gear.Id, member.Id) == true;
         LoadoutScreen.GearDetailIcon.Source = string.IsNullOrWhiteSpace(gear.Icon)
             ? null
-            : AssetImage.Load("ItemIcons", Path.GetFileName(gear.Icon));
+            : AssetImage.Load(
+                "ItemIcons",
+                Path.ChangeExtension(Path.GetFileName(gear.Icon), ".png"));
         LoadoutScreen.GearDetailTitleText.Text = gear.Item;
         LoadoutScreen.GearDetailMetaText.Text =
             $"{member.Name} · {gear.Slot} · Act {gear.Act}";
