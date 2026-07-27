@@ -8,13 +8,50 @@ struct AssistantAIMessage: Sendable {
 struct AssistantAIClient: Sendable {
     static let openRouterModel = "google/gemini-3-flash-preview"
 
-    func complete(
+    func completeText(
         provider: AIProvider,
         messages: [AssistantAIMessage],
         imageData: Data? = nil,
-        jsonSchema: Data? = nil,
         temperature: Double = 0.1,
         maxTokens: Int = 1_200,
+        ollamaRuntime: OllamaRuntime
+    ) async throws -> String {
+        try await complete(
+            provider: provider,
+            messages: messages,
+            imageData: imageData,
+            jsonSchema: nil,
+            temperature: temperature,
+            maxTokens: maxTokens,
+            ollamaRuntime: ollamaRuntime
+        )
+    }
+
+    func completeJSON(
+        provider: AIProvider,
+        messages: [AssistantAIMessage],
+        jsonSchema: Data,
+        temperature: Double = 0.1,
+        maxTokens: Int = 1_200,
+        ollamaRuntime: OllamaRuntime
+    ) async throws -> String {
+        try await complete(
+            provider: provider,
+            messages: messages,
+            jsonSchema: jsonSchema,
+            temperature: temperature,
+            maxTokens: maxTokens,
+            ollamaRuntime: ollamaRuntime
+        )
+    }
+
+    private func complete(
+        provider: AIProvider,
+        messages: [AssistantAIMessage],
+        imageData: Data? = nil,
+        jsonSchema: Data?,
+        temperature: Double,
+        maxTokens: Int,
         ollamaRuntime: OllamaRuntime
     ) async throws -> String {
         switch provider {

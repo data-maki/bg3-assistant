@@ -10,11 +10,17 @@ public sealed record OpenRouterMessage(string Role, string Content);
 
 public interface IOpenRouterClient
 {
-    Task<string> CompleteAsync(
+    Task<string> CompleteTextAsync(
         string apiKey,
         IReadOnlyList<OpenRouterMessage> messages,
-        JsonNode? responseSchema = null,
-        string schemaName = "assistant_response",
+        int maxTokens = 1_200,
+        CancellationToken cancellationToken = default);
+
+    Task<string> CompleteJsonAsync(
+        string apiKey,
+        IReadOnlyList<OpenRouterMessage> messages,
+        JsonNode responseSchema,
+        string schemaName,
         int maxTokens = 1_200,
         CancellationToken cancellationToken = default);
 }
@@ -43,13 +49,45 @@ public sealed class OpenRouterClient : IOpenRouterClient
         this.timeout = timeout ?? TimeSpan.FromSeconds(90);
     }
 
-    public async Task<string> CompleteAsync(
+    public Task<string> CompleteTextAsync(
         string apiKey,
         IReadOnlyList<OpenRouterMessage> messages,
-        JsonNode? responseSchema = null,
-        string schemaName = "assistant_response",
+        int maxTokens = 1_200,
+        CancellationToken cancellationToken = default) =>
+        CompleteAsync(
+            apiKey,
+            messages,
+            responseSchema: null,
+            schemaName: "assistant_response",
+            maxTokens: maxTokens,
+            cancellationToken: cancellationToken);
+
+    public Task<string> CompleteJsonAsync(
+        string apiKey,
+        IReadOnlyList<OpenRouterMessage> messages,
+        JsonNode responseSchema,
+        string schemaName,
         int maxTokens = 1_200,
         CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(responseSchema);
+        ArgumentException.ThrowIfNullOrWhiteSpace(schemaName);
+        return CompleteAsync(
+            apiKey,
+            messages,
+            responseSchema,
+            schemaName,
+            maxTokens,
+            cancellationToken);
+    }
+
+    private async Task<string> CompleteAsync(
+        string apiKey,
+        IReadOnlyList<OpenRouterMessage> messages,
+        JsonNode? responseSchema,
+        string schemaName,
+        int maxTokens,
+        CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
         ArgumentNullException.ThrowIfNull(messages);

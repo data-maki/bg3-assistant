@@ -271,7 +271,7 @@ public partial class MainWindow
         UpdateNetworkButtons();
         try
         {
-            _ = await openRouter.CompleteAsync(
+            _ = await openRouter.CompleteTextAsync(
                 apiKey,
                 [
                     new OpenRouterMessage(

@@ -45,7 +45,7 @@ extension AppState {
             guard let aiProvider else { throw AIProviderError.providerNotConfigured }
             let source = try await BuildImportSourceLoader.load(url)
             loadoutImportStatus = "Extracting classes, levels, abilities, and gear…"
-            let content = try await assistantAIClient.complete(
+            let content = try await assistantAIClient.completeJSON(
                 provider: aiProvider,
                 messages: [
                     AssistantAIMessage(role: "system", content: BuildImportPrompt.system),

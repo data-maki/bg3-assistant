@@ -64,7 +64,7 @@ extension AppState {
         do {
             guard let aiProvider else { throw AIProviderError.providerNotConfigured }
             let grounding = chatGrounding(for: message)
-            let content = try await assistantAIClient.complete(
+            let content = try await assistantAIClient.completeText(
                 provider: aiProvider,
                 messages: chatMessages(question: message, history: history, grounding: grounding),
                 imageData: screenshot?.data,

@@ -113,11 +113,20 @@ public sealed class BuildImportCoordinatorTests
 
         internal int MaxTokens { get; private set; }
 
-        public Task<string> CompleteAsync(
+        public Task<string> CompleteTextAsync(
             string apiKey,
             IReadOnlyList<OpenRouterMessage> messages,
-            JsonNode? responseSchema = null,
-            string schemaName = "assistant_response",
+            int maxTokens = 1_200,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("Build import must use structured JSON completion.");
+        }
+
+        public Task<string> CompleteJsonAsync(
+            string apiKey,
+            IReadOnlyList<OpenRouterMessage> messages,
+            JsonNode responseSchema,
+            string schemaName,
             int maxTokens = 1_200,
             CancellationToken cancellationToken = default)
         {
