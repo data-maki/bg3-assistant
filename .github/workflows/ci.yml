@@ -30,11 +30,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - architecture: x64
-            runner: windows-latest
-            expected_os_architecture: X64
-            expected_dotnet_architecture: x64
-            evidence_label: x64 Windows CI (not native-x64 hardware)
           - architecture: arm64
             runner: windows-11-arm
             expected_os_architecture: Arm64

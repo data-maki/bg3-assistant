@@ -9,6 +9,12 @@ All local execution evidence is **native-ISA ARM64 in a Parallels VM** on
 Windows 11 ARM64 running on Apple Silicon. It is not physical Windows ARM64
 hardware proof.
 
+Opening the draft PR initially triggered the repository's historical dual-RID
+matrix. Run `30259250896` was cancelled while the x64 job was still in
+`setup-dotnet`; its restore, build, test, publish, package, inspection, and
+upload steps were all skipped. The PR workflow was then scoped to the ARM64
+entry for this milestone.
+
 The ARM64 .NET SDK/host was
 `C:\Users\jcarbs\AppData\Local\Microsoft\dotnet-arm64\dotnet.exe`. It reported
 host architecture `arm64` and RID `win-arm64`.

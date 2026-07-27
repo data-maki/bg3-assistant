@@ -233,6 +233,11 @@ was built, reviewed, packaged, or tested. All results below are classified as
 native-ISA ARM64 in a Parallels VM, not physical Windows ARM64 hardware proof.
 The `mac/` tree remained read-only.
 
+The first draft-PR workflow run (`30259250896`) was cancelled after checkout
+while the historical x64 job was still in `setup-dotnet`; all x64 restore,
+build, test, publish, package, inspection, and upload steps were skipped. The
+CI matrix was then scoped to its ARM64 entry for this milestone.
+
 ### Integrated product result
 
 The Windows WPF application now connects the fresh/mid-run onboarding model,
