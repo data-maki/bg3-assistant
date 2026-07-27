@@ -52,9 +52,9 @@ model. `AssistantController` remains the only product-operation boundary.
 
 1. Find its row in `research/ui-replica-ledger.md`.
 2. Compare the numbered PNG under
-   `../mac-ui-tear/screenshots/clone-1-to-1/` or
-   `../mac-ui-tear/screenshots/windows-adapted/` with the full Swift view and
-   action owner named by that row.
+   `evidence/arm64-completion/screenshots/final-package-matrix/` with the full
+   Swift view and action owner named by that row. Rows 49 and 50 intentionally
+   rely on deterministic provider tests and source review instead of screenshots.
 3. Make the smallest change inside the owning screen folder.
 4. Recheck the exact window size, disabled state, confirmation, persistence, and
    navigation result.

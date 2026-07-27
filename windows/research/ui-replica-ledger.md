@@ -17,7 +17,7 @@ open as `WIN-QA-001`; therefore `Complete` rows below are implementation/action
 audits, not a claim that every row has a final runtime screenshot.
 
 Legend: **Exact** means no visible redesign. **Adapted** permits only the named
-Windows difference from `mac-ui-tear/WINDOWS-PORT-GUIDE.md`.
+Windows difference recorded in the **Approved difference** column.
 
 | # | Class | PNG / exact size | Mac view; state/action owner | Windows owner | Assets | Action/result | Approved difference | Status / evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

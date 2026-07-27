@@ -1,26 +1,26 @@
 # BG3 Honor Assistant for Windows
 
-> **Status: implementation in progress. There is no signed Windows release to download yet.**
-> The repository can produce an unsigned development MSIX, but every public installation or usage step below remains **Planned** until a signed build passes the controlled Windows release gates.
+> **Status: experimental. There is no signed Windows release to download yet.**
+> The ARM64 app and development MSIX were installed and exercised only in a Windows 11 Parallels VM on Apple silicon at 200% display scaling. They have not been tested on Intel/AMD hardware or a native Windows PC. Controlled `bg3.exe` windows were used instead of the live game.
 
-BG3 Honor Assistant is planned as an overlay-only Honor Mode companion for Baldur’s Gate 3. It will show route guidance, party/build/loadout planning, act progress, and optional OpenRouter chat while you play.
+BG3 Honor Assistant is an overlay-only companion for Baldur’s Gate 3. It shows route guidance, party/build/loadout planning, act progress, and optional OpenRouter chat while you play.
 
 It will not install a BG3 mod, inject into the game, read or edit saves, inspect game memory, or change game files.
 
-## Planned system requirements
+## Experimental system requirements
 
-- Windows 11 ARM64 or x64/AMD64. Initial target: Windows 11 24H2 or newer; the supported floor will be rechecked before release.
+- Windows 11 ARM64 in Parallels for the currently exercised build. Windows 11 x64/AMD64 remains unverified on native hardware.
 - The 64-bit Windows version of Baldur’s Gate 3.
-- BG3 in **Windowed** or **Borderless Windowed** mode. True exclusive full-screen is not supported by the planned non-injected overlay.
+- BG3 in **Windowed** or **Borderless Windowed** mode. True exclusive full-screen is not supported by the non-injected overlay.
 - Internet only for OpenRouter chat, build imports, external links, and updates.
 
 Windows releases are separate, self-contained `arm64`/`win-arm64` and `x64`/`win-x64` MSIX packages. 32-bit x86, neutral MSIX identities, AnyCPU native payloads, and Arm64EC are unsupported.
 
-The finished installer is intended to include its own .NET runtime and all guide assets. You should not need Visual Studio, developer tools, Python, Node, Ollama, a local model, or a separate server.
+The package includes its own .NET runtime and guide assets. A future signed player release will not require Visual Studio, developer tools, Python, Node, Ollama, a local model, or a separate server.
 
 ## Download and installation
 
-**Planned — not available today.**
+**Not available to players today.** The repository can build development MSIX packages, but no signed release artifact is published.
 
 The intended stable installation is through the Microsoft Store:
 
@@ -39,7 +39,7 @@ No public release will ask you to enable Developer Mode, import a self-signed ce
 
 ## OpenRouter key setup
 
-**Planned. OpenRouter will be optional; the local guide will work without AI chat.**
+OpenRouter is optional; the local guide works without AI chat.
 
 1. Create an OpenRouter account and API key from the [OpenRouter dashboard](https://openrouter.ai/keys).
 2. In BG3 Honor Assistant, open **Settings > AI**.
@@ -48,11 +48,9 @@ No public release will ask you to enable Developer Mode, import a self-signed ce
 
 The app will call OpenRouter directly over HTTPS. It will not route your key through a BG3 Honor Assistant server. The key will be stored for your Windows user in Windows Credential Manager under `BG3HonorAssistant/OpenRouter`, not in the run database or logs.
 
-The planned default model is `google/gemini-3.6-flash`, based on the OpenRouter catalog as of July 25, 2026. Model availability and pricing can change; the release process will verify the configured model before every build. Check [OpenRouter’s model page](https://openrouter.ai/google/gemini-3.6-flash) and your account limits for current pricing.
+The app pins `google/gemini-3.6-flash`. Model availability and pricing can change; the release process must verify the configured model before every build. Check [OpenRouter’s model page](https://openrouter.ai/google/gemini-3.6-flash) and your account limits for current pricing.
 
 ## First launch and permission prompts
-
-**Planned.**
 
 First launch will ask you to:
 
@@ -72,18 +70,16 @@ speech-recognition, or dictation feature and requests none of those permissions.
 
 ## Starting the overlay with BG3
 
-**Planned.**
-
 1. Start BG3 Honor Assistant. It will wait in the system tray.
 2. Start Baldur’s Gate 3 in DirectX 11 or Vulkan.
 3. Use Windowed or Borderless Windowed mode.
 4. The overlay will appear when the BG3 window is detected and “Show overlay while BG3 is running” is enabled.
 
-You will also be able to use **Launch BG3** from the tray for the Steam edition. GOG players can launch from GOG Galaxy or their normal shortcut.
+You can also use **Launch BG3** from the tray for the Steam edition. GOG players can launch from GOG Galaxy or their normal shortcut.
 
 If BG3 was started as administrator, restart it normally. BG3 Honor Assistant will not elevate itself to follow an elevated game.
 
-The planned overlay includes:
+The overlay includes:
 
 - a compact animated pet, focus card, and reference density;
 - Now and Route guidance with completion/skip/revisit state;
@@ -96,7 +92,7 @@ The current shared guide has Act 1 and Act 3 route content but no Act 2 checkpoi
 
 ## Updating
 
-**Planned.**
+Development-package upgrades preserved runs and settings in the Parallels test. Public updates are unavailable until a signed release exists.
 
 - Microsoft Store installs will update through the Store.
 - Signed beta installs will use Windows App Installer to check the official HTTPS feed when the app launches.
@@ -106,8 +102,6 @@ The current shared guide has Act 1 and Act 3 route content but no Act 2 checkpoi
 Do not download replacement executables from chat messages, mirrors, or unverified domains.
 
 ## Uninstalling
-
-**Planned.**
 
 1. To remove the API key, use **Settings > AI > Remove OpenRouter key**.
 2. Open **Windows Settings > Apps > Installed apps**.
@@ -123,7 +117,7 @@ The app will not leave a BG3 mod, service, driver, scheduled task, firewall rule
 
 That is the current expected state. This repository contains research, implementation source, tests, and development packaging, but not a signed Windows release.
 
-### The planned overlay does not appear
+### The overlay does not appear
 
 - Confirm BG3 is Windowed or Borderless Windowed.
 - Confirm **Show overlay while BG3 is running** is on.
@@ -146,13 +140,13 @@ The stable goal is a Microsoft Store build. A newly signed direct beta may still
 
 ## Privacy and security
 
-Planned local data:
+Local data:
 
 - runs, routes, party, builds, gear, acts, and settings in a local SQLite database;
 - OpenRouter key in Windows Credential Manager;
 - short redacted diagnostics logs with no key or prompt content.
 
-Planned network data:
+Network data:
 
 - typed chat text, selected guide context, and recent in-memory chat history go directly to OpenRouter when you press Send;
 - build-import URLs are fetched only after you request an import;
