@@ -108,13 +108,13 @@
                             <TextBlock Margin="0,7,0,0"
                                        HorizontalAlignment="Center"
                                        Style="{StaticResource BG3Caption}"
-                                       Text="Ask about this run state." />
+                                       Text="Ask anything about Baldur's Gate 3." />
                             <TextBlock Margin="0,4,0,0"
                                        HorizontalAlignment="Center"
                                        Style="{StaticResource BG3Caption}"
                                        FontSize="9"
                                        Opacity="0.58"
-                                       Text="Action first. Guide facts and unknowns stay labelled." />
+                                       Text="Run context is used only when it helps." />
                         </StackPanel>
                     </Grid>
 

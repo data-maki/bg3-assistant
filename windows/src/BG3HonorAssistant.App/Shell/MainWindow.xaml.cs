@@ -31,11 +31,6 @@ namespace BG3HonorAssistant.App;
 
 public partial class MainWindow : Window
 {
-    private static readonly Regex MarkdownLinkPattern = new(
-        @"\[(?<label>[^\]\r\n]{1,200})\]\((?<url>https?://[^\s)]+)\)",
-        RegexOptions.Compiled |
-        RegexOptions.CultureInvariant |
-        RegexOptions.NonBacktracking);
     private readonly AssistantController controller;
     private readonly StartupTaskService startup;
     private readonly GameLauncher launcher;

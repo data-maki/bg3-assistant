@@ -4,7 +4,7 @@ BG3 Overlay is a native menu-bar macOS app with an in-game SwiftUI/AppKit overla
 
 ## Product boundary
 
-The app shows the current risk, recommended action, route progress, party and build guidance, equipment plans, act-transition checks, and guide-grounded chat. Progress, outcomes, party status, and equipment ownership change only when the player confirms them.
+The app shows the current risk, recommended action, route progress, party and build guidance, equipment plans, act-transition checks, and context-aware BG3 chat. Progress, outcomes, party status, and equipment ownership change only when the player confirms them.
 
 It is not a BG3 mod. It does not read game memory or saves, edit game files, automate input, infer progress, take periodic screenshots, or record gameplay. With Screen Recording permission, OpenRouter chat may attach one player-visible BG3-window screenshot to the next message. Local Qwen does not accept images. The app detects the BG3 process and window only to place the overlay and perform that explicit capture.
 
@@ -160,10 +160,10 @@ Each `data/acts/act{1,2,3}.json` record declares route availability and a public
 
 ### Chat
 
-1. Swift selects nearby or query-relevant walkthrough entries from the generated guide and combines them with player-confirmed run/party state and up to eight recent non-error turns.
+1. Swift selects nearby or query-relevant walkthrough entries from the generated guide and combines them with player-confirmed run/party state and up to eight recent non-error turns as optional context.
 2. `AssistantAIClient` calls only the selected provider. Local Qwen uses `qwen3:4b` through Ollama; OpenRouter uses `google/gemini-3-flash-preview` and may include the one-shot JPEG.
-3. Both providers are asked for a strict JSON object containing `answer`.
-4. Swift rejects malformed output. Provider failures are visible and include deterministic current-guide advice, but do not trigger a request to another provider.
+3. The provider answers as normal text using its general BG3 knowledge. It uses supplied context only when relevant and keeps answers short enough for the overlay.
+4. Swift displays any non-empty text response directly. Provider failures remain explicit and do not trigger bundled-guide advice or a request to another provider.
 
 ### Build import
 

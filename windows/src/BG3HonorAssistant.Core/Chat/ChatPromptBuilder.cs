@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using BG3HonorAssistant.Core.Models;
 using BG3HonorAssistant.Core.Serialization;
@@ -15,27 +14,11 @@ public enum ChatScope
 
 public sealed record ChatMessage(string Role, string Content);
 
-public sealed record ChatSource(string Title, string Url, string Snippet);
-
-public sealed record ChatPrompt(
-    IReadOnlyList<ChatMessage> Messages,
-    IReadOnlyList<ChatSource> Sources);
+public sealed record ChatPrompt(IReadOnlyList<ChatMessage> Messages);
 
 public static class ChatPromptBuilder
 {
     private static readonly JsonSerializerOptions Json = CreateJson();
-
-    public static JsonNode ResponseSchema { get; } = JsonNode.Parse(
-        """
-        {
-          "type": "object",
-          "properties": {
-            "answer": { "type": "string" }
-          },
-          "required": ["answer"],
-          "additionalProperties": false
-        }
-        """)!;
 
     public static ChatPrompt Build(
         HonorRun run,
@@ -51,11 +34,6 @@ public static class ChatPromptBuilder
         ArgumentNullException.ThrowIfNull(activeParty);
         ArgumentException.ThrowIfNullOrWhiteSpace(question);
         ArgumentNullException.ThrowIfNull(history);
-        if (!payload.RouteAvailable)
-        {
-            throw new InvalidOperationException(
-                $"Reviewed route chat is not available for Act {run.SelectedAct ?? payload.Act} yet.");
-        }
 
         var candidates = scope == ChatScope.Current
             ? CurrentCandidates(payload.Walkthrough, currentStep)
@@ -74,9 +52,23 @@ public static class ChatPromptBuilder
             .OrderBy(outcome => outcome, StringComparer.Ordinal));
         var system =
             $"""
-             You are a concise Baldur's Gate 3 assistant for a {run.Difficulty} run. Answer only from the bundled guide facts and run state below. Never invent mechanics, locations, rewards, or completion state. Clearly say when the guide does not establish an answer. Prioritize irreversible risks and the safest next action. Only treat legendary actions and single-save consequences as active when difficulty is Honour. Keep the answer under 220 words. Return strict JSON matching the supplied schema.
+             You are BG3 Overlay's chat assistant, a knowledgeable and practical companion for Baldur's Gate 3.
 
-             RUN STATE
+             Help the player with any Baldur's Gate 3 question, including mechanics, quests, items, builds, combat, exploration, companions, choices, and troubleshooting. Use your general game knowledge to answer. Optional context is additional information, not a boundary on what you may discuss.
+
+             Before answering, silently decide which parts of the optional context are relevant to the question. Use relevant context to personalize the answer. Treat explicit run-state details as facts about this player's save. Treat guide excerpts as supporting information, not as the only permitted source. Ignore irrelevant context completely and never assume the context is complete.
+
+             Address the main point in the first sentence. Default to one to three short paragraphs and no more than 120 words, as if the player were reading on a phone. Use more only when omitting important instructions or consequences would make the answer worse.
+
+             Use plain text paragraphs. You may use **bold** sparingly for the most important words. Apart from bold, do not use Markdown: no headings, bullet or numbered lists, tables, code blocks, or links.
+
+             Include only the explanation, consequences, or steps that help the player act. Distinguish game facts from recommendations. Avoid unnecessary spoilers, but clearly identify irreversible choices when relevant. Mention difficulty, patch, platform, or mod differences only when they materially affect the answer. If uncertain, say so instead of inventing details.
+
+             Use conversation history for follow-up questions. Make a reasonable Baldur's Gate 3 assumption when the question is understandable from context. Ask one concise clarifying question only when answering without it would likely mislead the player.
+
+             You do not have web access, tools, or direct access to the live game beyond information the player or application supplies. Do not imply otherwise. Write concise, natural, practical answers.
+
+             OPTIONAL RUN CONTEXT
              Difficulty: {run.Difficulty}
              Act: {run.SelectedAct ?? payload.Act}
              Region: {run.MapRegion}
@@ -84,7 +76,7 @@ public static class ChatPromptBuilder
              Story outcomes: {outcomes}
              Party: {rosterJson}
 
-             BUNDLED GUIDE FACTS
+             OPTIONAL GUIDE CONTEXT
              {guideJson}
              """;
         var recentHistory = history
@@ -100,32 +92,7 @@ public static class ChatPromptBuilder
         };
         messages.AddRange(recentHistory);
         messages.Add(new ChatMessage("user", question.Trim()));
-        return new ChatPrompt(messages, Sources(ranked));
-    }
-
-    public static string DecodeAnswer(string structuredContent)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(structuredContent);
-        try
-        {
-            using var document = JsonDocument.Parse(structuredContent);
-            if (document.RootElement.ValueKind == JsonValueKind.Object &&
-                document.RootElement.TryGetProperty("answer", out var answer) &&
-                answer.ValueKind == JsonValueKind.String &&
-                answer.GetString()?.Trim() is { Length: > 0 } text)
-            {
-                return text;
-            }
-        }
-        catch (JsonException exception)
-        {
-            throw new InvalidOperationException(
-                "OpenRouter returned an invalid structured chat response.",
-                exception);
-        }
-
-        throw new InvalidOperationException(
-            "OpenRouter returned an invalid structured chat response.");
+        return new ChatPrompt(messages);
     }
 
     private static IReadOnlyList<WalkthroughStep> CurrentCandidates(
@@ -175,26 +142,6 @@ public static class ChatPromptBuilder
             .OrderByDescending(item => item.Score)
             .ThenBy(item => item.Step.Order)
             .Select(item => item.Step);
-    }
-
-    private static IReadOnlyList<ChatSource> Sources(
-        IReadOnlyList<WalkthroughStep> steps)
-    {
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        return steps
-            .Where(
-                step =>
-                    !string.IsNullOrWhiteSpace(step.SourceUrl) &&
-                    seen.Add(step.SourceUrl))
-            .Select(
-                step =>
-                    new ChatSource(
-                        string.IsNullOrWhiteSpace(step.SourceLabel)
-                            ? step.Title
-                            : step.SourceLabel,
-                        step.SourceUrl,
-                        step.Summary))
-            .ToList();
     }
 
     private static JsonSerializerOptions CreateJson()

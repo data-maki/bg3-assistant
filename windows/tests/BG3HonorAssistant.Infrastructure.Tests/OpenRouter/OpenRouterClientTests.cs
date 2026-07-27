@@ -52,7 +52,7 @@ public sealed class OpenRouterClientTests
     }
 
     [Fact]
-    public async Task JoinsTextPartsInProviderResponse()
+    public async Task JoinsTextPartsWithoutRequestingAResponseSchema()
     {
         var handler = new RecordingHandler(
             _ => JsonResponse(
@@ -66,6 +66,11 @@ public sealed class OpenRouterClientTests
             [new OpenRouterMessage("user", "question")]);
 
         Assert.Equal("one two", result);
+        using var document = JsonDocument.Parse(handler.Body!);
+        var root = document.RootElement;
+        Assert.False(
+            root.GetProperty("provider").GetProperty("require_parameters").GetBoolean());
+        Assert.False(root.TryGetProperty("response_format", out _));
     }
 
     [Theory]
