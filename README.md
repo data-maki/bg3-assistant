@@ -40,6 +40,14 @@ Keep the overlay tucked away as a companion, expand the current objective when y
   <img src="docs/images/in-game-planner.webp" width="840" alt="Baldur's Gate 3 gameplay with the BG3 Overlay party planner open beside the game">
 </p>
 
+### Ask about unclear items
+
+Chat can explain what a story or quest item does and whether it is worth keeping. Here it identifies the Dark Amethyst, what it unlocks, and why the player should hold onto it.
+
+<p align="center">
+  <img src="docs/images/chat-dark-amethyst.webp" width="320" alt="BG3 Overlay chat explaining what the Dark Amethyst unlocks and why the player should keep it">
+</p>
+
 ## Quick start
 
 The app works on Apple silicon Macs running macOS 14 or later. The first install takes about 5 to 10 minutes and needs an internet connection and about 3 GB of free space. A local model needs another 2.5 GB for Qwen or 7.6 GB for Gemma.
@@ -231,6 +239,8 @@ See the [architecture guide](docs/developers/ARCHITECTURE.md) for data flow and 
 
 ## Project links
 
+- [Support and privacy](https://data-maki.github.io/bg3-assistant-site/support.html)
+- [Website source](https://github.com/data-maki/bg3-assistant-site)
 - [Contributing](CONTRIBUTING.md)
 - [Product and design history](docs/developers/DESIGN_HISTORY.md)
 - [Architecture](docs/developers/ARCHITECTURE.md)
