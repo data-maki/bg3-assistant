@@ -175,7 +175,7 @@ public partial class MainWindow
         UpdateNetworkButtons();
         try
         {
-            var answer = await openRouter.CompleteAsync(
+            var answer = await openRouter.CompleteTextAsync(
                 apiKey,
                 prompt.Messages
                     .Select(message => new OpenRouterMessage(message.Role, message.Content))

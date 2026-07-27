@@ -22,7 +22,7 @@ public sealed class LiveOpenRouterCanaryTests
 
         var client = new OpenRouterClient(AssistantHttpClient.Instance);
         using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        var result = await client.CompleteAsync(
+        var result = await client.CompleteTextAsync(
             key!,
             [
                 new OpenRouterMessage(

@@ -18,7 +18,7 @@ public sealed class OpenRouterClientTests
                 """));
         var client = CreateClient(handler);
 
-        var result = await client.CompleteAsync(
+        var result = await client.CompleteJsonAsync(
             "temporary-secret",
             [
                 new OpenRouterMessage("system", "Use only guide facts."),
@@ -27,7 +27,8 @@ public sealed class OpenRouterClientTests
             JsonNode.Parse(
                 """
                 {"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"],"additionalProperties":false}
-                """));
+                """)!,
+            "assistant_response");
 
         Assert.Equal("""{"answer":"Stay high."}""", result);
         Assert.NotNull(handler.Request);
@@ -61,7 +62,7 @@ public sealed class OpenRouterClientTests
                 """));
         var client = CreateClient(handler);
 
-        var result = await client.CompleteAsync(
+        var result = await client.CompleteTextAsync(
             "key",
             [new OpenRouterMessage("user", "question")]);
 
@@ -103,7 +104,7 @@ public sealed class OpenRouterClientTests
         var client = CreateClient(handler);
 
         var exception = await Assert.ThrowsAsync<OpenRouterException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 key,
                 [new OpenRouterMessage("user", prompt)]));
 
@@ -123,7 +124,7 @@ public sealed class OpenRouterClientTests
         var client = CreateClient(handler);
 
         var exception = await Assert.ThrowsAsync<OpenRouterException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 "key",
                 [new OpenRouterMessage("user", "question")]));
 
@@ -141,7 +142,7 @@ public sealed class OpenRouterClientTests
         var client = CreateClient(handler);
 
         var exception = await Assert.ThrowsAsync<OpenRouterException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 "key",
                 [new OpenRouterMessage("user", "question")]));
 
@@ -158,7 +159,7 @@ public sealed class OpenRouterClientTests
         var client = CreateClient(handler);
 
         var exception = await Assert.ThrowsAsync<OpenRouterException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 "key",
                 [new OpenRouterMessage("user", "question")]));
 
@@ -183,7 +184,7 @@ public sealed class OpenRouterClientTests
         cancellation.Cancel();
 
         var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 "key",
                 [new OpenRouterMessage("user", "question")],
                 cancellationToken: cancellation.Token));
@@ -202,7 +203,7 @@ public sealed class OpenRouterClientTests
         var client = CreateClient(handler);
 
         var exception = await Assert.ThrowsAsync<OpenRouterException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 "key",
                 [new OpenRouterMessage("user", "question")]));
 
@@ -220,7 +221,7 @@ public sealed class OpenRouterClientTests
         var client = CreateClient(handler);
 
         var exception = await Assert.ThrowsAsync<OpenRouterException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 "key",
                 [new OpenRouterMessage("user", "question")]));
 
@@ -255,7 +256,7 @@ public sealed class OpenRouterClientTests
         var client = CreateClient(handler, TimeSpan.FromMilliseconds(25));
 
         var exception = await Assert.ThrowsAsync<OpenRouterException>(
-            () => client.CompleteAsync(
+            () => client.CompleteTextAsync(
                 "key",
                 [new OpenRouterMessage("user", "question")]));
 

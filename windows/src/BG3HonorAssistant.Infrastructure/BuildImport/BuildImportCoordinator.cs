@@ -31,7 +31,7 @@ public sealed class BuildImportCoordinator
             .LoadAsync(rawUrl, cancellationToken)
             .ConfigureAwait(false);
         var result = await openRouter
-            .CompleteAsync(
+            .CompleteJsonAsync(
                 apiKey,
                 [
                     new OpenRouterMessage("system", BuildImportPrompt.System),
