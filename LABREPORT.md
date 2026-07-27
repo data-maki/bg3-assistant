@@ -257,9 +257,12 @@ Adversarial cross-review found and fixed:
 - stale OpenRouter completions after cancel/key replacement;
 - an executable provenance bypass using a renamed ARM64 runtime.
 
-The coordinator's packaged visual comparison then found a WebP alpha-channel
-regression that rendered a black sprite rectangle. The final package uses a
-lossless RGBA PNG sheet; clean-install captures show transparent artwork.
+The coordinator's signed-package invalidation pass then found and fixed a
+sprite alpha regression, recursive roster formatting crash, blank initial tab,
+empty Reference overlay, illegal manual-build point buy, undecodable build/item
+WebPs, retained party selection, and wrong-step Route revisit. The original
+WebP assets remain authoritative; WPF receives derived lossless PNGs from the
+shared resource tree.
 
 ### Persistence and lifecycle
 
@@ -268,12 +271,15 @@ identity and guide compatibility, serializes run transitions with queued saves,
 and exposes bounded flush/seal behavior to explicit quit and session ending.
 Undo, dialogs, snoozes, and chat remain transient.
 
-Signed 0.2.0.0 installed, completed onboarding, and created an 81,920-byte
-LocalState database. Tray Quit exited cleanly. Signed 0.2.0.1 upgraded in place;
-the database remained byte-for-byte identical with SHA-256
-`94C61526F1499AA8A4E7FCD0AF4D155459D1C99123484762F596897140399AA5`.
-Uninstall removed the package and LocalState, left no startup entry, and
-retained the user-owned Credential Manager entry.
+Signed package upgrades through 0.2.0.11 preserved the manually exercised runs,
+rename, catch-up, party/build/gear state, and settings. Immediately before the
+final uninstall check, the LocalState database was 487,424 bytes with SHA-256
+`0B1F5EDA635785180299C19F629B41B24605E1BBA7FCF1E4D2B19C94A09B0178`.
+A cold hidden-to-tray launch, same-PID second activation, overlay collapse,
+tray Open Planner/Quit, and startup off -> on -> off passed. Uninstall removed
+the package family and database while retaining the external Credential Manager
+entry. Reinstall of the exact signed artifact reproduced clean first launch and
+left the package installed as `Arm64`/`Ok`.
 
 ### OpenRouter and product boundary
 
@@ -296,18 +302,19 @@ was introduced.
 
 The ARM64 .NET host executed:
 
-- Core: 165/165
+- Core: 167/167
 - Package: 20/20
 - Infrastructure: 88/88
 - Windows: 67/67
-- App: 30/30
-- Total: 370/370, zero failures or skips
+- App: 37/37
+- Total: 379/379, zero failures or skips
 
 The Windows suite's synthetic foreground cases require actual foreground input
 when launched from the headless executor. Two retained diagnostic runs passed
-65/67 and timed out only at the strict foreground assertion. With input
-directed to the unchanged controlled hosts, the suite passed 67/67 in four
-seconds. GitHub's hosted ARM64 desktop rejected foreground acquisition even
+65/67 and timed out only at the strict foreground assertion. With physical
+desktop input directed to the unchanged controlled hosts, the suite passed
+67/67 in three seconds. GitHub's hosted ARM64 desktop rejected foreground
+acquisition even
 with injected input; its workflow therefore sets `BG3_HEADLESS_CI=1` to skip
 only that interactive reacquisition while retaining all other controlled-host
 assertions. The strict path remains enabled and green in Parallels.
@@ -320,13 +327,20 @@ native machine `0xAA64`.
 
 ### Remaining risk
 
-The complete 59-state implementation/action ledger is populated, but the final
-0.2.0.1 package was recaptured only for clean onboarding, expanded overlay,
-Now, and Settings after the late sprite fix. Exhaustive final-package visual
-and action recapture remains `WIN-QA-001`, so the pull request must remain
-draft. A public development `.cer` export remains in the user's Temp directory
-because deletion outside the workspace was blocked; every private-key and
-trust-store entry was removed.
+The signed integration sequence now has real packaged captures for all 57
+non-provider oracle rows (row 15 is absent). Rows 49/50 require an in-flight
+and successful provider request; they have deterministic client/decode coverage
+and WPF source/action review, but no runtime screenshot because no live canary
+was authorized. Captures span the final signed integration sequence and do not
+embed per-image package version metadata. The pull request therefore remains
+draft.
+
+The exact signed 0.2.0.11 artifact passed native ARM64 MakeAppx unpack and
+recursive validation: 1,253 files, 486 PEs, 695 build PNGs, 51 item PNGs, zero
+WebPs, and no foreign native payload. Its signed SHA-256 is
+`73D8C205E1ED216C6B369272F17C98B2E4138B812E04A7BDA5F37F5DCBBDCD9B`.
+All QA certificate, trust, CER, dump-registry, and temporary unpack/publish
+residue was removed; the user-owned credential was not touched.
 
 Detailed evidence, hashes, TRX results, screenshots, reviewer outcomes, and
 defect records are in `windows/evidence/arm64-completion/`.

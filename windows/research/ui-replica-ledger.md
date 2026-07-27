@@ -68,8 +68,8 @@ Windows difference from `mac-ui-tear/WINDOWS-PORT-GUIDE.md`.
 | 46 | Exact | `46-overlay-collapsed-minimal.png` 126×98 | `PeekCardView.minimalPeekCard`; density state | `Overlay/OverlayWindow.xaml`; `UpdatePetFrame` | pet | Minimal-density animation/hover/reveal | None | **Complete** — density switches exact size; existing reduced-motion/hover animation retained |
 | 47 | Exact | `47-overlay-collapsed-reference.png` 437×184 | `PeekCardView.focusPeekCard`; reference density | `Overlay/OverlayWindow.xaml`; `OverlayWindow.Update` | pet | Extra reference lines; same shortcuts/menu | None | **Complete** — exact height and 105 px reference headline row; same routed controls/menu |
 | 48 | Adapted | `48-chat-qwen-text-only.png` 420×550 | `ChatTabView`; provider notice state | Chat tab empty state | pet | Empty typed-chat layout reference | Always OpenRouter; no Qwen/screenshot/mic notice | **Complete** — provider notice/attachment row is omitted; guide context and typed actions remain |
-| 49 | Adapted | `49-chat-qwen-loading.png` 420×550 | `ChatTabView`; `AppState+Chat` loading state | `SendChatAsync`; network button state | pet | Submit; disable composer; show loading | OpenRouter request; no Qwen/screenshot/mic | **Complete** — user bubble renders immediately, waiting state is visible, and network controls disable during request |
-| 50 | Adapted | `50-chat-qwen-response.png` 420×550 | `ChatTabView`; message/source state | `RenderChatHistory`; markdown/source links | pet | Render answer/source chips; compose again | OpenRouter response; no Qwen/screenshot/mic | **Complete** — answer bubbles and grounded source links render before the enabled typed composer |
+| 49 | Adapted | `49-chat-qwen-loading.png` 420×550 | `ChatTabView`; `AppState+Chat` loading state | `SendChatAsync`; network button state | pet | Submit; disable composer; show loading | OpenRouter request; no Qwen/screenshot/mic | **Complete, source/action reviewed** — user bubble/waiting/disabled-control transitions are implemented; no runtime screenshot was claimed without live-canary opt-in |
+| 50 | Adapted | `50-chat-qwen-response.png` 420×550 | `ChatTabView`; message/source state | `RenderChatHistory`; markdown/source links | pet | Render answer/source chips; compose again | OpenRouter response; no Qwen/screenshot/mic | **Complete, source/action reviewed** — answer/source/composer transitions are implemented and response decode is tested; no runtime screenshot was claimed without live-canary opt-in |
 | 51 | Exact | `51-onboarding-midrun-difficulty.png` 430×560 | `OnboardingView.difficulty`; mid-run step order | branch-aware onboarding chrome | pet | Mid-run branch shows seven-step progress | None | **Complete** — mid-run fork rebuilds the seven-step sequence before rendering difficulty |
 | 52 | Exact | `52-onboarding-catchup-act1.png` 430×470 | `OnboardingView.catchUp`; `AppState+Onboarding` | catch-up panel; `RenderOnboardingLandmarks` | guide, pet | Select Act 1 landmark | None | **Complete** — real ordered Act 1 checkpoint data plus start-of-act state |
 | 53 | Exact | `53-onboarding-catchup-act2.png` 430×470 | `OnboardingView.catchUp`; `AppState+Onboarding` | `SelectOnboardingActAsync`; catch-up panel | guide, pet | Act 2 no-landmark state | None | **Complete** — unavailable Act 2 route yields only the truthful start-of-act choice |
@@ -92,18 +92,21 @@ Windows difference from `mac-ui-tear/WINDOWS-PORT-GUIDE.md`.
   no local-model, Ollama, Gemma, Qwen, screenshot/capture, microphone, audio,
   speech, or screen-sharing control. The two Core capability constants remain
   explicit `false` declarations.
-- Shared resource audit: complete. MSBuild links the guide, 11 portraits, 51 item
-  icons, 697 build-option icons, pet atlas, and notices from repo-root
-  `Resources/`; the package script takes `AppIcon.png` from the same source.
-  `AssetImage` resolves runtime paths without altering the files, every guide item
-  icon exists, and no raster artwork is duplicated below `windows/`.
+- Shared resource audit: complete. MSBuild links the guide, 11 portraits, pet
+  atlas, and notices from repo-root `Resources/`. The original inventory has 51
+  item WebPs and 696 build-option WebPs plus its manifest; `friends.webp` is the
+  sole zero-byte optional source. Windows packages 51 item and 695 build
+  lossless PNG derivatives from `Resources/WindowsPng`, linked to the canonical
+  runtime paths. Exact 0.2.0.11 unpack found those 746 PNGs and zero WebPs.
+  No raster artwork is duplicated below `windows/`.
 - Superseded generic shell audit: complete. Both player windows use
   `WindowStyle="None"`; the stock `TabControl` strip is hidden behind the compact
   Mac navigation; no sidebar, `DataGrid`, `GroupBox`, or top-level Diagnostics tab
   remains.
-- Static integrity audit: all 19 WPF XAML files parse as XML; all 142 declared
+- Runtime integrity audit: all 19 WPF XAML files parse as XML; all 142 declared
   event handlers resolve in code-behind; all 49 referenced resource keys are
-  defined; all 59 measured ledger sizes match their PNGs; `git diff --check`
-  passes. No .NET/MSBuild/C# compiler or Windows runtime is installed on this Mac,
-  so this is source-level completion, not a claim of Windows runtime visual
-  validation.
+  defined; and all 59 measured ledger sizes match their oracle PNGs. The native
+  ARM64 .NET host in the Parallels VM passed 379/379 tests. The signed package
+  sequence produced 57 real runtime captures for the 57 non-provider rows at
+  the available 200% DPI. Rows 49/50 remain source/action-reviewed rather than
+  runtime-captured because no live OpenRouter canary was authorized.

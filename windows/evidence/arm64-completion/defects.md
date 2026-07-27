@@ -1,136 +1,189 @@
 # ARM64 completion defect record
 
-## Fixed defects
+## Fixed implementation defects
 
 ### WIN-PROD-001 — High — Decision completion opened the wrong Route state
 
 - **Reproduction:** complete a decision while Route is filtered to Core or
   Equipment.
-- **Root cause:** completion selected from the filtered collection rather than
-  restoring All and resolving the exact route row.
-- **Fix:** force All, refresh rows, select the exact `RoutePlannerRow`, and open
-  outcome detail.
-- **Regression test:** focused Core/product route tests; included in 165/165
-  Core and 30/30 App results.
-- **Reviewer result:** original reviewer rejected; different-lane re-review
-  accepted after the fix.
-- **Residual risk:** low; final interactive recapture of every decision variant
-  remains part of `WIN-QA-001`.
+- **Root cause:** completion selected from the filtered collection instead of
+  restoring All and resolving the exact row.
+- **Fix:** restore All, refresh rows, select the exact row, and open its result.
+- **Regression test:** Core/product Route tests and packaged Route pass.
+- **Reviewer result:** different-lane reviewer rejected, then accepted the fix.
+- **Residual risk:** low.
 
-### WIN-PROD-002 — High — Party undo could restore stale or incomplete state
+### WIN-PROD-002 — High — Party undo could restore stale/incomplete state
 
-- **Reproduction:** change roster/build state, perform another party mutation,
-  then invoke the older undo.
-- **Root cause:** undo did not retain the full party plan and was not invalidated
-  by later party mutations.
-- **Fix:** transient full-plan undo snapshot, active-party/build restoration,
-  visible undo banner, and stale-undo invalidation.
-- **Regression test:** App controller party/undo tests.
-- **Reviewer result:** rejected before fix; accepted after focused 31/31 Core
-  and product checks.
+- **Reproduction:** change roster/build state, perform another mutation, then
+  invoke the older undo.
+- **Root cause:** undo lacked a full party snapshot and stale-undo invalidation.
+- **Fix:** transient full-plan snapshot, restoration banner, and invalidation
+  after later party mutations.
+- **Regression test:** App controller party/undo tests and packaged undo pass.
+- **Reviewer result:** different-lane reviewer rejected, then accepted the fix.
 - **Residual risk:** low.
 
 ### WIN-PERSIST-001 — Critical — Run switch could race a queued save
 
-- **Reproduction:** mutate the current run and immediately switch runs while a
-  save is queued.
-- **Root cause:** run transitions and durable producer work did not share a
-  serialized barrier.
-- **Fix:** ordered durable queue, serialized run transition barrier,
-  `FlushAsync`, producer-sealed `SealAndFlushAsync`, and surfaced exceptions.
-- **Regression test:** controller/repository concurrency, flush, and shutdown
-  tests; packaged tray quit and byte-stable upgrade observation.
-- **Reviewer result:** product reviewer rejected; accepted after the fix.
+- **Reproduction:** mutate the current run and immediately switch runs.
+- **Root cause:** run transitions and durable work lacked one serialized
+  barrier.
+- **Fix:** ordered durable queue, serialized transition barrier, flush/seal,
+  and surfaced exceptions.
+- **Regression test:** concurrency/shutdown tests and multi-version upgrade.
+- **Reviewer result:** different-lane reviewer rejected, then accepted the fix.
 - **Residual risk:** low.
 
-### WIN-PERSIST-002 — High — Recovery could discard evidence or accept incoherent rows
+### WIN-PERSIST-002 — High — Recovery could discard or accept incoherent rows
 
-- **Reproduction:** inject a corrupt active snapshot, or a row whose id/name
-  disagrees with its payload.
-- **Root cause:** recovery lacked retained rejected evidence and complete
-  row/payload coherence checks.
-- **Fix:** schema v3 `recovery_evidence`, one-time healing, preservation of
-  corrupt rows, and id/name/guide-version coherence validation.
-- **Regression test:** infrastructure repository and guide-version tests.
-- **Reviewer result:** rejected before fix; accepted after repository/guide
-  suites passed.
+- **Reproduction:** inject a corrupt snapshot or disagreeing row/payload ids.
+- **Root cause:** recovery lacked retained evidence and full coherence checks.
+- **Fix:** schema v3 recovery evidence, one-time healing, corrupt-byte
+  preservation, and id/name/guide-version validation.
+- **Regression test:** repository corruption/recovery/guide tests.
+- **Reviewer result:** different-lane reviewer rejected, then accepted the fix.
 - **Residual risk:** low.
 
-### WIN-OR-001 — High — Cancelled or replaced-key operations could update UI late
+### WIN-OR-001 — High — Cancelled/replaced-key work could update UI late
 
-- **Reproduction:** use a noncooperative HTTP stub, cancel or replace/remove
-  the key, then complete the old request.
-- **Root cause:** cancellation tokens alone could not prevent stale completion
-  callbacks.
-- **Fix:** operation generations invalidate completion after cancel, close,
-  save/replace, or remove; active buttons switch to Cancel.
-- **Regression test:** OpenRouter client and App stale-completion tests.
-- **Reviewer result:** persistence reviewer rejected; accepted after 27/27
-  OpenRouter tests and 30/30 App tests.
+- **Reproduction:** complete a noncooperative request after cancel, close, key
+  replace, or key removal.
+- **Root cause:** cancellation tokens alone did not invalidate stale callbacks.
+- **Fix:** operation generations invalidate old completion paths.
+- **Regression test:** OpenRouter/App stale-completion tests.
+- **Reviewer result:** different-lane reviewer rejected, then accepted the fix.
 - **Residual risk:** low.
 
-### WIN-PKG-001 — Critical — Renamed executable payload bypassed the package boundary
+### WIN-PKG-001 — Critical — Renamed executable bypassed package boundary
 
-- **Reproduction:** copy a valid ARM64 .NET host into the package as
-  `pythonw.exe`.
-- **Root cause:** architecture validation proved ISA but not delivered-file
-  provenance.
+- **Reproduction:** add a valid ARM64 .NET host named `pythonw.exe`.
+- **Root cause:** ISA validation did not prove delivered-file provenance.
 - **Fix:** dependency-derived DLL allowlist, exact sole executable and
-  package/resource anchors, reparse-point rejection, and resource MZ rejection.
-- **Regression test:** package adversarial test rejects the renamed host; clean
-  packed/unpacked ARM64 package passes.
-- **Reviewer result:** persistence reviewer rejected; accepted after 20/20
-  package tests.
+  package/resource anchors, plus reparse/resource-MZ rejection.
+- **Regression test:** adversarial package fixture and clean pre/post unpack.
+- **Reviewer result:** different-lane reviewer rejected, then accepted the fix.
 - **Residual risk:** low.
 
-### WIN-VIS-001 — Medium — Companion sprite rendered with a black rectangle
+### WIN-VIS-001 — Medium — Companion sprite had a black rectangle
 
-- **Reproduction:** launch 0.2.0.0 and compare compact/expanded overlay with
-  screenshot 46/13.
-- **Root cause:** the Windows WebP/WIC path flattened the sprite sheet alpha
-  channel during crop/decode.
-- **Fix:** derive and package a lossless four-channel RGBA PNG sheet and load it
-  through WPF's native PNG decoder.
-- **Regression test:** shared-resource inventory test plus final clean-package
-  screenshots 11–14.
-- **Reviewer result:** found during coordinator visual review; fixed and
-  visually rechecked in signed 0.2.0.1.
+- **Reproduction:** compare compact/expanded 0.2.0.0 overlay with the oracle.
+- **Root cause:** the Windows WebP/WIC crop path flattened alpha.
+- **Fix:** package a lossless RGBA PNG sprite sheet.
+- **Regression test:** shared-resource inventory and transparent captures.
+- **Reviewer result:** coordinator visual invalidation; fixed in 0.2.0.1.
 - **Residual risk:** low.
 
-## Remaining defects and evidence gaps
+### WIN-PROD-003 — High — Onboarding roster selection crashed WPF
 
-### WIN-QA-001 — Medium — Exhaustive final-package visual/action matrix is incomplete
+- **Reproduction:** interact with a roster status ComboBox in onboarding.
+- **Root cause:** generated record formatting recursively traversed computed
+  `AbilityScores` records, ending in `InsufficientExecutionStackException`.
+- **Fix:** bounded `AbilityScores.ToString()` summary.
+- **Regression test:** `RecordFormattingDoesNotRecurseThroughComputedAbilityScores`.
+- **Reviewer result:** integrated packaged-app invalidation found and rechecked
+  the fix.
+- **Residual risk:** low.
 
-- **Reproduction:** compare the 59-state UI oracle with
-  `screenshots/`; only clean onboarding, expanded overlay, Now, and Settings
-  have final 0.2.0.1 captures. Route, Party, Loadout, Act, compact overlay, and
-  tray were exercised before the sprite fix and remain in the diagnostic
-  folder; nested build/gear/run/act variants were primarily validated by tests
-  and source/action review.
-- **Root cause:** the integrated manual pass found and repaired the sprite
-  decoder late; the entire state matrix was not replayed after rebuilding.
-- **Fix required:** interactively replay and capture all 59 oracle states from
-  the signed final package at available window sizes/DPI, including both
-  onboarding branches, run switching/rename/catch-up, all class prerequisite
-  paths, gear conflicts/swaps, Act transition/finalization, startup toggle, and
-  every OpenRouter error surface using deterministic stubs.
-- **Regression test:** add a version-stamped final visual/action checklist and
-  capture index; keep the current 370 automated tests green.
-- **Reviewer result:** outstanding; implementation/action ledgers are complete,
-  but final runtime visual sign-off is not.
-- **Residual risk:** a state-specific layout or disconnected routed action may
-  remain despite controller coverage. The pull request must remain draft until
-  this matrix is signed off.
+### WIN-PROD-004 — High — Initial planner tab could be blank
 
-### WIN-ENV-001 — Informational — Public development certificate export remains in Temp
+- **Reproduction:** finish onboarding or cold-launch with Now selected.
+- **Root cause:** the custom tab template did not materialize initial content
+  while onboarding owned first layout.
+- **Fix:** reselect/layout the planner tab after load and onboarding.
+- **Regression test:** packaged cold restart and same-PID restore show Now.
+- **Reviewer result:** integrated package invalidation found and rechecked it.
+- **Residual risk:** low.
 
-- **Reproduction:** test
-  `C:\Users\jcarbs\AppData\Local\Temp\BG3HonorAssistant-5703A3EFC56DC6766612C50BB0B0FF4C03D2A8E4.cer`.
-- **Root cause:** the execution policy blocked deleting a file outside the
-  workspace.
-- **Fix required:** delete that exact public `.cer` file when permitted.
-- **Regression test:** confirm the file is absent and all four certificate
-  stores still lack the thumbprint.
-- **Reviewer result:** coordinator cleanup check only.
-- **Residual risk:** negligible; it contains no private key, and all user and
-  machine trust/private-key entries were removed.
+### WIN-VIS-002 — High — Reference overlay was transparent/empty
+
+- **Reproduction:** select Reference density and collapse.
+- **Root cause:** the shared focus/reference panel was visible only for Focus.
+- **Fix:** materialize the card for every non-Minimal density.
+- **Regression test:** `OverlayWindowPolicyTests` and packaged row 47.
+- **Reviewer result:** integrated package invalidation found and rechecked it.
+- **Residual risk:** low.
+
+### WIN-PROD-005 — High — Manual build started with illegal point buy
+
+- **Reproduction:** begin a manual plan for a default class; observe 29/27.
+- **Root cause:** displayed creation bonuses were treated as point-buy base.
+- **Fix:** remove the distinct +2/+1 bonuses to derive the legal base.
+- **Regression test:** all default class/custom profiles produce 27 points;
+  packaged Bard editor.
+- **Reviewer result:** integrated package invalidation found and rechecked it.
+- **Residual risk:** low.
+
+### WIN-VIS-003 — Critical — Build/item WebP terminated player flows
+
+- **Reproduction:** select Bard or open a populated loadout in the package.
+- **Root cause:** WPF/WIC could not decode the packaged WebPs in this ARM64 VM.
+- **Fix:** preserve source WebPs; package derived lossless PNGs from
+  `Resources/WindowsPng`; optional decode now degrades to no image.
+- **Regression test:** `AssetImageTests`, package tests, recursive inspection,
+  and signed 0.2.0.11 loadout/manual-build captures.
+- **Reviewer result:** integrated package invalidation reproduced two crashes
+  and rechecked the final artifact.
+- **Residual risk:** low; the sole zero-byte optional source image remains
+  intentionally absent.
+
+### WIN-PROD-006 — Medium — Party member could not reopen after Back
+
+- **Reproduction:** open Tav, press Back, click Tav again.
+- **Root cause:** retained list selection suppressed `SelectionChanged`.
+- **Fix:** clear selection when returning to the roster.
+- **Regression test:** packaged open -> Back -> reopen interaction.
+- **Reviewer result:** integrated package invalidation found and rechecked it.
+- **Residual risk:** low.
+
+### WIN-PROD-007 — High — Revisit changed the wrong Route step
+
+- **Reproduction:** skip a step, advance, then Revisit from archived detail.
+- **Root cause:** focus rejected the skipped row and disposition changed the
+  already-advanced current step.
+- **Fix:** atomically restore/focus/persist the exact selected step.
+- **Regression test:** exact-step controller test and packaged skip -> Revisit.
+- **Reviewer result:** integrated package invalidation found and rechecked it.
+- **Residual risk:** low.
+
+## Closed evidence gaps
+
+### WIN-QA-001 — Medium — Exhaustive signed-package UI/action matrix
+
+- **Reproduction:** compare the supplied 59-row oracle (row 15 is absent) with
+  `screenshots/final-package-matrix/`.
+- **Root cause:** the earlier final pass captured only four states after a late
+  sprite repair.
+- **Fix:** replay the signed integration sequence, capture all 57 non-provider
+  rows, record actions, repair each observed regression, and rerun all suites.
+- **Regression test:** 57 PNGs, matrix index, 379/379 ARM64 tests, clean final
+  first launch, and exact 0.2.0.11 package/resource/loadout proof.
+- **Reviewer result:** coordinator integrated invalidation completed; the three
+  implementation lanes already had accepted different-lane reviews.
+- **Residual risk:** rows 49/50 have deterministic client/decode coverage and
+  source/action review but no runtime screenshot because no live canary was
+  authorized. Captures span the signed integration sequence and lack embedded
+  per-image version metadata. The PR remains draft for these limitations and
+  the non-physical-hardware classification.
+
+### WIN-ENV-001 — Informational — QA signing/diagnostic residue
+
+- **Reproduction:** inspect the two QA thumbprints, Temp CERs, dump override,
+  and temporary publish/unpack trees.
+- **Root cause:** iterative signing and crash diagnosis created local residue.
+- **Fix:** delete the exact verified entries after reinstall validation.
+- **Regression test:** zero matching certificates in CurrentUser/LocalMachine
+  My/Root/TrustedPeople; CERs, dump override, and temporary trees absent;
+  installed package remains `Arm64`/`Ok`.
+- **Reviewer result:** coordinator cleanup check passed.
+- **Residual risk:** none identified. The user-owned OpenRouter credential was
+  intentionally retained.
+
+## Remaining evidence limitations
+
+- No physical Windows ARM64 hardware proof; all local results are native-ISA
+  ARM64 in a Parallels VM.
+- No live OpenRouter UI canary or rows 49/50 screenshots without explicit
+  opt-in. No finding is invented for those states.
+- The development signature is intentionally untimestamped and not a
+  production trust/SmartScreen result.
