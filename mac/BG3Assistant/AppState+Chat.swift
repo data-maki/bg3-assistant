@@ -42,19 +42,6 @@ extension AppState {
 
     func sendChat(_ quickPrompt: String? = nil) async {
         guard !isPreparingChatScreenshot, !isSendingChat else { return }
-        guard activeRouteAvailable else {
-            chatLines.append(ChatLine(
-                role: .assistant,
-                text: activeGuideLoaded
-                    ? "Reviewed route chat is not available for Act \(selectedAct) yet."
-                    : "The Act \(selectedAct) guide is still loading.",
-                isError: true
-            ))
-            return
-        }
-        let step = currentWalkthroughStep
-        let checkpoint = currentCheckpoint
-        guard step != nil || checkpoint != nil else { return }
         let message = quickPrompt ?? chatDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !message.isEmpty else { return }
         let requestedRunID = run.id
@@ -76,48 +63,27 @@ extension AppState {
 
         do {
             guard let aiProvider else { throw AIProviderError.providerNotConfigured }
-            let grounding = try chatGrounding(for: message)
+            let grounding = chatGrounding(for: message)
             let content = try await assistantAIClient.complete(
                 provider: aiProvider,
-                messages: chatMessages(question: message, history: history, grounding: grounding.steps),
+                messages: chatMessages(question: message, history: history, grounding: grounding),
                 imageData: screenshot?.data,
-                jsonSchema: Self.chatResponseSchema,
                 ollamaRuntime: ollamaRuntime
             )
-            let answer = try Self.decodeChatAnswer(content)
             guard generation == chatGeneration,
                   requestedRunID == run.id,
                   requestedAct == selectedAct else { return }
-            chatLines.append(ChatLine(role: .assistant, text: answer, sources: grounding.sources))
+            chatLines.append(ChatLine(role: .assistant, text: content))
         } catch {
             guard generation == chatGeneration,
                   requestedRunID == run.id,
                   requestedAct == selectedAct else { return }
-            let failure = "The selected AI provider could not answer: \(error.localizedDescription)"
             chatLines.append(ChatLine(
                 role: .assistant,
-                text: deterministicGuideAnswer(providerFailure: failure),
-                sources: chatSources(from: step.map { [$0] } ?? []),
+                text: "The selected AI provider could not answer: \(error.localizedDescription)",
                 isError: true
             ))
         }
-    }
-
-    private static let chatResponseSchema = try! JSONSerialization.data(withJSONObject: [
-        "type": "object",
-        "properties": ["answer": ["type": "string"]],
-        "required": ["answer"],
-        "additionalProperties": false,
-    ])
-
-    private static func decodeChatAnswer(_ content: String) throws -> String {
-        guard let data = content.data(using: .utf8),
-              let root = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let answer = root["answer"] as? String,
-              !answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw AIProviderError.invalidResponse
-        }
-        return answer
     }
 
     private func chatMessages(
@@ -130,9 +96,23 @@ extension AppState {
         let guideJSON = (try? encoder.encode(grounding)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let rosterJSON = (try? encoder.encode(roster)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
         let system = """
-        You are a concise Baldur's Gate 3 assistant for a \(runDifficulty.title) run. Answer only from the bundled guide facts and run state below. Never invent mechanics, locations, rewards, or completion state. Clearly say when the guide does not establish an answer. Prioritize irreversible risks and the safest next action. Only treat legendary actions and single-save consequences as active when difficulty is Honour. Keep the answer under 220 words. Return strict JSON matching the supplied schema.
+        You are BG3 Overlay's chat assistant, a knowledgeable and practical companion for Baldur's Gate 3.
 
-        RUN STATE
+        Help the player with any Baldur's Gate 3 question, including mechanics, quests, items, builds, combat, exploration, companions, choices, and troubleshooting. Use your general game knowledge to answer. Optional context is additional information, not a boundary on what you may discuss.
+
+        Before answering, silently decide which parts of the optional context are relevant to the question. Use relevant context to personalize the answer. Treat explicit run-state details as facts about this player's save. Treat guide excerpts as supporting information, not as the only permitted source. Ignore irrelevant context completely and never assume the context is complete.
+
+        Address the main point in the first sentence. Default to one to three short paragraphs and no more than 120 words, as if the player were reading on a phone. Use more only when omitting important instructions or consequences would make the answer worse.
+
+        Use plain text paragraphs. You may use **bold** sparingly for the most important words. Apart from bold, do not use Markdown: no headings, bullet or numbered lists, tables, code blocks, or links.
+
+        Include only the explanation, consequences, or steps that help the player act. Distinguish game facts from recommendations. Avoid unnecessary spoilers, but clearly identify irreversible choices when relevant. Mention difficulty, patch, platform, or mod differences only when they materially affect the answer. If uncertain, say so instead of inventing details.
+
+        Use conversation history for follow-up questions. Make a reasonable Baldur's Gate 3 assumption when the question is understandable from context. Ask one concise clarifying question only when answering without it would likely mislead the player.
+
+        You do not have web access, tools, or direct access to the live game beyond information the player or application supplies. Do not imply otherwise. Write concise, natural, practical answers.
+
+        OPTIONAL RUN CONTEXT
         Difficulty: \(runDifficulty.title)
         Act: \(selectedAct)
         Region: \(run.mapRegion)
@@ -140,7 +120,7 @@ extension AppState {
         Story outcomes: \((run.storyOutcomes ?? []).sorted().joined(separator: ", "))
         Party: \(rosterJSON)
 
-        BUNDLED GUIDE FACTS
+        OPTIONAL GUIDE CONTEXT
         \(guideJSON)
         """
         return [AssistantAIMessage(role: "system", content: system)]
@@ -148,7 +128,7 @@ extension AppState {
             + [AssistantAIMessage(role: "user", content: question)]
     }
 
-    private func chatGrounding(for question: String) throws -> (steps: [WalkthroughStep], sources: [ChatSource]) {
+    private func chatGrounding(for question: String) -> [WalkthroughStep] {
         let candidates: [WalkthroughStep]
         switch chatScope {
         case .current:
@@ -159,7 +139,7 @@ extension AppState {
                 candidates = Array(walkthrough.prefix(8))
             }
         case .route, .party:
-            candidates = try GuideRepository().payload(for: selectedAct).walkthrough
+            candidates = (try? GuideRepository().payload(for: selectedAct).walkthrough) ?? walkthrough
         }
         let terms = Set(question.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init))
         let currentID = currentWalkthroughStep?.id
@@ -171,32 +151,7 @@ extension AppState {
         let steps = ranked.sorted {
             $0.1 == $1.1 ? $0.0.order < $1.0.order : $0.1 > $1.1
         }.prefix(chatScope == .current ? 5 : 14).map(\.0)
-        return (steps, chatSources(from: steps))
-    }
-
-    private func chatSources(from steps: [WalkthroughStep]) -> [ChatSource] {
-        var seen = Set<String>()
-        return steps.compactMap { step in
-            guard !step.sourceUrl.isEmpty, seen.insert(step.sourceUrl).inserted else { return nil }
-            return ChatSource(
-                title: step.sourceLabel.isEmpty ? step.title : step.sourceLabel,
-                url: step.sourceUrl,
-                snippet: step.summary,
-                image: nil
-            )
-        }
-    }
-
-    private func deterministicGuideAnswer(providerFailure: String) -> String {
-        guard let step = currentWalkthroughStep else {
-            return "\(providerFailure) The bundled guide is still available in the Now and Route tabs."
-        }
-        var parts = ["\(providerFailure) Showing bundled guide advice instead.", step.summary]
-        if !step.avoid.isEmpty { parts.append("Avoid: \(step.avoid)") }
-        if step.minimumLevel > lowestPartyLevel {
-            parts.append("Your party is level \(lowestPartyLevel); the guide recommends level \(step.minimumLevel).")
-        }
-        return parts.joined(separator: "\n\n")
+        return steps
     }
 
     func invalidateChatRequests() {
