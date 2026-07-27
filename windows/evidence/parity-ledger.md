@@ -3,6 +3,20 @@
 > Generated from `research/feature-parity.md`. Update Status and Evidence as tests are completed;
 > rerunning this generator intentionally resets rows to Pending.
 
+## 2026-07-27 ARM64 completion checkpoint
+
+This checkpoint supersedes stale `Pending` notes below where the newer evidence
+directly covers the row. It applies only to `arm64`/`win-arm64`; no x64/AMD64
+build, review, package, or test was performed in this milestone.
+
+| Area | Status | Current evidence |
+|---|---|---|
+| Fresh onboarding, shell, overlay, tray, Now, Route, Party, Loadout, Act, Settings | Manual pass plus automated pass | Signed MSIX 0.2.0.1 installed and launched; final captures and the packaged lifecycle log are in `evidence/arm64-completion/`. Controller/UI tests cover routing, roster/build/gear/act actions and transient undo behavior. |
+| Mid-run catch-up, multiple runs, revisions, persistence | Automated pass | App and infrastructure tests cover branch-aware onboarding, catch-up, serialized run transitions, revisions, recovery, and SQLite durability. The package upgrade preserved the LocalState database byte-for-byte. |
+| Credential Manager and direct OpenRouter | Automated pass plus packaged UI observation | Settings exposed only configured/not-configured state, replace/test/remove, and the pinned model. The key value was never read or printed. HTTP stubs cover success, cancellation, authentication, rate limit, timeout, provider, malformed response, offline, and response limits. Live canary remains opt-in and disabled by default. |
+| ARM64 package/product boundary | Automated pass plus manual package pass | Recursive pre/post-pack validation, dependency/resource allowlisting, PE inspection, signed install, native-process probe, upgrade, and uninstall passed. Architecture evidence reports 487 publish PEs and 486 packaged PEs with no foreign native payload. |
+| Full final-state visual matrix | Pending | Final-package captures cover clean onboarding, expanded overlay, Now, and Settings. The complete 59-state source/oracle ledger is implemented, but every state has not yet been recaptured interactively from 0.2.0.1. See `evidence/arm64-completion/defects.md` (`WIN-QA-001`). |
+
 | Row | Gate | Status | Evidence |
 |---|---|---|---|
 | O-01 | G2 | Pending | Partial automated pass: the production `NotifyIcon` command model now contains Show Overlay, Planner, Map, dynamic run switcher, Steam launch, Hide/Show Pet, Settings, and Quit; action invocation and state refresh tests pass. Visible clean-VM tray interaction remains outstanding. See `evidence/G2/overlay-shell-anchor-pet-2026-07-25.md`. |

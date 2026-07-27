@@ -3,7 +3,18 @@
 This is the static completion record for the Windows replica. The PNG is the
 visual oracle; the complete Swift view plus the named state owner is the
 behavior oracle. `Complete` requires concrete Windows file/symbol evidence and
-an action/result audit. Runtime visual execution on Windows is unavailable.
+an action/result audit.
+
+## 2026-07-27 runtime checkpoint
+
+The signed 0.2.0.1 ARM64 MSIX was executed as native-ISA ARM64 in a Parallels
+VM at the available 200% DPI. Final-package captures cover clean first launch,
+expanded overlay, Now, and Settings, and the WebP alpha-flattening defect found
+during comparison was fixed by packaging a lossless RGBA PNG sprite sheet.
+Earlier diagnostic captures cover Route, Party, Loadout, Act, compact overlay,
+and tray restoration. The exhaustive 59-state final-package recapture remains
+open as `WIN-QA-001`; therefore `Complete` rows below are implementation/action
+audits, not a claim that every row has a final runtime screenshot.
 
 Legend: **Exact** means no visible redesign. **Adapted** permits only the named
 Windows difference from `mac-ui-tear/WINDOWS-PORT-GUIDE.md`.

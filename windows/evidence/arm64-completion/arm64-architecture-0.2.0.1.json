@@ -1,0 +1,14 @@
+﻿{
+    "targetArchitecture":  "arm64",
+    "runtimeIdentifier":  "win-arm64",
+    "expectedPeMachine":  "0xAA64",
+    "osArchitecture":  "Arm64",
+    "processArchitecture":  "Arm64",
+    "publishPath":  "C:\\Mac\\Home\\Documents\\bg3_windows\\windows\\artifacts\\publish\\win-arm64-0.2.0.1-final",
+    "packagePath":  "C:\\Mac\\Home\\Documents\\bg3_windows\\windows\\artifacts\\BG3HonorAssistant_0.2.0.1_arm64_signed.msix",
+    "publishPeCount":  487,
+    "publishTargetPeCount":  167,
+    "publishNeutralManagedPeCount":  320,
+    "packagePeCount":  486,
+    "result":  "pass"
+}
